@@ -1,10 +1,10 @@
 version: '3'
 
 services:
-  with-docker-multi-env-staging:
+  mail-buddy-staging:
     build:
       context: ../../
       dockerfile: docker/staging/Dockerfile
-    image: with-docker-multi-env-staging
+    image: mail-buddy-staging
     ports:
       - '3002:3000'

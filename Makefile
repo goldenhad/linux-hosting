@@ -1,14 +1,14 @@
 .PHONY: build-development
 build-development: ## Build the development docker image.
-	docker compose -f docker/development/docker-compose.yml build
+	docker compose -f docker/development/docker-compose.yml --env-file .env build
 
 .PHONY: start-development
 start-development: ## Start the development docker container.
-	docker compose -f docker/development/docker-compose.yml up -d
+	docker compose -f docker/development/docker-compose.yml --env-file .env up -d
 
 .PHONY: stop-development
 stop-development: ## Stop the development docker container.
-	docker compose -f docker/development/docker-compose.yml down
+	docker compose -f docker/development/docker-compose.yml --env-file .env down
 
 .PHONY: build-staging
 build-staging: ## Build the staging docker image.

@@ -11,7 +11,7 @@ export default function Home() {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js</a> on Docker!
+          Welcome to <a href="https://nextjs.org">Next.js</a> IPSUM DOLOR on Docker!
         </h1>
         <h2 className={styles.title}>with Multiple Deployment Environments</h2>
         <h3>API_URL: {process.env.NEXT_PUBLIC_API_URL}</h3>

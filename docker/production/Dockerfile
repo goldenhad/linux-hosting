@@ -24,6 +24,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # This will do the trick, use the corresponding env file for each environment.
 COPY .env.production.sample .env.production
+RUN npx prisma generate
 RUN yarn build
 
 # 3. Production image, copy all the files and run next

@@ -77,12 +77,15 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: JsonObject })
           }}
         />
         <Content
-
+          style={{
+            height: "100vh",
+            overflowY: "scroll"
+          }}
         >
           <div
             style={{
               padding: 24,
-              minHeight: 360,
+              minHeight: "100vh",
               background: colorBgContainer,
             }}
           >

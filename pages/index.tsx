@@ -1,68 +1,58 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { Card, Button, Form, Input, Select, Checkbox, Divider, Skeleton, Space, Alert, Typography } from 'antd';
+import styles from './index.module.scss'
+import axios from 'axios';
+import { useState } from 'react';
+import { GetServerSideProps } from 'next';
+import Link from 'next/link';
+import { CombinedUser } from '../helper/LoginTypes';
+import SidebarLayout from '../components/SidebarLayout';
+import { Prisma } from '@prisma/client';
+import { Capabilities } from '../helper/capabilities';
+import { JsonObject } from '@prisma/client/runtime/library';
+const { Paragraph } = Typography;
 
-export default function Home() {
+
+
+export interface InitialProps {
+  Data: any;
+  InitialState: CombinedUser;
+}
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  //Get the context of the request
+  const { req, res } = ctx;
+  //Get the cookies from the current request
+  const { cookies } = req;
+
+  //Check if the login cookie is set
+  if (!cookies.login) {
+      //Redirect if the cookie is not set
+      res.writeHead(302, { Location: "/login" });
+      res.end();
+
+      return { props: { InitialState: {} } };
+  } else {
+
+      return {
+          props: {
+              InitialState: JSON.parse(
+              Buffer.from(cookies.login, "base64").toString("ascii")
+              ),
+              Data: {}
+          },
+      };
+  }
+};
+
+
+export default function Home(props: InitialProps) {
+  
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
+    <SidebarLayout capabilities={props.InitialState.role.capabilities as JsonObject}>
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js</a> IPSUM DOLOR on Docker!
-        </h1>
-        <h2 className={styles.title}>with Multiple Deployment Environments</h2>
-        <h3>API_URL: {process.env.NEXT_PUBLIC_API_URL}</h3>
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+        
       </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
+    </SidebarLayout>
   )
 }

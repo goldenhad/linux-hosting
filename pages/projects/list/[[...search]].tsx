@@ -4,9 +4,9 @@ import axios from 'axios';
 import { useState } from 'react';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
-import { prisma } from '../../db'
-import { CombinedUser } from '../../helper/LoginTypes';
-import SidebarLayout from '../../components/SidebarLayout';
+import { prisma } from '../../../db'
+import { CombinedUser } from '../../../helper/LoginTypes';
+import SidebarLayout from '../../../components/SidebarLayout';
 import { JsonObject } from '@prisma/client/runtime/library';
 import { useRouter } from 'next/router';
 import { Project } from '@prisma/client';
@@ -94,7 +94,7 @@ export default function Projects(props: InitialProps) {
         render: (_: any, obj: any) => {
           return (
             <Space direction='horizontal'>
-                <Button>Bearbeiten</Button>
+                <Button type='link' href={`/projects/edit/${obj.id}`}>Bearbeiten</Button>
                 <Button onClick={() => {setUserToDelete(obj.id); setIsDeleteModalOpen(true)}}>Löschen</Button>
             </Space>
         );

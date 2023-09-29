@@ -18,6 +18,8 @@ model User {
   salt     String
   roleid   Int?
   role     Role?  @relation(fields: [roleid], references: [id])
+  projectId  Int?
+  project    Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Role {
@@ -42,5 +44,17 @@ model Company {
 model Project {
   id        Int      @id @default(autoincrement())
   name      String
-  company   Company? 
+  company   Company?
+  tokenusages TokenUsage[]
+  users     User[]
+}
+
+
+model TokenUsage {
+  id        Int      @id @default(autoincrement())
+  month     Int
+  year      Int
+  amount    Int
+  projectId Int
+  project    Project? @relation(fields: [projectId], references: [id])
 }

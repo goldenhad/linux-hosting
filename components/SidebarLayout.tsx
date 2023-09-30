@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from 'react';
 import Image from 'next/image';
-import { TeamOutlined, LogoutOutlined, AlignLeftOutlined, RobotOutlined} from '@ant-design/icons';
+import { TeamOutlined, LogoutOutlined, ApartmentOutlined, RobotOutlined, FolderOpenOutlined} from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
 import Link from 'next/link';
@@ -14,15 +14,12 @@ const { Header, Content, Footer, Sider } = Layout;
 type MenuItem = Required<MenuProps>['items'][number];
 
 
-const SidebarLayout = (props: { children: ReactNode, capabilities: JsonObject }) => {
-  const [collapsed, setCollapsed] = useState(false);
+const SidebarLayout = (props: { children: ReactNode, capabilities: any }) => {
+  const [collapsed, setCollapsed] = useState(true);
   const { token: { colorBgContainer } } = theme.useToken();
   const router = useRouter();
 
-  const projectRights = props.capabilities.projects as JsonObject;
-  const personRights = projectRights.persons as JsonObject;
-  const creditRights = projectRights.credits as JsonObject;
-  const userRights = props.capabilities.users as JsonObject;
+  const rights = props.capabilities;
 
   function getItem( label: React.ReactNode, key: React.Key, check: () => boolean, icon?: React.ReactNode, children?: MenuItem[] ): MenuItem {
     if( check() ){
@@ -40,7 +37,8 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: JsonObject })
 
   const items = [
     getItem(<Link href={"/"}>Siteware Mailbuddy</Link>, '1', () => { return true }, <RobotOutlined />, ),
-    getItem(<Link href={"/prompt"}>Prompt bearbeiten</Link>, '2', () => { return projectRights != undefined }, <AlignLeftOutlined />),
+    getItem(<Link href={"/projects/list"}>Projekte</Link>, '2', () => { return rights.superadmin }, <FolderOpenOutlined />),
+    getItem(<Link href={"/company"}>Firma</Link>, '2', () => { return !rights.superadmin }, <ApartmentOutlined />),
     getItem(<Link href={"/logout"}>Ausloggen</Link>, '4', () => { return true }, <LogoutOutlined />),
   ];
 
@@ -48,7 +46,7 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: JsonObject })
     switch(router.pathname){
       case '/': 
         return '1';
-      case '/prompt':
+      case '/projects/list':
         return '2';
       case '/users':
         return '3';
@@ -70,20 +68,18 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: JsonObject })
         <Menu theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
       </Sider>
       <Layout>
-        <Header
-          style={{
-            padding: 0,
-            background: colorBgContainer,
-          }}
-        />
+        
         <Content
-
+          style={{
+            height: "100vh",
+            overflowY: "scroll"
+          }}
         >
           <div
             style={{
               padding: 24,
-              minHeight: 360,
-              background: colorBgContainer,
+              minHeight: "100vh",
+              background: "rgba(217, 217, 227, 0.01)",
             }}
           >
             {props.children}

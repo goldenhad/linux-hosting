@@ -1,3 +1,4 @@
+import { Company } from "@prisma/client";
 import { JsonValue } from "@prisma/client/runtime/library";
 
 export type Login = {
@@ -12,6 +13,13 @@ export type CombinedUser = {
     username: string,
     email: string,
     role: Role,
+    project: Project
+}
+
+export type Project = {
+    id: number,
+    name: String,
+    company: Company
 }
 
 //Redefine the product type for the product query

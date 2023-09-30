@@ -15,4 +15,5 @@ export interface Capabilities{
         credits: Crud,
     },
     users: Crud,
+    superadmin: boolean
 }

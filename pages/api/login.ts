@@ -31,20 +31,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                     password: true,
                     salt: true,
                     email: true,
-                    roleid: true
+                    role: true,
+                    project: {
+                        select: {
+                            id: true,
+                            name: true,
+                            company: true,
+                        }
+                    },
                 },
                 where: { username: data.username }
             });
 
             //If the query returns a user object
             if( user ){
-                if( user.roleid ){
-                    const role = await prisma.role.findFirst({
-                        where: { id: user.roleid }
-                    })
+                if( user.role ){
     
-                    if( role ){
-                        let cUser: CombinedUser = {...user, role: role};
+                    if( user.role.id ){
+                        let cUser: CombinedUser = user
 
                         //Get the pepper from the enviroment file
                         const pepper = process.env.PEPPER;
@@ -63,7 +67,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                                 'id': cUser.id,
                                 'username': cUser.username,
                                 'email': cUser.email,
-                                'role': cUser.role
+                                'role': cUser.role,
+                                'project': cUser.project
                             };
         
                             let B = Buffer.from(JSON.stringify( cookieData )).toString('base64');

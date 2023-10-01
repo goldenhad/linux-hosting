@@ -1,4 +1,4 @@
-import '../styles/globals.css'
+import './globals.css'
 import Head from 'next/head';
 import { Roboto } from 'next/font/google';
 import { AppProps } from 'next/app';

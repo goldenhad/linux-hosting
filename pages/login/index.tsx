@@ -61,7 +61,7 @@ export default function Login(){
                 alignItems: "center"
             }}>
                 <div style={{borderRadius: "10%", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                    <Image src={logo} alt="Logo" width={744/10} height={744/10}/>
+                    <img src={"/mailbuddy.png"} alt="Logo" width={744/10} height={744/10}/>
                 </div>
                 <h2 style={{marginTop: 25, marginBottom: 50}} >Mailbuddy</h2>
                 <Form

@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 import { JsonObject, JsonValue } from '@prisma/client/runtime/library';
 import { Prisma } from '@prisma/client';
 const { Header, Content, Footer, Sider } = Layout;
+import logo from '../public/mailbuddy.png';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -63,7 +64,7 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any }) => {
     >
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", marginBottom: 25, marginTop: 25 }}>
-          <Image style={{ borderRadius: 5 }} src="/mailbuddy.png" width={50} height={50} alt="Logo"/>
+          <Image style={{ borderRadius: 5 }} src={logo} width={50} height={50} alt="Logo"/>
         </div>
         <Menu theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
       </Sider>

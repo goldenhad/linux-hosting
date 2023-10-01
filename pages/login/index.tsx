@@ -4,6 +4,7 @@ import router from "next/router";
 import { GetServerSideProps } from "next";
 import { useState } from "react";
 import { Alert, Button, Checkbox, Form, Input } from 'antd';
+import logo from '../../public/mailbuddy.png'
 
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -60,9 +61,9 @@ export default function Login(){
                 alignItems: "center"
             }}>
                 <div style={{borderRadius: "10%", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                    <Image src={"/mailbuddy.png"} alt="Logo" width={744/10} height={744/10}/>
+                    <Image src={logo} alt="Logo" width={744/10} height={744/10}/>
                 </div>
-                <h2 style={{marginTop: 25, marginBottom: 50}} >GP-Buddy</h2>
+                <h2 style={{marginTop: 25, marginBottom: 50}} >Mailbuddy</h2>
                 <Form
                     name="basic"
                     labelCol={{
@@ -89,7 +90,7 @@ export default function Login(){
                     rules={[
                         {
                         required: true,
-                        message: 'Please input your username!',
+                        message: 'Bitte geben Sie ihren Benutzernamen ein!',
                         },
                     ]}
                     >
@@ -102,7 +103,7 @@ export default function Login(){
                     rules={[
                         {
                         required: true,
-                        message: 'Please input your password!',
+                        message: 'Bitte geben Sie ihr Password ein!',
                         },
                     ]}
                     >

@@ -160,6 +160,8 @@ export default function Home(props: InitialProps) {
         length: values.length
       });
 
+      console.log(answer.data);
+
       if(answer.data){
         setIsLoaderVisible(false);
         setIsAnswerVisible(true);
@@ -177,13 +179,13 @@ export default function Home(props: InitialProps) {
         }
       }
 
-      setFormDisabled(false);
-
       console.log(answer);
     }catch(e){
       console.log(e);
       setTokens("");
     }
+
+    setFormDisabled(false);
   }
 
   return (

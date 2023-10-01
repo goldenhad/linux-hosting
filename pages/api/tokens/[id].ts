@@ -40,15 +40,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                                         }
                                     });
                                 }else{
+                                    console.log(loginObj);
                                     await prisma.tokenUsage.create({
                                         data: {
                                             month: data.month,
                                             year: data.year,
-                                            amount: amount
-                                        }
+                                            amount: amount,
+                                            project: {
+                                                connect: {
+                                                    id: loginObj.project.id
+                                                }
+                                            }
+                                        },
                                     })
                                 }
                             }catch(e){
+                                console.log(e);
                                 return res.status(500).send({ errorcode: 5, message: "Error creating the dataset!" });
                             }
     

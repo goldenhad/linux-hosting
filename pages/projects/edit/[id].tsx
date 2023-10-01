@@ -706,7 +706,7 @@ export default function ProjectEdit(props: InitialProps) {
                             <Card title={"Tokens"} bordered={true}>
                                 <h2>Verbrauchte Tokens (seit 01.{pad(props.currentMonth, 2)}.{props.currentYear})</h2>
                                 <div className={styles.quotarow}>
-                                    <div className={styles.quota}>{props.quota.amount + 20000}</div>
+                                    <div className={styles.quota}>{props.quota.amount}</div>
                                 </div>
                             </Card>
                         </div>

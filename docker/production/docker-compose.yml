@@ -32,7 +32,7 @@ services:
     mailbuddy:
         build:
             context: ../../
-            dockerfile: docker/development/Dockerfile
+            dockerfile: docker/production/Dockerfile
         image: mailbuddy
         ports:
             - '3002:3000'

@@ -2,6 +2,7 @@ import './globals.css'
 import Head from 'next/head';
 import { Roboto } from 'next/font/google';
 import { AppProps } from 'next/app';
+import favicon from '../public/favicon.ico';
 
 const roboto = Roboto({
   weight: ['100', '300', '400', '500', '700', '900'],

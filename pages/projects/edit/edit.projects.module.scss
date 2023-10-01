@@ -1,0 +1,44 @@
+.row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.spacelayout{
+    width: 100%;
+}
+
+
+.editcol{
+    width: 48%;
+}
+
+.finishformrow{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.quotarow{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    .quota {
+        font-size: 60px;
+    }
+}
+
+.buttonrow{
+    margin-bottom: 20px;
+}
+
+.modalbuttonrow{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.successrow{
+    margin-bottom: 20px;
+}

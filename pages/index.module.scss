@@ -3,6 +3,7 @@
     flex-direction: column;
     justify-content: space-between;
     min-height: 100vh;
+    width: 100%;
   }
   
   .content{
@@ -258,4 +259,35 @@
   
   .answerRow{
     width: 100%;
+  }
+
+  .mrow{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .mcol{
+    width: 48%;
+  }
+
+  .submitrow{
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+  }
+
+  .submitbutton{
+    margin-right: 10px;
+  }
+
+  .answercol {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .clipboardbutton{
+    width: 30%;
   }

@@ -29,18 +29,6 @@ services:
             - 8081:80
         networks:
             - mailbuddynetwork
-    mailbuddy:
-        build:
-            context: ../../
-            dockerfile: docker/development/Dockerfile
-        image: mailbuddy
-        ports:
-            - '3001:3000'
-        depends_on:
-            - mail-buddy-database
-        networks:
-            - mailbuddynetwork
-
 
 networks:
   mailbuddynetwork:

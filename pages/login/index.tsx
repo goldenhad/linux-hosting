@@ -5,6 +5,7 @@ import { GetServerSideProps } from "next";
 import { useState } from "react";
 import { Alert, Button, Checkbox, Form, Input } from 'antd';
 import logo from '../../public/mailbuddy.png'
+import styles from './login.module.scss'
 
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -72,9 +73,7 @@ export default function Login(){
                     wrapperCol={{
                         span: 24,
                     }}
-                    style={{
-                        width: 600,
-                    }}
+                    className={styles.loginform}
                     initialValues={{
                         remember: true,
                     }}

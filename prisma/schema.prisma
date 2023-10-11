@@ -11,15 +11,23 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  username String
-  password String
-  salt     String
-  roleid   Int?
-  role     Role?  @relation(fields: [roleid], references: [id])
-  projectId  Int?
-  project    Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String
+  password  String
+  salt      String
+  roleid    Int?
+  role      Role?    @relation(fields: [roleid], references: [id])
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Quota {
+  id      Int       @id @default(autoincrement())
+  name    String    @unique
+  price   Float
+  tokens  Int
+  Company Company[]
 }
 
 model Role {
@@ -30,31 +38,24 @@ model Role {
 }
 
 model Company {
-  id         Int      @id @default(autoincrement())
-  name       String
-  street     String
-  city       String
-  postalcode String
-  country    String
-  settings   Json
-  projectId  Int? @unique
-  project    Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
-}
-
-model Project {
-  id        Int      @id @default(autoincrement())
-  name      String
-  company   Company?
+  id          Int          @id @default(autoincrement())
+  name        String
+  street      String
+  city        String
+  postalcode  String
+  country     String
+  settings    Json
   tokenusages TokenUsage[]
-  users     User[]
+  users       User[]
+  quotaId     Int?
+  quota       Quota?       @relation(fields: [quotaId], references: [id])
 }
-
 
 model TokenUsage {
   id        Int      @id @default(autoincrement())
   month     Int
   year      Int
   amount    Int
-  projectId Int
-  project    Project? @relation(fields: [projectId], references: [id])
+  companyId Int
+  Company   Company? @relation(fields: [companyId], references: [id])
 }

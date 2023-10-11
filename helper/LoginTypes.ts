@@ -13,7 +13,7 @@ export type CombinedUser = {
     username: string,
     email: string,
     role: Role,
-    project: Project
+    company: Company
 }
 
 export type Project = {

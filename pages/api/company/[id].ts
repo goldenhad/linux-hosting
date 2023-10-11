@@ -23,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
                 if(!isNaN(id) && id >= 1){
                     try{
-                        await prisma.project.delete({
+                        await prisma.company.delete({
                             where: {
                                 id: id
                             }
@@ -54,19 +54,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
                 if(loginObj.role.capabilities.superadmin || (loginObj.role.capabilities.canEditOwnProject && loginObj.project.id == id) ){
                     try{
-                        await prisma.project.update({
+                        await prisma.company.update({
                             data: {
-                                name: data.name,
-                                company: {
-                                    update: {
-                                        name: data.companyname,
-                                        street: data.companystreet,
-                                        city: data.companycity,
-                                        postalcode: data.companypostalcode,
-                                        country: data.companycountry,
-                                        settings: {background: data.companybackground}
-                                    }
-                                }
+                                name: data.companyname,
+                                street: data.companystreet,
+                                city: data.companycity,
+                                postalcode: data.companypostalcode,
+                                country: data.companycountry,
+                                settings: {background: data.companybackground}
                             },
                             where: {
                                 id: id

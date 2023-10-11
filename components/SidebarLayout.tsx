@@ -43,7 +43,7 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any}) => {
 
   const items = [
     getItem(<Link href={"/"}>Siteware Mailbuddy</Link>, '1', () => { return true }, <RobotOutlined />, ),
-    getItem(<Link href={"/projects/list"}>Projekte</Link>, '2', () => { return rights.superadmin }, <FolderOpenOutlined />),
+    getItem(<Link href={"/companies/list"}>Firmen</Link>, '2', () => { return rights.superadmin }, <FolderOpenOutlined />),
     getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return !rights.superadmin }, <ApartmentOutlined />),
     getItem(<Link href={"/logout"}>Ausloggen</Link>, '4', () => { return true }, <LogoutOutlined />),
   ];
@@ -52,8 +52,10 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any}) => {
     switch(router.pathname){
       case '/': 
         return '1';
-      case '/projects/list/[[...search]]':
+      case '/companies/list/[[...search]]':
         return '2';
+      case '/companies/edit/[id]':
+          return '2';
       case '/company':
         return '3';
       default:

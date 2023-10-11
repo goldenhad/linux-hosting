@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                         let email = data.email;
                         let role = parseInt(data.role);
                         let password = data.password;
-                        let project = data.project;
+                        let company = data.company;
 
                         const pepper = process.env.PEPPER;
 
@@ -47,9 +47,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                                 role: { connect: { id: role } },
                                 password: hash,
                                 salt: salt,
-                                project: {
+                                company: {
                                     connect: {
-                                        id: project
+                                        id: company
                                     }
                                 }
                             }

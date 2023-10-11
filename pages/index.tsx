@@ -171,7 +171,7 @@ export default function Home(props: InitialProps) {
         let caps = props.InitialState.role.capabilities as JsonObject;
 
         if(!caps.superadmin){
-          await axios.put(`/api/tokens/${props.InitialState.project.id}`, {
+          await axios.put(`/api/tokens/${props.InitialState.company.id}`, {
             amount: answer.data.tokens,
             month: props.Data.currentMonth,
             year: props.Data.currentYear

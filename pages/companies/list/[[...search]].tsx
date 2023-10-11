@@ -9,7 +9,7 @@ import { CombinedUser } from '../../../helper/LoginTypes';
 import SidebarLayout from '../../../components/SidebarLayout';
 import { JsonObject } from '@prisma/client/runtime/library';
 import { useRouter } from 'next/router';
-import { Project } from '@prisma/client';
+import { Company } from '@prisma/client';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -34,10 +34,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       return { props: { InitialState: {} } };
   } else {
 
-      let projects = await prisma.project.findMany({
-        include: {
-          company: true,
-        }
+      let companies = await prisma.company.findMany({
       });
 
       return {
@@ -46,7 +43,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
               Buffer.from(cookies.login, "base64").toString("ascii")
               ),
               Data: {
-                Projects: projects
+                Companies: companies
               }
           },
       };
@@ -55,7 +52,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 
-export default function Projects(props: InitialProps) {
+export default function Companies(props: InitialProps) {
   const [ isCreateModalOpen, setIsCreateModalOpen ]  = useState(false);
   const [ isDeleteModalOpen, setIsDeleteModalOpen ]  = useState(false);
   const [ errMsg, setErrMsg ] = useState("");
@@ -80,21 +77,13 @@ export default function Projects(props: InitialProps) {
       key: 'name',
     },
     {
-      title: 'Firma',
-      dataIndex: 'company',
-      key: 'company',
-      render: (_: any, obj: any) => {
-        return (obj.company)? obj.company.name: "";
-      }
-    },
-    {
         title: 'Aktion',
         dataIndex: 'action',
         key: 'action',
         render: (_: any, obj: any) => {
           return (
             <Space direction='horizontal'>
-                <Button type='link' href={`/projects/edit/${obj.id}`}>Bearbeiten</Button>
+                <Button type='link' href={`/companies/edit/${obj.id}`}>Bearbeiten</Button>
                 <Button onClick={() => {setUserToDelete(obj.id); setIsDeleteModalOpen(true)}}>Löschen</Button>
             </Space>
         );
@@ -104,20 +93,19 @@ export default function Projects(props: InitialProps) {
 
 
   const getProjectName = (id: Number) => {
-    const projects: Array<Project> = props.Data.Projects;
-    let projectobj = {id: -1, name: ""};
-    projects.forEach((project: Project) => { if(project.id == id){ projectobj = project } });
+    const companies: Array<Company> = props.Data.Companies;
+    let companyobj = {id: -1, name: ""};
+    companies.forEach((company: Company) => { if(company.id == id){ companyobj = company } });
 
-    console.log(projects);
 
-    return (projectobj.id != -1)? projectobj.name: "FEHLER";
+    return (companyobj.id != -1)? companyobj.name: "FEHLER";
   }
 
 
   const deleteUser = async () => {
     console.log(userToDelete);
     try{
-      await axios.delete(`/api/project/${userToDelete}`);
+      await axios.delete(`/api/company/${userToDelete}`);
     }catch(e){
       console.log(e);
       setErrMsg("Beim Löschen ist etwas fehlgeschlagen bitte versuche es später erneut.");
@@ -133,11 +121,10 @@ export default function Projects(props: InitialProps) {
 
 
 
-  const createProject = async (values: any) => {
+  const createCompany = async (values: any) => {
 
     try{
-      await axios.post('/api/project', {
-        projectname: values.projectname,
+      await axios.post('/api/company', {
         companyname: values.companyname,
         street: values.companystreet,
         city: values.companycity,
@@ -154,7 +141,7 @@ export default function Projects(props: InitialProps) {
     setErrMsg("");
     setIsErrVisible(false);
     setIsCreateModalOpen(false);
-    form.resetFields(["projectname", "companyname", "companystreet", "companycity", "companypostalcode", "companycountry", "companybackground"]);
+    form.resetFields([ "companyname", "companystreet", "companycity", "companypostalcode", "companycountry", "companybackground"]);
   }
 
   return (
@@ -164,33 +151,20 @@ export default function Projects(props: InitialProps) {
             <Button type='primary' onClick={() => {setIsCreateModalOpen(true)}}>+ Hinzufügen</Button>
         </div>
         <div className={styles.projecttable}>
-          <Table columns={columns} dataSource={props.Data.Projects}></Table>
+          <Table columns={columns} dataSource={props.Data.Companies}></Table>
         </div>
 
         <Modal
-          title="Projekt hinzufügen"
+          title="Firma hinzufügen"
           open={isCreateModalOpen}
           onCancel={() => {setIsCreateModalOpen(false)}}
           footer = {[]}
         >
           <Form 
               layout='vertical'
-              onFinish={createProject}
+              onFinish={createCompany}
               form={form}
           >
-
-            <Form.Item
-                label="Projektname"
-                name="projectname"
-                rules={[
-                    {
-                        required: true,
-                        message: 'Bitte geben Sie einen Projektnamen an!',
-                    },
-                ]}
-            >
-                <Input placeholder="Projektname..." />
-            </Form.Item>
 
             <h3>Firma</h3>
 
@@ -263,12 +237,12 @@ export default function Projects(props: InitialProps) {
         </Modal>
 
         <Modal
-          title="Projekt Löschen"
+          title="Firma Löschen"
           open={isDeleteModalOpen}
           onCancel={() => {setIsDeleteModalOpen(false)}}
           footer = {[]}
         >
-          <Paragraph>Wollen sie das Projekt {getProjectName(userToDelete)} wirklich löschen?</Paragraph>
+          <Paragraph>Wollen sie die Firma {getProjectName(userToDelete)} wirklich löschen?</Paragraph>
 
           <div className={styles.finishformrow}>
               <Space direction='horizontal'>

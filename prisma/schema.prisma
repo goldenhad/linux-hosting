@@ -20,6 +20,7 @@ model User {
   role      Role?    @relation(fields: [roleid], references: [id])
   companyId Int?
   company   Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  profiles  Profile[]
 }
 
 model Quota {
@@ -58,4 +59,13 @@ model TokenUsage {
   amount    Int
   companyId Int
   Company   Company? @relation(fields: [companyId], references: [id])
+}
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  name      String
+  settings  String @db.Text
+  salt      String
+  userId    Int
+  User   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -32,7 +32,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                     salt: true,
                     email: true,
                     role: true,
-                    company: true,
+                    company: {
+                        include: {
+                            quota: true,
+                        }
+                    },
                 },
                 where: { username: data.username }
             });

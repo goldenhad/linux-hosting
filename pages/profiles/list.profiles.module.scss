@@ -17,3 +17,29 @@
 .errorrow{
     margin-bottom: 20px;
 }
+
+.profilesempty{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.profilecard{
+    height: 75px;
+}
+
+.profilecard_title {
+    font-weight: bold;
+}
+
+.profilecard_tags {
+    margin-top: 20px;
+}
+
+.profilecounter{
+    color: darkgray;
+    margin-top: 40px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}

@@ -1,4 +1,5 @@
-import { Alert, Button, Card, Form, Input, Modal, Select, Space, Table, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, Modal, Select, Space, Table, Tag, Typography } from 'antd';
+import { SettingOutlined, DeleteOutlined } from '@ant-design/icons';
 import styles from './list.profiles.module.scss'
 import axios from 'axios';
 import { useState } from 'react';
@@ -17,9 +18,11 @@ import AES from 'crypto-js/aes';
 import enc from 'crypto-js/enc-utf8';
 require('dotenv').config();
 
+const MAXPROFILES = 12;
+
 
 export interface InitialProps {
-  Data: { Profiles: Array<Profile> };
+  Data: { Profiles: Array<Profile & {parsedSettings: ProfileSettings}> };
   InitialState: CombinedUser;
 }
 
@@ -47,6 +50,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             }
         });
 
+        let parsedProfiles: Array<Profile & {parsedSettings: ProfileSettings} > = [];
+
         const pepper = process.env.PEPPER;
 
         profiles.forEach((profile: Profile) => {
@@ -54,15 +59,16 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             let decryptedBase = decryptedBaseByte.toString(enc);
             let decryptedSettings = JSON.parse(decryptedBase);
 
-            profile.settings = decryptedSettings;
-        })
+            let singleParsed = {...profile, parsedSettings: decryptedSettings as ProfileSettings};
 
+            parsedProfiles.push(singleParsed);
+        });
     
         return {
             props: {
                 InitialState: cookie,
                 Data: {
-                    Profiles: profiles,
+                    Profiles: parsedProfiles,
                 },
             },
         };
@@ -85,6 +91,7 @@ export default function Profiles(props: InitialProps) {
     const [ profileToDelete, setProfileToDelete ] = useState(-1);
     const [ profileToEdit, setProfileToEdit ] = useState({id: -1, name: "", settings: {}});
     const [ isErrVisible, setIsErrVisible ] = useState(false);
+    const [ tokenCount, setTokenCount ] = useState(0);
     const router = useRouter();
     const [ form ] = Form.useForm();
     const [ editForm ] = Form.useForm();
@@ -169,40 +176,17 @@ export default function Profiles(props: InitialProps) {
         return arr;
       }
   
-    const columns = [
-      {
-        title: '#',
-        dataIndex: 'id',
-        key: 'id',
-      },
-      {
-        title: 'Name',
-        dataIndex: 'name',
-        key: 'name',
-      },
-      {
-          title: 'Aktion',
-          dataIndex: 'action',
-          key: 'action',
-          render: (_: any, obj: any) => {
-            return (
-              <Space direction='horizontal'>
-                  <Button onClick={() => {setProfileToEdit(obj); setIsEditModalOpen(true); setEditFields(obj)}}>Bearbeiten</Button>
-                  <Button onClick={() => {setProfileToDelete(obj.id); setIsDeleteModalOpen(true)}}>Löschen</Button>
-              </Space>
-          );
-          }
-      },
-    ];
-  
     const setEditFields = (obj: {id: Number, name: String, settings: ProfileSettings}) => {
-        console.log(obj);
-        editForm.setFieldValue("name", obj.name);
-        editForm.setFieldValue("personal", obj.settings.personal);
-        editForm.setFieldValue("address", obj.settings.salutation);
-        editForm.setFieldValue("style", obj.settings.style);
-        editForm.setFieldValue("order", obj.settings.order);
-        editForm.setFieldValue("emotions", obj.settings.emotions);
+      editForm.setFieldValue("name", obj.name);
+      editForm.setFieldValue("personal", obj.settings.personal);
+      editForm.setFieldValue("address", obj.settings.salutation);
+      editForm.setFieldValue("style", obj.settings.stil);
+      editForm.setFieldValue("order", obj.settings.order);
+      editForm.setFieldValue("emotions", obj.settings.emotions);
+      editForm.setFieldValue("tags", obj.settings.tags);
+      if(obj.settings.tags){
+        setTokenCount(obj.settings.tags.length);
+      }
     }
   
     const getProfileName = (id: Number) => {
@@ -217,7 +201,7 @@ export default function Profiles(props: InitialProps) {
   
     const deleteProfile = async () => {
       try{
-        await axios.delete(`/api/profile/${profileToDelete}`);
+        await axios.delete(`/api/profiles/${profileToDelete}`);
       }catch(e){
         console.log(e);
         setErrMsg("Beim Löschen ist etwas fehlgeschlagen bitte versuche es später erneut.");
@@ -232,42 +216,114 @@ export default function Profiles(props: InitialProps) {
     } 
   
     const editProfile = async (values: any) => {
+      if (values.name){
+        try {
+          await axios.put(`/api/profiles/${profileToEdit.id}`, {
+            name: values.name,
+            settings: {
+              personal: values.personal,
+              salutation: values.address,
+              stil: values.style,
+              order: values.order,
+              emotions: values.emotions,
+              tags: values.tags
+            },
+          });
+        }catch(e){
+          setErrMsg("Beim Bearbeiten ist etwas fehlgeschlagen bitte versuche es später erneut.");
+          setIsErrVisible(true);
+        }
 
+        refreshData();
+        setErrMsg("");
+        setIsErrVisible(false);
+        setIsEditModalOpen(false);
+        editForm.resetFields([]);
+      }
     }
   
     const createProfile = async (values: any) => {
   
-      try{
-        await axios.post('/api/profiles', {
-          name: values.name,
-          settings: {
-            personal: values.personal,
-            salutation: values.salutation,
-            stil: values.style,
-            order: values.order,
-            emotions: values.emotions,
-          },
-        })
-      }catch(e){
-        setErrMsg("Beim Speichern ist etwas fehlgeschlagen bitte versuche es später erneut.");
-        setIsErrVisible(true);
+      if(values.name){
+        try{
+          await axios.post('/api/profiles', {
+            name: values.name,
+            settings: {
+              personal: values.personal,
+              salutation: values.address,
+              stil: values.style,
+              order: values.order,
+              emotions: values.emotions,
+              tags: values.tags
+            },
+          })
+        }catch(e){
+          setErrMsg("Beim Speichern ist etwas fehlgeschlagen bitte versuche es später erneut.");
+          setIsErrVisible(true);
+        }
+    
+        refreshData();
+        setErrMsg("");
+        setIsErrVisible(false);
+        setIsCreateModalOpen(false);
+        form.resetFields([]);
       }
-  
-      refreshData();
-      setErrMsg("");
-      setIsErrVisible(false);
-      setIsCreateModalOpen(false);
-      form.resetFields([]);
     }
-  
+
+    const getTags = (tags: Array<String>) => {
+      if(tags){
+        return tags.map((element, tagid) => {
+          return(
+            <Tag key={tagid}>{element}</Tag>
+          );
+        });
+      }
+    }
+    
+    const getProfileDisplay = () => {
+      if(props.Data.Profiles){
+        return (
+          <>
+            <Space wrap={true}>
+              { props.Data.Profiles.map((singleProfile, idx) => {
+                return (
+                  <Card
+                      key={idx}
+                      style={{
+                        width: 300,
+                        marginTop: 16,
+                      }}
+                      actions={[
+                        <div onClick={() => {setProfileToEdit(singleProfile); setIsEditModalOpen(true); setEditFields({id: singleProfile.id, name: singleProfile.name, settings: singleProfile.parsedSettings})}}><SettingOutlined key="setting" /></div>,
+                        <div onClick={() => {setProfileToDelete(singleProfile.id); setIsDeleteModalOpen(true)}}><DeleteOutlined key="edit" /></div>,
+                      ]}
+                    >
+                      <div className={styles.profilecard}>
+                        <div className={styles.profilecard_title}>{singleProfile.name}</div>
+                        <div className={styles.profilecard_tags}>
+                          { getTags(singleProfile.parsedSettings.tags)}
+                        </div>
+                      </div>
+                  </Card>
+                );
+              }) }
+            </Space>
+            <div className={styles.profilecounter}>{props.Data.Profiles? props.Data.Profiles.length:0} von 12 erstellt</div>
+          </>
+        );
+      }else{
+        return <div className={styles.profilesempty}><h3>Noch keine Profile definiert</h3></div>
+      }
+    }
+
     return (
       <SidebarLayout capabilities={props.InitialState.role.capabilities as JsonObject}>
         <div className={styles.main}>
           <div className={styles.interactionrow}>
-              <Button type='primary' onClick={() => {setIsCreateModalOpen(true)}}>+ Hinzufügen</Button>
+              <Button type='primary' onClick={() => {setIsCreateModalOpen(true)}} disabled={(props.Data.Profiles && props.Data.Profiles.length >= MAXPROFILES)}>+ Hinzufügen</Button>
           </div>
           <div className={styles.projecttable}>
-            <Table columns={columns} dataSource={props.Data.Profiles}></Table>
+            { getProfileDisplay() }
           </div>
   
           <Modal
@@ -281,7 +337,7 @@ export default function Profiles(props: InitialProps) {
                 onFinish={createProfile}
                 form={form}
             >
-                <Form.Item label={<b>Profilname</b>} name="name">
+                <Form.Item label={<b>Profilname</b>} name="name" rules={[{ required: true, message: 'Ein Name ist erforderlich!' }]}>
                     <Input placeholder="Names des Profils..."/>
                 </Form.Item>
   
@@ -306,6 +362,16 @@ export default function Profiles(props: InitialProps) {
 
                 <Form.Item label={<b>Allgemeine Gemütslage</b>} name="emotions">
                     <Select placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(emotions)} mode="multiple" allowClear/>
+                </Form.Item>
+
+                <Form.Item label={<b>Tags</b>} name="tags">
+                  <Select
+                    mode="tags"
+                    style={{ width: '100%' }}
+                    tokenSeparators={[',']}
+                    options={[]}
+                    placeholder={"Tippen Sie, um Tags hinzuzufügen, die Ihr Profil kategorisieren"}
+                  />
                 </Form.Item>
   
                 
@@ -331,7 +397,7 @@ export default function Profiles(props: InitialProps) {
                 onFinish={editProfile}
                 form={editForm}
             >
-                <Form.Item label={<b>Profilname</b>} name="name">
+                <Form.Item label={<b>Profilname</b>} name="name" rules={[{ required: true, message: 'Ein Name ist erforderlich!' }]}>
                     <Input placeholder="Names des Profils..."/>
                 </Form.Item>
   
@@ -356,6 +422,18 @@ export default function Profiles(props: InitialProps) {
 
                 <Form.Item label={<b>Allgemeine Gemütslage</b>} name="emotions">
                     <Select placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(emotions)} mode="multiple" allowClear/>
+                </Form.Item>
+
+                <Form.Item label={<b>Tags {tokenCount}/4</b>} name="tags">
+                  <Select
+                    mode="tags"
+                    style={{ width: '100%' }}
+                    tokenSeparators={[',']}
+                    onChange={(value) => {setTokenCount(value.length); console.log(value)}}
+                    options={[]}
+                    maxTagCount={5}
+                    placeholder={"Tippen Sie, um Tags hinzuzufügen, die Ihr Profil kategorisieren"}
+                  />
                 </Form.Item>
   
                 

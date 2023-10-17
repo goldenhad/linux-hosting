@@ -1,15 +1,16 @@
-import { Card, Button, Form, Input, Select, Checkbox, Divider, Skeleton, Space, Alert, Typography, Tooltip } from 'antd';
+import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert } from 'antd';
 import styles from './index.module.scss'
-import { InfoCircleOutlined } from '@ant-design/icons';
+import { prisma } from '../db';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
-import Link from 'next/link';
 import { CombinedUser } from '../helper/LoginTypes';
 import SidebarLayout from '../components/SidebarLayout';
-import { Prisma } from '@prisma/client';
-import { Capabilities } from '../helper/capabilities';
+import { Profile, Quota, TokenUsage } from '@prisma/client';
 import { JsonObject } from '@prisma/client/runtime/library';
+import AES from 'crypto-js/aes';
+import enc from 'crypto-js/enc-utf8';
+import { ProfileSettings } from '../helper/ProfileTypes';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -18,7 +19,10 @@ const { TextArea } = Input;
 export interface InitialProps {
   Data: {
     currentMonth: number,
-    currentYear: number
+    currentYear: number,
+    profiles: Array<Profile & {parsedSettings: ProfileSettings}>,
+    usage: TokenUsage,
+    quota: Quota
   };
   InitialState: CombinedUser;
 }
@@ -38,15 +42,57 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       return { props: { InitialState: {} } };
   } else {
       let datum = new Date();
+      let loginobj = JSON.parse(Buffer.from(cookies.login, "base64").toString("ascii"));
+
+      let profiles = await prisma.profile.findMany({
+        where: {
+          userId: loginobj.id,
+        }
+      });
+
+      let parsedProfiles: Array<Profile & {parsedSettings: ProfileSettings} > = [];
+
+      const pepper = process.env.PEPPER;
+
+      profiles.forEach((profile: Profile) => {
+          let decryptedBaseByte = AES.decrypt(profile.settings, profile.salt + pepper);
+          let decryptedBase = decryptedBaseByte.toString(enc);
+          let decryptedSettings = JSON.parse(decryptedBase);
+
+          let singleParsed = {...profile, parsedSettings: decryptedSettings as ProfileSettings};
+
+          parsedProfiles.push(singleParsed);
+      });
+
+      
+      let usage = await prisma.tokenUsage.findFirst({
+        where: {
+          companyId: loginobj.company.id,
+          month: datum.getMonth()+1,
+          year: datum.getFullYear()
+        }
+      });
+
+      if( !usage ){
+        usage = await prisma.tokenUsage.create({
+          data: {
+            month: datum.getMonth()+1,
+            year: datum.getFullYear(),
+            amount: 0,
+            companyId: loginobj.company.id
+          }
+        });
+      }
 
       return {
           props: {
-              InitialState: JSON.parse(
-              Buffer.from(cookies.login, "base64").toString("ascii")
-              ),
+              InitialState: loginobj,
               Data: {
                 currentMonth: datum.getMonth() + 1,
                 currentYear: datum.getFullYear(),
+                profiles: parsedProfiles,
+                quota: loginobj.company.quota,
+                usage: usage
               }
           },
       };
@@ -61,7 +107,18 @@ export default function Home(props: InitialProps) {
   const [ isAnswerCardVisible, setIsAnswerCardvisible ] = useState(false);
   const [ answer, setAnswer ] = useState("");
   const [ formDisabled, setFormDisabled ] = useState(false);
+  const [ currentUsage, setCurrentUsage ] = useState(props.Data.usage)
+  const [ quotaOverused, setQuotaOverused ] =  useState(!false);
   const [ tokens, setTokens ] = useState("");
+
+  useEffect(() => {
+    console.log(props.Data);
+    if(currentUsage.amount >= props.Data.quota.tokens){
+      setQuotaOverused(true);
+    }else{
+      setQuotaOverused(false);
+    }
+  }, [currentUsage])
 
   const style = [
     "Professionell",
@@ -139,53 +196,125 @@ export default function Home(props: InitialProps) {
     return arr;
   }
 
-
   const generateAnswer = async (values: any) => {
-    
-    try{
-      setFormDisabled(true);
-      setIsAnswerCardvisible(true);
-      setIsLoaderVisible(true);
-      setIsAnswerVisible(false);
-      setTokens("");
 
-      let answer = await axios.post('/api/prompt/generate', {
-        personal: values.personal,
-        dialog: values.dialog,
-        continue: values.continue,
-        address: values.address,
-        style: values.style,
-        order: values.order,
-        emotions: values.emotions,
-        length: values.length
-      });
+    console.log(values);
 
-      console.log(answer.data);
+    let profile = props.Data.profiles.find((singleProfile: Profile) => {
+      return singleProfile.name == values.profile;
+    });
 
-      if(answer.data){
-        setIsLoaderVisible(false);
-        setIsAnswerVisible(true);
-        setAnswer(answer.data.message);
-        setTokens(answer.data.tokens);
+    if(profile) {
+      try{
+        setFormDisabled(true);
+        setIsAnswerCardvisible(true);
+        setIsLoaderVisible(true);
+        setIsAnswerVisible(false);
+        setTokens("");
+  
+        let answer = await axios.post('/api/prompt/generate', {
+          personal: profile.parsedSettings.personal,
+          dialog: values.dialog,
+          continue: values.continue,
+          address: profile.parsedSettings.salutation,
+          style: profile.parsedSettings.stil,
+          order: profile.parsedSettings.order,
+          emotions: profile.parsedSettings.emotions,
+          length: values.length
+        });
+  
+        console.log(answer.data);
+  
+        if(answer.data){
+          setIsLoaderVisible(false);
+          setIsAnswerVisible(true);
+          setAnswer(answer.data.message);
+          setTokens(answer.data.tokens);
+  
+          let caps = props.InitialState.role.capabilities as JsonObject;
+  
+          if(!caps.superadmin){
+            await axios.put(`/api/tokens/${props.InitialState.company.id}`, {
+              amount: answer.data.tokens,
+              month: props.Data.currentMonth,
+              year: props.Data.currentYear
+            });
 
-        let caps = props.InitialState.role.capabilities as JsonObject;
-
-        if(!caps.superadmin){
-          await axios.put(`/api/tokens/${props.InitialState.company.id}`, {
-            amount: answer.data.tokens,
-            month: props.Data.currentMonth,
-            year: props.Data.currentYear
-          });
+            setCurrentUsage(currentUsage + answer.data.tokens)
+          }
         }
+  
+        console.log(answer);
+      }catch(e){
+        console.log(e);
+        setTokens("");
       }
-
-      console.log(answer);
-    }catch(e){
-      console.log(e);
-      setTokens("");
+  
+      setFormDisabled(false);
     }
+    
+  }
 
-    setFormDisabled(false);
+  const getProfiles = () => {
+    let profileOptions =  props.Data.profiles.map((singleProfile: Profile) => {
+      return {
+        key: singleProfile.id,
+        value: singleProfile.name
+      }
+    });
+
+    return profileOptions;
+  }
+
+  const getPrompt = () => {
+    if(!props.Data.profiles){
+      return (
+        <Result
+          title="Bitte definiere zuerst ein Profil"
+          extra={
+            <Button href='/profiles' type="primary" key="console">
+              Profil erstellen
+            </Button>
+          }
+        />
+      );
+    }else{
+      return(
+        <Card title={"Verlauf"}>
+          <Form.Item label={<b>Profil</b>} name="profile">
+                <Select
+                showSearch
+                placeholder="Wählen Sie ein Profil aus"
+                optionFilterProp="children"
+                onChange={(values: any) => {console.log(values)}}
+                onSearch={() => {}}
+                options={getProfiles()}
+                disabled={formDisabled || quotaOverused}
+              />
+            </Form.Item>
+            <Form.Item label={<b>Bisheriger Dialog</b>} name="dialog">
+              <TextArea rows={10} placeholder="Bisheriger Dialog..." disabled={formDisabled || quotaOverused}/>
+            </Form.Item>
+
+            <Form.Item label={<b>Wie soll der Dialog fortgesetzt werden?</b>} name="continue">
+              <TextArea rows={5} placeholder="Formulieren Sie kurz, wie der Dialog fortgesetzt werden soll und was sie damit erreichen wollen?" disabled={formDisabled || quotaOverused}/>
+            </Form.Item>
+
+            <Form.Item label={<b>Länge der Antwort</b>} name="length">
+              <Select placeholder="Wie lang soll die erzeuge Antwort sein?" options={listToOptions(lengths)} disabled={formDisabled || quotaOverused}/>
+            </Form.Item>
+
+            <div className={styles.submitrow}>
+              <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>Antwort generieren</Button>
+            </div>
+            <div className={styles.tokenalert}>
+              {
+                (quotaOverused)? <Alert message={`Ihr Tokenbudget ist ausgeschöpft. Ihr Budget setzt sich am 01.${props.Data.currentMonth+1}.${props.Data.currentYear} zurück. Wenn Sie weitere Tokens benötigen, können Sie diese in ihrem Konto dazubuchen.`} type="error" />: <></>
+              }
+            </div>
+        </Card>
+      );
+    }
   }
 
   return (
@@ -195,52 +324,10 @@ export default function Home(props: InitialProps) {
           <Form layout='vertical' onFinish={generateAnswer} onChange={() => {setIsAnswerCardvisible(false); setIsAnswerVisible(false); setIsLoaderVisible(false)}} form={form}>
             <div className={styles.mrow}>
               <div className={styles.mcol}>
-                <Card title={"Verlauf"}>
-                  <Form.Item label={<b>Persönliche Informationen</b>} name="personal">
-                    <TextArea placeholder="Wer sind sie, beschreiben Sie ihre Position..." disabled={formDisabled}/>
-                  </Form.Item>
-
-                  <Form.Item label={<b>Bisheriger Dialog</b>} name="dialog">
-                    <TextArea rows={10} placeholder="Bisheriger Dialog..." disabled={formDisabled}/>
-                  </Form.Item>
-
-                  <Form.Item label={<b>Wie soll der Dialog fortgesetzt werden?</b>} name="continue">
-                    <TextArea rows={5} placeholder="Formulieren Sie kurz, wie der Dialog fortgesetzt werden soll und was sie damit erreichen wollen?" disabled={formDisabled}/>
-                  </Form.Item>
-
-                  <div className={styles.submitrow}>
-                    <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled}>Antwort generieren</Button>
-
-                  </div>
-                </Card>
+                {getPrompt()}
               </div>
 
-              <div className={styles.mcol}>
-                <Card title={"Einstellungen"}>
-                  <Form.Item label={<b>Ansprache</b>} name="address">
-                    <Select placeholder="Bitte wählen Sie die Form der Ansprache aus..." options={[
-                      {label: "Du", value: "du", },
-                      {label: "Sie", value: "sie", },
-                    ]} disabled={formDisabled} />
-                  </Form.Item>
-
-                  <Form.Item label={<b>Allgemeine Stilistik</b>} name="style">
-                    <Select placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(style)} mode="multiple" allowClear disabled={formDisabled}/>
-                  </Form.Item>
-
-                  <Form.Item label={<b>Einordnung des Gesprächpartners</b>} name="order">
-                    <Select placeholder="Wie orden Sie ihren Gesprächpartner ein?" options={listToOptions(motive)} mode="multiple" allowClear disabled={formDisabled}/>
-                  </Form.Item>
-
-                  <Form.Item label={<b>Allgemeine Gemütslage</b>} name="emotions">
-                    <Select placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(emotions)} mode="multiple" allowClear disabled={formDisabled}/>
-                  </Form.Item>
-
-                  <Form.Item label={<b>Länge der Antwort</b>} name="length">
-                    <Select placeholder="Wie lang soll die erzeuge Antwort sein?" options={listToOptions(lengths)} disabled={formDisabled}/>
-                  </Form.Item>
-                </Card>
-              </div>
+              
             </div>
           </Form>
 

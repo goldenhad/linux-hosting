@@ -1,15 +1,10 @@
 import React, { ReactNode, useEffect, useState } from 'react';
-import Image from 'next/image';
-import { TeamOutlined, LogoutOutlined, ApartmentOutlined, RobotOutlined, FolderOpenOutlined, BugOutlined} from '@ant-design/icons';
+import { LogoutOutlined, ApartmentOutlined, RobotOutlined, FolderOpenOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import { Layout, Menu, theme } from 'antd';
 import Link from 'next/link';
-import { CombinedUser } from '../helper/LoginTypes';
-import { Capabilities, Crud } from '../helper/capabilities';
 import { useRouter } from 'next/router';
-import { JsonObject, JsonValue } from '@prisma/client/runtime/library';
-import { Prisma } from '@prisma/client';
-const { Header, Content, Footer, Sider } = Layout;
+const { Content, Footer, Sider } = Layout;
 import {isMobile} from 'react-device-detect';
 import axios from 'axios';
 
@@ -43,19 +38,24 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any}) => {
 
   const items = [
     getItem(<Link href={"/"}>Siteware Mailbuddy</Link>, '1', () => { return true }, <RobotOutlined />, ),
-    getItem(<Link href={"/projects/list"}>Projekte</Link>, '2', () => { return rights.superadmin }, <FolderOpenOutlined />),
+    getItem(<Link href={"/companies/list"}>Firmen</Link>, '2', () => { return rights.superadmin }, <FolderOpenOutlined />),
     getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return !rights.superadmin }, <ApartmentOutlined />),
-    getItem(<Link href={"/logout"}>Ausloggen</Link>, '4', () => { return true }, <LogoutOutlined />),
+    getItem(<Link href={"/profiles"}>Profile</Link>, '4', () => { return !rights.superadmin }, <UserOutlined />),
+    getItem(<Link href={"/logout"}>Ausloggen</Link>, '5', () => { return true }, <LogoutOutlined />),
   ];
 
   const getDefaultSelected = () => {
     switch(router.pathname){
       case '/': 
         return '1';
-      case '/projects/list/[[...search]]':
+      case '/companies/list/[[...search]]':
         return '2';
+      case '/companies/edit/[id]':
+          return '2';
       case '/company':
         return '3';
+      case '/profiles':
+        return '4';
       default:
         return '-1';
     }

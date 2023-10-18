@@ -20,22 +20,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
             if(loginObj.role.capabilities.projects.create){
                 let data = req.body;
-                if(data.projectname && data.companyname){
+                if(data.companyname){
                     try{
-                        await prisma.project.create({
+                        await prisma.company.create({
                             data: {
-                                name: data.projectname,
-                                company: {
-                                    create: {
-                                        name: data.companyname,
-                                        street: handleEmptyString(data.street),
-                                        city: handleEmptyString(data.city),
-                                        postalcode: handleEmptyString(data.postalcode),
-                                        country: handleEmptyString(data.country),
-                                        settings: {
-                                            background: handleEmptyString(data.background),
-                                        }
-                                    }
+                                name: data.companyname,
+                                street: handleEmptyString(data.street),
+                                city: handleEmptyString(data.city),
+                                postalcode: handleEmptyString(data.postalcode),
+                                country: handleEmptyString(data.country),
+                                settings: {
+                                    background: handleEmptyString(data.background),
                                 }
                             }
                         });

@@ -9,14 +9,14 @@ import { CombinedUser } from '../../../helper/LoginTypes';
 import SidebarLayout from '../../../components/SidebarLayout';
 import { JsonObject } from '@prisma/client/runtime/library';
 import { useRouter } from 'next/router';
-import { Company, Project, Role, TokenUsage, User } from '@prisma/client';
+import { Company, Role, TokenUsage, User } from '@prisma/client';
 import { handleEmptyString } from '../../../helper/architecture';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
 
 export interface InitialProps {
-  Data: { SingleProject: Project & { company: any }, Users: Array<User>, Roles: Array<Role> };
+  Data: { SingleCompany: Company, Users: Array<User>, Roles: Array<Role> };
   currentMonth: number;
   currentYear: number;
   quota: TokenUsage;
@@ -58,10 +58,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
     if(!isNaN(rawid)){
         if(cookie.role.capabilities.superadmin){
-            let project = await prisma.project.findFirst({
-                include: {
-                    company: true,
-                },
+            let company = await prisma.company.findFirst({
                 where: {
                     id: rawid
                 }
@@ -69,7 +66,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     
             let quota = await prisma.tokenUsage.findFirst({
                 where: {
-                    projectId: rawid,
+                    companyId: rawid,
                     month: currentMonth,
                     year: currentYear,
                 }
@@ -81,7 +78,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
                         month: currentMonth,
                         year: currentYear,
                         amount: 0,
-                        project: {
+                        Company: {
                             connect: {
                                 id: rawid
                             }
@@ -96,7 +93,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
                     role: true
                 },
                 where: {
-                    projectId: rawid
+                    companyId: rawid
                 }
             })
 
@@ -104,12 +101,12 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
         
-            if(project){
+            if(company){
                 return {
                     props: {
                         InitialState: cookie,
                         Data: {
-                            SingleProject: project,
+                            SingleCompany: company,
                             Users: users,
                             Roles: roles
                         },
@@ -122,7 +119,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         }
     }
 
-    res.writeHead(302, { Location: "/projects/list" });
+    res.writeHead(302, { Location: "/company/list" });
     res.end();
 
     return { props: { InitialState: {} } };
@@ -131,7 +128,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 
-export default function ProjectEdit(props: InitialProps) {
+export default function CompanyEdit(props: InitialProps) {
     const [ errMsg, setErrMsg ] = useState([]);
     const [ isErrVisible, setIsErrVisible ] = useState(false);
     const [ isAddUserModalOpen, setIsAddUserModalOpen ] = useState(false);
@@ -150,15 +147,15 @@ export default function ProjectEdit(props: InitialProps) {
     }
 
     useEffect(() => {
-        form.setFieldValue("projectname", props.Data.SingleProject.name);
-        form.setFieldValue("companyname", props.Data.SingleProject.company.name);
-        form.setFieldValue("companystreet", props.Data.SingleProject.company.street);
-        form.setFieldValue("companycity", props.Data.SingleProject.company.city);
-        form.setFieldValue("companypostalcode", props.Data.SingleProject.company.postalcode);
-        form.setFieldValue("companycountry", props.Data.SingleProject.company.country);
-        form.setFieldValue("companybackground", props.Data.SingleProject.company.settings.background);
+        let settigs = props.Data.SingleCompany.settings as JsonObject;
+        form.setFieldValue("companyname", props.Data.SingleCompany.name);
+        form.setFieldValue("companystreet", props.Data.SingleCompany.street);
+        form.setFieldValue("companycity", props.Data.SingleCompany.city);
+        form.setFieldValue("companypostalcode", props.Data.SingleCompany.postalcode);
+        form.setFieldValue("companycountry", props.Data.SingleCompany.country);
+        form.setFieldValue("companybackground", settigs.background);
 
-    }, [props.Data.SingleProject]);
+    }, [props.Data.SingleCompany]);
 
     const columns = [
         {
@@ -451,7 +448,7 @@ export default function ProjectEdit(props: InitialProps) {
                 role: values.role,
                 email: values.email,
                 password: values.userpassword,
-                project: props.Data.SingleProject.id
+                company: props.Data.SingleCompany.id
             })
             .then(function (response) {
                 //reload data
@@ -561,8 +558,7 @@ export default function ProjectEdit(props: InitialProps) {
         //Define a array so save error-messages
         let msg: any = [];
 
-        axios.put(`/api/project/${props.Data.SingleProject.id}`, {
-            name: handleEmptyString(values.projectname),
+        axios.put(`/api/company/${props.Data.SingleCompany.id}`, {
             companyname: handleEmptyString(values.companyname),
             companystreet: handleEmptyString(values.companystreet),
             companycity: handleEmptyString(values.companycity),
@@ -606,28 +602,13 @@ export default function ProjectEdit(props: InitialProps) {
                 <Space direction='vertical' className={styles.spacelayout} size="large">
                     <div className={styles.row}>
                         <div className={styles.editcol}>
-                            <Card title={`Projekt ${props.Data.SingleProject.id} bearbeiten`} bordered={true}>
+                            <Card title={`Firma: ${props.Data.SingleCompany.id} bearbeiten`} bordered={true}>
                                 <Form 
                                     layout='vertical'
                                     onFinish={editProject}
                                     onChange={() => {setEditSuccessfull(false)}}
                                     form={form}
                                 >
-
-                                    <Form.Item
-                                        label="Projektname"
-                                        name="projectname"
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: 'Bitte geben Sie einen Projektnamen an!',
-                                            },
-                                        ]}
-                                    >
-                                        <Input placeholder="Projektname..." />
-                                    </Form.Item>
-
-                                    <h3>Firma</h3>
 
                                     <Form.Item
                                         label="Firmenname"

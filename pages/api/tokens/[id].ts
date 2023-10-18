@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                         
                         if(!isNaN(amount) && amount){
                             try{
-                                let currentUsage = await prisma.tokenUsage.findFirst({where: {month: data.month, year: data.year, projectId: loginObj.project.id}});
+                                let currentUsage = await prisma.tokenUsage.findFirst({where: {month: data.month, year: data.year, companyId: loginObj.company.id}});
     
                                 if(currentUsage){
                                     await prisma.tokenUsage.update({
@@ -46,9 +46,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                                             month: data.month,
                                             year: data.year,
                                             amount: amount,
-                                            project: {
+                                            Company: {
                                                 connect: {
-                                                    id: loginObj.project.id
+                                                    id: loginObj.company.id
                                                 }
                                             }
                                         },

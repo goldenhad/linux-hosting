@@ -9,14 +9,14 @@ import { CombinedUser } from '../../helper/LoginTypes';
 import SidebarLayout from '../../components/SidebarLayout';
 import { JsonObject } from '@prisma/client/runtime/library';
 import { useRouter } from 'next/router';
-import { Company, Project, Role, TokenUsage, User } from '@prisma/client';
+import { Company, Role, TokenUsage, User } from '@prisma/client';
 import { handleEmptyString } from '../../helper/architecture';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
 
 export interface InitialProps {
-  Data: { SingleProject: Project & { company: any }, Users: Array<User>, Roles: Array<Role> };
+  Data: { SingleCompany: Company & { company: any }, Users: Array<User>, Roles: Array<Role> };
   currentMonth: number;
   currentYear: number;
   quota: TokenUsage;
@@ -51,16 +51,18 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       return { props: { InitialState: {} } };
   } else {
     let cookie = JSON.parse(Buffer.from(cookies.login, "base64").toString("ascii"));
-    let rawid = cookie.project.id;
+    let rawid = cookie.company.id;
     let currentMonth = new Date().getMonth() + 1;
     let currentYear = new Date().getFullYear();
+
+    console.log(cookie);
 
     if(!isNaN(rawid)){
         if(!cookie.role.capabilities.superadmin){
     
             let quota = await prisma.tokenUsage.findFirst({
                 where: {
-                    projectId: rawid,
+                    companyId: rawid,
                     month: currentMonth,
                     year: currentYear,
                 }
@@ -72,7 +74,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
                         month: currentMonth,
                         year: currentYear,
                         amount: 0,
-                        project: {
+                        Company: {
                             connect: {
                                 id: rawid
                             }
@@ -87,7 +89,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
                 props: {
                     InitialState: cookie,
                     Data: {
-                        SingleProject: cookie.project,
+                        SingleCompany: cookie.company,
                     },
                     currentMonth: currentMonth,
                     currentYear: currentYear,
@@ -124,8 +126,7 @@ export default function Company(props: InitialProps) {
         //Define a array so save error-messages
         let msg: any = [];
 
-        axios.put(`/api/project/${props.Data.SingleProject.id}`, {
-            name: handleEmptyString(values.projectname),
+        axios.put(`/api/company/${props.Data.SingleCompany.id}`, {
             companyname: handleEmptyString(values.companyname),
             companystreet: handleEmptyString(values.companystreet),
             companycity: handleEmptyString(values.companycity),
@@ -149,15 +150,15 @@ export default function Company(props: InitialProps) {
     }
 
     useEffect(() => {
-        let setts = props.InitialState.project.company.settings as JsonObject;
-        form.setFieldValue("companyname", props.InitialState.project.company.name);
-        form.setFieldValue("companystreet", props.InitialState.project.company.street);
-        form.setFieldValue("companycity", props.InitialState.project.company.city);
-        form.setFieldValue("companypostalcode", props.InitialState.project.company.postalcode);
-        form.setFieldValue("companycountry", props.InitialState.project.company.country);
+        let setts = props.InitialState.company.settings as JsonObject;
+        form.setFieldValue("companyname", props.InitialState.company.name);
+        form.setFieldValue("companystreet", props.InitialState.company.street);
+        form.setFieldValue("companycity", props.InitialState.company.city);
+        form.setFieldValue("companypostalcode", props.InitialState.company.postalcode);
+        form.setFieldValue("companycountry", props.InitialState.company.country);
         form.setFieldValue("companybackground", setts.background);
 
-    }, [props.InitialState.project]);
+    }, [props.InitialState.company]);
 
 
     const getCompanyInput = () => {
@@ -302,7 +303,7 @@ export default function Company(props: InitialProps) {
         <SidebarLayout capabilities={props.InitialState.role.capabilities as JsonObject}>
             <div className={styles.main}>
                 <Space direction='vertical' className={styles.spacelayout} size="large">
-                    <Card title={`Projekt ${props.Data.SingleProject.id}`} bordered={true}>
+                    <Card title={`Firma: ${props.Data.SingleCompany.id}`} bordered={true}>
                         {getCompanyInput()}
                     </Card>
                     <Card title={"Tokens"} bordered={true}>

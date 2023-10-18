@@ -32,11 +32,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                     salt: true,
                     email: true,
                     role: true,
-                    project: {
-                        select: {
-                            id: true,
-                            name: true,
-                            company: true,
+                    company: {
+                        include: {
+                            quota: true,
                         }
                     },
                 },
@@ -68,7 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                                 'username': cUser.username,
                                 'email': cUser.email,
                                 'role': cUser.role,
-                                'project': cUser.project
+                                'company': cUser.company
                             };
         
                             let B = Buffer.from(JSON.stringify( cookieData )).toString('base64');
@@ -76,14 +74,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                             //Set the user cookie with the cookieData-object 
                             cookies.set('login', B, {
                                 httpOnly: true,
-                                maxAge: 1000 * 60 * 60 * 4 //Make cookie valid 4 hours
+                                maxAge: 1000 * 60 * 60 * 24 * 30 //Make cookie valid 4 hours
                             });
         
                             //Send a status 200 as the login is valid
                             return res.status(200).send({ errorcode: 0, message: "OK" });
                         }else{
                             //The user couldn't be found send a forbidden
-                            return res.status(403).send({ errorcode: 1, message: "Password and username combination not found" });
+                            return res.status(403).send({ errorcode: 5, message: "Password and username combination not found" });
                         }
                     }else{
                         return res.status(403).send({ errorcode: 1, message: "User missing role!" });
@@ -94,7 +92,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 
                 }else{
                     //The password is invalid, send a 'forbidden'
-                    return res.status(403).send({ errorcode: 1, message: "Password and username combination not found" });
+                    return res.status(403).send({ errorcode: 3, message: "Password and username combination not found" });
                 }
         }else{
             //If the needed data is not provided, send a bad request

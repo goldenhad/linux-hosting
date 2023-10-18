@@ -44,58 +44,65 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       let datum = new Date();
       let loginobj = JSON.parse(Buffer.from(cookies.login, "base64").toString("ascii"));
 
-      let profiles = await prisma.profile.findMany({
-        where: {
-          userId: loginobj.id,
-        }
-      });
-
-      let parsedProfiles: Array<Profile & {parsedSettings: ProfileSettings} > = [];
-
-      const pepper = process.env.PEPPER;
-
-      profiles.forEach((profile: Profile) => {
-          let decryptedBaseByte = AES.decrypt(profile.settings, profile.salt + pepper);
-          let decryptedBase = decryptedBaseByte.toString(enc);
-          let decryptedSettings = JSON.parse(decryptedBase);
-
-          let singleParsed = {...profile, parsedSettings: decryptedSettings as ProfileSettings};
-
-          parsedProfiles.push(singleParsed);
-      });
-
-      
-      let usage = await prisma.tokenUsage.findFirst({
-        where: {
-          companyId: loginobj.company.id,
-          month: datum.getMonth()+1,
-          year: datum.getFullYear()
-        }
-      });
-
-      if( !usage ){
-        usage = await prisma.tokenUsage.create({
-          data: {
-            month: datum.getMonth()+1,
-            year: datum.getFullYear(),
-            amount: 0,
-            companyId: loginobj.company.id
+      try{
+        let profiles = await prisma.profile.findMany({
+          where: {
+            userId: loginobj.id,
           }
         });
-      }
+  
+        let parsedProfiles: Array<Profile & {parsedSettings: ProfileSettings} > = [];
+  
+        const pepper = process.env.PEPPER;
+  
+        profiles.forEach((profile: Profile) => {
+            let decryptedBaseByte = AES.decrypt(profile.settings, profile.salt + pepper);
+            let decryptedBase = decryptedBaseByte.toString(enc);
+            let decryptedSettings = JSON.parse(decryptedBase);
+  
+            let singleParsed = {...profile, parsedSettings: decryptedSettings as ProfileSettings};
+  
+            parsedProfiles.push(singleParsed);
+        });
+  
+        
+        let usage = await prisma.tokenUsage.findFirst({
+          where: {
+            companyId: loginobj.company.id,
+            month: datum.getMonth()+1,
+            year: datum.getFullYear()
+          }
+        });
+  
+        if( !usage ){
+          usage = await prisma.tokenUsage.create({
+            data: {
+              month: datum.getMonth()+1,
+              year: datum.getFullYear(),
+              amount: 0,
+              companyId: loginobj.company.id
+            }
+          });
+        }
+  
+        return {
+            props: {
+                InitialState: loginobj,
+                Data: {
+                  currentMonth: datum.getMonth() + 1,
+                  currentYear: datum.getFullYear(),
+                  profiles: parsedProfiles,
+                  quota: loginobj.company.quota,
+                  usage: usage
+                }
+            },
+        };
+      } catch(e) {
+        res.writeHead(302, { Location: "/logout" });
+        res.end();
 
-      return {
-          props: {
-              InitialState: loginobj,
-              Data: {
-                currentMonth: datum.getMonth() + 1,
-                currentYear: datum.getFullYear(),
-                profiles: parsedProfiles,
-                quota: loginobj.company.quota,
-                usage: usage
-              }
-          },
-      };
+        return { props: { InitialState: {} } };
+      }
   }
 };
 

@@ -281,7 +281,7 @@ export default function Profiles(props: InitialProps) {
     }
     
     const getProfileDisplay = () => {
-      if(props.Data.Profiles){
+      if(props.Data.Profiles && props.Data.Profiles.length > 0){
         return (
           <>
             <Space wrap={true}>

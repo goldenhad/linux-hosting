@@ -267,7 +267,8 @@ export default function Home(props: InitialProps) {
   }
 
   const getPrompt = () => {
-    if(!props.Data.profiles){
+    console.log(props.Data.profiles)
+    if(!(props.Data.profiles?.length > 0)){
       return (
         <Result
           title="Bitte definiere zuerst ein Profil"

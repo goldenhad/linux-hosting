@@ -5,6 +5,9 @@ import { prisma } from '../../db';
 import Cookies from 'cookies';
 import bcrypt from 'bcrypt';
 import { CombinedUser } from '../../helper/LoginTypes';
+import { db } from '../../db';
+import { collection, query, where, getDocs } from "firebase/firestore";
+
 
 
 //Special type for custom response-error-messages
@@ -40,6 +43,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 },
                 where: { username: data.username }
             });
+
+
+        const q = query(collection(db, "User"), where("username", "==", data.username));
+        const querySnapshot = await getDocs(q);
+
+        console.log(querySnapshot);
 
             //If the query returns a user object
             if( user ){

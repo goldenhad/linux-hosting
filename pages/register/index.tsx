@@ -7,6 +7,7 @@ import { Alert, Button, Checkbox, Form, Input } from 'antd';
 import logo from '../../public/mailbuddy.png'
 import styles from './login.module.scss'
 import signIn from "../../firebase/auth/signin";
+import signUp from "../../firebase/auth/signup";
 
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -29,26 +30,7 @@ export default function Login(){
     const [ loginFailed, setLoginFailed ] = useState(false);
 
     const onFinish = async (values: any) => {
-        /* axios.post('/api/login', {
-            username: values.username,
-            password: values.password
-        })
-          .then(function (response) {
-            setLoginFailed(false);
-    
-            // Make sure we're in the browser
-            if (typeof window !== 'undefined') {
-                router.push('/');
-                return; 
-            }
-    
-        })
-          .catch(function (error) {
-            console.log(error);
-            setLoginFailed(true);
-        }); */
-
-        const { result, error } = await signIn(values.email, values.password);
+        const { result, error } = await signUp(values.email, values.username, values.password, values.company, values.street, values.city, values.postalcode, "DE");
 
         if (error) {
             console.log(error);
@@ -57,7 +39,7 @@ export default function Login(){
             setLoginFailed(false);
             // else successful
             console.log(result)
-            return router.push("/")
+            //return router.push("/")
         }
 
         
@@ -105,7 +87,20 @@ export default function Login(){
                     rules={[
                         {
                         required: true,
-                        message: 'Bitte geben Sie ihre E-Mail ein!',
+                        message: 'Bitte geben Sie ein E-Mail ein!',
+                        },
+                    ]}
+                    >
+                    <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                    label="Username"
+                    name="username"
+                    rules={[
+                        {
+                        required: true,
+                        message: 'Bitte geben Sie einen Usernamen ein!',
                         },
                     ]}
                     >
@@ -118,11 +113,84 @@ export default function Login(){
                     rules={[
                         {
                         required: true,
-                        message: 'Bitte geben Sie ihr Password ein!',
+                        message: 'Bitte geben Sie ein Password ein!',
                         },
                     ]}
                     >
                     <Input.Password />
+                    </Form.Item>
+
+                    <Form.Item
+                    label="Password wiederholen"
+                    name="passwordwdhl"
+                    rules={[
+                        {
+                        required: true,
+                        message: 'Bitte wiederholen Sie das Passwort!',
+                        },
+                        ({ getFieldValue }) => ({
+                            validator(_, value) {
+                              if (!value || getFieldValue('password') === value) {
+                                return Promise.resolve();
+                              }
+                              return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
+                            },
+                        }),
+                    ]}
+                    >
+                    <Input.Password />
+                    </Form.Item>
+
+                    <Form.Item
+                    label="Name des Unternehmens"
+                    name="company"
+                    rules={[
+                        {
+                        required: true,
+                        message: 'Bitte geben Sie einen Namen für Ihr Unternehmen ein!',
+                        },
+                    ]}
+                    >
+                    <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                    label="Straße"
+                    name="street"
+                    rules={[
+                        {
+                        required: true,
+                        message: 'Bitte geben Sie einen Namen für Ihr Unternehmen ein!',
+                        },
+                    ]}
+                    >
+                    <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                    label="Ort"
+                    name="city"
+                    rules={[
+                        {
+                        required: true,
+                        message: 'Bitte geben Sie einen Namen für Ihr Unternehmen ein!',
+                        },
+                    ]}
+                    >
+                    <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                    label="PLZ"
+                    name="postalcode"
+                    rules={[
+                        {
+                        required: true,
+                        message: 'Bitte geben Sie einen Namen für Ihr Unternehmen ein!',
+                        },
+                    ]}
+                    >
+                    <Input />
                     </Form.Item>
 
                     <Alert style={{marginBottom: 20, display: (loginFailed)? "block": "none"}} message="Beim Anmelden ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
@@ -137,7 +205,7 @@ export default function Login(){
                         }}
                     >
                         <Button type="primary" htmlType="submit">
-                            Anmelden
+                            Registrieren
                         </Button>
                     </Form.Item>
                 </Form>

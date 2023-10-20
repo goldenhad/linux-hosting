@@ -8,6 +8,7 @@ import logo from '../../public/mailbuddy.png'
 import styles from './login.module.scss'
 import signIn from "../../firebase/auth/signin";
 import signUp from "../../firebase/auth/signup";
+import Head from "next/head";
 
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -26,7 +27,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     return { props: { InitialState: {} } }
 }
 
-export default function Login(){
+export default function Register(){
     const [ loginFailed, setLoginFailed ] = useState(false);
 
     const onFinish = async (values: any) => {
@@ -211,5 +212,20 @@ export default function Login(){
                 </Form>
             </div>
         </main>
+    );
+}
+
+Register.getLayout = (page) => {
+    return(
+        <>
+        <Head>
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <link rel="icon" type="image/x-icon" href="mailbuddy.ico" />
+            <title>Siteware-Mailbuddy | mail assistant</title>
+        </Head>
+        <main>
+            {page}
+        </main>
+        </>
     );
 }

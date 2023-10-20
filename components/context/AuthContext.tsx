@@ -3,11 +3,12 @@ import {
     onAuthStateChanged,
     getAuth,
 } from 'firebase/auth';
-import { firebase_app } from '../../db';
+import { db, firebase_app } from '../../db';
 import getDocument from '../../firebase/data/getData';
-import { User, basicUser } from '../../firebase/types/User';
-import { Company, basicCompany } from '../../firebase/types/Company';
-import { Role, basicRole } from '../../firebase/types/Role';
+import { User } from '../../firebase/types/User';
+import { Company, Usage, Quota } from '../../firebase/types/Company';
+import { Role } from '../../firebase/types/Role';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 
 
@@ -15,7 +16,8 @@ interface ctx {
     login: any,
     user: User,
     company: Company,
-    role: Role
+    role: Role,
+    quota: Quota
 }
 
 const auth = getAuth(firebase_app);
@@ -31,65 +33,92 @@ export const AuthContextProvider = ({
     const [user, setUser] = React.useState(null);
     const [company, setCompany] = React.useState(null);
     const [role, setRole] = React.useState(null);
+    const [quota, setQuota] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             console.log("Authstate changes!");
-            if (user) {
-                const userdoc = await getDocument("User", user.uid);
-                console.log(userdoc);
+            try {
+                if (user) {
+                    const userdoc = await getDocument("User", user.uid);
+                    console.log(userdoc);
 
-                if(userdoc.result){
-                    let userobj = userdoc.result.data() as User;
-                    const roledoc = await getDocument("Role", userobj.Role);
+                    if(userdoc.result){
+                        let userobj = userdoc.result.data() as User;
+                        const roledoc = await getDocument("Role", userobj.Role);
 
-                    if(roledoc.result){
-                        const companydoc = await getDocument("Company", userobj.Role);
+                        if(roledoc.result){
+                            console.log(userobj);
+                            const companydoc = await getDocument("Company", userobj.Company);
 
-                        if(companydoc.result){
+                            if(companydoc.result){
+                                let companyobj = companydoc.result.data() as Company;
+                                const quotadoc = await getDocument("Quota", companyobj.Quota);
 
-                            setLogin(user);
-                            setUser(userdoc);
-                            setRole(roledoc.result.data() as Role);
-                            setCompany(companydoc.result.data() as Company);
-                            setLoading(false);
-                            console.log("All ready")
+                                if(quotadoc.result){
+
+                                    console.log(companyobj.Quota);
+                                    console.log(quotadoc.result.data());
+
+                                    setLogin(user);
+                                    setUser(userdoc.result.data() as User);
+                                    setRole(roledoc.result.data() as Role);
+                                    setCompany(companydoc.result.data() as Company);
+                                    setQuota(quotadoc.result.data() as Usage)
+                                    setLoading(false);
+                                    console.log("All ready")
+                                }else{
+                                    throw Error("Quota not defined!");
+                                }
+                            }else{
+                                throw Error("Company not defined!");
+                            }
                         }else{
-                            setLogin(null);
-                            setUser(null);
-                            setRole(null);
-                            setCompany(null);
-                            console.log("Company not found");
+                            throw Error("Role not defined!");
                         }
                     }else{
-                        setLogin(null);
-                        setUser(null);
-                        setRole(null);
-                        setCompany(null);
-                        console.log("Role not found");
+                        throw Error("User not defined!");
                     }
                 }else{
-                    setLogin(null);
-                    setUser(null);
-                    setRole(null);
-                    setCompany(null);
-                    console.log("User not found");
+                    throw Error("Login not defined!");
                 }
-            } else {
+            } catch(e) {
                 setLogin(null);
                 setUser(null);
                 setRole(null);
                 setCompany(null);
-                console.log("Loginfailure");
+                setQuota(null)
+                console.log(e);
             }
         });
+
 
         return () => unsubscribe();
     }, []);
 
+    React.useEffect(() => {
+        if(user){
+            const unsubscribe = onSnapshot(doc(db, "Company", user.Company), (doc) => {
+                setCompany(doc.data());
+            })
+    
+            return unsubscribe;
+        }
+    }, [login]);
+
+    React.useEffect(() => {
+        if(login){
+            const unsubscribe = onSnapshot(doc(db, "User", login.uid), (doc) => {
+                setUser(doc.data());
+            })
+    
+            return unsubscribe;
+        }
+    }, [login]);
+
     return (
-        <AuthContext.Provider value={{login: login, user: user, company: company, role: role}}>
+        <AuthContext.Provider value={{login: login, user: user, company: company, role: role, quota: quota}}>
             {loading ? <div>Loading...</div> : children}
         </AuthContext.Provider>
     );

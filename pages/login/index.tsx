@@ -2,11 +2,12 @@ import Image from "next/image";
 import axios from "axios";
 import router from "next/router";
 import { GetServerSideProps } from "next";
-import { useState } from "react";
+import { Component, useState } from "react";
 import { Alert, Button, Checkbox, Form, Input } from 'antd';
 import logo from '../../public/mailbuddy.png'
 import styles from './login.module.scss'
 import signIn from "../../firebase/auth/signin";
+import Head from "next/head";
 
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -143,5 +144,20 @@ export default function Login(){
                 </Form>
             </div>
         </main>
+    );
+}
+
+Login.getLayout = (page) => {
+    return(
+        <>
+        <Head>
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <link rel="icon" type="image/x-icon" href="mailbuddy.ico" />
+            <title>Siteware-Mailbuddy | mail assistant</title>
+        </Head>
+        <main>
+            {page}
+        </main>
+        </>
     );
 }

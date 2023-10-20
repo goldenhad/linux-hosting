@@ -1,8 +1,8 @@
 import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert } from 'antd';
 import styles from './index.module.scss'
-import { prisma } from '../db';
+import { db, prisma } from '../db';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { CombinedUser } from '../helper/LoginTypes';
 import SidebarLayout from '../components/SidebarLayout';
@@ -13,6 +13,11 @@ import enc from 'crypto-js/enc-utf8';
 import { ProfileSettings } from '../helper/ProfileTypes';
 import { useAuthContext } from '../components/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { Company, Usage } from '../firebase/types/Company';
+import updateData from '../firebase/data/updateData';
+import { arrayUnion, doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { useAsyncEffect } from '../helper/useAsyncEffect';
+import getData from '../firebase/data/getData';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -35,78 +40,23 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   //Get the cookies from the current request
   const { cookies } = req;
 
-  //Check if the login cookie is set
-  if (!cookies.login) {
-     
-    return { props: { InitialState: {} } };
-  } else {
-      let datum = new Date();
-      let loginobj = JSON.parse(Buffer.from(cookies.login, "base64").toString("ascii"));
+  let datum = new Date();
 
-      try{
-        let profiles = await prisma.profile.findMany({
-          where: {
-            userId: loginobj.id,
-          }
-        });
-  
-        let parsedProfiles: Array<Profile & {parsedSettings: ProfileSettings} > = [];
-  
-        const pepper = process.env.PEPPER;
-  
-        profiles.forEach((profile: Profile) => {
-            let decryptedBaseByte = AES.decrypt(profile.settings, profile.salt + pepper);
-            let decryptedBase = decryptedBaseByte.toString(enc);
-            let decryptedSettings = JSON.parse(decryptedBase);
-  
-            let singleParsed = {...profile, parsedSettings: decryptedSettings as ProfileSettings};
-  
-            parsedProfiles.push(singleParsed);
-        });
-  
-        
-        let usage = await prisma.tokenUsage.findFirst({
-          where: {
-            companyId: loginobj.company.id,
-            month: datum.getMonth()+1,
-            year: datum.getFullYear()
-          }
-        });
-  
-        if( !usage ){
-          usage = await prisma.tokenUsage.create({
-            data: {
-              month: datum.getMonth()+1,
-              year: datum.getFullYear(),
-              amount: 0,
-              companyId: loginobj.company.id
-            }
-          });
+  return {
+    props: {
+        Data: {
+          currentMonth: datum.getMonth() + 1,
+          currentYear: datum.getFullYear(),
         }
-  
-        return {
-            props: {
-                InitialState: loginobj,
-                Data: {
-                  currentMonth: datum.getMonth() + 1,
-                  currentYear: datum.getFullYear(),
-                  profiles: parsedProfiles,
-                  quota: loginobj.company.quota,
-                  usage: usage
-                }
-            },
-        };
-      } catch(e) {
-        res.writeHead(302, { Location: "/logout" });
-        res.end();
+    },
+  };
 
-        return { props: { InitialState: {} } };
-      }
-  }
+  
 };
 
 
 export default function Home(props: InitialProps) {
+  const { login, user, company, role, quota } = useAuthContext();
   const [ form ] = Form.useForm();
   const [ isAnswerVisible, setIsAnswerVisible ] = useState(false);
   const [ isLoaderVisible, setIsLoaderVisible ] = useState(false);
@@ -115,21 +65,39 @@ export default function Home(props: InitialProps) {
   const [ formDisabled, setFormDisabled ] = useState(false);
   const [ quotaOverused, setQuotaOverused ] =  useState(!false);
   const [ tokens, setTokens ] = useState("");
+  const [ comp, setComp ] = useState(company);
 
-  const { login, user, company, role } = useAuthContext();
+  
   const router = useRouter();
 
-  /* useEffect(() => {
-    if(currentUsage.amount >= props.Data.quota.tokens){
-      setQuotaOverused(true);
-    }else{
-      setQuotaOverused(false);
-    }
-  }, [currentUsage]); */
+  useEffect(() => {
+    console.log(company.Usage);
+  }, [company])
 
   useEffect(() => {
-    console.log(login);
-    if (login == null) router.push("/login")
+
+    const createData = async () => {
+      await updateDoc(doc(db, "Company", user.Company), { Usage: arrayUnion({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: 0 }) });
+    }
+      
+
+    let currentUsage = company.Usage.find((Usge: Usage) => {
+      return Usge.month == props.Data.currentMonth && Usge.year == props.Data.currentYear;
+    });
+
+    if(currentUsage){
+      if(currentUsage.amount < quota.tokens){
+        setQuotaOverused(true);
+      }else{
+        setQuotaOverused(false);
+      }
+    }else{
+      console.log("no usage")
+      createData();
+    }
+
+    if (login == null) router.push("/login");
+      
 }, [login]);
 
   const style = [
@@ -234,9 +202,7 @@ export default function Home(props: InitialProps) {
           emotions: profile.parsedSettings.emotions,
           length: values.length
         });
-  
-        console.log(answer.data);
-  
+    
         if(answer.data){
           setIsLoaderVisible(false);
           setIsAnswerVisible(true);
@@ -246,13 +212,8 @@ export default function Home(props: InitialProps) {
           let caps = props.InitialState.role.capabilities as JsonObject;
   
           if(!caps.superadmin){
-            await axios.put(`/api/tokens/${props.InitialState.company.id}`, {
-              amount: answer.data.tokens,
-              month: props.Data.currentMonth,
-              year: props.Data.currentYear
-            });
-
-            setCurrentUsage(currentUsage + answer.data.tokens)
+            
+            await updateDoc(doc(db, "Company", user.Company), { Usage: arrayUnion({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: company.Usage.find((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear}) + answer.data.tokens }) });
           }
         }
   

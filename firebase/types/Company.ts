@@ -3,6 +3,11 @@ export type CompanySettings = {
     background: string;
 }
 
+export type Quota = {
+    price: number;
+    tokens: number;
+}
+
 export type Usage = {
     amount: number;
     month: number;

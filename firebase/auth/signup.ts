@@ -23,7 +23,7 @@ export default async function signUp(email, username, password, name, street, ci
                         let companycreationresult = await addDataWithoutId("Company", { name: name, street: street, city: city, postalcode: postalcode, country: country, settings: {background: ""}, Usage: [], Quota: "Free" });
                         console.log(companycreationresult);
                         try {
-                            let usercreationresult = await addData("User", result.user.uid, { username: username, Role: "Company", company: `${companycreationresult.result.id}`, profiles: [] });
+                            let usercreationresult = await addData("User", result.user.uid, { username: username, Role: "Company", Company: `${companycreationresult.result.id}`, profiles: [] });
                             console.log(usercreationresult);
                         } catch(e) {
                             console.log(e);

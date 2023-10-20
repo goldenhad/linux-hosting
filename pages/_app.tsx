@@ -22,4 +22,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     </>);
 }
 
+
+// Der Authcontextprovider muss rein
+
 export default MyApp

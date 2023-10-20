@@ -11,6 +11,8 @@ import { JsonObject } from '@prisma/client/runtime/library';
 import AES from 'crypto-js/aes';
 import enc from 'crypto-js/enc-utf8';
 import { ProfileSettings } from '../helper/ProfileTypes';
+import { useAuthContext } from '../components/context/AuthContext';
+import { useRouter } from 'next/navigation';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -35,11 +37,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   //Check if the login cookie is set
   if (!cookies.login) {
-      //Redirect if the cookie is not set
-      res.writeHead(302, { Location: "/login" });
-      res.end();
-
-      return { props: { InitialState: {} } };
+     
+    return { props: { InitialState: {} } };
   } else {
       let datum = new Date();
       let loginobj = JSON.parse(Buffer.from(cookies.login, "base64").toString("ascii"));
@@ -114,18 +113,24 @@ export default function Home(props: InitialProps) {
   const [ isAnswerCardVisible, setIsAnswerCardvisible ] = useState(false);
   const [ answer, setAnswer ] = useState("");
   const [ formDisabled, setFormDisabled ] = useState(false);
-  const [ currentUsage, setCurrentUsage ] = useState(props.Data.usage)
   const [ quotaOverused, setQuotaOverused ] =  useState(!false);
   const [ tokens, setTokens ] = useState("");
 
-  useEffect(() => {
-    console.log(props.Data);
+  const { login, user, company, role } = useAuthContext();
+  const router = useRouter();
+
+  /* useEffect(() => {
     if(currentUsage.amount >= props.Data.quota.tokens){
       setQuotaOverused(true);
     }else{
       setQuotaOverused(false);
     }
-  }, [currentUsage])
+  }, [currentUsage]); */
+
+  useEffect(() => {
+    console.log(login);
+    if (login == null) router.push("/login")
+}, [login]);
 
   const style = [
     "Professionell",
@@ -274,59 +279,60 @@ export default function Home(props: InitialProps) {
   }
 
   const getPrompt = () => {
-    console.log(props.Data.profiles)
-    if(!(props.Data.profiles?.length > 0)){
-      return (
-        <Result
-          title="Bitte definiere zuerst ein Profil"
-          extra={
-            <Button href='/profiles' type="primary" key="console">
-              Profil erstellen
-            </Button>
-          }
-        />
-      );
-    }else{
-      return(
-        <Card title={"Verlauf"}>
-          <Form.Item label={<b>Profil</b>} name="profile">
-                <Select
-                showSearch
-                placeholder="Wählen Sie ein Profil aus"
-                optionFilterProp="children"
-                onChange={(values: any) => {console.log(values)}}
-                onSearch={() => {}}
-                options={getProfiles()}
-                disabled={formDisabled || quotaOverused}
-              />
-            </Form.Item>
-            <Form.Item label={<b>Bisheriger Dialog</b>} name="dialog">
-              <TextArea rows={10} placeholder="Bisheriger Dialog..." disabled={formDisabled || quotaOverused}/>
-            </Form.Item>
-
-            <Form.Item label={<b>Wie soll der Dialog fortgesetzt werden?</b>} name="continue">
-              <TextArea rows={5} placeholder="Formulieren Sie kurz, wie der Dialog fortgesetzt werden soll und was sie damit erreichen wollen?" disabled={formDisabled || quotaOverused}/>
-            </Form.Item>
-
-            <Form.Item label={<b>Länge der Antwort</b>} name="length">
-              <Select placeholder="Wie lang soll die erzeuge Antwort sein?" options={listToOptions(lengths)} disabled={formDisabled || quotaOverused}/>
-            </Form.Item>
-
-            <div className={styles.submitrow}>
-              <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>Antwort generieren</Button>
-            </div>
-            <div className={styles.tokenalert}>
-              {
-                (quotaOverused)? <Alert message={`Ihr Tokenbudget ist ausgeschöpft. Ihr Budget setzt sich am 01.${props.Data.currentMonth+1}.${props.Data.currentYear} zurück. Wenn Sie weitere Tokens benötigen, können Sie diese in ihrem Konto dazubuchen.`} type="error" />: <></>
-              }
-            </div>
-        </Card>
-      );
+    if(user){
+      if(!(user.profiles?.length > 0)){
+        return (
+          <Result
+            title="Bitte definiere zuerst ein Profil"
+            extra={
+              <Button href='/profiles' type="primary" key="console">
+                Profil erstellen
+              </Button>
+            }
+          />
+        );
+      }else{
+        return(
+          <Card title={"Verlauf"}>
+            <Form.Item label={<b>Profil</b>} name="profile">
+                  <Select
+                  showSearch
+                  placeholder="Wählen Sie ein Profil aus"
+                  optionFilterProp="children"
+                  onChange={(values: any) => {console.log(values)}}
+                  onSearch={() => {}}
+                  options={getProfiles()}
+                  disabled={formDisabled || quotaOverused}
+                />
+              </Form.Item>
+              <Form.Item label={<b>Bisheriger Dialog</b>} name="dialog">
+                <TextArea rows={10} placeholder="Bisheriger Dialog..." disabled={formDisabled || quotaOverused}/>
+              </Form.Item>
+  
+              <Form.Item label={<b>Wie soll der Dialog fortgesetzt werden?</b>} name="continue">
+                <TextArea rows={5} placeholder="Formulieren Sie kurz, wie der Dialog fortgesetzt werden soll und was sie damit erreichen wollen?" disabled={formDisabled || quotaOverused}/>
+              </Form.Item>
+  
+              <Form.Item label={<b>Länge der Antwort</b>} name="length">
+                <Select placeholder="Wie lang soll die erzeuge Antwort sein?" options={listToOptions(lengths)} disabled={formDisabled || quotaOverused}/>
+              </Form.Item>
+  
+              <div className={styles.submitrow}>
+                <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>Antwort generieren</Button>
+              </div>
+              <div className={styles.tokenalert}>
+                {
+                  (quotaOverused)? <Alert message={`Ihr Tokenbudget ist ausgeschöpft. Ihr Budget setzt sich am 01.${props.Data.currentMonth+1}.${props.Data.currentYear} zurück. Wenn Sie weitere Tokens benötigen, können Sie diese in ihrem Konto dazubuchen.`} type="error" />: <></>
+                }
+              </div>
+          </Card>
+        );
+      }
     }
   }
 
   return (
-    <SidebarLayout capabilities={props.InitialState.role.capabilities as JsonObject}>
+    <SidebarLayout capabilities={(role)? role.capabilities: {}}>
       <main className={styles.main}>
         <Space direction='vertical' size={"large"}>
           <Form layout='vertical' onFinish={generateAnswer} onChange={() => {setIsAnswerCardvisible(false); setIsAnswerVisible(false); setIsLoaderVisible(false)}} form={form}>

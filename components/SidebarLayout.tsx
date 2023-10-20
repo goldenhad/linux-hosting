@@ -70,13 +70,6 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any}) => {
       setCollapseWidth(undefined);
       setBreakpoint(undefined);
     }
-
-    const fetchVersion = async () => {
-      let ver = await axios.get('/api/version');
-      setVersion(ver.data.message);
-    }
-
-    fetchVersion();
   }, [])
 
 

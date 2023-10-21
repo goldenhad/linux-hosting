@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { CombinedUser } from '../helper/LoginTypes';
 import SidebarLayout from '../components/SidebarLayout';
-import { Profile, Quota, TokenUsage } from '@prisma/client';
+import { Quota, TokenUsage } from '@prisma/client';
 import { JsonObject } from '@prisma/client/runtime/library';
 import AES from 'crypto-js/aes';
 import enc from 'crypto-js/enc-utf8';
@@ -14,6 +14,7 @@ import { ProfileSettings } from '../helper/ProfileTypes';
 import { useAuthContext } from '../components/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Company, Usage } from '../firebase/types/Company';
+import { Profile } from '../firebase/types/Profile';
 import updateData from '../firebase/data/updateData';
 import { arrayUnion, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useAsyncEffect } from '../helper/useAsyncEffect';
@@ -65,13 +66,12 @@ export default function Home(props: InitialProps) {
   const [ formDisabled, setFormDisabled ] = useState(false);
   const [ quotaOverused, setQuotaOverused ] =  useState(!false);
   const [ tokens, setTokens ] = useState("");
-  const [ comp, setComp ] = useState(company);
 
   
   const router = useRouter();
 
   useEffect(() => {
-    console.log(company.Usage);
+    console.log(user);
   }, [company])
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function Home(props: InitialProps) {
     });
 
     if(currentUsage){
-      if(currentUsage.amount < quota.tokens){
+      if(currentUsage.amount > quota.tokens){
         setQuotaOverused(true);
       }else{
         setQuotaOverused(false);
@@ -99,61 +99,6 @@ export default function Home(props: InitialProps) {
     if (login == null) router.push("/login");
       
 }, [login]);
-
-  const style = [
-    "Professionell",
-    "Formell",
-    "Sachlich",
-    "Komplex",
-    "Einfach",
-    "Konservativ",
-    "Modern",
-    "Wissenschaftlich",
-    "Fachspezifisch",
-    "Abstrakt",
-    "Klar",
-    "Direkt",
-    "Rhetorisch",
-    "Ausdrucksstark"
-  ];
-
-  const motive = [
-    "Diplomatisch",
-    "Respektvoll",
-    "Kultiviert",
-    "Bedächtig",
-    "Persönlich",
-    "Umgangssprachlich",
-    "Unkonventionell",
-    "Emphatisch"
-  ];
-
-  const emotions = [
-    "Humorvoll",
-    "Nüchtern",
-    "Sentimental",
-    "Objektiv",
-    "Subjektiv",
-    "Ehrfürchtig",
-    "Emotionell",
-    "Lebhaft",
-    "Freundlich",
-    "Höflich",
-    "Selbstbewusst",
-    "Sympathisch",
-    "Kreativ",
-    "Enthusiastisch",
-    "Eloquent",
-    "Prägnant",
-    "Blumig",
-    "Poetisch",
-    "Pathetisch",
-    "Scherzhaft",
-    "Mystisch",
-    "Ironisch",
-    "Sarkastisch",
-    "Despektierlich"
-  ];
 
   const lengths = [
     "So kurz wie möglich",
@@ -180,7 +125,7 @@ export default function Home(props: InitialProps) {
 
     console.log(values);
 
-    let profile = props.Data.profiles.find((singleProfile: Profile) => {
+    let profile = user.profiles.find((singleProfile: Profile) => {
       return singleProfile.name == values.profile;
     });
 
@@ -193,13 +138,13 @@ export default function Home(props: InitialProps) {
         setTokens("");
   
         let answer = await axios.post('/api/prompt/generate', {
-          personal: profile.parsedSettings.personal,
+          personal: profile.settings.personal,
           dialog: values.dialog,
           continue: values.continue,
-          address: profile.parsedSettings.salutation,
-          style: profile.parsedSettings.stil,
-          order: profile.parsedSettings.order,
-          emotions: profile.parsedSettings.emotions,
+          address: profile.settings.salutation,
+          style: profile.settings.stil,
+          order: profile.settings.order,
+          emotions: profile.settings.emotions,
           length: values.length
         });
     
@@ -209,12 +154,18 @@ export default function Home(props: InitialProps) {
           setAnswer(answer.data.message);
           setTokens(answer.data.tokens);
   
-          let caps = props.InitialState.role.capabilities as JsonObject;
-  
-          if(!caps.superadmin){
-            
-            await updateDoc(doc(db, "Company", user.Company), { Usage: arrayUnion({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: company.Usage.find((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear}) + answer.data.tokens }) });
+          let usageidx = company.Usage.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});
+          
+          if(usageidx != -1){
+            let usageupdates = company.Usage;
+            usageupdates[usageidx].amount += answer.data.tokens;
+            await updateDoc(doc(db, "Company", user.Company), { Usage: usageupdates});
+
+            if(usageupdates[usageidx].amount > quota.tokens){
+              setQuotaOverused(true);
+            }
           }
+
         }
   
         console.log(answer);
@@ -229,9 +180,9 @@ export default function Home(props: InitialProps) {
   }
 
   const getProfiles = () => {
-    let profileOptions =  props.Data.profiles.map((singleProfile: Profile) => {
+    let profileOptions =  user.profiles.map((singleProfile: Profile, idx: number) => {
       return {
-        key: singleProfile.id,
+        key: idx,
         value: singleProfile.name
       }
     });

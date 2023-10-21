@@ -2,20 +2,23 @@ import { Alert, Button, Card, Form, Input, Modal, Select, Space, Table, Tag, Typ
 import { SettingOutlined, DeleteOutlined } from '@ant-design/icons';
 import styles from './list.profiles.module.scss'
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { prisma } from '../../db'
 import { CombinedUser } from '../../helper/LoginTypes';
 import SidebarLayout from '../../components/SidebarLayout';
 import { JsonObject } from '@prisma/client/runtime/library';
 import { useRouter } from 'next/router';
-import { Profile } from '@prisma/client';
-import { ProfileSettings } from '../../helper/ProfileTypes';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 import bcrypt from 'bcrypt';
 import AES from 'crypto-js/aes';
 import enc from 'crypto-js/enc-utf8';
+import { useAuthContext } from '../../components/context/AuthContext';
+import { Profile, ProfileSettings } from '../../firebase/types/Profile';
+import getDocument from '../../firebase/data/getData';
+import updateData from '../../firebase/data/updateData';
+import { arrayUnion } from 'firebase/firestore';
 require('dotenv').config();
 
 const MAXPROFILES = 12;
@@ -32,73 +35,48 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   //Get the cookies from the current request
   const { cookies } = req;
 
-  //Check if the login cookie is set
-  if (!cookies.login) {
-      //Redirect if the cookie is not set
-      res.writeHead(302, { Location: "/login" });
-      res.end();
+  let datum = new Date();
 
-      return { props: { InitialState: {} } };
-  } else {
-    let cookie = JSON.parse(Buffer.from(cookies.login, "base64").toString("ascii"));
+  return {
+    props: {
+        Data: {
+          currentMonth: datum.getMonth() + 1,
+          currentYear: datum.getFullYear(),
+        }
+    },
+  };
 
-    if(!cookie.role.capabilities.superadmin){
-    
-        let profiles = await prisma.profile.findMany({
-            where: {
-                userId: cookie.id
-            }
-        });
-
-        let parsedProfiles: Array<Profile & {parsedSettings: ProfileSettings} > = [];
-
-        const pepper = process.env.PEPPER;
-
-        profiles.forEach((profile: Profile) => {
-            let decryptedBaseByte = AES.decrypt(profile.settings, profile.salt + pepper);
-            let decryptedBase = decryptedBaseByte.toString(enc);
-            let decryptedSettings = JSON.parse(decryptedBase);
-
-            let singleParsed = {...profile, parsedSettings: decryptedSettings as ProfileSettings};
-
-            parsedProfiles.push(singleParsed);
-        });
-    
-        return {
-            props: {
-                InitialState: cookie,
-                Data: {
-                    Profiles: parsedProfiles,
-                },
-            },
-        };
-    }
-
-    res.writeHead(302, { Location: "/" });
-    res.end();
-
-    return { props: { InitialState: {} } };
-  }
+  
 };
 
 
 
 export default function Profiles(props: InitialProps) {
+    const { login, user, company, role, quota } = useAuthContext();
     const [ isCreateModalOpen, setIsCreateModalOpen ]  = useState(false);
     const [ isEditModalOpen, setIsEditModalOpen ]  = useState(false);
     const [ isDeleteModalOpen, setIsDeleteModalOpen ]  = useState(false);
     const [ errMsg, setErrMsg ] = useState("");
     const [ profileToDelete, setProfileToDelete ] = useState(-1);
-    const [ profileToEdit, setProfileToEdit ] = useState({id: -1, name: "", settings: {}});
+    const [ profileToEdit, setProfileToEdit ] = useState(-1);
     const [ isErrVisible, setIsErrVisible ] = useState(false);
     const [ tokenCount, setTokenCount ] = useState(0);
-    const router = useRouter();
     const [ form ] = Form.useForm();
     const [ editForm ] = Form.useForm();
+
+
+    const router = useRouter();
+
   
     const refreshData = () => {
       router.replace(router.asPath);
     }
+
+    useEffect(() => {
+
+      if (login == null) router.push("/login");
+        
+    }, [login]);
 
     const style = [
         "Professionell",
@@ -176,7 +154,7 @@ export default function Profiles(props: InitialProps) {
         return arr;
       }
   
-    const setEditFields = (obj: {id: Number, name: String, settings: ProfileSettings}) => {
+    const setEditFields = (obj: {name: String, settings: ProfileSettings}) => {
       editForm.setFieldValue("name", obj.name);
       editForm.setFieldValue("personal", obj.settings.personal);
       editForm.setFieldValue("address", obj.settings.salutation);
@@ -189,19 +167,18 @@ export default function Profiles(props: InitialProps) {
       }
     }
   
-    const getProfileName = (id: Number) => {
-      const profiles: Array<Profile> = props.Data.Profiles;
-      let profileobj = {id: -1, name: ""};
-      profiles.forEach((profile: Profile) => { if(profile.id == id){ profileobj = profile } });
-  
-  
-      return (profileobj.id != -1)? profileobj.name: "FEHLER";
-    }
-  
-  
     const deleteProfile = async () => {
+      setIsDeleteModalOpen(false);
       try{
-        await axios.delete(`/api/profiles/${profileToDelete}`);
+        if ( profileToDelete != -1 ){
+          let profiles = user.profiles;
+          profiles.splice(profileToDelete, 1);
+
+          await updateData("User", login.uid, { profiles: profiles })
+          editForm.setFieldsValue([]);
+        }else{
+          throw("Profile not defined");
+        }
       }catch(e){
         console.log(e);
         setErrMsg("Beim Löschen ist etwas fehlgeschlagen bitte versuche es später erneut.");
@@ -210,7 +187,7 @@ export default function Profiles(props: InitialProps) {
   
       setErrMsg("");
       setIsErrVisible(false);
-      setIsDeleteModalOpen(false);
+      
       setProfileToDelete(-1);
       refreshData();
     } 
@@ -218,17 +195,14 @@ export default function Profiles(props: InitialProps) {
     const editProfile = async (values: any) => {
       if (values.name){
         try {
-          await axios.put(`/api/profiles/${profileToEdit.id}`, {
-            name: values.name,
-            settings: {
-              personal: values.personal,
-              salutation: values.address,
-              stil: values.style,
-              order: values.order,
-              emotions: values.emotions,
-              tags: values.tags
-            },
-          });
+          if ( profileToEdit != -1 ){
+            let profiles = user.profiles;
+            profiles[profileToEdit] = {name: values.name, settings: { personal: values.personal, salutation: values.address, stil: values.style, order: values.order, emotions: values.emotions, tags: values.tags }}
+            await updateData("User", login.uid, { profiles: profiles })
+            editForm.setFieldsValue([]);
+          }else{
+            throw("Profile not defined");
+          }
         }catch(e){
           setErrMsg("Beim Bearbeiten ist etwas fehlgeschlagen bitte versuche es später erneut.");
           setIsErrVisible(true);
@@ -246,17 +220,9 @@ export default function Profiles(props: InitialProps) {
   
       if(values.name){
         try{
-          await axios.post('/api/profiles', {
-            name: values.name,
-            settings: {
-              personal: values.personal,
-              salutation: values.address,
-              stil: values.style,
-              order: values.order,
-              emotions: values.emotions,
-              tags: values.tags
-            },
-          })
+
+          await updateData("User", login.uid, { profiles: arrayUnion({name: values.name, settings: { personal: values.personal, salutation: values.address, stil: values.style, order: values.order, emotions: values.emotions, tags: values.tags }}) })
+          form.setFieldsValue([]);
         }catch(e){
           setErrMsg("Beim Speichern ist etwas fehlgeschlagen bitte versuche es später erneut.");
           setIsErrVisible(true);
@@ -281,11 +247,14 @@ export default function Profiles(props: InitialProps) {
     }
     
     const getProfileDisplay = () => {
-      if(props.Data.Profiles && props.Data.Profiles.length > 0){
+      if(user.profiles && user.profiles.length > 0){
         return (
           <>
             <Space wrap={true}>
-              { props.Data.Profiles.map((singleProfile, idx) => {
+              { user.profiles.map((singleProfile: Profile, idx) => {
+                
+                let settings: ProfileSettings = singleProfile.settings;
+
                 return (
                   <Card
                       key={idx}
@@ -294,21 +263,21 @@ export default function Profiles(props: InitialProps) {
                         marginTop: 16,
                       }}
                       actions={[
-                        <div onClick={() => {setProfileToEdit(singleProfile); setIsEditModalOpen(true); setEditFields({id: singleProfile.id, name: singleProfile.name, settings: singleProfile.parsedSettings})}}><SettingOutlined key="setting" /></div>,
-                        <div onClick={() => {setProfileToDelete(singleProfile.id); setIsDeleteModalOpen(true)}}><DeleteOutlined key="edit" /></div>,
+                        <div onClick={() => {setProfileToEdit(idx); setIsEditModalOpen(true); setEditFields({name: singleProfile.name, settings: settings})}}><SettingOutlined key="setting" /></div>,
+                        <div onClick={() => {setProfileToDelete(idx); setIsDeleteModalOpen(true)}}><DeleteOutlined key="edit" /></div>,
                       ]}
                     >
                       <div className={styles.profilecard}>
                         <div className={styles.profilecard_title}>{singleProfile.name}</div>
                         <div className={styles.profilecard_tags}>
-                          { getTags(singleProfile.parsedSettings.tags)}
+                          { getTags(settings.tags)}
                         </div>
                       </div>
                   </Card>
                 );
               }) }
             </Space>
-            <div className={styles.profilecounter}>{props.Data.Profiles? props.Data.Profiles.length:0} von 12 erstellt</div>
+            <div className={styles.profilecounter}>{user.profiles? user.profiles.length : 0} von 12 erstellt</div>
           </>
         );
       }else{
@@ -317,10 +286,10 @@ export default function Profiles(props: InitialProps) {
     }
 
     return (
-      <SidebarLayout capabilities={props.InitialState.role.capabilities as JsonObject}>
+      <SidebarLayout capabilities={(role)? role.capabilities: {}}>
         <div className={styles.main}>
           <div className={styles.interactionrow}>
-              <Button type='primary' onClick={() => {setIsCreateModalOpen(true)}} disabled={(props.Data.Profiles && props.Data.Profiles.length >= MAXPROFILES)}>+ Hinzufügen</Button>
+              <Button type='primary' onClick={() => {setIsCreateModalOpen(true)}} disabled={(user.profiles && user.profiles.length >= MAXPROFILES)}>+ Hinzufügen</Button>
           </div>
           <div className={styles.projecttable}>
             { getProfileDisplay() }
@@ -454,7 +423,7 @@ export default function Profiles(props: InitialProps) {
             onCancel={() => {setIsDeleteModalOpen(false)}}
             footer = {[]}
           >
-            <Paragraph>Wollen sie das Profil {getProfileName(profileToDelete)} wirklich löschen?</Paragraph>
+            <Paragraph>Wollen sie das Profil {(profileToDelete != -1 && user.profiles[profileToDelete]) ? user.profiles[profileToDelete].name: "UNDEFINED"} wirklich löschen?</Paragraph>
   
             <div className={styles.finishformrow}>
                 <Space direction='horizontal'>

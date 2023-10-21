@@ -12,7 +12,6 @@ export type ProfileSettings = {
 export type Profile = {
     name:      string
     settings:  ProfileSettings;
-    salt:      string
 }
 
 export const basicProfile = {

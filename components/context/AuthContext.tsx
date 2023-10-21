@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     onAuthStateChanged,
     getAuth,
@@ -9,6 +9,7 @@ import { User } from '../../firebase/types/User';
 import { Company, Usage, Quota } from '../../firebase/types/Company';
 import { Role } from '../../firebase/types/Role';
 import { doc, onSnapshot } from 'firebase/firestore';
+import nookies from "nookies";
 
 
 
@@ -36,9 +37,26 @@ export const AuthContextProvider = ({
     const [quota, setQuota] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
 
-    React.useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            console.log("Authstate changes!");
+    useEffect(() => {
+        const unsubscribe = auth.onIdTokenChanged(async (user) => {
+            console.log("Token changed!");
+
+
+            console.log(`token changed!`);
+            if (!user) {
+                console.log(`no token found...`);
+                setUser(null);
+                nookies.destroy(null, "token");
+                nookies.set(null, "token", "", {path: '/'});
+                return;
+            }
+
+            console.log(`updating token...`);
+            const token = await user.getIdToken();
+            setUser(user);
+            nookies.destroy(null, "token");
+            nookies.set(null, "token", token, {path: '/'});
+
             try {
                 if (user) {
                     const userdoc = await getDocument("User", user.uid);
@@ -97,7 +115,16 @@ export const AuthContextProvider = ({
         return () => unsubscribe();
     }, []);
 
-    React.useEffect(() => {
+    useEffect(() => {
+        const handle = setInterval(async () => {
+          console.log(`refreshing token...`);
+          const user = auth.currentUser;
+          if (user) await user.getIdToken(true);
+        }, 10 * 60 * 1000);
+        return () => clearInterval(handle);
+    }, []);
+
+    useEffect(() => {
         if(user){
             const unsubscribe = onSnapshot(doc(db, "Company", user.Company), (doc) => {
                 setCompany(doc.data());
@@ -107,7 +134,7 @@ export const AuthContextProvider = ({
         }
     }, [login]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if(login){
             const unsubscribe = onSnapshot(doc(db, "User", login.uid), (doc) => {
                 setUser(doc.data());

@@ -1,18 +1,19 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { LogoutOutlined, ApartmentOutlined, RobotOutlined, FolderOpenOutlined, UserOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Layout, Menu, theme } from 'antd';
+import { Avatar, Layout, Menu, theme } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 const { Content, Footer, Sider } = Layout;
 import {isMobile} from 'react-device-detect';
 import axios from 'axios';
+import { User } from '../firebase/types/User';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
 
 
-const SidebarLayout = (props: { children: ReactNode, capabilities: any}) => {
+const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: User, login: any}) => {
   const [collapsed, setCollapsed] = useState(true);
   const { token: { colorBgContainer } } = theme.useToken();
   const [ collapseWidth, setCollapseWidth ] = useState(undefined);
@@ -38,8 +39,8 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any}) => {
 
   const items = [
     getItem(<Link href={"/"}>Siteware Mailbuddy</Link>, '1', () => { return true }, <RobotOutlined />, ),
-    getItem(<Link href={"/companies/list"}>Firmen</Link>, '2', () => { return rights.superadmin }, <FolderOpenOutlined />),
-    getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return !rights.superadmin }, <ApartmentOutlined />),
+    //getItem(<Link href={"/companies/list"}>Firmen</Link>, '2', () => { return rights.superadmin }, <FolderOpenOutlined />),
+    getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return true }, <ApartmentOutlined />),
     getItem(<Link href={"/profiles"}>Profile</Link>, '4', () => { return !rights.superadmin }, <UserOutlined />),
     getItem(<Link href={"/logout"}>Ausloggen</Link>, '5', () => { return true }, <LogoutOutlined />),
   ];
@@ -70,7 +71,32 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any}) => {
       setCollapseWidth(undefined);
       setBreakpoint(undefined);
     }
-  }, [])
+  }, []);
+
+
+  const getAvatar = () => {
+    if(collapsed){
+      return(
+        <Link href={'/account'}>
+          <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+            <Avatar size={30} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{props.user.firstname.toUpperCase().charAt(0)}{props.user.lastname.toUpperCase().charAt(0)}</Avatar>
+          </div>
+        </Link>
+      );
+    }else{
+      return(
+        <Link href={'/account'}>
+          <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", width: "100%" }}>
+            <Avatar size={30} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{props.user.firstname.toUpperCase().charAt(0)}{props.user.lastname.toUpperCase().charAt(0)}</Avatar>
+            <div style={{ display: "flex", flexDirection: "column", marginLeft: 10, color: 'rgba(255, 255, 255, 0.65)' }}>
+              <div style={{ fontWeight: "bold" }} >{props.user.username}</div>
+              <div style={{ fontSize: 10 }} >{props.login.email}</div>
+            </div>
+          </div>
+        </Link>
+      );
+    }
+  }
 
 
   return (
@@ -83,7 +109,12 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any}) => {
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", marginBottom: 25, marginTop: 25 }}>
           <img style={{ borderRadius: 5 }} src="/mailbuddy.png" width={50} height={50} alt="Logo"/>
         </div>
-        <Menu theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: '82vh' }}>
+          
+          <Menu theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
+          { getAvatar() }
+        </div>
+        
       </Sider>
       <Layout>
         

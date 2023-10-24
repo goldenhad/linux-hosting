@@ -10,7 +10,8 @@ import { Company, Usage, Quota } from '../../firebase/types/Company';
 import { Role } from '../../firebase/types/Role';
 import { doc, onSnapshot } from 'firebase/firestore';
 import nookies from "nookies";
-
+import { LoadingOutlined } from '@ant-design/icons';
+import { Spin } from 'antd';
 
 
 interface ctx {
@@ -146,7 +147,7 @@ export const AuthContextProvider = ({
 
     return (
         <AuthContext.Provider value={{login: login, user: user, company: company, role: role, quota: quota}}>
-            {loading ? <div>Loading...</div> : children}
+            {loading ? <div style={{height: "100vh", width: "100%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}}><Spin indicator={<LoadingOutlined style={{ fontSize: 90 }} spin />} /></div> : children}
         </AuthContext.Provider>
     );
 };

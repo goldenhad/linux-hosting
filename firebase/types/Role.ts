@@ -19,10 +19,9 @@ export type Role = {
 
 export const basicRole = {
     capabilities: {
-        projects: {create: false, edit: false, delete: false},
+        project: {create: false, edit: false, delete: false},
         persons: {create: false, edit: false, delete: false},
         credits: {create: false, edit: false, delete: false},
-        users: {create: false, edit: false, delete: false},
         superadmin: false,
     }
 }

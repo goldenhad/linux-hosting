@@ -286,7 +286,7 @@ export default function Profiles(props: InitialProps) {
     }
 
     return (
-      <SidebarLayout capabilities={(role)? role.capabilities: {}}>
+      <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
         <div className={styles.main}>
           <div className={styles.interactionrow}>
               <Button type='primary' onClick={() => {setIsCreateModalOpen(true)}} disabled={(user.profiles && user.profiles.length >= MAXPROFILES)}>+ Hinzufügen</Button>

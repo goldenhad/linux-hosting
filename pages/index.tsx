@@ -195,7 +195,7 @@ export default function Home(props: InitialProps) {
       if(!(user.profiles?.length > 0)){
         return (
           <Result
-            title="Bitte definiere zuerst ein Profil"
+            title="Bitte definieren Sie zuerst ein Profil"
             extra={
               <Button href='/profiles' type="primary" key="console">
                 Profil erstellen
@@ -244,7 +244,7 @@ export default function Home(props: InitialProps) {
   }
 
   return (
-    <SidebarLayout capabilities={(role)? role.capabilities: {}}>
+    <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
       <main className={styles.main}>
         <Space direction='vertical' size={"large"}>
           <Form layout='vertical' onFinish={generateAnswer} onChange={() => {setIsAnswerCardvisible(false); setIsAnswerVisible(false); setIsLoaderVisible(false)}} form={form}>

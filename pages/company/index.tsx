@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Form, Input, Modal, Select, Space, Statistic, Table, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, Modal, Progress, Select, Space, Statistic, Table, Tooltip, Typography } from 'antd';
 import styles from './edit.company.module.scss'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -11,14 +11,13 @@ import { JsonObject } from '@prisma/client/runtime/library';
 import { useRouter } from 'next/router';
 import { Company, Role, TokenUsage, User } from '@prisma/client';
 import { handleEmptyString } from '../../helper/architecture';
+import { useAuthContext } from '../../components/context/AuthContext';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
 
 export interface InitialProps {
-  Data: { SingleCompany: Company & { company: any }, Users: Array<User>, Roles: Array<Role> };
-  currentMonth: number;
-  currentYear: number;
+  Data: { currentMonth: number, currentYear: number; };
   quota: TokenUsage;
   InitialState: CombinedUser;
 }
@@ -37,81 +36,33 @@ function pad(number: number, size: number){
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  //Get the context of the request
-  const { req, res } = ctx;
-  //Get the cookies from the current request
-  const { cookies } = req;
-
-  //Check if the login cookie is set
-  if (!cookies.login) {
-      //Redirect if the cookie is not set
-      res.writeHead(302, { Location: "/login" });
-      res.end();
-
-      return { props: { InitialState: {} } };
-  } else {
-    let cookie = JSON.parse(Buffer.from(cookies.login, "base64").toString("ascii"));
-    let rawid = cookie.company.id;
-    let currentMonth = new Date().getMonth() + 1;
-    let currentYear = new Date().getFullYear();
-
-    console.log(cookie);
-
-    if(!isNaN(rawid)){
-        if(!cookie.role.capabilities.superadmin){
+    //Get the context of the request
+    const { req, res } = ctx;
+    //Get the cookies from the current request
+    const { cookies } = req;
+  
+    let datum = new Date();
+  
+    return {
+      props: {
+          Data: {
+            currentMonth: datum.getMonth() + 1,
+            currentYear: datum.getFullYear(),
+          }
+      },
+    };
+  
     
-            let quota = await prisma.tokenUsage.findFirst({
-                where: {
-                    companyId: rawid,
-                    month: currentMonth,
-                    year: currentYear,
-                }
-            })
-    
-            if(!quota){
-                quota = await prisma.tokenUsage.create({
-                    data: {
-                        month: currentMonth,
-                        year: currentYear,
-                        amount: 0,
-                        Company: {
-                            connect: {
-                                id: rawid
-                            }
-                        }
-                    },
-                    
-                })
-            }
-
-        
-            return {
-                props: {
-                    InitialState: cookie,
-                    Data: {
-                        SingleCompany: cookie.company,
-                    },
-                    currentMonth: currentMonth,
-                    currentYear: currentYear,
-                    quota: quota,
-                },
-            };
-        }
-    }
-
-    res.writeHead(302, { Location: "/" });
-    res.end();
-
-    return { props: { InitialState: {} } };
-  }
 };
 
 
 
 export default function Company(props: InitialProps) {
+    const { login, user, company, role, quota } = useAuthContext();
     const [ errMsg, setErrMsg ] = useState([]);
     const [ isErrVisible, setIsErrVisible ] = useState(false);
     const [ editSuccessfull, setEditSuccessfull ] = useState(false);
+    const [ overused, setOverused ] = useState(false);
     const [ form ] = Form.useForm();
     const router = useRouter();
 
@@ -120,13 +71,33 @@ export default function Company(props: InitialProps) {
         router.replace(router.asPath);
     }
 
+    useEffect(() => {
+        if (login == null) router.push("/login");
+
+        if(getCurrentUsage().amount > quota.tokens){
+            setOverused(true);
+        }
+
+        form.setFieldValue("companyname", company.name);
+        form.setFieldValue("companystreet", company.street);
+        form.setFieldValue("companycity", company.city);
+        form.setFieldValue("companypostalcode", company.postalcode);
+        form.setFieldValue("companycountry", company.country);
+        form.setFieldValue("companybackground", company.settings.background);
+    }, [login]);
+
+    
+    const getCurrentUsage = () => {
+        return company.Usage.find((elm, idx) => { return elm.month == props.Data.currentMonth && elm.year == props.Data.currentYear });
+    }
+
     const editCompany = async (values: any) => {
         //Define a default case for the error
         let error = false;
         //Define a array so save error-messages
         let msg: any = [];
 
-        axios.put(`/api/company/${props.Data.SingleCompany.id}`, {
+        axios.put(`/api/company/${user.Company}`, {
             companyname: handleEmptyString(values.companyname),
             companystreet: handleEmptyString(values.companystreet),
             companycity: handleEmptyString(values.companycity),
@@ -149,22 +120,10 @@ export default function Company(props: InitialProps) {
         setEditSuccessfull(true);
     }
 
-    useEffect(() => {
-        let setts = props.InitialState.company.settings as JsonObject;
-        form.setFieldValue("companyname", props.InitialState.company.name);
-        form.setFieldValue("companystreet", props.InitialState.company.street);
-        form.setFieldValue("companycity", props.InitialState.company.city);
-        form.setFieldValue("companypostalcode", props.InitialState.company.postalcode);
-        form.setFieldValue("companycountry", props.InitialState.company.country);
-        form.setFieldValue("companybackground", setts.background);
-
-    }, [props.InitialState.company]);
-
-
     const getCompanyInput = () => {
-        let caps = props.InitialState.role.capabilities as JsonObject;
+        let caps = role.capabilities;
 
-        if(caps.canEditOwnProject){
+        if(role.capabilities.projects.edit){
             return (<Form 
                 layout='vertical'
                 onFinish={editCompany}
@@ -300,16 +259,20 @@ export default function Company(props: InitialProps) {
 
   
     return (
-        <SidebarLayout capabilities={props.InitialState.role.capabilities as JsonObject}>
+        <SidebarLayout capabilities={role.capabilities} user={user} login={login}>
             <div className={styles.main}>
                 <Space direction='vertical' className={styles.spacelayout} size="large">
-                    <Card title={`Firma: ${props.Data.SingleCompany.id}`} bordered={true}>
+                    <Card title={`Ihre Firma`} bordered={true}>
                         {getCompanyInput()}
                     </Card>
-                    <Card title={"Tokens"} bordered={true}>
-                        <h2>Verbrauchte Tokens (seit 01.{pad(props.currentMonth, 2)}.{props.currentYear})</h2>
+                    <Card title={"Credits"} bordered={true}>
+                        <h2>Verbrauchte Credits (seit 01.{pad(props.Data.currentMonth, 2)}.{props.Data.currentYear})</h2>
                         <div className={styles.quotarow}>
-                            <div className={styles.quota}>{props.quota.amount}</div>
+                            {/* <div className={styles.quota}>{}</div> */}
+                            
+                            <Tooltip title={`${getCurrentUsage().amount} Credits von ${quota.tokens} verbraucht.`}>
+                                <Progress className={styles.quotaprogress} status={(overused)? "exception": undefined} percent={Math.round((getCurrentUsage().amount / quota.tokens) * 10000000)  } />
+                            </Tooltip>
                         </div>
                     </Card>
                 </Space>

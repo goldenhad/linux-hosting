@@ -1,7 +1,7 @@
 import { Alert, Button, Form, Input, Modal, Select, Space, Table, Typography } from 'antd';
 import styles from './projects.module.scss'
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { prisma } from '../../../db'
@@ -10,6 +10,7 @@ import SidebarLayout from '../../../components/SidebarLayout';
 import { JsonObject } from '@prisma/client/runtime/library';
 import { useRouter } from 'next/router';
 import { Company } from '@prisma/client';
+import { useAuthContext } from '../../../components/context/AuthContext';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -25,34 +26,23 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   //Get the cookies from the current request
   const { cookies } = req;
 
-  //Check if the login cookie is set
-  if (!cookies.login) {
-      //Redirect if the cookie is not set
-      res.writeHead(302, { Location: "/login" });
-      res.end();
+  let datum = new Date();
 
-      return { props: { InitialState: {} } };
-  } else {
-
-      let companies = await prisma.company.findMany({
-      });
-
-      return {
-          props: {
-              InitialState: JSON.parse(
-              Buffer.from(cookies.login, "base64").toString("ascii")
-              ),
-              Data: {
-                Companies: companies
-              }
-          },
-      };
-  }
+  return {
+    props: {
+        Data: {
+          currentMonth: datum.getMonth() + 1,
+          currentYear: datum.getFullYear(),
+        }
+    },
+  };
 };
 
 
 
+
 export default function Companies(props: InitialProps) {
+  const { login, user, company, role, quota } = useAuthContext();
   const [ isCreateModalOpen, setIsCreateModalOpen ]  = useState(false);
   const [ isDeleteModalOpen, setIsDeleteModalOpen ]  = useState(false);
   const [ errMsg, setErrMsg ] = useState("");
@@ -64,6 +54,12 @@ export default function Companies(props: InitialProps) {
   const refreshData = () => {
     router.replace(router.asPath);
   }
+
+  useEffect(() => {
+
+    if (login == null) router.push("/login");
+      
+  }, [login]);
 
   const columns = [
     {

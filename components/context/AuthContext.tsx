@@ -12,6 +12,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import nookies from "nookies";
 import { LoadingOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
+import { useRouter } from 'next/navigation';
 
 
 interface ctx {
@@ -37,6 +38,7 @@ export const AuthContextProvider = ({
     const [role, setRole] = React.useState(null);
     const [quota, setQuota] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
+    const router = useRouter();
 
     useEffect(() => {
         const unsubscribe = auth.onIdTokenChanged(async (user) => {
@@ -49,6 +51,7 @@ export const AuthContextProvider = ({
                 setUser(null);
                 nookies.destroy(null, "token");
                 nookies.set(null, "token", "", {path: '/'});
+                router.replace('/login');
                 return;
             }
 

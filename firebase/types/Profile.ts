@@ -2,9 +2,7 @@ import { type } from "os";
 
 export type ProfileSettings = {
     personal: string;
-    salutation: string;
     stil: string;
-    order: string;
     emotions: string;
     tags: Array<string>;
 }
@@ -18,10 +16,7 @@ export const basicProfile = {
     name: "",
     settings: {
         personal: "",
-        salutation: "",
-        stil: "",
-        order: "",
-        emotions: "",
+        stil: [],
         tags: [],
     },
     salt: "",

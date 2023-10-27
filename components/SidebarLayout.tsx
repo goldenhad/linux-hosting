@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 const { Content, Footer, Sider } = Layout;
 import {isMobile} from 'react-device-detect';
-import axios from 'axios';
 import { User } from '../firebase/types/User';
+import { handleEmptyString } from '../helper/architecture';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -15,7 +15,6 @@ type MenuItem = Required<MenuProps>['items'][number];
 
 const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: User, login: any}) => {
   const [collapsed, setCollapsed] = useState(true);
-  const { token: { colorBgContainer } } = theme.useToken();
   const [ collapseWidth, setCollapseWidth ] = useState(undefined);
   const [ breakpoint, setBreakpoint ] = useState(undefined);
   const router = useRouter();
@@ -79,7 +78,7 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
       return(
         <Link href={'/account'}>
           <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-            <Avatar size={30} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{props.user.firstname.toUpperCase().charAt(0)}{props.user.lastname.toUpperCase().charAt(0)}</Avatar>
+            <Avatar size={30} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
           </div>
         </Link>
       );
@@ -87,10 +86,10 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
       return(
         <Link href={'/account'}>
           <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", width: "100%" }}>
-            <Avatar size={30} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{props.user.firstname.toUpperCase().charAt(0)}{props.user.lastname.toUpperCase().charAt(0)}</Avatar>
+            <Avatar size={30} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
             <div style={{ display: "flex", flexDirection: "column", marginLeft: 10, color: 'rgba(255, 255, 255, 0.65)' }}>
-              <div style={{ fontWeight: "bold" }} >{props.user.username}</div>
-              <div style={{ fontSize: 10 }} >{props.login.email}</div>
+              <div style={{ fontWeight: "bold" }} >{handleEmptyString(props.user.username)}</div>
+              <div style={{ fontSize: 10 }} >{handleEmptyString(props.login.email)}</div>
             </div>
           </div>
         </Link>

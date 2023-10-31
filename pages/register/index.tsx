@@ -2,7 +2,7 @@ import Image from "next/image";
 import axios from "axios";
 import router from "next/router";
 import { GetServerSideProps } from "next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, Button, Checkbox, Form, Input, Space } from 'antd';
 import logo from '../../public/mailbuddy.png'
 import styles from './login.module.scss'
@@ -13,7 +13,7 @@ import Head from "next/head";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
     //Get the context of the request
-    const { req, res } = ctx
+    const { req, res, query } = ctx
     //Get the cookies from the current request
     const {cookies} = req
     
@@ -24,13 +24,29 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         res.end();
     }
 
-    return { props: { InitialState: {} } }
+    let invite = query.invite;
+    if(invite){
+        try{
+            const json = Buffer.from(invite as string, "base64").toString();
+            let invitiparams = JSON.parse(json);
+
+            console.log(invitiparams);
+
+            return { props: {invite: { company: invitiparams.company, firstname: invitiparams.firstname, lastname: invitiparams.lastname, email: invitiparams.email }} }
+        } catch(e) {
+            return { props: {  } };
+        }
+    }else{
+        return { props: {  } };
+    }
+    
 }
 
-export default function Register(){
+export default function Register(props){
     const [ loginFailed, setLoginFailed ] = useState(false);
+    const [ usedInvite, setUsedInvite ] = useState(props.invite == undefined)
 
-    const onFinish = async (values: any) => {
+    const onFinishRegisterCompany = async (values: any) => {
         const { result, error } = await signUp(values.firstname, values.lastname, values.email, values.username, values.password, values.company, values.street, values.city, values.postalcode, "DE");
 
         if (error) {
@@ -42,29 +58,25 @@ export default function Register(){
             console.log(result)
             return router.push("/")
         }
-
-        
     };
+
+    useEffect(() => {
+        
+    }, []);
 
     const onFinishFailed = (errorInfo: any) => {
         console.log('Failed:', errorInfo);
         setLoginFailed(true);
     };
 
-    return(
-        <main>
-            <div style={{
-                height: "100vh",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center"
-            }}>
-                <div style={{borderRadius: "10%", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                    <img src={"/mailbuddy.png"} alt="Logo" width={744/10} height={744/10}/>
-                </div>
-                <h2 style={{marginTop: 25, marginBottom: 50}} >Mailbuddy</h2>
-                <Form
+
+
+    const getForm = () => {
+        if(usedInvite){
+            // Hier muss Formular rein für den User...
+            return <></>;
+        }else{
+            <Form
                     name="basic"
                     labelCol={{
                         span: 24,
@@ -76,7 +88,7 @@ export default function Register(){
                     initialValues={{
                         remember: true,
                     }}
-                    onFinish={onFinish}
+                    onFinish={onFinishRegisterCompany}
                     onFinishFailed={onFinishFailed}
                     autoComplete="off"
                     layout="vertical"
@@ -245,6 +257,23 @@ export default function Register(){
                         </Button>
                     </Form.Item>
                 </Form>
+        }
+    }
+
+    return(
+        <main>
+            <div style={{
+                height: "100vh",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center"
+            }}>
+                <div style={{borderRadius: "10%", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center"}}>
+                    <img src={"/mailbuddy.png"} alt="Logo" width={744/10} height={744/10}/>
+                </div>
+                <h2 style={{marginTop: 25, marginBottom: 50}} >Mailbuddy</h2>
+                {getForm()}
             </div>
         </main>
     );

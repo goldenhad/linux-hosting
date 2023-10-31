@@ -1,14 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import OpenAI from 'openai';
-import { prisma } from '../../../db';
 import { auth } from '../../../firebase/admin'
 import { sendMail } from '../../../helper/emailer';
-const bcrypt = require("bcrypt")
-
-
-const openai = new OpenAI({
-    apiKey: process.env.OPENAIAPIKEY
-});
 
 type ResponseData = {
     errorcode: number,
@@ -27,9 +19,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
             if( data.email && data.company && data.firstname && data.lastname ){
                 
+                let inviteobj = { company: data.company, email: data.email, firstname: data.firstname, lastname: data.lastname };
+                const json = JSON.stringify(inviteobj);
+                let invitecode =  Buffer.from(json).toString("base64");
+
                 try {
-                    let text = `Sie wurden eingeladen http://localhost:3000/register?company=${data.company}&firstname=${data.firstname}&firstname=${data.lastname}`;
-                    let html = `Sie wurden eingeladen <a href="http://localhost:3000/register?company=${data.company}&firstname=${data.firstname}&firstname=${data.lastname}">Jetzt registrieren!</a>`;
+                    let text = `Sie wurden eingeladen http://localhost:3000/register?invite=${invitecode}`;
+                    let html = `Sie wurden eingeladen <a href="http://localhost:3000/register?invite=${invitecode}">Jetzt registrieren!</a>`;
                     await sendMail(data.email, "Sie wurden eingeladen!", text, html);
 
                 }catch(e){

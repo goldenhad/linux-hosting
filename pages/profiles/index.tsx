@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Form, Input, Modal, Select, Space, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, Modal, Select, Space, Steps, Table, Tag, Typography, message } from 'antd';
 import { SettingOutlined, DeleteOutlined } from '@ant-design/icons';
 import styles from './list.profiles.module.scss'
 import axios from 'axios';
@@ -19,6 +19,7 @@ import { Profile, ProfileSettings } from '../../firebase/types/Profile';
 import getDocument from '../../firebase/data/getData';
 import updateData from '../../firebase/data/updateData';
 import { arrayUnion } from 'firebase/firestore';
+import { handleEmptyArray, handleEmptyString } from '../../helper/architecture';
 require('dotenv').config();
 
 const MAXPROFILES = 12;
@@ -63,7 +64,7 @@ export default function Profiles(props: InitialProps) {
     const [ tokenCount, setTokenCount ] = useState(0);
     const [ form ] = Form.useForm();
     const [ editForm ] = Form.useForm();
-
+    const [current, setCurrent] = useState(0);
 
     const router = useRouter();
 
@@ -93,17 +94,6 @@ export default function Profiles(props: InitialProps) {
         "Direkt",
         "Rhetorisch",
         "Ausdrucksstark"
-      ];
-    
-      const motive = [
-        "Diplomatisch",
-        "Respektvoll",
-        "Kultiviert",
-        "Bedächtig",
-        "Persönlich",
-        "Umgangssprachlich",
-        "Unkonventionell",
-        "Emphatisch"
       ];
     
       const emotions = [
@@ -155,11 +145,10 @@ export default function Profiles(props: InitialProps) {
       }
   
     const setEditFields = (obj: {name: String, settings: ProfileSettings}) => {
+      console.log(obj.settings)
       editForm.setFieldValue("name", obj.name);
       editForm.setFieldValue("personal", obj.settings.personal);
-      editForm.setFieldValue("address", obj.settings.salutation);
       editForm.setFieldValue("style", obj.settings.stil);
-      editForm.setFieldValue("order", obj.settings.order);
       editForm.setFieldValue("emotions", obj.settings.emotions);
       editForm.setFieldValue("tags", obj.settings.tags);
       if(obj.settings.tags){
@@ -197,9 +186,9 @@ export default function Profiles(props: InitialProps) {
         try {
           if ( profileToEdit != -1 ){
             let profiles = user.profiles;
-            profiles[profileToEdit] = {name: values.name, settings: { personal: values.personal, salutation: values.address, stil: values.style, order: values.order, emotions: values.emotions, tags: values.tags }}
+            profiles[profileToEdit] = {name: values.name, settings: { personal: handleEmptyString(values.personal), stil: handleEmptyArray(values.style), emotions: handleEmptyArray(values.emotions), tags: handleEmptyArray(values.tags) }}
             await updateData("User", login.uid, { profiles: profiles })
-            editForm.setFieldsValue([]);
+            form.resetFields([]);
           }else{
             throw("Profile not defined");
           }
@@ -212,26 +201,26 @@ export default function Profiles(props: InitialProps) {
         setErrMsg("");
         setIsErrVisible(false);
         setIsEditModalOpen(false);
-        editForm.resetFields([]);
+        form.resetFields([]);
       }
     }
   
     const createProfile = async (values: any) => {
-  
+
       if(values.name){
         try{
-
-          await updateData("User", login.uid, { profiles: arrayUnion({name: values.name, settings: { personal: values.personal, salutation: values.address, stil: values.style, order: values.order, emotions: values.emotions, tags: values.tags }}) })
+          await updateData("User", login.uid, { profiles: arrayUnion({name: values.name, settings: { personal: handleEmptyString(values.personal), stil: handleEmptyArray(values.style), emotions: handleEmptyArray(values.emotions), tags: handleEmptyArray(values.tags) }}) })
           form.setFieldsValue([]);
+          setIsCreateModalOpen(false);
         }catch(e){
           setErrMsg("Beim Speichern ist etwas fehlgeschlagen bitte versuche es später erneut.");
           setIsErrVisible(true);
+          setIsCreateModalOpen(true);
         }
     
         refreshData();
         setErrMsg("");
         setIsErrVisible(false);
-        setIsCreateModalOpen(false);
         form.resetFields([]);
       }
     }
@@ -263,7 +252,7 @@ export default function Profiles(props: InitialProps) {
                         marginTop: 16,
                       }}
                       actions={[
-                        <div onClick={() => {setProfileToEdit(idx); setIsEditModalOpen(true); setEditFields({name: singleProfile.name, settings: settings})}}><SettingOutlined key="setting" /></div>,
+                        <div onClick={() => {setProfileToEdit(idx); setEditFields({name: singleProfile.name, settings: settings}); setIsEditModalOpen(true);}}><SettingOutlined key="setting" /></div>,
                         <div onClick={() => {setProfileToDelete(idx); setIsDeleteModalOpen(true)}}><DeleteOutlined key="edit" /></div>,
                       ]}
                     >
@@ -285,6 +274,72 @@ export default function Profiles(props: InitialProps) {
       }
     }
 
+
+    const steps = [
+      {
+        step: 1,
+        title: 'Persönliche Informationen',
+        content: <div>
+          <Paragraph>
+            Beschreiben Sie kurz wer Sie sind.
+          </Paragraph>
+          <Form.Item name="personal">
+              <TextArea placeholder="Wer sind sie, beschreiben Sie ihre Position..."/>
+          </Form.Item>
+        </div>,
+      },
+      {
+        step: 2,
+        title: 'Allgemeine Stilistik',
+        content: <div>
+          <Paragraph>
+            Wie genau soll die allgemeine Stilistik der Antwort sein?
+          </Paragraph>
+          <Form.Item name="style">
+              <Select placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(style)} mode="multiple" allowClear/>
+          </Form.Item>
+        </div>,
+      },
+      {
+        step: 3,
+        title: 'Allgemeine Gemütslage',
+        content: <div>
+          <Paragraph>
+            Welche allgemeine Gemütslage soll in der Nachricht deutlich werden?
+          </Paragraph>
+          <Form.Item name="emotions">
+              <Select placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(emotions)} mode="multiple" allowClear/>
+          </Form.Item>
+        </div>,
+      },
+      {
+        step: 4,
+        title: 'Abschließen',
+        content: <div>
+          <Paragraph>
+            In diesem Bereich können Sie Ihrem Profil einen Namen geben und es mit Tags kategorisieren.
+          </Paragraph>
+          <Form.Item name="name" rules={[{ required: true, message: 'Ein Name ist erforderlich!' }]}>
+            <Input placeholder='Name des Profils'></Input>
+          </Form.Item>
+          <Paragraph>
+            Kategorisieren Sie ihr Profil über Tags
+          </Paragraph>
+          <Form.Item name="tags">
+              <Select
+                mode="tags"
+                style={{ width: '100%' }}
+                tokenSeparators={[',']}
+                options={[]}
+                placeholder={"Tippen Sie, um Tags hinzuzufügen, die Ihr Profil kategorisieren"}
+              />
+          </Form.Item>
+        </div>
+      }
+    ];
+
+    const items = steps.map((item) => ({ key: item.title, title: item.title }));
+
     return (
       <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
         <div className={styles.main}>
@@ -295,9 +350,11 @@ export default function Profiles(props: InitialProps) {
             { getProfileDisplay() }
           </div>
   
+          
           <Modal
-            title="Profil hinzufügen"
+            title={"Ein neues Profil anlegen"}
             open={isCreateModalOpen}
+            width={"70%"}
             onCancel={() => {setIsCreateModalOpen(false)}}
             footer = {[]}
           >
@@ -306,54 +363,45 @@ export default function Profiles(props: InitialProps) {
                 onFinish={createProfile}
                 form={form}
             >
-                <Form.Item label={<b>Profilname</b>} name="name" rules={[{ required: true, message: 'Ein Name ist erforderlich!' }]}>
-                    <Input placeholder="Names des Profils..."/>
-                </Form.Item>
-  
-                <Form.Item label={<b>Persönliche Informationen</b>} name="personal">
-                    <TextArea placeholder="Wer sind sie, beschreiben Sie ihre Position..."/>
-                </Form.Item>
-  
-                <Form.Item label={<b>Ansprache</b>} name="address">
-                    <Select placeholder="Bitte wählen Sie die Form der Ansprache aus..." options={[
-                        {label: "Du", value: "du", },
-                        {label: "Sie", value: "sie", },
-                    ]}/>
-                </Form.Item>
+                <Steps current={current} items={items} />
+                
+                {steps.map((item) => (
+                  <div
+                    className={`${styles.stepformcontent} ${
+                      item.step !== current + 1 && styles.hidden
+                    }`}
+                  >
+                    {item.content}
+                  </div>
+                ))}
 
-                <Form.Item label={<b>Allgemeine Stilistik</b>} name="style">
-                    <Select placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(style)} mode="multiple" allowClear/>
-                </Form.Item>
 
-                <Form.Item label={<b>Einordnung des Gesprächpartners</b>} name="order">
-                    <Select placeholder="Wie orden Sie ihren Gesprächpartner ein?" options={listToOptions(motive)} mode="multiple" allowClear/>
-                </Form.Item>
-
-                <Form.Item label={<b>Allgemeine Gemütslage</b>} name="emotions">
-                    <Select placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(emotions)} mode="multiple" allowClear/>
-                </Form.Item>
-
-                <Form.Item label={<b>Tags</b>} name="tags">
-                  <Select
-                    mode="tags"
-                    style={{ width: '100%' }}
-                    tokenSeparators={[',']}
-                    options={[]}
-                    placeholder={"Tippen Sie, um Tags hinzuzufügen, die Ihr Profil kategorisieren"}
-                  />
-                </Form.Item>
+                <div style={{ marginTop: 24 }}>
+                {current < steps.length - 1 && (
+                  <Button type="primary" onClick={() => setCurrent(current + 1)}>
+                    Weiter
+                  </Button>
+                )}
+                {current === steps.length - 1 && (
+                  <Button type="primary" htmlType='submit'>
+                    Speichern
+                  </Button>
+                )}
+                {current > 0 && (
+                  <Button style={{ margin: '0 8px' }} onClick={() => setCurrent(current - 1)}>
+                    Zurück
+                  </Button>
+                )}
+              </div>                
   
                 
               <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
                <Alert type='error' message={errMsg} />
               </div>
   
-              <div className={styles.finishformrow}>
-                <Button type='primary' htmlType='submit'>Speichern</Button>
-              </div>
-  
             </Form>
           </Modal>
+          
 
           <Modal
             title="Profil bearbeiten"
@@ -373,20 +421,9 @@ export default function Profiles(props: InitialProps) {
                 <Form.Item label={<b>Persönliche Informationen</b>} name="personal">
                     <TextArea placeholder="Wer sind sie, beschreiben Sie ihre Position..."/>
                 </Form.Item>
-  
-                <Form.Item label={<b>Ansprache</b>} name="address">
-                    <Select placeholder="Bitte wählen Sie die Form der Ansprache aus..." options={[
-                        {label: "Du", value: "du", },
-                        {label: "Sie", value: "sie", },
-                    ]}/>
-                </Form.Item>
 
                 <Form.Item label={<b>Allgemeine Stilistik</b>} name="style">
                     <Select placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(style)} mode="multiple" allowClear/>
-                </Form.Item>
-
-                <Form.Item label={<b>Einordnung des Gesprächpartners</b>} name="order">
-                    <Select placeholder="Wie orden Sie ihren Gesprächpartner ein?" options={listToOptions(motive)} mode="multiple" allowClear/>
                 </Form.Item>
 
                 <Form.Item label={<b>Allgemeine Gemütslage</b>} name="emotions">

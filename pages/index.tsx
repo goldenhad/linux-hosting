@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { CombinedUser } from '../helper/LoginTypes';
 import SidebarLayout from '../components/SidebarLayout';
-import { Quota, TokenUsage } from '@prisma/client';
 import { JsonObject } from '@prisma/client/runtime/library';
 import AES from 'crypto-js/aes';
 import enc from 'crypto-js/enc-utf8';
@@ -29,8 +28,6 @@ export interface InitialProps {
     currentMonth: number,
     currentYear: number,
     profiles: Array<Profile & {parsedSettings: ProfileSettings}>,
-    usage: TokenUsage,
-    quota: Quota
   };
   InitialState: CombinedUser;
 }
@@ -109,6 +106,17 @@ export default function Home(props: InitialProps) {
     "Umfangreich und sehr detailliert"
   ];
 
+  const motive = [
+    "Diplomatisch",
+    "Respektvoll",
+    "Kultiviert",
+    "Bedächtig",
+    "Persönlich",
+    "Umgangssprachlich",
+    "Unkonventionell",
+    "Emphatisch"
+  ];
+
 
   const listToOptions = (liste: Array<string>) => {
     const arr = liste.map(element => {
@@ -141,9 +149,9 @@ export default function Home(props: InitialProps) {
           personal: profile.settings.personal,
           dialog: values.dialog,
           continue: values.continue,
-          address: profile.settings.salutation,
+          address: values.salutation,
           style: profile.settings.stil,
-          order: profile.settings.order,
+          order: values.order,
           emotions: profile.settings.emotions,
           length: values.length
         });
@@ -234,6 +242,17 @@ export default function Home(props: InitialProps) {
               <Form.Item label={<b>Bisheriger Dialog</b>} name="dialog">
                 <TextArea rows={10} placeholder="Bisheriger Dialog..." disabled={formDisabled || quotaOverused}/>
               </Form.Item>
+
+              <Form.Item label={<b>Ansprache</b>} name="address">
+                    <Select placeholder="Bitte wählen Sie die Form der Ansprache aus..." options={[
+                        {label: "Du", value: "du", },
+                        {label: "Sie", value: "sie", },
+                    ]}/>
+                </Form.Item>
+
+                <Form.Item label={<b>Einordnung des Gesprächpartners</b>} name="order">
+                    <Select placeholder="Wie orden Sie ihren Gesprächpartner ein?" options={listToOptions(motive)} mode="multiple" allowClear/>
+                </Form.Item>
   
               <Form.Item label={<b>Wie soll der Dialog fortgesetzt werden?</b>} name="continue">
                 <TextArea rows={5} placeholder="Formulieren Sie kurz, wie der Dialog fortgesetzt werden soll und was sie damit erreichen wollen?" disabled={formDisabled || quotaOverused}/>

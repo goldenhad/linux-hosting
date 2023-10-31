@@ -164,8 +164,22 @@ export default function Home(props: InitialProps) {
             if(usageupdates[usageidx].amount > quota.tokens){
               setQuotaOverused(true);
             }
+          }else{
+            let usageupdates = [];
+            usageupdates.push({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: answer.data.tokens });
+            await updateDoc(doc(db, "Company", user.Company), { Usage: usageupdates});
           }
 
+          let userusageidx = user.usedCredits.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});
+          if(userusageidx != -1){
+            let usageupdates = user.usedCredits;
+            usageupdates[usageidx].amount += answer.data.tokens;
+            await updateDoc(doc(db, "User", login.uid), { usedCredits: usageupdates});
+          }else{
+            let usageupdates = [];
+            usageupdates.push({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: answer.data.tokens });
+            await updateDoc(doc(db, "User", login.uid), { usedCredits: usageupdates});
+          }
         }
   
         console.log(answer);

@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 import { Company, Role, TokenUsage, User } from '@prisma/client';
 import { handleEmptyString } from '../../helper/architecture';
 import { useAuthContext } from '../../components/context/AuthContext';
+import getDocument, { getDocWhere } from '../../firebase/data/getData';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -63,6 +64,8 @@ export default function Company(props: InitialProps) {
     const [ isErrVisible, setIsErrVisible ] = useState(false);
     const [ editSuccessfull, setEditSuccessfull ] = useState(false);
     const [ overused, setOverused ] = useState(false);
+    const [ users, setUsers ] = useState([]);
+    const [ inviteUserModalOpen, setInviteUserModalOpen ] = useState(false);
     const [ form ] = Form.useForm();
     const router = useRouter();
 
@@ -85,6 +88,22 @@ export default function Company(props: InitialProps) {
         form.setFieldValue("companycountry", company.country);
         form.setFieldValue("companybackground", company.settings.background);
     }, [login]);
+
+    useEffect(() => {
+        const load = async () => {
+            let {result, error} = await getDocWhere("User", "Company", "==", user.Company);
+            if(!error){
+                console.log(result);
+                setUsers(result);
+            }else{
+                setUsers([]);
+            }
+        }
+
+        load();
+    }, [company])
+
+    
 
     
     const getCurrentUsage = () => {
@@ -257,6 +276,53 @@ export default function Company(props: InitialProps) {
         }
     }
 
+
+    const usercolumns = [
+        {
+          title: 'Name',
+          dataIndex: 'name',
+          key: 'name',
+          render: (_: any, obj: any) => {
+            return obj.firstname + " " + obj.lastname;
+          }
+        },
+        {
+          title: 'Username',
+          dataIndex: 'username',
+          key: 'username',
+        },
+        {
+          title: 'Credits diesen Monat',
+          dataIndex: 'usedCredits',
+          key: 'usedCredits',
+          render: (_: any, obj: any) => {
+            let usageidx = obj.usedCredits.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});
+            if(usageidx != -1){
+                return obj.usedCredits[usageidx].amount;
+            }else{
+                return "0";
+            }
+          }
+        },
+        {
+            title: 'Aktionen',
+            dataIndex: 'actions',
+            key: 'actions',
+            render: (_: any, obj: any) => {
+              return undefined;
+            }
+          },
+      ];
+
+      const inviteUser = async (values: any) => {
+        await await axios.post('/api/company/invite', {
+            email: values.email,
+            company: user.Company,
+            firstname: values.firstname,
+            lastname: values.lastname
+        });
+      }
+
   
     return (
         <SidebarLayout capabilities={role.capabilities} user={user} login={login}>
@@ -275,7 +341,43 @@ export default function Company(props: InitialProps) {
                             </Tooltip>
                         </div>
                     </Card>
+                    <Card title={"Nutzer"} bordered={true}>
+                        <Table dataSource={users} columns={usercolumns} />
+                        <Button type='primary' onClick={() => {setInviteUserModalOpen(true)}}>Nutzer einladen</Button>
+                    </Card>
                 </Space>
+
+
+                <Modal title="Nutzer einladen" open={inviteUserModalOpen} onCancel={() => {setInviteUserModalOpen(false)}} footer = {[]}>
+                    
+                <Form layout='vertical' onFinish={inviteUser}>
+                    <Form.Item label={<b>E-Mail</b>} name="email" rules={[{ required: true, message: 'Eine E-Mail ist erforderlich!' }]}>
+                        <Input placeholder="max@mustermann.de"/>
+                    </Form.Item>
+
+                    <Form.Item label={<b>Vorname</b>} name="firstname" rules={[{ required: true, message: 'Eine Vorname ist erforderlich!' }]}>
+                        <Input placeholder="Max"/>
+                    </Form.Item>
+
+                    <Form.Item label={<b>Nachname</b>} name="lastname" rules={[{ required: true, message: 'Eine Nachname ist erforderlich!' }]}>
+                        <Input placeholder="Mustermann"/>
+                    </Form.Item>
+                    
+                    <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
+                        <Alert type='error' message={errMsg} />
+                    </div>
+
+                    <div className={styles.finishformrow}>
+                        <Space direction='horizontal'>
+                        <Button type='default' onClick={() => {setInviteUserModalOpen(false)}}>Abbrechen</Button>
+                        <Button type='primary' htmlType='submit' onClick={() => {}}>Einladen</Button>
+                        </Space>
+                    </div>
+    
+                </Form>
+
+                    
+                </Modal>
             </div>
         </SidebarLayout>
     );

@@ -1,3 +1,4 @@
+import { Usage } from "./Company";
 import { Profile } from "./Profile";
 
 
@@ -7,7 +8,8 @@ export type User =  {
     lastname: string,
     Company: string,
     Role: string,
-    profiles: Array<Profile>
+    profiles: Array<Profile>,
+    usedCredits: Array<Usage>,
 }
 
 export const basicUser: User = {
@@ -16,5 +18,6 @@ export const basicUser: User = {
     firstname: "",
     lastname: "",
     Role: "",
-    profiles: []
+    profiles: [],
+    usedCredits: []
 }

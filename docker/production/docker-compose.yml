@@ -8,8 +8,6 @@ services:
         image: mailbuddy
         ports:
             - '3002:3000'
-        depends_on:
-            - mail-buddy-database
         networks:
             - mailbuddynetwork
             - proxynetwork

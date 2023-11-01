@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
-import { prisma } from '../../../db';
 import { auth } from '../../../firebase/admin'
 
 const openai = new OpenAI({

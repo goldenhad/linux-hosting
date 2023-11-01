@@ -4,9 +4,7 @@ import { db } from '../db';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
-import { CombinedUser } from '../helper/LoginTypes';
 import SidebarLayout from '../components/SidebarLayout';
-import { ProfileSettings } from '../helper/ProfileTypes';
 import { useAuthContext } from '../components/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Usage } from '../firebase/types/Company';
@@ -21,9 +19,7 @@ export interface InitialProps {
   Data: {
     currentMonth: number,
     currentYear: number,
-    profiles: Array<Profile & {parsedSettings: ProfileSettings}>,
   };
-  InitialState: CombinedUser;
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {

@@ -3,7 +3,6 @@ import { SettingOutlined, DeleteOutlined } from '@ant-design/icons';
 import styles from './list.profiles.module.scss'
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
-import { CombinedUser } from '../../helper/LoginTypes';
 import SidebarLayout from '../../components/SidebarLayout';
 import { useRouter } from 'next/router';
 const { Paragraph } = Typography;
@@ -20,7 +19,6 @@ const MAXPROFILES = 12;
 
 export interface InitialProps {
   Data: { Profiles: Array<Profile & {parsedSettings: ProfileSettings}> };
-  InitialState: CombinedUser;
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {

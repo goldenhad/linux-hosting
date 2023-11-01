@@ -86,11 +86,11 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: '82vh' }}>
           
           <Menu theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
-          <Link href={'/account'}>
+          {/* <Link href={'/account'}>
             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
               <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
             </div>
-        </Link>
+          </Link> */}
         </div>
         
       </Sider>

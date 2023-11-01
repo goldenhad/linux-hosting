@@ -55,10 +55,13 @@ export default function Company(props: InitialProps) {
     const { login, user, company, role, quota } = useAuthContext();
     const [ errMsg, setErrMsg ] = useState([]);
     const [ isErrVisible, setIsErrVisible ] = useState(false);
+    const [ inviteErrMsg, setInviteErrMsg ] = useState("");
+    const [ isInviteErrVisible, setIsInviteErrVisible ] = useState(false);
     const [ editSuccessfull, setEditSuccessfull ] = useState(false);
     const [ overused, setOverused ] = useState(false);
     const [ users, setUsers ] = useState([]);
     const [ inviteUserModalOpen, setInviteUserModalOpen ] = useState(false);
+    const [ inviteForm ] = Form.useForm();
     const [ form ] = Form.useForm();
     const router = useRouter();
 
@@ -298,12 +301,22 @@ export default function Company(props: InitialProps) {
       ];
 
       const inviteUser = async (values: any) => {
-        await await axios.post('/api/company/invite', {
-            email: values.email,
-            company: user.Company,
-            firstname: values.firstname,
-            lastname: values.lastname
-        });
+        try{
+            await axios.post('/api/company/invite', {
+                email: values.email,
+                company: user.Company,
+                firstname: values.firstname,
+                lastname: values.lastname
+            });
+            
+            setIsInviteErrVisible(false);
+            setInviteErrMsg("");
+            inviteForm.resetFields(["email", "firstname", "lastname"]);
+            setInviteUserModalOpen(false);
+        }catch(e){
+            setIsInviteErrVisible(true);
+            setInviteErrMsg("Ein Nutzer mit dieser E-Mail Adresse nutzt Mailbuddy bereits!");
+        }
       }
 
     const getUserOverview = () => {
@@ -317,7 +330,7 @@ export default function Company(props: InitialProps) {
 
                     <Modal title="Nutzer einladen" open={inviteUserModalOpen} onCancel={() => {setInviteUserModalOpen(false)}} footer = {[]}>
                         
-                        <Form layout='vertical' onFinish={inviteUser}>
+                        <Form layout='vertical' onFinish={inviteUser} form={inviteForm} onChange={() => {setIsInviteErrVisible(false); setInviteErrMsg("")}}>
                             <Form.Item label={<b>E-Mail</b>} name="email" rules={[{ required: true, message: 'Eine E-Mail ist erforderlich!' }]}>
                                 <Input placeholder="max@mustermann.de"/>
                             </Form.Item>
@@ -330,8 +343,8 @@ export default function Company(props: InitialProps) {
                                 <Input placeholder="Mustermann"/>
                             </Form.Item>
                             
-                            <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
-                                <Alert type='error' message={errMsg} />
+                            <div className={styles.errorrow} style={{display: (isInviteErrVisible)? "block": "none"}}>
+                                <Alert type='error' message={inviteErrMsg} />
                             </div>
 
                             <div className={styles.finishformrow}>

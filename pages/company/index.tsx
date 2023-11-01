@@ -323,6 +323,52 @@ export default function Company(props: InitialProps) {
         });
       }
 
+    const getUserOverview = () => {
+        if(user.Role == "Company"){
+            return(
+                <div>
+                    <Card title={"Nutzer"} bordered={true}>
+                        <Table dataSource={users} columns={usercolumns} />
+                        <Button type='primary' onClick={() => {setInviteUserModalOpen(true)}}>Nutzer einladen</Button>
+                    </Card>
+
+                    <Modal title="Nutzer einladen" open={inviteUserModalOpen} onCancel={() => {setInviteUserModalOpen(false)}} footer = {[]}>
+                        
+                        <Form layout='vertical' onFinish={inviteUser}>
+                            <Form.Item label={<b>E-Mail</b>} name="email" rules={[{ required: true, message: 'Eine E-Mail ist erforderlich!' }]}>
+                                <Input placeholder="max@mustermann.de"/>
+                            </Form.Item>
+
+                            <Form.Item label={<b>Vorname</b>} name="firstname" rules={[{ required: true, message: 'Eine Vorname ist erforderlich!' }]}>
+                                <Input placeholder="Max"/>
+                            </Form.Item>
+
+                            <Form.Item label={<b>Nachname</b>} name="lastname" rules={[{ required: true, message: 'Eine Nachname ist erforderlich!' }]}>
+                                <Input placeholder="Mustermann"/>
+                            </Form.Item>
+                            
+                            <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
+                                <Alert type='error' message={errMsg} />
+                            </div>
+
+                            <div className={styles.finishformrow}>
+                                <Space direction='horizontal'>
+                                <Button type='default' onClick={() => {setInviteUserModalOpen(false)}}>Abbrechen</Button>
+                                <Button type='primary' htmlType='submit' onClick={() => {}}>Einladen</Button>
+                                </Space>
+                            </div>
+            
+                        </Form>
+
+                    </Modal>
+                </div>
+                
+            );
+        }else{
+            return <></>;
+        }
+    }
+
   
     return (
         <SidebarLayout capabilities={role.capabilities} user={user} login={login}>
@@ -341,43 +387,11 @@ export default function Company(props: InitialProps) {
                             </Tooltip>
                         </div>
                     </Card>
-                    <Card title={"Nutzer"} bordered={true}>
-                        <Table dataSource={users} columns={usercolumns} />
-                        <Button type='primary' onClick={() => {setInviteUserModalOpen(true)}}>Nutzer einladen</Button>
-                    </Card>
+                    {getUserOverview()}
                 </Space>
 
 
-                <Modal title="Nutzer einladen" open={inviteUserModalOpen} onCancel={() => {setInviteUserModalOpen(false)}} footer = {[]}>
-                    
-                <Form layout='vertical' onFinish={inviteUser}>
-                    <Form.Item label={<b>E-Mail</b>} name="email" rules={[{ required: true, message: 'Eine E-Mail ist erforderlich!' }]}>
-                        <Input placeholder="max@mustermann.de"/>
-                    </Form.Item>
-
-                    <Form.Item label={<b>Vorname</b>} name="firstname" rules={[{ required: true, message: 'Eine Vorname ist erforderlich!' }]}>
-                        <Input placeholder="Max"/>
-                    </Form.Item>
-
-                    <Form.Item label={<b>Nachname</b>} name="lastname" rules={[{ required: true, message: 'Eine Nachname ist erforderlich!' }]}>
-                        <Input placeholder="Mustermann"/>
-                    </Form.Item>
-                    
-                    <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
-                        <Alert type='error' message={errMsg} />
-                    </div>
-
-                    <div className={styles.finishformrow}>
-                        <Space direction='horizontal'>
-                        <Button type='default' onClick={() => {setInviteUserModalOpen(false)}}>Abbrechen</Button>
-                        <Button type='primary' htmlType='submit' onClick={() => {}}>Einladen</Button>
-                        </Space>
-                    </div>
-    
-                </Form>
-
-                    
-                </Modal>
+                
             </div>
         </SidebarLayout>
     );

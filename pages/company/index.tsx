@@ -3,7 +3,7 @@ import styles from './edit.company.module.scss'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
-import SidebarLayout from '../../components/SidebarLayout';
+import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useRouter } from 'next/router';
 import { handleEmptyString } from '../../helper/architecture';
 import { useAuthContext } from '../../components/context/AuthContext';

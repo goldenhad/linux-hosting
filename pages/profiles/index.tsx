@@ -3,7 +3,7 @@ import { SettingOutlined, DeleteOutlined } from '@ant-design/icons';
 import styles from './list.profiles.module.scss'
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
-import SidebarLayout from '../../components/SidebarLayout';
+import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useRouter } from 'next/router';
 const { Paragraph } = Typography;
 const { TextArea } = Input;

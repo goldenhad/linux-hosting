@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 const { Content, Footer, Sider } = Layout;
 import {isMobile} from 'react-device-detect';
-import { User } from '../firebase/types/User';
-import { handleEmptyString } from '../helper/architecture';
+import { User } from '../../firebase/types/User';
+import { handleEmptyString } from '../../helper/architecture';
+import styles from './sidebar.module.scss';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -38,10 +39,14 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
 
   const items = [
     getItem(<Link href={"/"}>Siteware Mailbuddy</Link>, '1', () => { return true }, <RobotOutlined />, ),
-    //getItem(<Link href={"/companies/list"}>Firmen</Link>, '2', () => { return rights.superadmin }, <FolderOpenOutlined />),
     getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return true }, <ApartmentOutlined />),
     getItem(<Link href={"/profiles"}>Profile</Link>, '4', () => { return !rights.superadmin }, <UserOutlined />),
     getItem(<Link href={"/logout"}>Ausloggen</Link>, '5', () => { return true }, <LogoutOutlined />),
+  ];
+
+  const footeritems = [
+    getItem(<Link href={"/"}>Help</Link>, '6', () => { return true }, <RobotOutlined />, ),
+    getItem(<Link href={"/company"}>Einstellungen</Link>, '7', () => { return true }, <ApartmentOutlined />),
   ];
 
   const getDefaultSelected = () => {
@@ -61,52 +66,34 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
     }
   }
 
-  useEffect(() => {
-    
-    if(isMobile){
-      setCollapseWidth("0");
-      setBreakpoint("lg");
-    }else{
-      setCollapseWidth(undefined);
-      setBreakpoint(undefined);
-    }
-  }, []);
+  
 
 
   return (
-    <Layout
-      style={{
-        minHeight: '100vh',
-      }}
-    >
-      <Sider breakpoint={breakpoint} collapsedWidth={collapseWidth} collapsible collapsed={collapsed} onCollapse={(value) => {setCollapsed(value)}}>
-        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", marginBottom: 25, marginTop: 25 }}>
-          <img style={{ borderRadius: 0 }} src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
+    <Layout className={styles.layout}>
+      <Sider className={styles.sidebar} breakpoint={breakpoint} collapsedWidth={collapseWidth} collapsed={collapsed} onCollapse={(value) => {setCollapsed(value)}}>
+        <div className={styles.logobox}>
+          <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: '82vh' }}>
+
+        <div className={styles.navigation}>
           
-          <Menu theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
-          {/* <Link href={'/account'}>
-            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-              <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
-            </div>
-          </Link> */}
+          <Menu className={styles.primarymenu}  theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
+
+          <div>
+            <Menu className={styles.secondarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={footeritems} />
+            <Link href={'/account'}>
+              <div className={styles.avatarcontainer}>
+                <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
+              </div>
+            </Link>
+          </div>
         </div>
-        
       </Sider>
+      
       <Layout>
-        
-        <Content
-          style={{
-            overflowY: "scroll"
-          }}
-        >
-          <div
-            style={{
-              padding: 24,
-              background: "rgba(217, 217, 227, 0.01)",
-            }}
-          >
+        <Content className={styles.layoutcontent}>
+          <div className={styles.childrencontainer}>
             {props.children}
           </div>
         </Content>

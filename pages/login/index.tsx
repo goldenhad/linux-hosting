@@ -1,13 +1,11 @@
-import Image from "next/image";
-import axios from "axios";
 import router from "next/router";
 import { GetServerSideProps } from "next";
 import { Component, useState } from "react";
 import { Alert, Button, Checkbox, Form, Input } from 'antd';
-import logo from '../../public/mailbuddy.png'
 import styles from './login.module.scss'
 import signIn from "../../firebase/auth/signin";
 import Head from "next/head";
+import Link from "next/link";
 
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -37,7 +35,6 @@ export default function Login(){
             setLoginFailed(true);
         }else{
             setLoginFailed(false);
-            // else successful
             console.log(result)
             return router.push("/")
         }
@@ -51,79 +48,65 @@ export default function Login(){
     };
 
     return(
-        <main>
-            <div style={{
-                height: "100vh",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center"
-            }}>
-                <div style={{borderRadius: "10%", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center", marginBottom: 25}}>
-                    <img src={"/full_logo.png"} alt="Logo" width={"50%"}/>
+        <div>
+            <div className={styles.logincontainer}>
+                <div className={styles.logorow}>
+                    <div className={styles.logobox}>
+                        <img src={"/full_logo.png"} alt="Logo" width={100}/>
+                    </div>
                 </div>
-                <Form
-                    name="basic"
-                    labelCol={{
-                        span: 8,
-                    }}
-                    wrapperCol={{
-                        span: 24,
-                    }}
-                    className={styles.loginform}
-                    initialValues={{
-                        remember: true,
-                    }}
-                    onFinish={onFinish}
-                    onFinishFailed={onFinishFailed}
-                    autoComplete="off"
-                    layout="vertical"
-                    onChange={() => { setLoginFailed(false) }}
-                >
-                    <Form.Item
-                    label="E-Mail"
-                    name="email"
-                    rules={[
-                        {
-                        required: true,
-                        message: 'Bitte geben Sie ihre E-Mail ein!',
-                        },
-                    ]}
-                    >
-                    <Input />
-                    </Form.Item>
 
-                    <Form.Item
-                    label="Password"
-                    name="password"
-                    rules={[
-                        {
-                        required: true,
-                        message: 'Bitte geben Sie ihr Password ein!',
-                        },
-                    ]}
-                    >
-                    <Input.Password />
-                    </Form.Item>
-
-                    <Alert style={{marginBottom: 20, display: (loginFailed)? "block": "none"}} message="Beim Anmelden ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
-
-                    <Form.Item
-                        wrapperCol={{
-                            offset: 0,
-                            span: 24,
+                <div className={styles.formContainer}>
+                    <div className={styles.formtitle}>Log in</div>
+                    <div className={styles.formexplanation}>Willkommen zurück. Bitte geben Sie unten Ihre Logindaten ein.</div>
+                    <Form
+                        name="basic"
+                        className={styles.loginform}
+                        initialValues={{
+                            remember: true,
                         }}
-                        style={{
-                            textAlign: "center"
-                        }}
+                        onFinish={onFinish}
+                        onFinishFailed={onFinishFailed}
+                        autoComplete="off"
+                        layout="vertical"
+                        onChange={() => { setLoginFailed(false) }}
                     >
-                        <Button type="primary" htmlType="submit">
-                            Anmelden
-                        </Button>
-                    </Form.Item>
-                </Form>
+                        <Form.Item
+                            label="E-Mail"
+                            name="email"
+                            className={styles.loginpart}
+                        >
+                            <Input className={styles.logininput} />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Passwort"
+                            name="password"
+                            className={styles.loginpart}
+                        >
+                            <Input.Password className={styles.logininput} />
+                        </Form.Item>
+
+                        <div className={styles.rememberrow}>
+                            <Checkbox name="remember">Eingeloggt bleiben</Checkbox>
+                            <Link href={"/passwordforgot"}>Passwort vergessen</Link>
+                        </div>
+
+                        <Alert style={{marginBottom: 20, display: (loginFailed)? "block": "none"}} message="Beim Anmelden ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
+
+                        <Form.Item className={styles.loginbutton}>
+                            <Button type="primary" htmlType="submit">
+                                Anmelden
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                    
+                    <div className={styles.signupnotice}>
+                        <div>Noch keinen Account?</div><Link className={styles.signuplink} href={"/register"}>Jetzt registrieren</Link>
+                    </div>
+                </div>
             </div>
-        </main>
+        </div>
     );
 }
 

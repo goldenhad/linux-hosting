@@ -5,7 +5,8 @@
       'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro',
       'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace;
   
-    --foreground-rgb: 0, 0, 0;
+    --foreground-rgb: #101828;
+    --foreground-rgb-secondary: #475467;
     --background-start-rgb: 214, 219, 220;
     --background-end-rgb: 255, 255, 255;
   
@@ -87,7 +88,7 @@
   
   body {
     color: rgb(var(--foreground-rgb));
-    background: rgba(217, 217, 227, 0.1);
+    background: white;
   }
   
   a {
@@ -101,3 +102,7 @@
     }
   }
   
+  .ant-layout-sider-children {
+    position: fixed !important;
+    width: 80px !important;
+}

@@ -4,12 +4,12 @@ import { db } from '../db';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
-import SidebarLayout from '../components/SidebarLayout';
+import SidebarLayout from '../components/Sidebar/SidebarLayout';
 import { useAuthContext } from '../components/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Usage } from '../firebase/types/Company';
 import { Profile } from '../firebase/types/Profile';
-import { arrayUnion, doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 

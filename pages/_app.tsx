@@ -28,9 +28,9 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ({
           <link rel="icon" type="image/x-icon" href="mailbuddy.ico" />
           <title>Siteware-Mailbuddy | mail assistant</title>
         </Head>
-        <main className={roboto.className}>
+        <div className={roboto.className}>
           <Component {...pageProps}/> 
-        </main>
+        </div>
       </>
     );
   }else{
@@ -42,9 +42,9 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ({
           <title>Siteware-Mailbuddy | mail assistant</title>
         </Head>
         <AuthContextProvider>
-          <main className={roboto.className}>
+          <div className={roboto.className}>
             <Component {...pageProps}/> 
-          </main>
+          </div>
         </AuthContextProvider>
       </>
     );

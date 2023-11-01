@@ -1,0 +1,48 @@
+.layout{
+    min-height: 100vh;
+
+    .sidebar {
+        background-color: #101828;
+
+        .logobox {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            margin-top: 25px;
+        }
+
+        .navigation {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 87vh;
+            background-color: #101828;
+
+            .primarymenu {
+                background-color: #101828;
+            }
+
+            .secondarymenu {
+                background-color: #101828;
+            }
+
+            .avatarcontainer {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                margin-top: 20px;
+            }
+        }
+    }
+
+    .layoutcontent{
+
+        .childrencontainer{
+            padding: 24px;
+            background: white;
+        }
+    }
+}

@@ -73,31 +73,6 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
   }, []);
 
 
-  const getAvatar = () => {
-    if(collapsed){
-      return(
-        <Link href={'/account'}>
-          <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
-            <Avatar size={30} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
-          </div>
-        </Link>
-      );
-    }else{
-      return(
-        <Link href={'/account'}>
-          <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", width: "100%" }}>
-            <Avatar size={30} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
-            <div style={{ display: "flex", flexDirection: "column", marginLeft: 10, color: 'rgba(255, 255, 255, 0.65)' }}>
-              <div style={{ fontWeight: "bold" }} >{handleEmptyString(props.user.username)}</div>
-              <div style={{ fontSize: 10 }} >{handleEmptyString(props.login.email)}</div>
-            </div>
-          </div>
-        </Link>
-      );
-    }
-  }
-
-
   return (
     <Layout
       style={{
@@ -106,12 +81,16 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
     >
       <Sider breakpoint={breakpoint} collapsedWidth={collapseWidth} collapsible collapsed={collapsed} onCollapse={(value) => {setCollapsed(value)}}>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", marginBottom: 25, marginTop: 25 }}>
-          <img style={{ borderRadius: 5 }} src="/mailbuddy.png" width={50} height={50} alt="Logo"/>
+          <img style={{ borderRadius: 0 }} src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
         </div>
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: '82vh' }}>
           
           <Menu theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
-          { getAvatar() }
+          <Link href={'/account'}>
+            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+              <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
+            </div>
+        </Link>
         </div>
         
       </Sider>

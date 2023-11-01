@@ -30,25 +30,6 @@ export default function Login(){
     const [ loginFailed, setLoginFailed ] = useState(false);
 
     const onFinish = async (values: any) => {
-        /* axios.post('/api/login', {
-            username: values.username,
-            password: values.password
-        })
-          .then(function (response) {
-            setLoginFailed(false);
-    
-            // Make sure we're in the browser
-            if (typeof window !== 'undefined') {
-                router.push('/');
-                return; 
-            }
-    
-        })
-          .catch(function (error) {
-            console.log(error);
-            setLoginFailed(true);
-        }); */
-
         const { result, error } = await signIn(values.email, values.password);
 
         if (error) {
@@ -78,10 +59,9 @@ export default function Login(){
                 justifyContent: "center",
                 alignItems: "center"
             }}>
-                <div style={{borderRadius: "10%", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                    <img src={"/mailbuddy.png"} alt="Logo" width={744/10} height={744/10}/>
+                <div style={{borderRadius: "10%", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center", marginBottom: 25}}>
+                    <img src={"/full_logo.png"} alt="Logo" width={"50%"}/>
                 </div>
-                <h2 style={{marginTop: 25, marginBottom: 50}} >Mailbuddy</h2>
                 <Form
                     name="basic"
                     labelCol={{
@@ -152,7 +132,7 @@ Login.getLayout = (page) => {
         <>
         <Head>
             <meta name="viewport" content="width=device-width, initial-scale=1" />
-            <link rel="icon" type="image/x-icon" href="mailbuddy.ico" />
+            <link rel="icon" type="image/x-icon" href="small_logo.ico" />
             <title>Siteware-Mailbuddy | mail assistant</title>
         </Head>
         <main>

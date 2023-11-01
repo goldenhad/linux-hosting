@@ -1,22 +1,15 @@
 import { Alert, Button, Card, Form, Input, Modal, Select, Space, Steps, Table, Tag, Typography, message } from 'antd';
 import { SettingOutlined, DeleteOutlined } from '@ant-design/icons';
 import styles from './list.profiles.module.scss'
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
-import { prisma } from '../../db'
 import { CombinedUser } from '../../helper/LoginTypes';
 import SidebarLayout from '../../components/SidebarLayout';
-import { JsonObject } from '@prisma/client/runtime/library';
 import { useRouter } from 'next/router';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
-import bcrypt from 'bcrypt';
-import AES from 'crypto-js/aes';
-import enc from 'crypto-js/enc-utf8';
 import { useAuthContext } from '../../components/context/AuthContext';
 import { Profile, ProfileSettings } from '../../firebase/types/Profile';
-import getDocument from '../../firebase/data/getData';
 import updateData from '../../firebase/data/updateData';
 import { arrayUnion } from 'firebase/firestore';
 import { handleEmptyArray, handleEmptyString } from '../../helper/architecture';

@@ -3,24 +3,17 @@ import styles from './edit.company.module.scss'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
-import Link from 'next/link';
-import { prisma } from '../../db'
-import { CombinedUser } from '../../helper/LoginTypes';
 import SidebarLayout from '../../components/SidebarLayout';
-import { JsonObject } from '@prisma/client/runtime/library';
 import { useRouter } from 'next/router';
-import { Company, Role, TokenUsage, User } from '@prisma/client';
 import { handleEmptyString } from '../../helper/architecture';
 import { useAuthContext } from '../../components/context/AuthContext';
-import getDocument, { getDocWhere } from '../../firebase/data/getData';
-const { Paragraph } = Typography;
+import { getDocWhere } from '../../firebase/data/getData';
+import updateData from '../../firebase/data/updateData';
 const { TextArea } = Input;
 
 
 export interface InitialProps {
   Data: { currentMonth: number, currentYear: number; };
-  quota: TokenUsage;
-  InitialState: CombinedUser;
 }
 
 function pad(number: number, size: number){
@@ -104,48 +97,37 @@ export default function Company(props: InitialProps) {
     }, [company])
 
     
-
-    
     const getCurrentUsage = () => {
         return company.Usage.find((elm, idx) => { return elm.month == props.Data.currentMonth && elm.year == props.Data.currentYear });
     }
 
     const editCompany = async (values: any) => {
-        //Define a default case for the error
-        let error = false;
-        //Define a array so save error-messages
-        let msg: any = [];
+        let comp = company;
+        comp.name = handleEmptyString(values.companyname);
+        comp.street = handleEmptyString(values.companystreet);
+        comp.city = handleEmptyString(values.companycity);
+        comp.postalcode = handleEmptyString(values.companypostalcode);
+        comp.country = handleEmptyString(values.companycountry);
+        comp.settings.background = handleEmptyString(values.companybackground);
 
-        axios.put(`/api/company/${user.Company}`, {
-            companyname: handleEmptyString(values.companyname),
-            companystreet: handleEmptyString(values.companystreet),
-            companycity: handleEmptyString(values.companycity),
-            companypostalcode: handleEmptyString(values.companypostalcode),
-            companycountry: handleEmptyString(values.companycountry),
-            companybackground: handleEmptyString(values.companybackground)
-        })
-        .then(function (response) {
-            //reload data
-            refreshData();
-        })
-        .catch(function (error) {
+        try{
+            await updateData("Company", user.Company, comp);
 
+            setErrMsg([]);
+            setIsErrVisible(false);
+            setEditSuccessfull(true);
+        } catch(e) {
             setErrMsg(["Speichern fehlgeschlagen!"]);
             setIsErrVisible(true);
-        });
-
-        setErrMsg([]);
-        setIsErrVisible(false);
-        setEditSuccessfull(true);
+        }
     }
 
     const getCompanyInput = () => {
-        let caps = role.capabilities;
-
         if(role.capabilities.projects.edit){
             return (<Form 
                 layout='vertical'
                 onFinish={editCompany}
+                onChange={() => {setIsErrVisible(false), setEditSuccessfull(false)}}
                 form={form}
             >
 
@@ -189,6 +171,7 @@ export default function Company(props: InitialProps) {
                             label: 'Deutschland',
                         },
                         ]}
+                        style={{ width: 150 }}
                     />
                 </Form.Item>
                 </Space>

@@ -1,23 +1,17 @@
 import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert } from 'antd';
 import styles from './index.module.scss'
-import { db, prisma } from '../db';
+import { db } from '../db';
 import axios from 'axios';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { CombinedUser } from '../helper/LoginTypes';
 import SidebarLayout from '../components/SidebarLayout';
-import { JsonObject } from '@prisma/client/runtime/library';
-import AES from 'crypto-js/aes';
-import enc from 'crypto-js/enc-utf8';
 import { ProfileSettings } from '../helper/ProfileTypes';
 import { useAuthContext } from '../components/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Company, Usage } from '../firebase/types/Company';
+import { Usage } from '../firebase/types/Company';
 import { Profile } from '../firebase/types/Profile';
-import updateData from '../firebase/data/updateData';
 import { arrayUnion, doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { useAsyncEffect } from '../helper/useAsyncEffect';
-import getData from '../firebase/data/getData';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 

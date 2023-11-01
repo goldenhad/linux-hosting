@@ -15,7 +15,7 @@ export default async function signUp(firstname, lastname, email, username, passw
         try {
             let usernameexistsquery = await getDocWhere('User', "username", "==", username);
             console.log(usernameexistsquery);
-            if(usernameexistsquery.result.size == 0){
+            if(usernameexistsquery.result.length == 0){
                 try {
                     result = await createUserWithEmailAndPassword(auth, email, password);
                     try{
@@ -48,9 +48,10 @@ export async function signUpUser(firstname, lastname, email, username, password,
         error = null;
         
         try {
+            console.log("Entering, User signup!");
             let usernameexistsquery = await getDocWhere('User', "username", "==", username);
-            console.log(usernameexistsquery);
-            if(usernameexistsquery.result.size == 0){
+            console.log(usernameexistsquery.result.length);
+            if(usernameexistsquery.result.length == 0){
                 try {
                     result = await createUserWithEmailAndPassword(auth, email, password);
                     try {

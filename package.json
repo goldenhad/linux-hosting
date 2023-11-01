@@ -6,7 +6,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@prisma/client": "^5.3.1",
     "@types/crypto-js": "^4.1.2",
     "antd": "^5.9.4",
     "axios": "^1.5.1",
@@ -14,9 +13,12 @@
     "cookies": "^0.8.0",
     "crypto-js": "^4.1.1",
     "dotenv": "^16.3.1",
+    "firebase": "^10.5.0",
+    "firebase-admin": "^11.11.0",
     "next": "latest",
+    "nodemailer": "^6.9.7",
+    "nookies": "^2.5.2",
     "openai": "^4.11.0",
-    "prisma": "^5.3.1",
     "react": "^18.2.0",
     "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0"

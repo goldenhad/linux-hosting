@@ -1,16 +1,15 @@
 import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert } from 'antd';
 import styles from './index.module.scss'
-import { prisma } from '../db';
+import { db } from '../db';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
-import { CombinedUser } from '../helper/LoginTypes';
 import SidebarLayout from '../components/SidebarLayout';
-import { Profile, Quota, TokenUsage } from '@prisma/client';
-import { JsonObject } from '@prisma/client/runtime/library';
-import AES from 'crypto-js/aes';
-import enc from 'crypto-js/enc-utf8';
-import { ProfileSettings } from '../helper/ProfileTypes';
+import { useAuthContext } from '../components/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { Usage } from '../firebase/types/Company';
+import { Profile } from '../firebase/types/Profile';
+import { arrayUnion, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -20,11 +19,7 @@ export interface InitialProps {
   Data: {
     currentMonth: number,
     currentYear: number,
-    profiles: Array<Profile & {parsedSettings: ProfileSettings}>,
-    usage: TokenUsage,
-    quota: Quota
   };
-  InitialState: CombinedUser;
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -33,115 +28,72 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   //Get the cookies from the current request
   const { cookies } = req;
 
-  //Check if the login cookie is set
-  if (!cookies.login) {
-      //Redirect if the cookie is not set
-      res.writeHead(302, { Location: "/login" });
-      res.end();
+  let datum = new Date();
 
-      return { props: { InitialState: {} } };
-  } else {
-      let datum = new Date();
-      let loginobj = JSON.parse(Buffer.from(cookies.login, "base64").toString("ascii"));
-
-      try{
-        let profiles = await prisma.profile.findMany({
-          where: {
-            userId: loginobj.id,
-          }
-        });
-  
-        let parsedProfiles: Array<Profile & {parsedSettings: ProfileSettings} > = [];
-  
-        const pepper = process.env.PEPPER;
-  
-        profiles.forEach((profile: Profile) => {
-            let decryptedBaseByte = AES.decrypt(profile.settings, profile.salt + pepper);
-            let decryptedBase = decryptedBaseByte.toString(enc);
-            let decryptedSettings = JSON.parse(decryptedBase);
-  
-            let singleParsed = {...profile, parsedSettings: decryptedSettings as ProfileSettings};
-  
-            parsedProfiles.push(singleParsed);
-        });
-  
-        
-        let usage = await prisma.tokenUsage.findFirst({
-          where: {
-            companyId: loginobj.company.id,
-            month: datum.getMonth()+1,
-            year: datum.getFullYear()
-          }
-        });
-  
-        if( !usage ){
-          usage = await prisma.tokenUsage.create({
-            data: {
-              month: datum.getMonth()+1,
-              year: datum.getFullYear(),
-              amount: 0,
-              companyId: loginobj.company.id
-            }
-          });
+  return {
+    props: {
+        Data: {
+          currentMonth: datum.getMonth() + 1,
+          currentYear: datum.getFullYear(),
         }
-  
-        return {
-            props: {
-                InitialState: loginobj,
-                Data: {
-                  currentMonth: datum.getMonth() + 1,
-                  currentYear: datum.getFullYear(),
-                  profiles: parsedProfiles,
-                  quota: loginobj.company.quota,
-                  usage: usage
-                }
-            },
-        };
-      } catch(e) {
-        res.writeHead(302, { Location: "/logout" });
-        res.end();
+    },
+  };
 
-        return { props: { InitialState: {} } };
-      }
-  }
+  
 };
 
 
 export default function Home(props: InitialProps) {
+  const { login, user, company, role, quota } = useAuthContext();
   const [ form ] = Form.useForm();
   const [ isAnswerVisible, setIsAnswerVisible ] = useState(false);
   const [ isLoaderVisible, setIsLoaderVisible ] = useState(false);
   const [ isAnswerCardVisible, setIsAnswerCardvisible ] = useState(false);
   const [ answer, setAnswer ] = useState("");
   const [ formDisabled, setFormDisabled ] = useState(false);
-  const [ currentUsage, setCurrentUsage ] = useState(props.Data.usage)
   const [ quotaOverused, setQuotaOverused ] =  useState(!false);
   const [ tokens, setTokens ] = useState("");
 
-  useEffect(() => {
-    console.log(props.Data);
-    if(currentUsage.amount >= props.Data.quota.tokens){
-      setQuotaOverused(true);
-    }else{
-      setQuotaOverused(false);
-    }
-  }, [currentUsage])
+  
+  const router = useRouter();
 
-  const style = [
-    "Professionell",
-    "Formell",
-    "Sachlich",
-    "Komplex",
-    "Einfach",
-    "Konservativ",
-    "Modern",
-    "Wissenschaftlich",
-    "Fachspezifisch",
-    "Abstrakt",
-    "Klar",
-    "Direkt",
-    "Rhetorisch",
-    "Ausdrucksstark"
+  useEffect(() => {
+    console.log(user);
+  }, [company])
+
+  useEffect(() => {
+
+    const createData = async () => {
+      await updateDoc(doc(db, "Company", user.Company), { Usage: arrayUnion({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: 0 }) });
+    }
+      
+
+    let currentUsage = company.Usage.find((Usge: Usage) => {
+      return Usge.month == props.Data.currentMonth && Usge.year == props.Data.currentYear;
+    });
+
+    if(currentUsage){
+      if(currentUsage.amount > quota.tokens){
+        setQuotaOverused(true);
+      }else{
+        setQuotaOverused(false);
+      }
+    }else{
+      console.log("no usage")
+      createData();
+    }
+
+    if (login == null) router.push("/login");
+      
+}, [login]);
+
+  const lengths = [
+    "So kurz wie möglich",
+    "Sehr kurz",
+    "Kurz",
+    "Mittellang",
+    "Detailliert",
+    "Umfangreich und sehr detailliert"
   ];
 
   const motive = [
@@ -153,42 +105,6 @@ export default function Home(props: InitialProps) {
     "Umgangssprachlich",
     "Unkonventionell",
     "Emphatisch"
-  ];
-
-  const emotions = [
-    "Humorvoll",
-    "Nüchtern",
-    "Sentimental",
-    "Objektiv",
-    "Subjektiv",
-    "Ehrfürchtig",
-    "Emotionell",
-    "Lebhaft",
-    "Freundlich",
-    "Höflich",
-    "Selbstbewusst",
-    "Sympathisch",
-    "Kreativ",
-    "Enthusiastisch",
-    "Eloquent",
-    "Prägnant",
-    "Blumig",
-    "Poetisch",
-    "Pathetisch",
-    "Scherzhaft",
-    "Mystisch",
-    "Ironisch",
-    "Sarkastisch",
-    "Despektierlich"
-  ];
-
-  const lengths = [
-    "So kurz wie möglich",
-    "Sehr kurz",
-    "Kurz",
-    "Mittellang",
-    "Detailliert",
-    "Umfangreich und sehr detailliert"
   ];
 
 
@@ -207,7 +123,7 @@ export default function Home(props: InitialProps) {
 
     console.log(values);
 
-    let profile = props.Data.profiles.find((singleProfile: Profile) => {
+    let profile = user.profiles.find((singleProfile: Profile) => {
       return singleProfile.name == values.profile;
     });
 
@@ -220,34 +136,47 @@ export default function Home(props: InitialProps) {
         setTokens("");
   
         let answer = await axios.post('/api/prompt/generate', {
-          personal: profile.parsedSettings.personal,
+          personal: profile.settings.personal,
           dialog: values.dialog,
           continue: values.continue,
-          address: profile.parsedSettings.salutation,
-          style: profile.parsedSettings.stil,
-          order: profile.parsedSettings.order,
-          emotions: profile.parsedSettings.emotions,
+          address: values.salutation,
+          style: profile.settings.stil,
+          order: values.order,
+          emotions: profile.settings.emotions,
           length: values.length
         });
-  
-        console.log(answer.data);
-  
+    
         if(answer.data){
           setIsLoaderVisible(false);
           setIsAnswerVisible(true);
           setAnswer(answer.data.message);
           setTokens(answer.data.tokens);
   
-          let caps = props.InitialState.role.capabilities as JsonObject;
-  
-          if(!caps.superadmin){
-            await axios.put(`/api/tokens/${props.InitialState.company.id}`, {
-              amount: answer.data.tokens,
-              month: props.Data.currentMonth,
-              year: props.Data.currentYear
-            });
+          let usageidx = company.Usage.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});
+          
+          if(usageidx != -1){
+            let usageupdates = company.Usage;
+            usageupdates[usageidx].amount += answer.data.tokens;
+            await updateDoc(doc(db, "Company", user.Company), { Usage: usageupdates});
 
-            setCurrentUsage(currentUsage + answer.data.tokens)
+            if(usageupdates[usageidx].amount > quota.tokens){
+              setQuotaOverused(true);
+            }
+          }else{
+            let usageupdates = [];
+            usageupdates.push({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: answer.data.tokens });
+            await updateDoc(doc(db, "Company", user.Company), { Usage: usageupdates});
+          }
+
+          let userusageidx = user.usedCredits.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});
+          if(userusageidx != -1){
+            let usageupdates = user.usedCredits;
+            usageupdates[usageidx].amount += answer.data.tokens;
+            await updateDoc(doc(db, "User", login.uid), { usedCredits: usageupdates});
+          }else{
+            let usageupdates = [];
+            usageupdates.push({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: answer.data.tokens });
+            await updateDoc(doc(db, "User", login.uid), { usedCredits: usageupdates});
           }
         }
   
@@ -263,9 +192,9 @@ export default function Home(props: InitialProps) {
   }
 
   const getProfiles = () => {
-    let profileOptions =  props.Data.profiles.map((singleProfile: Profile) => {
+    let profileOptions =  user.profiles.map((singleProfile: Profile, idx: number) => {
       return {
-        key: singleProfile.id,
+        key: idx,
         value: singleProfile.name
       }
     });
@@ -274,59 +203,71 @@ export default function Home(props: InitialProps) {
   }
 
   const getPrompt = () => {
-    console.log(props.Data.profiles)
-    if(!(props.Data.profiles?.length > 0)){
-      return (
-        <Result
-          title="Bitte definiere zuerst ein Profil"
-          extra={
-            <Button href='/profiles' type="primary" key="console">
-              Profil erstellen
-            </Button>
-          }
-        />
-      );
-    }else{
-      return(
-        <Card title={"Verlauf"}>
-          <Form.Item label={<b>Profil</b>} name="profile">
-                <Select
-                showSearch
-                placeholder="Wählen Sie ein Profil aus"
-                optionFilterProp="children"
-                onChange={(values: any) => {console.log(values)}}
-                onSearch={() => {}}
-                options={getProfiles()}
-                disabled={formDisabled || quotaOverused}
-              />
-            </Form.Item>
-            <Form.Item label={<b>Bisheriger Dialog</b>} name="dialog">
-              <TextArea rows={10} placeholder="Bisheriger Dialog..." disabled={formDisabled || quotaOverused}/>
-            </Form.Item>
+    if(user){
+      if(!(user.profiles?.length > 0)){
+        return (
+          <Result
+            title="Bitte definieren Sie zuerst ein Profil"
+            extra={
+              <Button href='/profiles' type="primary" key="console">
+                Profil erstellen
+              </Button>
+            }
+          />
+        );
+      }else{
+        return(
+          <Card title={"Verlauf"}>
+            <Form.Item label={<b>Profil</b>} name="profile">
+                  <Select
+                  showSearch
+                  placeholder="Wählen Sie ein Profil aus"
+                  optionFilterProp="children"
+                  onChange={(values: any) => {console.log(values)}}
+                  onSearch={() => {}}
+                  options={getProfiles()}
+                  disabled={formDisabled || quotaOverused}
+                />
+              </Form.Item>
+              <Form.Item label={<b>Bisheriger Dialog</b>} name="dialog">
+                <TextArea rows={10} placeholder="Bisheriger Dialog..." disabled={formDisabled || quotaOverused}/>
+              </Form.Item>
 
-            <Form.Item label={<b>Wie soll der Dialog fortgesetzt werden?</b>} name="continue">
-              <TextArea rows={5} placeholder="Formulieren Sie kurz, wie der Dialog fortgesetzt werden soll und was sie damit erreichen wollen?" disabled={formDisabled || quotaOverused}/>
-            </Form.Item>
+              <Form.Item label={<b>Ansprache</b>} name="address">
+                    <Select placeholder="Bitte wählen Sie die Form der Ansprache aus..." options={[
+                        {label: "Du", value: "du", },
+                        {label: "Sie", value: "sie", },
+                    ]}/>
+                </Form.Item>
 
-            <Form.Item label={<b>Länge der Antwort</b>} name="length">
-              <Select placeholder="Wie lang soll die erzeuge Antwort sein?" options={listToOptions(lengths)} disabled={formDisabled || quotaOverused}/>
-            </Form.Item>
-
-            <div className={styles.submitrow}>
-              <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>Antwort generieren</Button>
-            </div>
-            <div className={styles.tokenalert}>
-              {
-                (quotaOverused)? <Alert message={`Ihr Tokenbudget ist ausgeschöpft. Ihr Budget setzt sich am 01.${props.Data.currentMonth+1}.${props.Data.currentYear} zurück. Wenn Sie weitere Tokens benötigen, können Sie diese in ihrem Konto dazubuchen.`} type="error" />: <></>
-              }
-            </div>
-        </Card>
-      );
+                <Form.Item label={<b>Einordnung des Gesprächpartners</b>} name="order">
+                    <Select placeholder="Wie orden Sie ihren Gesprächpartner ein?" options={listToOptions(motive)} mode="multiple" allowClear/>
+                </Form.Item>
+  
+              <Form.Item label={<b>Wie soll der Dialog fortgesetzt werden?</b>} name="continue">
+                <TextArea rows={5} placeholder="Formulieren Sie kurz, wie der Dialog fortgesetzt werden soll und was sie damit erreichen wollen?" disabled={formDisabled || quotaOverused}/>
+              </Form.Item>
+  
+              <Form.Item label={<b>Länge der Antwort</b>} name="length">
+                <Select placeholder="Wie lang soll die erzeuge Antwort sein?" options={listToOptions(lengths)} disabled={formDisabled || quotaOverused}/>
+              </Form.Item>
+  
+              <div className={styles.submitrow}>
+                <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>Antwort generieren</Button>
+              </div>
+              <div className={styles.tokenalert}>
+                {
+                  (quotaOverused)? <Alert message={`Ihr Tokenbudget ist ausgeschöpft. Ihr Budget setzt sich am 01.${props.Data.currentMonth+1}.${props.Data.currentYear} zurück. Wenn Sie weitere Tokens benötigen, können Sie diese in ihrem Konto dazubuchen.`} type="error" />: <></>
+                }
+              </div>
+          </Card>
+        );
+      }
     }
   }
 
   return (
-    <SidebarLayout capabilities={props.InitialState.role.capabilities as JsonObject}>
+    <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
       <main className={styles.main}>
         <Space direction='vertical' size={"large"}>
           <Form layout='vertical' onFinish={generateAnswer} onChange={() => {setIsAnswerCardvisible(false); setIsAnswerVisible(false); setIsLoaderVisible(false)}} form={form}>

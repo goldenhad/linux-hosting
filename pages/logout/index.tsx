@@ -1,5 +1,9 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import Cookies from 'cookies';
+import { useEffect } from 'react';
+import { useAuthContext } from '../../components/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import signUserOut from '../../firebase/auth/signout';
 
 
 
@@ -9,38 +13,35 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     //Get the cookies from the current request
     const {cookies} = req
     
-    //Check if the login cookie is set
-    if( !cookies.login ){
-        //Redirect if the cookie is not set
-        
+    const currCookies = new Cookies(req, res);
+    currCookies.set('login', "", {
+        httpOnly: true,
+        maxAge: 0 //Used for deletion
+    });
 
-        return {
-            redirect: {
-              permanent: false,
-              destination: "/",
-            },
-            props: { InitialState: {} }
-          }
-    }else{
-        const currCookies = new Cookies(req, res);
-        currCookies.set('login', "", {
-            httpOnly: true,
-            maxAge: 0 //Used for deletion
-        });
-
-        return {
-            redirect: {
-              permanent: false,
-              destination: "/login",
-            },
-            props: { InitialState: {} }
-          }
-    }
-
+    return {
+      props: {}
+    };
 }
 
 export default function Logout(){
-    return (<div>
-        <h1>Logout</h1>
-    </div>);
+  const { login, user, company, role, quota } = useAuthContext();
+  const router = useRouter();
+
+  const handleLogOut = async () => {
+    const { result, error } = await signUserOut();
+  }
+
+  useEffect(() => {
+    if(login == null) router.push("/login");
+
+    
+    handleLogOut();
+
+    //router.push('/login');
+  }, [login]);
+
+  return (<div>
+      <h1>Logout</h1>
+  </div>);
 }

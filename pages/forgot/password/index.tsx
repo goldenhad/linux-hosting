@@ -120,6 +120,7 @@ export default function Forgot_Password(){
                     {getResetForm()}
                 </div>
             </div>
+            <div className={styles.copyrightfooter}>© Mailbuddy 2023</div>
         </div>
     );
 }

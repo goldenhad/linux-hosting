@@ -123,6 +123,7 @@ export default function Login(){
                     </div>
                 </div>
             </div>
+            <div className={styles.copyrightfooter}>© Mailbuddy 2023</div>
         </div>
     );
 }

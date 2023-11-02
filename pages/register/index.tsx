@@ -288,49 +288,51 @@ export default function Register(props){
                         <Input className={styles.logininput} />
                     </Form.Item>
 
-                    <Form.Item
-                        label="Password"
-                        name="password"
-                        rules={[
-                            {
-                            required: true,
-                            message: 'Bitte geben Sie ein Password ein!',
-                            },
-                        ]}
-                        className={styles.loginpart}
-                    >
-                        <Input.Password className={styles.logininput} />
-                    </Form.Item>
+                    <Space.Compact block>
+                        <Form.Item
+                            label="Password"
+                            name="password"
+                            rules={[
+                                {
+                                required: true,
+                                message: 'Bitte geben Sie ein Password ein!',
+                                },
+                            ]}
+                            className={styles.loginpart}
+                        >
+                            <Input.Password className={styles.logininput_left} />
+                        </Form.Item>
 
-                    <Form.Item
-                        label="Password wiederholen"
-                        name="passwordwdhl"
-                        rules={[
-                            {
-                            required: true,
-                            message: 'Bitte wiederholen Sie das Passwort!',
-                            },
-                            ({ getFieldValue }) => ({
-                                validator(_, value) {
-                                if (!value || getFieldValue('password') === value) {
-                                    return Promise.resolve();
-                                }
-                                return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
+                        <Form.Item
+                            label="Password wiederholen"
+                            name="passwordwdhl"
+                            rules={[
+                                {
+                                required: true,
+                                message: 'Bitte wiederholen Sie das Passwort!',
                                 },
-                            }),
-                            () => ({
-                                validator(_, value: string) {
-                                if (value.length >= 6) {
-                                    return Promise.resolve();
-                                }
-                                return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
-                                },
-                            }),
-                        ]}
-                        className={styles.loginpart}
-                    >
-                        <Input.Password className={styles.logininput} />
-                    </Form.Item>
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                    if (!value || getFieldValue('password') === value) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
+                                    },
+                                }),
+                                () => ({
+                                    validator(_, value: string) {
+                                    if (value.length >= 6) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
+                                    },
+                                }),
+                            ]}
+                            className={styles.loginpart}
+                        >
+                            <Input.Password className={styles.logininput_right} />
+                        </Form.Item>
+                    </Space.Compact>
 
                     <Form.Item
                         label="Name des Unternehmens"
@@ -418,8 +420,8 @@ export default function Register(props){
                     <div className={styles.formexplanation}>"Willkommen an Bord! Perfektioniere deine E-Mail-Kunst – starte mit dem Registrierungsformular direkt unter diesem Text."</div>
                     {getForm()}
                 </div>
-                
             </div>
+            <div className={styles.copyrightfooter}>© Mailbuddy 2023</div>
         </div>
     );
 }

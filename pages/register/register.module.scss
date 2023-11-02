@@ -51,6 +51,8 @@
             font-size: 16px;
             line-height: 24px;
             margin-bottom: 32px;
+            width: 720px;
+            text-align: center;
         }
 
         .loginform {
@@ -65,8 +67,25 @@
 
             .logininput{
                 background-color: white;
-                padding: 10px 14px 10px 14px;
                 border-radius: 8px;
+                padding: 10px 14px 10px 14px;
+
+                &_left{
+                    border-top-right-radius: 0px;
+                    border-bottom-right-radius: 0px;
+                    padding: 10px 14px 10px 14px;
+                }
+
+                &_middle{
+                    border-radius: 0px;
+                    padding: 10px 14px 10px 14px;
+                }
+
+                &_right{
+                    border-top-left-radius: 0px;
+                    border-bottom-left-radius: 0px;
+                    padding: 10px 14px 10px 14px;
+                }
             }
 
             .rememberrow{
@@ -108,20 +127,5 @@
             }
         }
 
-    }
-
-    .googleloginbutton{
-        width: 360px;
-        height: 44px;
-        margin-bottom: 32px;
-
-        button {
-            width: 360px;
-            height: 44px;
-            font-weight: 700;
-            font-size: 16px;
-            line-height: 24px;
-            padding: 10px 18px 10px 18px;
-        }
     }
 }

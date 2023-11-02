@@ -3,7 +3,7 @@ import { GetServerSideProps } from "next";
 import { Component, useState } from "react";
 import { Alert, Button, Checkbox, Form, Input } from 'antd';
 import styles from './login.module.scss'
-import signIn from "../../firebase/auth/signin";
+import signIn, { signInWithGoogle } from "../../firebase/auth/signin";
 import Head from "next/head";
 import Link from "next/link";
 
@@ -38,8 +38,19 @@ export default function Login(){
             console.log(result)
             return router.push("/")
         }
+    };
 
-        
+    const googleOnline = async (values: any) => {
+        const { result, error } = await signInWithGoogle();
+
+        if (error) {
+            console.log(error);
+            setLoginFailed(true);
+        }else{
+            setLoginFailed(false);
+            console.log(result)
+            return router.push("/")
+        }
     };
 
     const onFinishFailed = (errorInfo: any) => {
@@ -89,10 +100,10 @@ export default function Login(){
 
                         <div className={styles.rememberrow}>
                             <Checkbox name="remember">Eingeloggt bleiben</Checkbox>
-                            <Link href={"/passwordforgot"}>Passwort vergessen</Link>
+                            <Link href={"/forgot/password"}>Passwort vergessen</Link>
                         </div>
 
-                        <Alert style={{marginBottom: 20, display: (loginFailed)? "block": "none"}} message="Beim Anmelden ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
+                        <Alert style={{marginBottom: 20, marginTop: 20, display: (loginFailed)? "block": "none"}} message="Beim Anmelden ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
 
                         <Form.Item className={styles.loginbutton}>
                             <Button type="primary" htmlType="submit">
@@ -100,6 +111,12 @@ export default function Login(){
                             </Button>
                         </Form.Item>
                     </Form>
+
+                    <div className={styles.googleloginbutton}>
+                        <Button onClick={googleOnline} icon={<img src={"/Social icon.svg"} alt="google" width={10}></img>}>
+                            Mit Google anmelden
+                        </Button>
+                    </div>
                     
                     <div className={styles.signupnotice}>
                         <div>Noch keinen Account?</div><Link className={styles.signuplink} href={"/register"}>Jetzt registrieren</Link>

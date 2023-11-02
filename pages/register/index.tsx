@@ -5,8 +5,7 @@ import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 import { Alert, Button, Checkbox, Form, Input, Space } from 'antd';
 import logo from '../../public/mailbuddy.png'
-import styles from './login.module.scss'
-import signIn from "../../firebase/auth/signin";
+import styles from './register.module.scss'
 import signUp, { signUpUser } from "../../firebase/auth/signup";
 import Head from "next/head";
 
@@ -96,12 +95,6 @@ export default function Register(props){
             // Hier muss Formular rein für den User...
             return (<Form
                     name="basic"
-                    labelCol={{
-                        span: 24,
-                    }}
-                    wrapperCol={{
-                        span: 24,
-                    }}
                     className={styles.loginform}
                     initialValues={{
                         remember: true,
@@ -113,7 +106,7 @@ export default function Register(props){
                     onChange={() => { setLoginFailed(false) }}
                     form={registerUserForm}
                 >
-                    <Space.Compact style={{width: "100%"}} block>
+                    <Space.Compact block>
                         <Form.Item
                             label="Vorname"
                             name="firstname"
@@ -124,8 +117,9 @@ export default function Register(props){
                                 message: 'Bitte geben Sie einen Vornamen ein!',
                                 },
                             ]}
+                            className={styles.loginpart}
                             >
-                            <Input disabled={true} />
+                            <Input className={styles.logininput} disabled={true} />
                         </Form.Item>
 
                         <Form.Item
@@ -138,8 +132,9 @@ export default function Register(props){
                                 message: 'Bitte geben Sie einen Nachnamen ein!',
                                 },
                             ]}
+                            className={styles.loginpart}
                             >
-                            <Input disabled={true} />
+                            <Input className={styles.logininput} disabled={true} />
                         </Form.Item>
                     </Space.Compact>
 
@@ -152,8 +147,9 @@ export default function Register(props){
                             message: 'Bitte geben Sie ein E-Mail ein!',
                             },
                         ]}
+                        className={styles.loginpart}
                         >
-                        <Input disabled={true} />
+                        <Input className={styles.logininput} disabled={true} />
                     </Form.Item>
 
                     <Form.Item
@@ -165,8 +161,9 @@ export default function Register(props){
                             message: 'Bitte geben Sie einen Usernamen ein!',
                             },
                         ]}
+                        className={styles.loginpart}
                         >
-                        <Input />
+                        <Input className={styles.logininput} />
                     </Form.Item>
 
                     <Form.Item
@@ -178,8 +175,9 @@ export default function Register(props){
                             message: 'Bitte geben Sie ein Password ein!',
                             },
                         ]}
+                        className={styles.loginpart}
                         >
-                        <Input.Password />
+                        <Input.Password className={styles.logininput} />
                         </Form.Item>
 
                     <Form.Item
@@ -198,22 +196,23 @@ export default function Register(props){
                                 return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
                                 },
                             }),
+                            () => ({
+                                validator(_, value: string) {
+                                if (value.length >= 6) {
+                                    return Promise.resolve();
+                                }
+                                return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
+                                },
+                            }),
                         ]}
+                        className={styles.loginpart}
                         >
-                        <Input.Password />
+                        <Input.Password className={styles.logininput} />
                     </Form.Item>
 
                     <Alert style={{marginBottom: 20, display: (loginFailed)? "block": "none"}} message="Beim Registrieren ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
 
-                    <Form.Item
-                        wrapperCol={{
-                            offset: 0,
-                            span: 24,
-                        }}
-                        style={{
-                            textAlign: "center"
-                        }}
-                    >
+                    <Form.Item className={styles.loginbutton}>
                         <Button type="primary" htmlType="submit">
                             Registrieren
                         </Button>
@@ -222,16 +221,7 @@ export default function Register(props){
         }else{
             return (<Form
                     name="basic"
-                    labelCol={{
-                        span: 24,
-                    }}
-                    wrapperCol={{
-                        span: 24,
-                    }}
                     className={styles.loginform}
-                    initialValues={{
-                        remember: true,
-                    }}
                     onFinish={onFinishRegisterCompany}
                     onFinishFailed={onFinishFailed}
                     autoComplete="off"
@@ -249,8 +239,9 @@ export default function Register(props){
                                 message: 'Bitte geben Sie einen Vornamen ein!',
                                 },
                             ]}
-                            >
-                            <Input  />
+                            className={styles.loginpart}
+                        >
+                            <Input className={styles.logininput_left} />
                         </Form.Item>
 
                         <Form.Item
@@ -263,8 +254,9 @@ export default function Register(props){
                                 message: 'Bitte geben Sie einen Nachnamen ein!',
                                 },
                             ]}
-                            >
-                            <Input />
+                            className={styles.loginpart}
+                        >
+                            <Input className={styles.logininput_right} />
                         </Form.Item>
                     </Space.Compact>
 
@@ -277,8 +269,9 @@ export default function Register(props){
                             message: 'Bitte geben Sie ein E-Mail ein!',
                             },
                         ]}
-                        >
-                        <Input />
+                        className={styles.loginpart}
+                    >
+                        <Input className={styles.logininput} />
                     </Form.Item>
 
                     <Form.Item
@@ -290,8 +283,9 @@ export default function Register(props){
                             message: 'Bitte geben Sie einen Usernamen ein!',
                             },
                         ]}
-                        >
-                        <Input />
+                        className={styles.loginpart}
+                    >
+                        <Input className={styles.logininput} />
                     </Form.Item>
 
                     <Form.Item
@@ -303,9 +297,10 @@ export default function Register(props){
                             message: 'Bitte geben Sie ein Password ein!',
                             },
                         ]}
-                        >
-                        <Input.Password />
-                        </Form.Item>
+                        className={styles.loginpart}
+                    >
+                        <Input.Password className={styles.logininput} />
+                    </Form.Item>
 
                     <Form.Item
                         label="Password wiederholen"
@@ -323,9 +318,18 @@ export default function Register(props){
                                 return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
                                 },
                             }),
+                            () => ({
+                                validator(_, value: string) {
+                                if (value.length >= 6) {
+                                    return Promise.resolve();
+                                }
+                                return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
+                                },
+                            }),
                         ]}
-                        >
-                        <Input.Password />
+                        className={styles.loginpart}
+                    >
+                        <Input.Password className={styles.logininput} />
                     </Form.Item>
 
                     <Form.Item
@@ -337,8 +341,9 @@ export default function Register(props){
                             message: 'Bitte geben Sie einen Namen für Ihr Unternehmen ein!',
                             },
                         ]}
+                        className={styles.loginpart}
                     >
-                        <Input />
+                        <Input className={styles.logininput} />
                     </Form.Item>
 
                     <Space.Compact style={{width: "100%"}} block>
@@ -352,8 +357,9 @@ export default function Register(props){
                                 message: 'Bitte geben Sie einen Namen für Ihr Unternehmen ein!',
                                 },
                             ]}
+                            className={styles.loginpart}
                             >
-                            <Input />
+                            <Input className={styles.logininput_left} />
                         </Form.Item>
 
                         <Form.Item
@@ -366,8 +372,9 @@ export default function Register(props){
                                 message: 'Bitte geben Sie einen Namen für Ihr Unternehmen ein!',
                                 },
                             ]}
+                            className={styles.loginpart}
                             >
-                            <Input />
+                            <Input className={styles.logininput_middle} />
                         </Form.Item>
 
                         <Form.Item
@@ -380,22 +387,15 @@ export default function Register(props){
                                 message: 'Bitte geben Sie einen Namen für Ihr Unternehmen ein!',
                                 },
                             ]}
+                            className={styles.loginpart}
                             >
-                            <Input />
+                            <Input className={styles.logininput_right} />
                         </Form.Item>
                     </Space.Compact>
 
                     <Alert style={{marginBottom: 20, display: (loginFailed)? "block": "none"}} message="Beim Registrieren ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
 
-                    <Form.Item
-                        wrapperCol={{
-                            offset: 0,
-                            span: 24,
-                        }}
-                        style={{
-                            textAlign: "center"
-                        }}
-                    >
+                    <Form.Item className={styles.loginbutton}>
                         <Button type="primary" htmlType="submit">
                             Registrieren
                         </Button>
@@ -405,21 +405,22 @@ export default function Register(props){
     }
 
     return(
-        <main>
-            <div style={{
-                height: "100vh",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center"
-            }}>
-                <div style={{borderRadius: "10%", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                    <img src={"/mailbuddy.png"} alt="Logo" width={744/10} height={744/10}/>
+        <div>
+            <div className={styles.logincontainer}>
+                <div className={styles.logorow}>
+                    <div className={styles.logobox}>
+                        <img src={"/full_logo.png"} alt="Logo" width={100}/>
+                    </div>
                 </div>
-                <h2 style={{marginTop: 25, marginBottom: 50}} >Mailbuddy</h2>
-                {getForm()}
+
+                <div className={styles.formContainer}>
+                    <div className={styles.formtitle}>Registrieren</div>
+                    <div className={styles.formexplanation}>"Willkommen an Bord! Perfektioniere deine E-Mail-Kunst – starte mit dem Registrierungsformular direkt unter diesem Text."</div>
+                    {getForm()}
+                </div>
+                
             </div>
-        </main>
+        </div>
     );
 }
 

@@ -112,7 +112,7 @@ export default function Forgot_Password(){
             <div className={styles.logincontainer}>
                 <div className={styles.logorow}>
                     <div className={styles.logobox}>
-                        <img src={"/full_logo.png"} alt="Logo" width={100}/>
+                        <img src={"/logo.svg"} alt="Logo" width={100}/>
                     </div>
                 </div>
 

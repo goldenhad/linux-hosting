@@ -139,7 +139,7 @@ export default function Home(props: InitialProps) {
           personal: profile.settings.personal,
           dialog: values.dialog,
           continue: values.continue,
-          address: values.salutation,
+          address: values.address,
           style: profile.settings.stil,
           order: values.order,
           emotions: profile.settings.emotions,
@@ -171,7 +171,7 @@ export default function Home(props: InitialProps) {
           let userusageidx = user.usedCredits.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});
           if(userusageidx != -1){
             let usageupdates = user.usedCredits;
-            usageupdates[usageidx].amount += answer.data.tokens;
+            usageupdates[userusageidx].amount += answer.data.tokens;
             await updateDoc(doc(db, "User", login.uid), { usedCredits: usageupdates});
           }else{
             let usageupdates = [];

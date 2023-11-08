@@ -8,6 +8,8 @@ services:
         image: mailbuddy
         ports:
             - '3002:3000'
+        volumes:
+            - prompt_stats.log:prompt_stats.log
         networks:
             - mailbuddynetwork
             - proxynetwork

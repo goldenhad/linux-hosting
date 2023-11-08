@@ -1,5 +1,6 @@
 .layout{
     min-height: 100vh;
+    background-color: #fff;
 
     .sidebar {
         background-color: #101828;
@@ -41,8 +42,22 @@
     .layoutcontent{
 
         .childrencontainer{
-            padding: 24px;
+            padding: 30px;
             background: white;
         }
     }
+
+
+    
 }
+
+.sidebariconsvg > svg{
+    size: 3px;
+    height: 21px;
+    width: 20px;
+    transform: translate(-2px, 3px);
+    fill: transparent;
+    color: inherit;
+    stroke: inherit;
+}
+

@@ -373,13 +373,12 @@ export default function Company(props: InitialProps) {
                     <Card title={`Ihre Firma`} bordered={true}>
                         {getCompanyInput()}
                     </Card>
-                    <Card title={"Credits"} bordered={true}>
-                        <h2>Verbrauchte Credits (seit 01.{pad(props.Data.currentMonth, 2)}.{props.Data.currentYear})</h2>
+                    <Card title={"Tokens"} bordered={true}>
+                        <h2>Verbrauchte Tokens (seit 01.{pad(props.Data.currentMonth, 2)}.{props.Data.currentYear})</h2>
                         <div className={styles.quotarow}>
                             {/* <div className={styles.quota}>{}</div> */}
-                            
-                            <Tooltip title={`${getCurrentUsage().amount} Credits von ${quota.tokens} verbraucht.`}>
-                                <Progress className={styles.quotaprogress} status={(overused)? "exception": undefined} percent={Math.round((getCurrentUsage().amount / quota.tokens) * 10000000)  } />
+                            <Tooltip title={`${getCurrentUsage().amount} Tokens von ${quota.tokens} verbraucht.`}>
+                                <Progress className={styles.quotaprogress} status={(overused)? "exception": undefined} percent={Math.round((getCurrentUsage().amount / quota.tokens) * 100)  } />
                             </Tooltip>
                         </div>
                     </Card>

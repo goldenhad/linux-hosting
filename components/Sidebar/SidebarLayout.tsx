@@ -1,7 +1,8 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { LogoutOutlined, ApartmentOutlined, RobotOutlined, FolderOpenOutlined, UserOutlined } from '@ant-design/icons';
+import Icon from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Avatar, Layout, Menu, theme } from 'antd';
+import { Avatar, ConfigProvider, Layout, Menu, theme } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 const { Content, Footer, Sider } = Layout;
@@ -9,6 +10,13 @@ import {isMobile} from 'react-device-detect';
 import { User } from '../../firebase/types/User';
 import { handleEmptyString } from '../../helper/architecture';
 import styles from './sidebar.module.scss';
+
+import Home from '../../public/icons/home.svg';
+import Main from '../../public/icons/main.svg';
+import Company from '../../public/icons/company.svg';
+import Profiles from '../../public/icons/profiles.svg';
+import Help from '../../public/icons/help.svg';
+import Settings from '../../public/icons/settings.svg';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -38,15 +46,15 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
 
 
   const items = [
-    getItem(<Link href={"/"}>Siteware Mailbuddy</Link>, '1', () => { return true }, <RobotOutlined />, ),
-    getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return true }, <ApartmentOutlined />),
-    getItem(<Link href={"/profiles"}>Profile</Link>, '4', () => { return !rights.superadmin }, <UserOutlined />),
-    getItem(<Link href={"/logout"}>Ausloggen</Link>, '5', () => { return true }, <LogoutOutlined />),
+    getItem(<Link href={"/"}>Siteware Mailbuddy</Link>, '1', () => { return true }, <Icon component={Home} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>, ),
+    getItem(<Link href={"/dialogue"}>Dialog</Link>, '2', () => { return true }, <Icon component={Main} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return true }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/profiles"}>Profile</Link>, '4', () => { return !rights.superadmin }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
   ];
 
   const footeritems = [
-    getItem(<Link href={"/"}>Help</Link>, '6', () => { return true }, <RobotOutlined />, ),
-    getItem(<Link href={"/company"}>Einstellungen</Link>, '7', () => { return true }, <ApartmentOutlined />),
+    getItem(<Link href={"/"}>Help</Link>, '6', () => { return true }, <Icon component={Help} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>, ),
+    getItem(<Link href={"/"}>Einstellungen</Link>, '7', () => { return true }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
   ];
 
   const getDefaultSelected = () => {
@@ -55,7 +63,7 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
         return '1';
       case '/companies/list/[[...search]]':
         return '2';
-      case '/companies/edit/[id]':
+      case '/dialogue':
           return '2';
       case '/company':
         return '3';
@@ -67,39 +75,46 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
   }
 
   
-
-
   return (
-    <Layout className={styles.layout}>
-      <Sider className={styles.sidebar} breakpoint={breakpoint} collapsedWidth={collapseWidth} collapsed={collapsed} onCollapse={(value) => {setCollapsed(value)}}>
-        <div className={styles.logobox}>
-          <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
-        </div>
-
-        <div className={styles.navigation}>
-          
-          <Menu className={styles.primarymenu}  theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
-
-          <div>
-            <Menu className={styles.secondarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={footeritems} />
-            <Link href={'/account'}>
-              <div className={styles.avatarcontainer}>
-                <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
-              </div>
-            </Link>
+    <ConfigProvider theme={{
+      components: {
+        Menu: {
+          darkItemSelectedBg: '#344054',
+          darkDangerItemSelectedColor: '#ffffff'
+        }
+      }
+    }}>
+      <Layout className={styles.layout}>
+        <Sider className={styles.sidebar} breakpoint={breakpoint} collapsedWidth={collapseWidth} collapsed={collapsed} onCollapse={(value) => {setCollapsed(value)}}>
+          <div className={styles.logobox}>
+            <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
           </div>
-        </div>
-      </Sider>
-      
-      <Layout>
-        <Content className={styles.layoutcontent}>
-          <div className={styles.childrencontainer}>
-            {props.children}
+
+          <div className={styles.navigation}>
+            
+            <Menu className={styles.primarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
+
+            <div>
+              <Menu className={styles.secondarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={footeritems} />
+              <Link href={'/account'}>
+                <div className={styles.avatarcontainer}>
+                  <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
+                </div>
+              </Link>
+            </div>
           </div>
-        </Content>
-        <Footer style={{ textAlign: 'center', color: "lightgrey" }}>{version}</Footer>
+        </Sider>
+        
+        <Layout>
+          <Content className={styles.layoutcontent}>
+            <div className={styles.childrencontainer}>
+              {props.children}
+            </div>
+          </Content>
+          <Footer style={{ textAlign: 'center', color: "lightgrey" }}>{version}</Footer>
+        </Layout>
       </Layout>
-    </Layout>
+    </ConfigProvider>
   );
 };
 export default SidebarLayout;

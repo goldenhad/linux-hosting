@@ -2,7 +2,7 @@ import { Card, Button, Form, Input, Select, Result, Skeleton, Typography, Alert,
 import Icon from '@ant-design/icons';
 import styles from './index.module.scss'
 import { db } from '../../db';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import SidebarLayout from '../../components/Sidebar/SidebarLayout';
@@ -19,6 +19,9 @@ import cookieCutter from 'cookie-cutter'
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
+const axiosTime = require('axios-time');
+
+axiosTime(axios);
 
 
 export interface InitialProps {
@@ -174,7 +177,7 @@ export default function Home(props: InitialProps) {
 
         cookieCutter.set('mailbuddy-dialog-lastusage', btoa(JSON.stringify( cookieobject )));
   
-        let answer = await axios.post('/api/prompt/generate', {
+        let answer: AxiosResponse<any, any> & {timings: {elapsedTime: Number, timingEnd: Number, timingStart: Number}} = await axios.post('/api/prompt/generate', {
           personal: profile.settings.personal,
           dialog: values.dialog,
           continue: values.continue,
@@ -190,6 +193,13 @@ export default function Home(props: InitialProps) {
           setIsAnswerVisible(true);
           setAnswer(answer.data.message);
           setTokens(answer.data.tokens);
+
+          try{
+            await axios.post("/api/stats", {tokens: answer.data.tokens, time: answer.timings.elapsedTime});
+          }catch(e){
+            console.log(e);
+            console.log("Timing logging failed!");
+          }
   
           let usageidx = company.Usage.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});
           

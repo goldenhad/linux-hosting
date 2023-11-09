@@ -2,7 +2,7 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import { LogoutOutlined, ApartmentOutlined, RobotOutlined, FolderOpenOutlined, UserOutlined } from '@ant-design/icons';
 import Icon from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Avatar, ConfigProvider, Layout, Menu, theme } from 'antd';
+import { Avatar, ConfigProvider, Divider, Layout, Menu, Popover, theme } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 const { Content, Footer, Sider } = Layout;
@@ -47,7 +47,8 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
 
   const items = [
     getItem(<Link href={"/"}>Siteware Mailbuddy</Link>, '1', () => { return true }, <Icon component={Home} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>, ),
-    getItem(<Link href={"/dialogue"}>Dialog</Link>, '2', () => { return true }, <Icon component={Main} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/dialog"}>Dialog</Link>, '2', () => { return true }, <Icon component={Main} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/monolog"}>Monolog</Link>, '5', () => { return true }, <Icon component={Main} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
     getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return true }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
     getItem(<Link href={"/profiles"}>Profile</Link>, '4', () => { return !rights.superadmin }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
   ];
@@ -63,8 +64,10 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
         return '1';
       case '/companies/list/[[...search]]':
         return '2';
-      case '/dialogue':
+      case '/dialog':
           return '2';
+      case '/monolog':
+        return '5';
       case '/company':
         return '3';
       case '/profiles':
@@ -73,6 +76,25 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
         return '-1';
     }
   }
+
+
+  const profilemenu = (
+    <div className={styles.avatarmenu}>
+      <div className={styles.profile}>
+        <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
+        <div className={styles.profileinfo}>{handleEmptyString(props.user.firstname)} {handleEmptyString(props.user.lastname)}</div>
+      </div>
+      <Divider className={styles.menudivider} />
+      <div className={styles.iconlink}>
+        <Link href="/logout" className={styles.linkwrapper}>
+          <LogoutOutlined />
+          <div className={styles.iconlinktext}>Ausloggen</div>
+        </Link>
+        
+      </div>
+      
+    </div>
+  );
 
   
   return (
@@ -96,11 +118,11 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
 
             <div>
               <Menu className={styles.secondarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={footeritems} />
-              <Link href={'/account'}>
-                <div className={styles.avatarcontainer}>
+              <div className={styles.avatarcontainer}>
+                <Popover placement="rightBottom" content={profilemenu} trigger="click">
                   <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
-                </div>
-              </Link>
+                </Popover>
+              </div>
             </div>
           </div>
         </Sider>

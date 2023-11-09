@@ -52,7 +52,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 };
 
 
-export default function Home(props: InitialProps) {
+export default function Dialogue(props: InitialProps) {
   const { login, user, company, role, quota } = useAuthContext();
   const [ form ] = Form.useForm();
   const [ showAnswer, setShowAnswer ] = useState(false);
@@ -177,7 +177,7 @@ export default function Home(props: InitialProps) {
 
         cookieCutter.set('mailbuddy-dialog-lastusage', btoa(JSON.stringify( cookieobject )));
   
-        let answer: AxiosResponse<any, any> & {timings: {elapsedTime: Number, timingEnd: Number, timingStart: Number}} = await axios.post('/api/prompt/generate', {
+        let answer: AxiosResponse<any, any> & {timings: {elapsedTime: Number, timingEnd: Number, timingStart: Number}} = await axios.post('/api/prompt/dialog/generate', {
           personal: profile.settings.personal,
           dialog: values.dialog,
           continue: values.continue,
@@ -195,7 +195,7 @@ export default function Home(props: InitialProps) {
           setTokens(answer.data.tokens);
 
           try{
-            await axios.post("/api/stats", {tokens: answer.data.tokens, time: answer.timings.elapsedTime});
+            await axios.post("/api/stats", {tokens: answer.data.tokens, time: answer.timings.elapsedTime, type: "DIALOG"});
           }catch(e){
             console.log(e);
             console.log("Timing logging failed!");
@@ -257,7 +257,7 @@ export default function Home(props: InitialProps) {
       if(!(user.profiles?.length > 0)){
         return (
           <Result
-            title="Bitte definieren Sie zuerst ein Profil"
+            title="Bitte definiere zuerst ein Profil"
             extra={
               <Button href='/profiles' type="primary" key="console">
                 Profil erstellen
@@ -273,7 +273,7 @@ export default function Home(props: InitialProps) {
                 <Form.Item className={styles.formpart} label={<b>Profil</b>} name="profile">
                   <Select
                     showSearch
-                    placeholder="Wählen Sie ein Profil aus"
+                    placeholder="Wähle ein Profil aus"
                     optionFilterProp="children"
                     onChange={(values: any) => {console.log(values)}}
                     onSearch={() => {}}
@@ -288,12 +288,12 @@ export default function Home(props: InitialProps) {
                   </Form.Item>
 
                   <Form.Item className={styles.formpart} label={<b>Wie soll der Dialog fortgesetzt werden?</b>} name="continue">
-                    <TextArea className={styles.forminput} rows={2} placeholder="Formulieren Sie kurz, wie der Dialog fortgesetzt werden soll und was sie damit erreichen wollen?" disabled={formDisabled || quotaOverused}/>
+                    <TextArea className={styles.forminput} rows={2} placeholder="Formuliere kurz, wie der Dialog fortgesetzt werden soll und was du damit erreichen willst?" disabled={formDisabled || quotaOverused}/>
                   </Form.Item>
               </Card>
               <Card title={"Einstellungen"} headStyle={{backgroundColor: "#F9FAFB"}} className={styles.userinputcardsub}>
                 <Form.Item className={styles.formpart} label={<b>Ansprache</b>} name="address">
-                    <Select placeholder="Bitte wählen Sie die Form der Ansprache aus..." options={[
+                    <Select placeholder="Bitte wähle die Form der Ansprache aus..." options={[
                         {label: "Du", value: "du", },
                         {label: "Sie", value: "sie", },
                     ]}
@@ -303,7 +303,7 @@ export default function Home(props: InitialProps) {
                 </Form.Item>
 
                 <Form.Item className={styles.formpart} label={<b>Einordnung des Gesprächpartners</b>} name="order">
-                    <Select placeholder="Wie orden Sie ihren Gesprächpartner ein?" options={listToOptions(motive)} mode="multiple" allowClear className={styles.formselect} size='large'/>
+                    <Select placeholder="Wie ordnest du deinen Gesprächpartner ein?" options={listToOptions(motive)} mode="multiple" allowClear className={styles.formselect} size='large'/>
                 </Form.Item>
 
                 <Form.Item className={styles.formpart} label={<b>Länge der Antwort</b>} name="length">
@@ -317,7 +317,7 @@ export default function Home(props: InitialProps) {
             </div>
             <div className={styles.tokenalert}>
               {
-                (quotaOverused)? <Alert message={`Ihr Tokenbudget ist ausgeschöpft. Ihr Budget setzt sich am 01.${props.Data.currentMonth+1}.${props.Data.currentYear} zurück. Wenn Sie weitere Tokens benötigen, können Sie diese in ihrem Konto dazubuchen.`} type="error" />: <></>
+                (quotaOverused)? <Alert message={`Das Tokenbudget ist ausgeschöpft. Dein Budget setzt sich am 01.${props.Data.currentMonth+1}.${props.Data.currentYear} zurück. Wenn du weitere Tokens benötigen, kannst du diese in der Kontoübersicht dazubuchen.`} type="error" />: <></>
               }
             </div>
           </div>
@@ -347,7 +347,7 @@ export default function Home(props: InitialProps) {
           <Card className={styles.answercard} title={"Antwort"} style={{ display: (isAnswerCardVisible)? 'block': 'none' }} headStyle={{backgroundColor: "#F9FAFB"}} extra={<div className={styles.clipboardextra} onClick={() => {navigator.clipboard.writeText(answer); messageApi.success("Antwort in die Zwischenablage kopiert.");}}><Icon component={Clipboard} className={styles.clipboardicon} viewBox='0 0 22 22' />In die Zwischenlage</div>}>
               {(isAnswerVisible)? <><div className={styles.answer}>{answer}</div><div className={styles.tokeninfo}><Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' /> Die Anfrage hat {tokens} Tokens verbraucht</div></>: <></>}
               {(isLoaderVisible)? <Skeleton active/>: <></>}
-              {(promptError)? <Alert type='error' message="Bei der Generierung der Anfrage ist etwas schiefgelaufen. Bitte versuchen Sie es später erneut!" />: <></>}
+              {(promptError)? <Alert type='error' message="Bei der Generierung der Anfrage ist etwas schiefgelaufen. Bitte versuche es später erneut!" />: <></>}
           </Card>
           <div className={styles.formfootercontainer}>
             <div className={styles.generatebuttonrow}>

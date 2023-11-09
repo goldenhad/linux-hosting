@@ -22,13 +22,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
             let data = req.body;
 
-            if(data.tokens && data.time){
+            if(data.tokens && data.time && data.type){
                 let timestamp = Math.floor(Date.now() / 1000);
 
                 let logobj = {
                     timestamp: timestamp,
                     tokens: data.tokens,
-                    time: data.time
+                    time: data.time,
+                    type: data.type
                 }
 
                 fs.appendFileSync('/app/stats/prompt_stats.log', JSON.stringify(logobj) + "\n");

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
-import { auth } from '../../../firebase/admin'
+import { auth } from '../../../../firebase/admin'
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAIAPIKEY
@@ -24,7 +24,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
             if(data.personal && data.dialog && data.continue && data.address && data.style && data.order && data.emotions && data.length ){
                 
-                console.log(data);
                 const prompt = `Ich bin ${data.personal}. Ich habe folgenden E-Mail-Dialog erhalten ${data.dialog}. Schreibe eine Antwort auf den bisherigen Dialog, der dabei folgende Punkte berücksichtigt: "${data.continue}". Schreibe deine Antwort in der ${data.address}-Form. Der allgemeine Stil deiner Antwort sollte dabei ${data.style.toString()} sein. Schätze dein Gegenüber als ${data.order.toString()} ein. Die allgemeine Gemütslage der Nachricht sollte ${data.emotions.toString()} sein. Die Länge der Nachricht sollte ${data.length} sein.`
             
                 try{

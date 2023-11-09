@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             
                 try{
                     const { data: completions, response: raw } = await openai.chat.completions.create({
-                        model: "gpt-4",
+                        model: "gpt-4-1106-preview",
                         messages: [
                         { 
                             role: 'user',

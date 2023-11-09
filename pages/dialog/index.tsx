@@ -199,6 +199,7 @@ export default function Dialogue(props: InitialProps) {
           }catch(e){
             console.log(e);
             console.log("Timing logging failed!");
+            console.log(`{tokens: ${answer.data.tokens}, time: ${answer.timings.elapsedTime}, type: "DIALOG"}`)
           }
   
           let usageidx = company.Usage.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});

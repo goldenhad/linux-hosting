@@ -97,7 +97,7 @@ export default function Dialogue(props: InitialProps) {
     if(cookiedata){
       try{
         let cookieobj = JSON.parse(
-          Buffer.from(cookiedata, 'base64').toString('ascii')
+          Buffer.from(cookiedata, 'base64').toString('utf8')
         );
 
         atob("")

@@ -94,7 +94,7 @@ export default function Monologue(props: InitialProps) {
     if(cookiedata){
       try{
         let cookieobj = JSON.parse(
-          Buffer.from(cookiedata, 'base64').toString('ascii')
+          Buffer.from(cookiedata, 'base64').toString('utf8')
         );
 
         form.setFieldValue('profile', cookieobj.profile);

@@ -16,7 +16,6 @@ import ArrowRight from '../../public/icons/arrowright.svg';
 import Info from '../../public/icons/info.svg';
 import Clipboard from '../../public/icons/clipboard.svg';
 import cookieCutter from 'cookie-cutter'
-import { setCookie } from 'cookies-next';
 
 
 const { Paragraph } = Typography;
@@ -184,9 +183,6 @@ export default function Dialogue(props: InitialProps) {
 
         cookieCutter.set('mailbuddy-dialog-lastusage', Buffer.from(JSON.stringify( cookieobject )).toString('base64'));
         
-        setCookie('last-dialog', true, {
-          path: '/',
-        });
   
         let answer: AxiosResponse<any, any> & {timings: {elapsedTime: Number, timingEnd: Number, timingStart: Number}} = await axios.post('/api/prompt/dialog/generate', {
           personal: profile.settings.personal,

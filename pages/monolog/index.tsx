@@ -94,7 +94,7 @@ export default function Monologue(props: InitialProps) {
     if(cookiedata){
       try{
         let cookieobj = JSON.parse(
-          atob(cookiedata)
+          Buffer.from(cookiedata, 'base64').toString('ascii')
         );
 
         form.setFieldValue('profile', cookieobj.profile);
@@ -173,7 +173,7 @@ export default function Monologue(props: InitialProps) {
           length: values.length
         }
 
-        cookieCutter.set('mailbuddy-monolog-lastusage', btoa(JSON.stringify( cookieobject )));
+        cookieCutter.set('mailbuddy-monolog-lastusage', Buffer.from(JSON.stringify( cookieobject )).toString('base64'));
   
         let answer: AxiosResponse<any, any> & {timings: {elapsedTime: Number, timingEnd: Number, timingStart: Number}} = await axios.post('/api/prompt/monolog/generate', {
           personal: profile.settings.personal,

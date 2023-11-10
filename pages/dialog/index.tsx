@@ -16,6 +16,9 @@ import ArrowRight from '../../public/icons/arrowright.svg';
 import Info from '../../public/icons/info.svg';
 import Clipboard from '../../public/icons/clipboard.svg';
 import cookieCutter from 'cookie-cutter'
+import { setCookie } from 'cookies-next';
+
+
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -65,6 +68,7 @@ export default function Dialogue(props: InitialProps) {
   const [messageApi, contextHolder] = message.useMessage();
   const [ tokens, setTokens ] = useState("");
   const [ promptError, setPromptError ] = useState(false);
+
   
   const router = useRouter();
 
@@ -94,8 +98,10 @@ export default function Dialogue(props: InitialProps) {
     if(cookiedata){
       try{
         let cookieobj = JSON.parse(
-          atob(cookiedata)
+          Buffer.from(cookiedata, 'base64').toString('ascii')
         );
+
+        atob("")
 
         form.setFieldValue('profile', cookieobj.profile);
         form.setFieldValue('dialog', cookieobj.dialog);
@@ -175,7 +181,12 @@ export default function Dialogue(props: InitialProps) {
           length: values.length
         }
 
-        cookieCutter.set('mailbuddy-dialog-lastusage', btoa(JSON.stringify( cookieobject )));
+
+        cookieCutter.set('mailbuddy-dialog-lastusage', Buffer.from(JSON.stringify( cookieobject )).toString('base64'));
+        
+        setCookie('last-dialog', true, {
+          path: '/',
+        });
   
         let answer: AxiosResponse<any, any> & {timings: {elapsedTime: Number, timingEnd: Number, timingStart: Number}} = await axios.post('/api/prompt/dialog/generate', {
           personal: profile.settings.personal,

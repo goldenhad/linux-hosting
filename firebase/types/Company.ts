@@ -6,6 +6,7 @@ export type CompanySettings = {
 export type Quota = {
     price: number;
     tokens: number;
+    features: Array<String>
 }
 
 export type Usage = {

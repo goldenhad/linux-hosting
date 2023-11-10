@@ -272,10 +272,10 @@ export default function Profiles(props: InitialProps) {
         title: 'Persönliche Informationen',
         content: <div>
           <Paragraph>
-            Beschreiben Sie kurz wer Sie sind.
+            Beschreiben kurz wer du bist.
           </Paragraph>
-          <Form.Item name="personal">
-              <TextArea placeholder="Wer sind sie, beschreiben Sie ihre Position..."/>
+          <Form.Item className={styles.formpart} name="personal">
+              <TextArea className={styles.forminput} placeholder="Wer bist du, beschreibe dich..."/>
           </Form.Item>
         </div>,
       },
@@ -286,8 +286,8 @@ export default function Profiles(props: InitialProps) {
           <Paragraph>
             Wie genau soll die allgemeine Stilistik der Antwort sein?
           </Paragraph>
-          <Form.Item name="style">
-              <Select placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(style)} mode="multiple" allowClear/>
+          <Form.Item className={styles.formpart} name="style">
+              <Select className={styles.formselect} placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(style)} mode="multiple" allowClear/>
           </Form.Item>
         </div>,
       },
@@ -298,8 +298,8 @@ export default function Profiles(props: InitialProps) {
           <Paragraph>
             Welche allgemeine Gemütslage soll in der Nachricht deutlich werden?
           </Paragraph>
-          <Form.Item name="emotions">
-              <Select placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(emotions)} mode="multiple" allowClear/>
+          <Form.Item className={styles.formpart} name="emotions">
+              <Select className={styles.formselect} placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(emotions)} mode="multiple" allowClear/>
           </Form.Item>
         </div>,
       },
@@ -308,21 +308,22 @@ export default function Profiles(props: InitialProps) {
         title: 'Abschließen',
         content: <div>
           <Paragraph>
-            In diesem Bereich können Sie Ihrem Profil einen Namen geben und es mit Tags kategorisieren.
+            In diesem Bereich kannst du deinem Profil einen Namen geben und es mit Tags kategorisieren.
           </Paragraph>
-          <Form.Item name="name" rules={[{ required: true, message: 'Ein Name ist erforderlich!' }]}>
-            <Input placeholder='Name des Profils'></Input>
+          <Form.Item className={styles.formpart} name="name" rules={[{ required: true, message: 'Ein Name ist erforderlich!' }]}>
+            <Input className={styles.forminput} placeholder='Name des Profils'></Input>
           </Form.Item>
           <Paragraph>
-            Kategorisieren Sie ihr Profil über Tags
+            Kategorisiere dein Profil über Tags
           </Paragraph>
-          <Form.Item name="tags">
+          <Form.Item className={styles.formpart} name="tags">
               <Select
+                className={styles.formselect}
                 mode="tags"
                 style={{ width: '100%' }}
                 tokenSeparators={[',']}
                 options={[]}
-                placeholder={"Tippen Sie, um Tags hinzuzufügen, die Ihr Profil kategorisieren"}
+                placeholder={"Tippe, um Tags hinzuzufügen, die das Profil kategorisieren"}
               />
           </Form.Item>
         </div>
@@ -405,31 +406,32 @@ export default function Profiles(props: InitialProps) {
                 onFinish={editProfile}
                 form={editForm}
             >
-                <Form.Item label={<b>Profilname</b>} name="name" rules={[{ required: true, message: 'Ein Name ist erforderlich!' }]}>
-                    <Input placeholder="Names des Profils..."/>
+                <Form.Item className={styles.formpart} label={<b>Profilname</b>} name="name" rules={[{ required: true, message: 'Ein Name ist erforderlich!' }]}>
+                    <Input className={styles.forminput}  placeholder="Names des Profils..."/>
                 </Form.Item>
   
-                <Form.Item label={<b>Persönliche Informationen</b>} name="personal">
-                    <TextArea placeholder="Wer sind sie, beschreiben Sie ihre Position..."/>
+                <Form.Item className={styles.formpart} label={<b>Persönliche Informationen</b>} name="personal">
+                    <TextArea className={styles.forminput} placeholder="Wer bist du, beschreibe dich..."/>
                 </Form.Item>
 
-                <Form.Item label={<b>Allgemeine Stilistik</b>} name="style">
-                    <Select placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(style)} mode="multiple" allowClear/>
+                <Form.Item className={styles.formpart} label={<b>Allgemeine Stilistik</b>} name="style">
+                    <Select className={styles.formselect} placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(style)} mode="multiple" allowClear/>
                 </Form.Item>
 
-                <Form.Item label={<b>Allgemeine Gemütslage</b>} name="emotions">
-                    <Select placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(emotions)} mode="multiple" allowClear/>
+                <Form.Item className={styles.formpart} label={<b>Allgemeine Gemütslage</b>} name="emotions">
+                    <Select className={styles.formselect} placeholder="Wie ist deine allgemeine Gemütslage?" options={listToOptions(emotions)} mode="multiple" allowClear/>
                 </Form.Item>
 
-                <Form.Item label={<b>Tags {tokenCount}/4</b>} name="tags">
+                <Form.Item className={styles.formpart} label={<b>Tags {tokenCount}/4</b>} name="tags">
                   <Select
+                    className={styles.formselect}
                     mode="tags"
                     style={{ width: '100%' }}
                     tokenSeparators={[',']}
                     onChange={(value) => {setTokenCount(value.length); console.log(value)}}
                     options={[]}
                     maxTagCount={5}
-                    placeholder={"Tippen Sie, um Tags hinzuzufügen, die Ihr Profil kategorisieren"}
+                    placeholder={"Tippe, um Tags hinzuzufügen, die das Profil kategorisieren"}
                   />
                 </Form.Item>
   
@@ -451,7 +453,7 @@ export default function Profiles(props: InitialProps) {
             onCancel={() => {setIsDeleteModalOpen(false)}}
             footer = {[]}
           >
-            <Paragraph>Wollen sie das Profil {(profileToDelete != -1 && user.profiles[profileToDelete]) ? user.profiles[profileToDelete].name: "UNDEFINED"} wirklich löschen?</Paragraph>
+            <Paragraph>Willst du das Profil {(profileToDelete != -1 && user.profiles[profileToDelete]) ? user.profiles[profileToDelete].name: "UNDEFINED"} wirklich löschen?</Paragraph>
   
             <div className={styles.finishformrow}>
                 <Space direction='horizontal'>

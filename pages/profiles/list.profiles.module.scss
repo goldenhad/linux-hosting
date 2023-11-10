@@ -51,3 +51,26 @@
 .hidden {
     display: none;
 }
+
+.formpart{
+    font-weight: 700;
+    line-height: 20px;
+    size: 14px;
+    letter-spacing: 1%;
+
+    .forminput{
+      background-color: white;
+      padding: 10px 14px 10px 14px;
+      border-radius: 8px;
+      box-shadow: 0px 1px 2px 0px #1018280D;
+      border-color: #D0D5DD;
+    }
+
+    .formselect{
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0px 1px 2px 0px #1018280D;
+      border-color: #D0D5DD;
+      font-weight: normal;
+    }
+}

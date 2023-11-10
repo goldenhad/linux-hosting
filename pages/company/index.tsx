@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Form, Input, Modal, Progress, Select, Space, Statistic, Table, Tooltip, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, List, Modal, Progress, Select, Space, Table, Tooltip, Typography } from 'antd';
 import styles from './edit.company.module.scss'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -9,6 +9,10 @@ import { handleEmptyString } from '../../helper/architecture';
 import { useAuthContext } from '../../components/context/AuthContext';
 import { getDocWhere } from '../../firebase/data/getData';
 import updateData from '../../firebase/data/updateData';
+import { RightCircleOutlined } from '@ant-design/icons';
+import Link from 'next/link';
+const { Paragraph } = Typography;
+
 const { TextArea } = Input;
 
 
@@ -137,37 +141,43 @@ export default function Company(props: InitialProps) {
                 <Form.Item
                     label="Firmenname"
                     name="companyname"
+                    className={styles.formpart}
                 >
-                    <Input placeholder="Name der Firma..." />
+                    <Input className={styles.forminput} placeholder="Name der Firma..." />
                 </Form.Item>
 
                 <Space direction='horizontal' wrap>
                 <Form.Item
                     label="Straße"
                     name="companystreet"
+                    className={styles.formpart}
                 >
-                    <Input placeholder="Musterstraße 1..." />
+                    <Input className={styles.forminput} placeholder="Musterstraße 1..." />
                 </Form.Item>
 
                 <Form.Item
                     label="Ort"
                     name="companycity"
+                    className={styles.formpart}
                 >
-                    <Input placeholder="Musterstadt..." />
+                    <Input className={styles.forminput} placeholder="Musterstadt..." />
                 </Form.Item>
 
                 <Form.Item
                     label="Plz"
                     name="companypostalcode"
+                    className={styles.formpart}
                 >
-                    <Input placeholder="123456"/>
+                    <Input className={styles.forminput} placeholder="123456"/>
                 </Form.Item>
 
                 <Form.Item
                     label="Land"
                     name="companycountry"
+                    className={styles.formpart}
                 >
                     <Select
+                        className={styles.formselect}
                         options={[
                         {
                             value: 'de',
@@ -182,8 +192,9 @@ export default function Company(props: InitialProps) {
                 <Form.Item
                     label="Background der Firma"
                     name="companybackground"
+                    className={styles.formpart}
                 >
-                    <TextArea placeholder="Was ist das Kerngeschäft der Firma?"/>
+                    <TextArea className={styles.forminput} placeholder="Was ist das Kerngeschäft der Firma?"/>
                 </Form.Item>
 
                 <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
@@ -323,7 +334,7 @@ export default function Company(props: InitialProps) {
         if(user.Role == "Company"){
             return(
                 <div>
-                    <Card title={"Nutzer"} bordered={true}>
+                    <Card title={"Nutzer"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
                         <Table dataSource={users} columns={usercolumns} />
                         <Button type='primary' onClick={() => {setInviteUserModalOpen(true)}}>Nutzer einladen</Button>
                     </Card>
@@ -331,16 +342,16 @@ export default function Company(props: InitialProps) {
                     <Modal title="Nutzer einladen" open={inviteUserModalOpen} onCancel={() => {setInviteUserModalOpen(false)}} footer = {[]}>
                         
                         <Form layout='vertical' onFinish={inviteUser} form={inviteForm} onChange={() => {setIsInviteErrVisible(false); setInviteErrMsg("")}}>
-                            <Form.Item label={<b>E-Mail</b>} name="email" rules={[{ required: true, message: 'Eine E-Mail ist erforderlich!' }]}>
-                                <Input placeholder="max@mustermann.de"/>
+                            <Form.Item className={styles.formpart} label={<b>E-Mail</b>} name="email" rules={[{ required: true, message: 'Eine E-Mail ist erforderlich!' }]}>
+                                <Input className={styles.forminput} placeholder="max@mustermann.de"/>
                             </Form.Item>
 
-                            <Form.Item label={<b>Vorname</b>} name="firstname" rules={[{ required: true, message: 'Eine Vorname ist erforderlich!' }]}>
-                                <Input placeholder="Max"/>
+                            <Form.Item className={styles.formpart} label={<b>Vorname</b>} name="firstname" rules={[{ required: true, message: 'Eine Vorname ist erforderlich!' }]}>
+                                <Input className={styles.forminput} placeholder="Max"/>
                             </Form.Item>
 
-                            <Form.Item label={<b>Nachname</b>} name="lastname" rules={[{ required: true, message: 'Eine Nachname ist erforderlich!' }]}>
-                                <Input placeholder="Mustermann"/>
+                            <Form.Item className={styles.formpart} label={<b>Nachname</b>} name="lastname" rules={[{ required: true, message: 'Eine Nachname ist erforderlich!' }]}>
+                                <Input className={styles.forminput} placeholder="Mustermann"/>
                             </Form.Item>
                             
                             <div className={styles.errorrow} style={{display: (isInviteErrVisible)? "block": "none"}}>
@@ -369,21 +380,44 @@ export default function Company(props: InitialProps) {
     return (
         <SidebarLayout capabilities={role.capabilities} user={user} login={login}>
             <div className={styles.main}>
-                <Space direction='vertical' className={styles.spacelayout} size="large">
-                    <Card title={`Ihre Firma`} bordered={true}>
+                <div className={styles.companyoverview}>
+                    <Card className={styles.companysettings} title={`Ihre Firma`} headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
                         {getCompanyInput()}
                     </Card>
-                    <Card title={"Tokens"} bordered={true}>
+                    <Card className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Tokens"} bordered={true}>
                         <h2>Verbrauchte Tokens (seit 01.{pad(props.Data.currentMonth, 2)}.{props.Data.currentYear})</h2>
                         <div className={styles.quotarow}>
                             {/* <div className={styles.quota}>{}</div> */}
                             <Tooltip title={`${getCurrentUsage().amount} Tokens von ${quota.tokens} verbraucht.`}>
-                                <Progress className={styles.quotaprogress} status={(overused)? "exception": undefined} percent={Math.round((getCurrentUsage().amount / quota.tokens) * 100)  } />
+                                <Progress type='circle' size="default" className={styles.quotaprogress} status={(overused)? "exception": undefined} percent={Math.round((getCurrentUsage().amount / quota.tokens) * 100)  } />
                             </Tooltip>
                         </div>
+                        <h2 className={styles.quotatitle}>Aktueller Plan: {company.Quota}</h2>
+                        
+                        <List
+                            className={styles.quotainfolist}
+                            bordered
+                            dataSource={quota.features}
+                            renderItem={(item) => {
+                                return(
+                                    <List.Item>
+                                        <div className={styles.quotainfo}>
+                                            <div className={styles.quotainfoicon}><RightCircleOutlined /></div>
+                                            <div className={styles.quotainfotext}>{item}</div>
+                                        </div>
+                                    </List.Item>
+                                );
+                            } }>
+                        </List>
+
+                        <Paragraph className={styles.upgrade}>
+                            Entdecke jetzt mehr Möglichkeiten – upgrade auf unsere weiteren Pläne und erlebe das volle Spektrum an Funktionen und Tokens! <Link href='/upgrade'>Weitere Pläne</Link>
+                        </Paragraph>
                     </Card>
+                </div>
+                <div className={styles.companyusers}>
                     {getUserOverview()}
-                </Space>
+                </div>
 
 
                 

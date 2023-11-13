@@ -329,6 +329,16 @@ export default function Company(props: InitialProps) {
             setInviteErrMsg("Ein Nutzer mit dieser E-Mail Adresse nutzt Mailbuddy bereits!");
         }
       }
+    
+    const getUpgradeLink = () => {
+        if(user.Role == "Company" || user.Role == "administrator") {
+            return(
+                <Paragraph className={styles.upgrade}>
+                    Entdecke jetzt mehr Möglichkeiten – upgrade auf unsere weiteren Pläne und erlebe das volle Spektrum an Funktionen und Tokens! <Link href='/upgrade'>Weitere Pläne</Link>
+                </Paragraph>
+            );
+        }
+    }
 
     const getUserOverview = () => {
         if(user.Role == "Company"){
@@ -410,9 +420,7 @@ export default function Company(props: InitialProps) {
                             } }>
                         </List>
 
-                        <Paragraph className={styles.upgrade}>
-                            Entdecke jetzt mehr Möglichkeiten – upgrade auf unsere weiteren Pläne und erlebe das volle Spektrum an Funktionen und Tokens! <Link href='/upgrade'>Weitere Pläne</Link>
-                        </Paragraph>
+                        {getUpgradeLink()}
                     </Card>
                 </div>
                 <div className={styles.companyusers}>

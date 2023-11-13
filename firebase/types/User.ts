@@ -2,6 +2,24 @@ import { Usage } from "./Company";
 import { Profile } from "./Profile";
 
 
+type State = {
+    dialog: {
+        profile: string,
+        dialog: string,
+        continue: string,
+        address: string,
+        order: string,
+        length: string,
+    },
+    monolog: {
+        profile: string,
+        content: string,
+        address: string,
+        order: string,
+        length: string,
+    }
+}
+
 export type User =  {
     username: string,
     firstname: string,
@@ -10,6 +28,7 @@ export type User =  {
     Role: string,
     profiles: Array<Profile>,
     usedCredits: Array<Usage>,
+    lastState: State,
 }
 
 export const basicUser: User = {
@@ -19,5 +38,22 @@ export const basicUser: User = {
     lastname: "",
     Role: "",
     profiles: [],
-    usedCredits: []
+    usedCredits: [],
+    lastState: {
+        dialog: {
+            profile: "",
+            dialog: "",
+            continue: "",
+            address: "",
+            order: "",
+            length: "",
+        },
+        monolog: {
+            profile: "",
+            content: "",
+            address: "",
+            order: "",
+            length: "",
+        }
+    }
 }

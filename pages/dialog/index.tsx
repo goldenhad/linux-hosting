@@ -16,6 +16,7 @@ import ArrowRight from '../../public/icons/arrowright.svg';
 import Info from '../../public/icons/info.svg';
 import Clipboard from '../../public/icons/clipboard.svg';
 import cookieCutter from 'cookie-cutter'
+import updateData from '../../firebase/data/updateData';
 
 
 const { Paragraph } = Typography;
@@ -91,23 +92,21 @@ export default function Dialogue(props: InitialProps) {
     "Emphatisch"
   ];
 
+  const updateField = (field: string, value: string) => {
+    if(value && value != ""){
+      form.setFieldValue(field, value);
+    }
+  }
+
   useEffect(() => {
-    let cookiedata = cookieCutter.get('mailbuddy-dialog-lastusage');
-
-    if(cookiedata){
+    if(user.lastState.dialog){
       try{
-        let cookieobj = JSON.parse(
-          Buffer.from(cookiedata, 'base64').toString('utf8')
-        );
-
-        atob("")
-
-        form.setFieldValue('profile', cookieobj.profile);
-        form.setFieldValue('dialog', cookieobj.dialog);
-        form.setFieldValue('continue', cookieobj.continue);
-        form.setFieldValue('address', cookieobj.address);
-        form.setFieldValue('order', cookieobj.order);
-        form.setFieldValue('length', cookieobj.length);
+        updateField('profile', user.lastState.dialog.profile);
+        updateField('dialog', user.lastState.dialog.dialog);
+        updateField('continue', user.lastState.dialog.continue);
+        updateField('address', user.lastState.dialog.address);
+        updateField('order', user.lastState.dialog.order);
+        updateField('length', user.lastState.dialog.length);
       }catch(e){
         console.log(e);
       }
@@ -181,7 +180,9 @@ export default function Dialogue(props: InitialProps) {
         }
 
 
-        cookieCutter.set('mailbuddy-dialog-lastusage', Buffer.from(JSON.stringify( cookieobject )).toString('base64'));
+        let newUser = user;
+        newUser.lastState.dialog = cookieobject;
+        await updateData('User', login.uid, newUser);
         
   
         let answer: AxiosResponse<any, any> & {timings: {elapsedTime: Number, timingEnd: Number, timingStart: Number}} = await axios.post('/api/prompt/dialog/generate', {

@@ -16,6 +16,7 @@ import ArrowRight from '../../public/icons/arrowright.svg';
 import Info from '../../public/icons/info.svg';
 import Clipboard from '../../public/icons/clipboard.svg';
 import cookieCutter from 'cookie-cutter'
+import updateData from '../../firebase/data/updateData';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -50,6 +51,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   
 };
+
 
 
 export default function Monologue(props: InitialProps) {
@@ -88,20 +90,21 @@ export default function Monologue(props: InitialProps) {
     "Emphatisch"
   ];
 
+
+  const updateField = (field: string, value: string) => {
+    if(value && value != ""){
+      form.setFieldValue(field, value);
+    }
+  }
+
   useEffect(() => {
-    let cookiedata = cookieCutter.get('mailbuddy-monolog-lastusage');
-
-    if(cookiedata){
+    if(user.lastState.monolog){
       try{
-        let cookieobj = JSON.parse(
-          Buffer.from(cookiedata, 'base64').toString('utf8')
-        );
-
-        form.setFieldValue('profile', cookieobj.profile);
-        form.setFieldValue('content', cookieobj.content);
-        form.setFieldValue('address', cookieobj.address);
-        form.setFieldValue('order', cookieobj.order);
-        form.setFieldValue('length', cookieobj.length);
+        updateField('profile', user.lastState.monolog.profile);
+        updateField('content', user.lastState.monolog.content);
+        updateField('address', user.lastState.monolog.address);
+        updateField('order', user.lastState.monolog.order);
+        updateField('length', user.lastState.monolog.length);
       }catch(e){
         console.log(e);
       }
@@ -173,7 +176,9 @@ export default function Monologue(props: InitialProps) {
           length: values.length
         }
 
-        cookieCutter.set('mailbuddy-monolog-lastusage', Buffer.from(JSON.stringify( cookieobject )).toString('base64'));
+        let newUser = user;
+        newUser.lastState.monolog = cookieobject;
+        await updateData('User', login.uid, newUser);
   
         let answer: AxiosResponse<any, any> & {timings: {elapsedTime: Number, timingEnd: Number, timingStart: Number}} = await axios.post('/api/prompt/monolog/generate', {
           personal: profile.settings.personal,

@@ -22,7 +22,33 @@ export default async function signUp(firstname, lastname, email, username, passw
                         let companycreationresult = await addDataWithoutId("Company", { name: name, street: street, city: city, postalcode: postalcode, country: country, settings: {background: ""}, Usage: [], Quota: "Free" });
                         console.log(companycreationresult);
                         try {
-                            let usercreationresult = await addData("User", result.user.uid, { firstname: firstname, lastname: lastname, email: email, username: username, Role: "Company", Company: `${companycreationresult.result.id}`, profiles: [], usedCredits: [] });
+                            let usercreationresult = await addData("User", result.user.uid, {
+                                firstname: firstname,
+                                lastname: lastname,
+                                email: email,
+                                username: username,
+                                Role: "Company",
+                                Company: `${companycreationresult.result.id}`,
+                                profiles: [],
+                                usedCredits: [],
+                                lastState: {
+                                    dialog: {
+                                        profile: "",
+                                        dialog: "",
+                                        continue: "",
+                                        address: "",
+                                        order: "",
+                                        length: "",
+                                    },
+                                    monolog: {
+                                        profile: "",
+                                        content: "",
+                                        address: "",
+                                        order: "",
+                                        length: "",
+                                    }
+                                }
+                            });
                             console.log(usercreationresult);
                         } catch(e) {
                             console.log(e);

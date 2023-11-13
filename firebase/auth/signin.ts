@@ -34,7 +34,33 @@ export async function signInWithGoogle() {
                     let companycreationresult = await addDataWithoutId("Company", { name: result._tokenResponse.displayName + " Firma", street: "", city: "", postalcode: "", country: "", settings: {background: ""}, Usage: [], Quota: "Free" });
                     console.log(companycreationresult);
                     try {
-                        let usercreationresult = await addData("User", result.user.uid, { firstname: result._tokenResponse.firstName, lastname: result._tokenResponse.lastName, email: result._tokenResponse.email, username: result._tokenResponse.firstname + result._tokenResponse.lastname, Role: "Company", Company: `${companycreationresult.result.id}`, profiles: [], usedCredits: [] });
+                        let usercreationresult = await addData("User", result.user.uid, {
+                            firstname: result._tokenResponse.firstName,
+                            lastname: result._tokenResponse.lastName,
+                            email: result._tokenResponse.email,
+                            username: result._tokenResponse.firstname + result._tokenResponse.lastname,
+                            Role: "Company",
+                            Company: `${companycreationresult.result.id}`,
+                            profiles: [],
+                            usedCredits: [],
+                            lastState: {
+                                dialog: {
+                                    profile: "",
+                                    dialog: "",
+                                    continue: "",
+                                    address: "",
+                                    order: "",
+                                    length: "",
+                                },
+                                monolog: {
+                                    profile: "",
+                                    content: "",
+                                    address: "",
+                                    order: "",
+                                    length: "",
+                                }
+                            }
+                        });
                         console.log(usercreationresult);
                     } catch(e) {
                         console.log(e);

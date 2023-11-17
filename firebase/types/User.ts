@@ -29,6 +29,7 @@ export type User =  {
     profiles: Array<Profile>,
     usedCredits: Array<Usage>,
     lastState: State,
+    setupDone: boolean,
 }
 
 export const basicUser: User = {
@@ -55,5 +56,6 @@ export const basicUser: User = {
             order: "",
             length: "",
         }
-    }
+    },
+    setupDone: false,
 }

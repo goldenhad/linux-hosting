@@ -2,7 +2,7 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import { LogoutOutlined, ApartmentOutlined, RobotOutlined, FolderOpenOutlined, UserOutlined } from '@ant-design/icons';
 import Icon from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Avatar, ConfigProvider, Divider, Layout, Menu, Popover, theme } from 'antd';
+import { Avatar, ConfigProvider, Divider, FloatButton, Layout, Menu, Popover, theme } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 const { Content, Footer, Sider } = Layout;
@@ -46,16 +46,15 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
 
 
   const items = [
-    getItem(<Link href={"/"}>Siteware Mailbuddy</Link>, '1', () => { return true }, <Icon component={Home} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>, ),
+    getItem(<Link href={"/"}>Home</Link>, '1', () => { return true }, <Icon component={Home} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>, ),
     getItem(<Link href={"/dialog"}>Dialog</Link>, '2', () => { return true }, <Icon component={Main} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
     getItem(<Link href={"/monolog"}>Monolog</Link>, '5', () => { return true }, <Icon component={Main} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
-    getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return true }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
-    getItem(<Link href={"/profiles"}>Profile</Link>, '4', () => { return !rights.superadmin }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return props.user.Role == "Company" }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/usage"}>Nutzung</Link>, '3', () => { return props.user.Role != "Company"  }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/profiles"}>Profile</Link>, '4', () => { return true }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
   ];
 
   const footeritems = [
-    getItem(<Link href={"/"}>Help</Link>, '6', () => { return true }, <Icon component={Help} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>, ),
-    getItem(<Link href={"/"}>Einstellungen</Link>, '7', () => { return true }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
   ];
 
   const getDefaultSelected = () => {
@@ -69,6 +68,8 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
       case '/monolog':
         return '5';
       case '/company':
+        return '3';
+      case '/usage':
         return '3';
       case '/profiles':
         return '4';
@@ -133,6 +134,7 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
               {props.children}
             </div>
           </Content>
+          <FloatButton icon={<Icon component={Help} className={styles.floaticon} viewBox='0 0 22 22' size={24} />} />
           <Footer style={{ textAlign: 'center', color: "lightgrey" }}>{version}</Footer>
         </Layout>
       </Layout>

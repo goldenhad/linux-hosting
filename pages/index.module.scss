@@ -1,0 +1,57 @@
+
+
+.main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    height: 80vh;
+
+    .greetingrow {
+        .greeting {
+            font-size: 48px;
+            font-weight: 700;
+        }
+    
+        .greeting_subtitle{
+            font-size: 24px;
+            font-weight: 700;
+        }
+    }
+
+    .optionrow {
+        width: 40%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 100px;
+
+        .option {
+            width: 300px;
+            height: 100px;
+            background-color: #EAECF0;
+            border-radius: 12px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: black;
+
+            &:hover {
+                cursor: pointer;
+                border-width: 3px;
+                border-style: solid;
+                border-color: #1677ff;
+                color: black;
+            }
+
+            .option_title {
+                font-size: 16px;
+                font-weight: 700;
+            }
+        }
+    }
+}

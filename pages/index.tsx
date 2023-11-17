@@ -13,6 +13,7 @@ import { Profile } from '../firebase/types/Profile';
 import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { handleEmptyString } from '../helper/architecture';
 import ArrowRight from '../public/icons/arrowright.svg';
+import Link from 'next/link';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -51,7 +52,26 @@ export default function Home(props: InitialProps) {
 
   return (
     <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
-      
+      <div className={styles.main}>
+        <div className={styles.greetingrow}>
+          <div className={styles.greeting}>Willkommen {user.firstname}</div>
+          <div className={styles.greeting_subtitle}>Wie kann ich dir heute helfen?</div>
+        </div>
+
+        <div className={styles.optionrow}>
+          <Link href={"/dialog"}>
+            <div className={styles.option}>
+              <div className={styles.option_title}>Mail-Dialog fortsetzen</div>
+            </div>
+          </Link>
+
+          <Link href={"/monolog"}>
+            <div className={styles.option}>
+              <div className={styles.option_title}>E-Mail schreiben</div>
+            </div>
+          </Link>
+        </div>
+      </div>
     </SidebarLayout>
   )
 }

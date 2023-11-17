@@ -121,6 +121,8 @@ export default function Dialogue(props: InitialProps) {
   useEffect(() => {
 
     const createData = async () => {
+      setQuotaOverused(false);
+      console.log("Creating new Quota...");
       await updateDoc(doc(db, "Company", user.Company), { Usage: arrayUnion({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: 0 }) });
     }
 
@@ -135,13 +137,10 @@ export default function Dialogue(props: InitialProps) {
         setQuotaOverused(false);
       }
     }else{
-      console.log("no usage")
       createData();
     }
-
-    if (login == null) router.push("/login");
       
-  }, [login]);
+  }, [company]);
 
 
   const listToOptions = (liste: Array<string>) => {
@@ -308,11 +307,12 @@ export default function Dialogue(props: InitialProps) {
                     ]}
                     className={styles.formselect}
                     size='large'
+                    disabled={formDisabled || quotaOverused}
                     />
                 </Form.Item>
 
                 <Form.Item className={styles.formpart} label={<b>Einordnung des Gesprächpartners</b>} name="order">
-                    <Select placeholder="Wie ordnest du deinen Gesprächpartner ein?" options={listToOptions(motive)} mode="multiple" allowClear className={styles.formselect} size='large'/>
+                    <Select placeholder="Wie ordnest du deinen Gesprächpartner ein?" options={listToOptions(motive)} mode="multiple" allowClear className={styles.formselect} size='large' disabled={formDisabled || quotaOverused}/>
                 </Form.Item>
 
                 <Form.Item className={styles.formpart} label={<b>Länge der Antwort</b>} name="length">
@@ -321,13 +321,13 @@ export default function Dialogue(props: InitialProps) {
               </Card>
           </div>
           <div className={styles.formfootercontainer}>
-            <div className={styles.generatebuttonrow}>
-              <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>Antwort generieren <Icon component={ArrowRight} className={styles.buttonicon} viewBox='0 0 20 20'/></Button>
-            </div>
             <div className={styles.tokenalert}>
               {
-                (quotaOverused)? <Alert message={`Das Tokenbudget ist ausgeschöpft. Dein Budget setzt sich am 01.${props.Data.currentMonth+1}.${props.Data.currentYear} zurück. Wenn du weitere Tokens benötigen, kannst du diese in der Kontoübersicht dazubuchen.`} type="error" />: <></>
+                (quotaOverused)? <Alert message={`Das Tokenbudget ist ausgeschöpft. Weitere Tokens, kannst du in der Kontoübersicht dazubuchen.`} type="error" />: <></>
               }
+            </div>
+            <div className={styles.generatebuttonrow}>
+              <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>Antwort generieren <Icon component={ArrowRight} className={styles.buttonicon} viewBox='0 0 20 20'/></Button>
             </div>
           </div>
           </>

@@ -112,3 +112,14 @@
     stroke: inherit;
 }
 
+.floaticon > svg{
+    size: 3px;
+    height: 21px;
+    width: 20px;
+    transform: translate(-1px, 1px);
+    fill: transparent;
+
+    > path {
+        stroke: black;
+    }
+}

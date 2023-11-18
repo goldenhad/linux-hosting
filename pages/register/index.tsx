@@ -3,11 +3,12 @@ import axios from "axios";
 import router from "next/router";
 import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
-import { Alert, Button, Checkbox, Form, Input, Space } from 'antd';
+import { Alert, Button, Checkbox, Form, Input, Select, Space } from 'antd';
 import logo from '../../public/mailbuddy.png'
 import styles from './register.module.scss'
 import signUp, { signUpUser } from "../../firebase/auth/signup";
 import Head from "next/head";
+import userExists, { usernameExists } from "../../firebase/auth/userExists";
 
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -45,24 +46,45 @@ export default function Register(props){
     const [ loginFailed, setLoginFailed ] = useState(false);
     const [ usedInvite, setUsedInvite ] = useState(props.invite != undefined);
     const [ registerUserForm ] = Form.useForm();
+    const [ registerForm ] = Form.useForm();
+    const [ registeringCompany, setRegisteringCompany ] = useState(false);
 
     const onFinishRegisterCompany = async (values: any) => {
-        const { result, error } = await signUp(values.firstname, values.lastname, values.email, values.username, values.password, values.company, values.street, values.city, values.postalcode, "DE");
+        let isPersonal = values.usecase != "Für mein Unternehmen";
 
-        if (error) {
-            console.log(error);
-            setLoginFailed(true);
+        if(isPersonal){
+            const { result, error } = await signUp(values.firstname, values.lastname, values.email, values.username, values.password, values.firstname + " Firma", "", "", "", "DE", isPersonal);
+            
+            if (error) {
+                console.log(error);
+                setLoginFailed(true);
+            }else{
+                setLoginFailed(false);
+                // else successful
+                console.log(result)
+                return router.push("/setup")
+            }
         }else{
-            setLoginFailed(false);
-            // else successful
-            console.log(result)
-            return router.push("/")
+            const { result, error } = await signUp(values.firstname, values.lastname, values.email, values.username, values.password, values.company, values.street, values.city, values.postalcode, "DE", isPersonal);
+            
+            if (error) {
+                console.log(error);
+                setLoginFailed(true);
+            }else{
+                setLoginFailed(false);
+                // else successful
+                console.log(result)
+                return router.push("/setup")
+            }
         }
+
+        
     };
 
 
     const onFinishRegisterUser = async (values: any) => {
         const { result, error } = await signUpUser(values.firstname, values.lastname, values.email, values.username, values.password, props.invite.company);
+
 
         if (error) {
             console.log(error);
@@ -88,253 +110,10 @@ export default function Register(props){
         setLoginFailed(true);
     };
 
-
-
-    const getForm = () => {
-        if(usedInvite){
-            // Hier muss Formular rein für den User...
-            return (<Form
-                    name="basic"
-                    className={styles.loginform}
-                    initialValues={{
-                        remember: true,
-                    }}
-                    onFinish={onFinishRegisterUser}
-                    onFinishFailed={onFinishFailed}
-                    autoComplete="off"
-                    layout="vertical"
-                    onChange={() => { setLoginFailed(false) }}
-                    form={registerUserForm}
-                >
-                    <Space.Compact block>
-                        <Form.Item
-                            label="Vorname"
-                            name="firstname"
-                            style={{width: "50%"}}
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Bitte geben Sie einen Vornamen ein!',
-                                },
-                            ]}
-                            className={styles.loginpart}
-                            >
-                            <Input className={styles.logininput} disabled={true} />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Nachname"
-                            name="lastname"
-                            style={{width: "50%"}}
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Bitte geben Sie einen Nachnamen ein!',
-                                },
-                            ]}
-                            className={styles.loginpart}
-                            >
-                            <Input className={styles.logininput} disabled={true} />
-                        </Form.Item>
-                    </Space.Compact>
-
-                    <Form.Item
-                        label="E-Mail"
-                        name="email"
-                        rules={[
-                            {
-                            required: true,
-                            message: 'Bitte geben Sie ein E-Mail ein!',
-                            },
-                        ]}
-                        className={styles.loginpart}
-                        >
-                        <Input className={styles.logininput} disabled={true} />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Username"
-                        name="username"
-                        rules={[
-                            {
-                            required: true,
-                            message: 'Bitte geben Sie einen Usernamen ein!',
-                            },
-                        ]}
-                        className={styles.loginpart}
-                        >
-                        <Input className={styles.logininput} />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Password"
-                        name="password"
-                        rules={[
-                            {
-                            required: true,
-                            message: 'Bitte geben Sie ein Password ein!',
-                            },
-                        ]}
-                        className={styles.loginpart}
-                        >
-                        <Input.Password className={styles.logininput} />
-                        </Form.Item>
-
-                    <Form.Item
-                        label="Password wiederholen"
-                        name="passwordwdhl"
-                        rules={[
-                            {
-                            required: true,
-                            message: 'Bitte wiederholen Sie das Passwort!',
-                            },
-                            ({ getFieldValue }) => ({
-                                validator(_, value) {
-                                if (!value || getFieldValue('password') === value) {
-                                    return Promise.resolve();
-                                }
-                                return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
-                                },
-                            }),
-                            () => ({
-                                validator(_, value: string) {
-                                if (value.length >= 6) {
-                                    return Promise.resolve();
-                                }
-                                return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
-                                },
-                            }),
-                        ]}
-                        className={styles.loginpart}
-                        >
-                        <Input.Password className={styles.logininput} />
-                    </Form.Item>
-
-                    <Alert style={{marginBottom: 20, display: (loginFailed)? "block": "none"}} message="Beim Registrieren ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
-
-                    <Form.Item className={styles.loginbutton}>
-                        <Button type="primary" htmlType="submit">
-                            Registrieren
-                        </Button>
-                    </Form.Item>
-                </Form>);
-        }else{
-            return (<Form
-                    name="basic"
-                    className={styles.loginform}
-                    onFinish={onFinishRegisterCompany}
-                    onFinishFailed={onFinishFailed}
-                    autoComplete="off"
-                    layout="vertical"
-                    onChange={() => { setLoginFailed(false) }}
-                >
-                    <Space.Compact style={{width: "100%"}} block>
-                        <Form.Item
-                            label="Vorname"
-                            name="firstname"
-                            style={{width: "50%"}}
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Bitte geben Sie einen Vornamen ein!',
-                                },
-                            ]}
-                            className={styles.loginpart}
-                        >
-                            <Input className={styles.logininput_left} />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Nachname"
-                            name="lastname"
-                            style={{width: "50%"}}
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Bitte geben Sie einen Nachnamen ein!',
-                                },
-                            ]}
-                            className={styles.loginpart}
-                        >
-                            <Input className={styles.logininput_right} />
-                        </Form.Item>
-                    </Space.Compact>
-
-                    <Form.Item
-                        label="E-Mail"
-                        name="email"
-                        rules={[
-                            {
-                            required: true,
-                            message: 'Bitte geben Sie ein E-Mail ein!',
-                            },
-                        ]}
-                        className={styles.loginpart}
-                    >
-                        <Input className={styles.logininput} />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Username"
-                        name="username"
-                        rules={[
-                            {
-                            required: true,
-                            message: 'Bitte geben Sie einen Usernamen ein!',
-                            },
-                        ]}
-                        className={styles.loginpart}
-                    >
-                        <Input className={styles.logininput} />
-                    </Form.Item>
-
-                    <Space.Compact block>
-                        <Form.Item
-                            label="Password"
-                            name="password"
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Bitte geben Sie ein Password ein!',
-                                },
-                            ]}
-                            className={styles.loginpart}
-                        >
-                            <Input.Password className={styles.logininput_left} />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Password wiederholen"
-                            name="passwordwdhl"
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Bitte wiederholen Sie das Passwort!',
-                                },
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                    if (!value || getFieldValue('password') === value) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
-                                    },
-                                }),
-                                () => ({
-                                    validator(_, value: string) {
-                                    if (value.length >= 6) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
-                                    },
-                                }),
-                            ]}
-                            className={styles.loginpart}
-                        >
-                            <Input.Password className={styles.logininput_right} />
-                        </Form.Item>
-                    </Space.Compact>
-
-                    <Form.Item
+    const evalUseCase = () => {
+        if(registeringCompany){
+            return <>
+                <Form.Item
                         label="Name des Unternehmens"
                         name="company"
                         rules={[
@@ -394,6 +173,307 @@ export default function Register(props){
                             <Input className={styles.logininput_right} />
                         </Form.Item>
                     </Space.Compact>
+            </>
+        }
+    }
+
+
+    const getForm = () => {
+        if(usedInvite){
+            // Hier muss Formular rein für den User...
+            return (<Form
+                    name="basic"
+                    className={styles.loginform}
+                    initialValues={{
+                        remember: true,
+                    }}
+                    onFinish={onFinishRegisterUser}
+                    onFinishFailed={onFinishFailed}
+                    autoComplete="off"
+                    layout="vertical"
+                    onChange={() => { setLoginFailed(false) }}
+                    form={registerUserForm}
+                >
+                    <Space.Compact block>
+                        <Form.Item
+                            label="Vorname"
+                            name="firstname"
+                            style={{width: "50%"}}
+                            rules={[
+                                {
+                                required: true,
+                                message: 'Bitte geben Sie einen Vornamen ein!',
+                                },
+                            ]}
+                            className={styles.loginpart}
+                            >
+                            <Input className={styles.logininput} disabled={true} />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Nachname"
+                            name="lastname"
+                            style={{width: "50%"}}
+                            rules={[
+                                {
+                                required: true,
+                                message: 'Bitte geben Sie einen Nachnamen ein!',
+                                },
+                            ]}
+                            className={styles.loginpart}
+                            >
+                            <Input className={styles.logininput} disabled={true} />
+                        </Form.Item>
+                    </Space.Compact>
+
+                    <Form.Item
+                        label="E-Mail"
+                        name="email"
+                        rules={[
+                            {
+                            required: true,
+                            message: 'Bitte geben Sie ein E-Mail ein!',
+                            },
+                            () => ({
+                                async validator(_, value) {
+                                if(value != ""){
+                                    if (await userExists(value)) {
+                                        return Promise.reject(new Error('Die E-Mail wird bereits verwendet!'));
+                                        
+                                    }
+                                }
+                                return Promise.resolve();
+                                },
+                            }),
+                        ]}
+                        className={styles.loginpart}
+                        >
+                        <Input className={styles.logininput} disabled={true} />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Username"
+                        name="username"
+                        rules={[
+                            {
+                            required: true,
+                            message: 'Bitte geben Sie einen Usernamen ein!',
+                            },
+                            () => ({
+                                async validator(_, value) {
+                                if(value != ""){
+                                    if (await usernameExists(value)) {
+                                        return Promise.reject(new Error('Dieser Benutzername wird bereits verwendet!'));
+                                        
+                                    }
+                                }
+                                return Promise.resolve();
+                                },
+                            }),
+                        ]}
+                        className={styles.loginpart}
+                        >
+                        <Input className={styles.logininput} />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Password"
+                        name="password"
+                        rules={[
+                            {
+                            required: true,
+                            message: 'Bitte geben Sie ein Password ein!',
+                            },
+                        ]}
+                        className={styles.loginpart}
+                        >
+                        <Input.Password className={styles.logininput} />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Password wiederholen"
+                        name="passwordwdhl"
+                        rules={[
+                            {
+                            required: true,
+                            message: 'Bitte wiederholen Sie das Passwort!',
+                            },
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                if (!value || getFieldValue('password') === value) {
+                                    return Promise.resolve();
+                                }
+                                return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
+                                },
+                            }),
+                            () => ({
+                                validator(_, value: string) {
+                                if (value.length >= 6) {
+                                    return Promise.resolve();
+                                }
+                                return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
+                                },
+                            }),
+                        ]}
+                        className={styles.loginpart}
+                        >
+                        <Input.Password className={styles.logininput} />
+                    </Form.Item>
+
+                    <Alert style={{marginBottom: 20, display: (loginFailed)? "block": "none"}} message="Beim Registrieren ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
+
+                    <Form.Item className={styles.loginbutton}>
+                        <Button type="primary" htmlType="submit">
+                            Registrieren
+                        </Button>
+                    </Form.Item>
+                </Form>);
+        }else{
+            return (<Form
+                    name="basic"
+                    className={styles.loginform}
+                    onFinish={onFinishRegisterCompany}
+                    onFinishFailed={onFinishFailed}
+                    autoComplete="off"
+                    layout="vertical"
+                    onChange={() => { setLoginFailed(false) }}
+                    form={registerForm}
+                >
+                    <Space.Compact style={{width: "100%"}} block>
+                        <Form.Item
+                            label="Vorname"
+                            name="firstname"
+                            style={{width: "50%"}}
+                            rules={[
+                                {
+                                required: true,
+                                message: 'Bitte geben Sie einen Vornamen ein!',
+                                },
+                            ]}
+                            className={styles.loginpart}
+                        >
+                            <Input className={styles.logininput_left} />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Nachname"
+                            name="lastname"
+                            style={{width: "50%"}}
+                            rules={[
+                                {
+                                required: true,
+                                message: 'Bitte geben Sie einen Nachnamen ein!',
+                                },
+                            ]}
+                            className={styles.loginpart}
+                        >
+                            <Input className={styles.logininput_right} />
+                        </Form.Item>
+                    </Space.Compact>
+
+                    <Form.Item
+                        label="E-Mail"
+                        name="email"
+                        rules={[
+                            {
+                            required: true,
+                            message: 'Bitte geben Sie ein E-Mail ein!',
+                            },
+                            () => ({
+                                async validator(_, value) {
+                                if(value != ""){
+                                    if (await userExists(value)) {
+                                        return Promise.reject(new Error('Die E-Mail wird bereits verwendet!'));
+                                        
+                                    }
+                                }
+                                return Promise.resolve();
+                                },
+                            }),
+                        ]}
+                        className={styles.loginpart}
+                    >
+                        <Input className={styles.logininput} />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Username"
+                        name="username"
+                        rules={[
+                            {
+                            required: true,
+                            message: 'Bitte geben Sie einen Usernamen ein!',
+                            },
+                            () => ({
+                                async validator(_, value) {
+                                if(value != ""){
+                                    if (await usernameExists(value)) {
+                                        return Promise.reject(new Error('Dieser Benutzername wird bereits verwendet!'));
+                                        
+                                    }
+                                }
+                                return Promise.resolve();
+                                },
+                            }),
+                        ]}
+                        className={styles.loginpart}
+                    >
+                        <Input className={styles.logininput} />
+                    </Form.Item>
+
+                    <Space.Compact block>
+                        <Form.Item
+                            label="Password"
+                            name="password"
+                            rules={[
+                                {
+                                required: true,
+                                message: 'Bitte geben Sie ein Password ein!',
+                                },
+                            ]}
+                            className={styles.loginpart}
+                        >
+                            <Input.Password className={styles.logininput_left} />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Password wiederholen"
+                            name="passwordwdhl"
+                            rules={[
+                                {
+                                required: true,
+                                message: 'Bitte wiederholen Sie das Passwort!',
+                                },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                    if (!value || getFieldValue('password') === value) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
+                                    },
+                                }),
+                                () => ({
+                                    validator(_, value: string) {
+                                    if (value.length >= 6) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
+                                    },
+                                }),
+                            ]}
+                            className={styles.loginpart}
+                        >
+                            <Input.Password className={styles.logininput_right} />
+                        </Form.Item>
+                    </Space.Compact>
+
+                    <Form.Item label="Nutzung" name={"usecase"} className={styles.loginpart}>
+                        <Select onChange={(value) => { (value == "Für mein Unternehmen")? setRegisteringCompany(true): setRegisteringCompany(false) }} placeholder={"Wie planst du Mailbuddy zu nutzen?"} options={[{key: 0, value: "Nur für mich persönlich"}, {key: 1, value: "Für mein Unternehmen"}]}/>
+                    </Form.Item>
+
+                    {
+                        evalUseCase() 
+                    }
 
                     <Alert style={{marginBottom: 20, display: (loginFailed)? "block": "none"}} message="Beim Registrieren ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
 

@@ -14,3 +14,13 @@ export function convertToCurrency(val: number){
 
     return euro.format(val);
 }
+export const listToOptions = (liste: Array<string>) => {
+    const arr = liste.map(element => {
+      return {
+        value: element.toLowerCase(),
+        label: element
+      };
+    });
+  
+    return arr;
+  }

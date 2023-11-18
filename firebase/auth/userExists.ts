@@ -19,3 +19,18 @@ export default async function userExists(email: String) {
 
     return { result, error };
 }
+
+export async function usernameExists(username: String) {
+    let result = null,
+        error = null;
+    try {
+        let { result, error } = await getDocWhere("User", "username", "==", username.toLowerCase());
+        console.log(result);
+        return result.length > 0;
+    } catch (e) {
+        error = e;
+        console.log(e);
+    }
+
+    return { result, error };
+}

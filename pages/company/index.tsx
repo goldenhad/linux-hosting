@@ -69,10 +69,11 @@ export default function Company(props: InitialProps) {
     const [ form ] = Form.useForm();
     const router = useRouter();
 
-
-    const refreshData = () => {
-        router.replace(router.asPath);
-    }
+    useEffect(() => {
+        if(user.Role != "Company" && user.Role != "mailagent") {
+            router.push("/");
+        }
+    }, []);
 
     useEffect(() => {
         if (login == null) router.push("/login");

@@ -1,0 +1,148 @@
+
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
+    .loginform {
+        width: 25%;
+    }
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+    .loginform {
+        width: 25%;
+    }
+}
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) {
+    .loginform {
+        width: 25%;
+    }
+}
+
+
+.logincontainer{
+    height: 96vh;
+    display: flex;
+    flex-direction: column;
+
+    .logorow{
+        height: 10vh;
+        margin: 20px;
+    }
+
+    .formContainer{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+
+        .formtitle{
+            margin-bottom: 20px;
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 44px;
+        }
+
+        .formexplanation{
+            color: var(--foreground-rgb-secondary);
+            font-size: 16px;
+            line-height: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stepcontainer{
+            width: 70%;
+            margin-top: 50px;
+
+            .singlestep{
+                font-size: 16px;
+            }
+
+            .stepformcontent{
+                margin-top: 32px;
+                margin-bottom: 25px;
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            .continue{
+                height: 44px;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                
+                button {
+                    width: 360px;
+                    height: 44px;
+                    font-weight: 700;
+                    font-size: 16px;
+                    line-height: 24px;
+                    padding: 10px 18px 10px 18px;
+                }
+            }
+        }
+
+        .formpart{
+            margin-top: 24px;
+            font-weight: 700;
+            line-height: 20px;
+            size: 14px;
+            letter-spacing: 1%;
+  
+            .forminput{
+              background-color: white;
+              padding: 10px 14px 10px 14px;
+              border-radius: 8px;
+              box-shadow: 0px 1px 2px 0px #1018280D;
+              border-color: #D0D5DD;
+            }
+  
+            .formselect{
+              background-color: white;
+              border-radius: 8px;
+              box-shadow: 0px 1px 2px 0px #1018280D;
+              border-color: #D0D5DD;
+            }
+          }
+
+        .signupnotice{
+            font-size: 14px;
+            display: flex;
+            flex-direction: row;
+
+            .signuplink{
+                margin-left: 8px;
+                color: #1478FD;
+                font-weight: 700;
+            }
+        }
+
+    }
+
+    .googleloginbutton{
+        width: 360px;
+        height: 44px;
+        margin-bottom: 32px;
+
+        button {
+            width: 360px;
+            height: 44px;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 24px;
+            padding: 10px 18px 10px 18px;
+        }
+    }
+}
+
+.copyrightfooter{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    color: #475467;
+}

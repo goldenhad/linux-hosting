@@ -8,7 +8,7 @@ import addData from "../data/setData";
 const auth = getAuth(firebase_app);
 const db = getFirestore(firebase_app);
 
-export default async function signUp(firstname, lastname, email, username, password, name, street, city, postalcode, country) {
+export default async function signUp(firstname, lastname, email, username, password, name, street, city, postalcode, country, isPersonal) {
     let result = null,
         error = null;
         
@@ -27,7 +27,7 @@ export default async function signUp(firstname, lastname, email, username, passw
                                 lastname: lastname,
                                 email: email,
                                 username: username,
-                                Role: "Company",
+                                Role: (isPersonal)? "Singleuser": "Company",
                                 Company: `${companycreationresult.result.id}`,
                                 profiles: [],
                                 usedCredits: [],
@@ -47,7 +47,8 @@ export default async function signUp(firstname, lastname, email, username, passw
                                         order: "",
                                         length: "",
                                     }
-                                }
+                                },
+                                setupDone: false,
                             });
                             console.log(usercreationresult);
                         } catch(e) {

@@ -37,3 +37,24 @@ export async function getDocWhere(col, state, comperator, invariant) {
     return { result, error };
 }
 
+
+export async function getAllDocs(col) {
+    let docRef = collection(db, col);
+
+    let result = null;
+    let error = null;
+
+    try {
+        let rawdata = await getDocs(docRef);
+        result = [];
+        rawdata.forEach((doc) => {
+            let obj = doc.data();
+            obj.uid = doc.id;
+            result.push(obj);
+        })
+    } catch (e) {
+        error = e;
+    }
+
+    return { result, error };
+}

@@ -1,0 +1,54 @@
+
+.main {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+
+    .quoatacard{
+        width: 400px;
+        height: 600px;
+        text-align: center;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        border: 1px  solid rgb(217, 217, 217);
+        padding: 20px 20px 20px 20px;
+
+        .quoataprice{
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 32px;
+        }
+        
+        .featuremap{
+            margin-top: 50px;
+            height: 300px;
+            padding-left: 20px;
+            padding-right: 20px;
+            .feature{
+                display: flex;
+                flex-direction: row;
+                text-align: left;
+
+                .featureicon{
+                    margin-right: 10px;
+                }
+            }
+        }
+
+
+        .buyrow{
+            margin-top: 100px;
+            .buynow{
+                width: 360px;
+                height: 44px;
+                font-weight: 700;
+                font-size: 16px;
+                line-height: 24px;
+                padding: 10px 18px 10px 18px;
+                font-weight: bold;
+            }
+        }
+        
+    }
+}

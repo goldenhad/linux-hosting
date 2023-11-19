@@ -19,7 +19,7 @@ export default async function signUp(firstname, lastname, email, username, passw
                 try {
                     result = await createUserWithEmailAndPassword(auth, email, password);
                     try{
-                        let companycreationresult = await addDataWithoutId("Company", { name: name, street: street, city: city, postalcode: postalcode, country: country, settings: {background: ""}, Usage: [], Quota: "Free" });
+                        let companycreationresult = await addDataWithoutId("Company", { name: name, street: street, city: city, postalcode: postalcode, country: country, settings: {background: ""}, Usage: [], Quota: "Free", tokens: 9000 });
                         console.log(companycreationresult);
                         try {
                             let usercreationresult = await addData("User", result.user.uid, {

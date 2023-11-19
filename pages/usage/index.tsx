@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Form, Input, List, Modal, Progress, Select, Space, Table, Tooltip, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, List, Modal, Progress, Select, Space, Table, Typography } from 'antd';
 import styles from './usage.module.scss'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -12,9 +12,31 @@ import updateData from '../../firebase/data/updateData';
 import { RightCircleOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { Usage } from '../../firebase/types/Company';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { User } from '../../firebase/types/User';
 const { Paragraph } = Typography;
 
 const { TextArea } = Input;
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
+
+const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
 
 export interface InitialProps {
@@ -58,6 +80,7 @@ export default function Usage(props: InitialProps) {
     const { login, user, company, role, quota } = useAuthContext();
     const [ overused, setOverused ] = useState(false);
     const [ currusage, setCurrusage ] = useState(0);
+    const [ users, setUsers ] = useState([]);
     const router = useRouter();
 
     useEffect(() => {
@@ -66,10 +89,19 @@ export default function Usage(props: InitialProps) {
         }
     }, []);
 
+
     useEffect(() => {
-        if(company){
-            setCurrusage(findUsage(company.Usage).amount);
+        const load = async () => {
+            let {result, error} = await getDocWhere("User", "Company", "==", user.Company);
+            if(!error){
+                console.log(result);
+                setUsers(result);
+            }else{
+                setUsers([]);
+            }
         }
+
+        load();
     }, [company])
 
     const findUsage = (usagearr: Array<Usage>) => {
@@ -85,11 +117,42 @@ export default function Usage(props: InitialProps) {
     
     const getUpgradeLink = () => {
         return(
-            <Paragraph className={styles.upgrade}>
-                Entdecke jetzt mehr Möglichkeiten upgrade auf unsere weiteren Pläne und erlebe das volle Spektrum an Funktionen und Tokens! <Link href='/upgrade'>Weitere Pläne</Link>
-            </Paragraph>
+            <div className={styles.generatebuttonrow}>
+                <Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button>
+            </div>
         );
     }
+
+    const purchasecolumns = [
+        {
+          title: 'Transaktion',
+          dataIndex: 'id',
+          key: 'id',
+        },
+        {
+          title: 'Datum',
+          dataIndex: 'date',
+          key: 'date',
+        },
+        {
+          title: 'Erworbene Tokens',
+          dataIndex: 'boughtCredits',
+          key: 'boughtCredits',
+        },
+        {
+            title: 'Betrag',
+            dataIndex: 'cost',
+            key: 'cost',
+          },
+        {
+            title: 'Aktionen',
+            dataIndex: 'actions',
+            key: 'actions',
+            render: (_: any, obj: any) => {
+              return undefined;
+            }
+          },
+      ];
 
   
     return (
@@ -98,38 +161,65 @@ export default function Usage(props: InitialProps) {
                 <div className={styles.companyoverview}>
                     <Card className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Tokens"} bordered={true}>
                         <div className={styles.tokeninfocard}>
-                            <h2>Verbrauchte Tokens (seit 01.{pad(props.Data.currentMonth, 2)}.{props.Data.currentYear})</h2>
+                            <h2>Dein Token-Budget</h2>
                             <div className={styles.quotarow}>
-                                <Tooltip title={`${currusage} Tokens von ${quota.tokens} verbraucht.`}>
-                                    <Progress type='circle' size="default" className={styles.quotaprogress} status={(overused)? "exception": undefined} percent={Math.round((currusage / quota.tokens) * 100)  } />
-                                </Tooltip>
+                                <div className={styles.tokenbudget}>{company.tokens} Tokens</div>
                             </div>
-                            <h2 className={styles.quotatitle}>Aktueller Plan: {company.Quota}</h2>
-                            
-                            <div className={styles.planinformation}>
-                                <List
-                                    className={styles.quotainfolist}
-                                    bordered
-                                    dataSource={quota.features}
-                                    renderItem={(item) => {
-                                        return(
-                                            <List.Item>
-                                                <div className={styles.quotainfo}>
-                                                    <div className={styles.quotainfoicon}><RightCircleOutlined /></div>
-                                                    <div className={styles.quotainfotext}>{item}</div>
-                                                </div>
-                                            </List.Item>
-                                        );
-                                    } }>
-                                </List>
+                        </div>
+                        <div className={styles.generatebuttonrow}>
+                            <Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button>
+                        </div>
+                    </Card>
+                    <Card className={styles.tokenusage} headStyle={{backgroundColor: "#F9FAFB"}} title={"Tokens"} bordered={true}>
+                        <div className={styles.tokeninfocard}>
+                            <h2>Verbrauch</h2>
+                            <div className={styles.usageinfo}>
+                                
+                                <div className={styles.barcontainer}>
+                                    <Bar
+                                        options={{
+                                            maintainAspectRatio: false,
+                                            plugins: {
+                                                legend: {
+                                                    position: 'top' as const,
+                                                },
+                                                title: {
+                                                    display: false,
+                                                    text: 'Chart.js Bar Chart',
+                                                },
+                                            },
+                                        }}
+                                        data={{
+                                            labels:  months,
+                                            datasets: [
+                                                {
+                                                    label: "Tokens",
+                                                    data: months.map((label, idx) => {
+                                                        let sum = 0;
+                                                        users.forEach((su: User) => {
+                                                          su.usedCredits.forEach((usage: Usage) => {
+                                                            if(usage.month == idx+1 && usage.year == new Date().getFullYear()){
+                                                                sum += usage.amount;
+                                                            }
+                                                          });
+                                                        })
+                                                        return sum;
+                                                    }),
+                                                    backgroundColor: 'rgba(16, 24, 40, 0.8)',
+                                                }
+                                            ]
+                                        }}
+                                    />
+                                </div>
 
                             </div>
-
-                            {getUpgradeLink()}
                         </div>
                         
                     </Card>
                 </div>
+                <Card title={"Käufe"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
+                    <Table dataSource={[]} columns={purchasecolumns} />
+                </Card>
             </div>
         </SidebarLayout>
     );

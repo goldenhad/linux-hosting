@@ -22,8 +22,7 @@ export type Company = {
     postalcode: string;
     country: string;
     settings: CompanySettings;
-    Usage: Array<Usage>;
-    Quota: string;
+    tokens: number;
 }
 
 export const basicCompany = {
@@ -35,6 +34,5 @@ export const basicCompany = {
     settings: {
         background: "",
     },
-    Usage: [],
-    Quota: "",
+    tokens: 0,
 }

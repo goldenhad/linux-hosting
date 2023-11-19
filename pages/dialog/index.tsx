@@ -123,15 +123,11 @@ export default function Dialogue(props: InitialProps) {
     const createData = async () => {
       setQuotaOverused(false);
       console.log("Creating new Quota...");
-      await updateDoc(doc(db, "Company", user.Company), { Usage: arrayUnion({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: 0 }) });
+      await updateDoc(doc(db, "Company", user.Company), { tokens: 0 });
     }
-
-    let currentUsage = company.Usage.find((Usge: Usage) => {
-      return Usge.month == props.Data.currentMonth && Usge.year == props.Data.currentYear;
-    });
-
-    if(currentUsage){
-      if(currentUsage.amount > quota.tokens){
+    
+    if(company.tokens != undefined){
+      if(company.tokens <= 0){
         setQuotaOverused(true);
       }else{
         setQuotaOverused(false);
@@ -208,21 +204,11 @@ export default function Dialogue(props: InitialProps) {
             console.log("Timing logging failed!");
             console.log(`{tokens: ${answer.data.tokens}, time: ${answer.timings.elapsedTime}, type: "DIALOG"}`)
           }
-  
-          let usageidx = company.Usage.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});
-          
-          if(usageidx != -1){
-            let usageupdates = company.Usage;
-            usageupdates[usageidx].amount += answer.data.tokens;
-            await updateDoc(doc(db, "Company", user.Company), { Usage: usageupdates});
 
-            if(usageupdates[usageidx].amount > quota.tokens){
-              setQuotaOverused(true);
-            }
+          if(company.tokens - answer.data.tokens <= 0){
+            company.tokens = 0;
           }else{
-            let usageupdates = [];
-            usageupdates.push({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: answer.data.tokens });
-            await updateDoc(doc(db, "Company", user.Company), { Usage: usageupdates});
+            company.tokens -= answer.data.tokens
           }
 
           let userusageidx = user.usedCredits.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});

@@ -206,7 +206,7 @@ export default function Company(props: InitialProps) {
                 </div>
 
                 <div className={styles.finishformrow}>
-                    <Button type='primary' htmlType='submit'>Speichern</Button>
+                    <Button className={styles.savebutton} type='primary' htmlType='submit'>Speichern</Button>
                 </div>
 
             </Form>);
@@ -338,7 +338,9 @@ export default function Company(props: InitialProps) {
                 <div>
                     <Card title={"Nutzer"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
                         <Table dataSource={users} columns={usercolumns} />
-                        <Button type='primary' onClick={() => {setInviteUserModalOpen(true)}}>Nutzer einladen</Button>
+                        <div className={styles.inviteuserrow}>
+                            <Button type='primary' onClick={() => {setInviteUserModalOpen(true)}}>Nutzer einladen</Button>
+                        </div>
                     </Card>
 
                     <Modal title="Nutzer einladen" open={inviteUserModalOpen} onCancel={() => {setInviteUserModalOpen(false)}} footer = {[]}>

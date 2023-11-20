@@ -111,7 +111,7 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
         }
       }
     }}>
-      <Layout className={styles.layout}>
+      <Layout className={styles.layout} hasSider={true}>
         <Sider className={styles.sidebar} breakpoint={breakpoint} collapsedWidth={collapseWidth} collapsed={collapsed} onCollapse={(value) => {setCollapsed(value)}}>
           <div className={styles.logobox}>
             <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>

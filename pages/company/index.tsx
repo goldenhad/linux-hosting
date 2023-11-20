@@ -504,7 +504,7 @@ export default function Company(props: InitialProps) {
                             </div>
 
                         <div className={styles.generatebuttonrow}>
-                            {(company.unlimited)? <></>:<Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button>}
+                            {(company.unlimited)? <></>:<Link href={"/upgrade"}><Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button></Link>}
                         </div>
                     </Card>
                 </div>

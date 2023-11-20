@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { handleEmptyString } from '../../helper/architecture';
 import { usernameExists, usernameExistsAtDifferentUser } from '../../firebase/auth/userExists';
 import forgotpassword from '../../firebase/auth/forgot';
+import updateData from '../../firebase/data/updateData';
 var paypal = require('paypal-rest-sdk');
 const { Paragraph } = Typography;
 const { TextArea } = Input;
@@ -36,12 +37,23 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 };
 
 
+function onlyUpdateIfSet(val, ideal){
+    if(val != ""){
+        return val;
+    }else{
+        return ideal;
+    }
+}
+
+
 export default function Account(props: InitialProps) {
   const { login, user, company, role, quota } = useAuthContext();
   const router = useRouter();
   const [ personalForm ] = Form.useForm();
   const [ passwordForm ] = Form.useForm();
   const [ wasReset, setWasReset ] = useState(false);
+  const [ isErrVisible, setIsErrVisible ] = useState(false);
+  const [ editSuccessfull, setEditSuccessfull ] = useState(false);
 
   useEffect(() => {
     personalForm.setFieldValue("username", user.username);
@@ -51,12 +63,49 @@ export default function Account(props: InitialProps) {
     personalForm.setFieldValue("street", company.street);
     personalForm.setFieldValue("postalcode", company.postalcode);
     personalForm.setFieldValue("city", company.city);
-  }, [])
+  }, []);
+
+
+  const saveAccountInfo = async () => {
+    let username = personalForm.getFieldValue("username");
+    let firstname = personalForm.getFieldValue("firstname");
+    let lastname = personalForm.getFieldValue("lastname");
+
+    let street = personalForm.getFieldValue("street");
+    let postalcode = personalForm.getFieldValue("postalcode");
+    let city = personalForm.getFieldValue("city");
+
+    let { result, error } = await updateData("User", login.uid, { 
+        username: onlyUpdateIfSet(username, user.username),
+        firstname: onlyUpdateIfSet(firstname, user.firstname),
+        lastname: onlyUpdateIfSet(lastname, user.lastname),
+    });
+
+    if(!error){
+        let { result, error } = await updateData("Company", user.Company, { 
+            street: onlyUpdateIfSet(street, company.street),
+            postalcode: onlyUpdateIfSet(postalcode, company.postalcode),
+            city: onlyUpdateIfSet(city, company.city),
+        });
+
+        if(!error){
+            setIsErrVisible(false);
+            setEditSuccessfull(true);
+        }else{
+            setIsErrVisible(true);
+            setEditSuccessfull(false);
+        }
+    }else{
+        setIsErrVisible(true);
+        setEditSuccessfull(false);
+    }
+
+  }
 
   const getPersonalForm = () => {
-    if(user.Role != "Company"){
+    if(user.Role == "Company"){
         return(
-            <Form layout='vertical' form={personalForm}>
+            <Form layout='vertical' form={personalForm} onFinish={() => {saveAccountInfo()}} onChange={() => {setIsErrVisible(false), setEditSuccessfull(false)}}>
                 <div className={styles.formrow}>
                     <Form.Item
                         className={styles.formpart}
@@ -66,7 +115,7 @@ export default function Account(props: InitialProps) {
                             () => ({
                                 async validator(_, value) {
                                 if(value != ""){
-                                    if (await usernameExists(value)) {
+                                    if (await usernameExistsAtDifferentUser(value, login.uid)) {
                                         return Promise.reject(new Error('Dieser Benutzername wird bereits verwendet!'));
                                         
                                     }
@@ -95,11 +144,23 @@ export default function Account(props: InitialProps) {
                         <Input className={styles.forminput} />
                     </Form.Item>
                 </div>
+
+                <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
+                    <Alert type='error' message={"Speichern fehlgeschlagen, bitte versuche es erneut!"} />
+                </div>
+
+                <div className={styles.successrow} style={{display: (editSuccessfull)? "block": "none"}}>
+                    <Alert type='success' message="Speichern erfolgreich!" />
+                </div>
+
+                <div className={styles.savebuttonrow}>
+                    <Button type='primary' className={styles.save} htmlType='submit'>Speichern</Button>
+                </div>
             </Form>
         );
     }else{
         return(
-            <Form layout='vertical' form={personalForm}>
+            <Form layout='vertical' form={personalForm} onFinish={() => {saveAccountInfo()}} onChange={() => {setIsErrVisible(false), setEditSuccessfull(false)}}>
                 <Form.Item
                         className={styles.formpart}
                         name={"username"}
@@ -150,6 +211,18 @@ export default function Account(props: InitialProps) {
                         <Input className={styles.forminput} />
                     </Form.Item>
                 </div>
+
+                <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
+                    <Alert type='error' message={"Speichern fehlgeschlagen, bitte versuche es erneut!"} />
+                </div>
+
+                <div className={styles.successrow} style={{display: (editSuccessfull)? "block": "none"}}>
+                    <Alert type='success' message="Speichern erfolgreich!" />
+                </div>
+
+                <div className={styles.savebuttonrow}>
+                    <Button type='primary' className={styles.save} htmlType='submit'>Speichern</Button>
+                </div>
             </Form>
         );
     }
@@ -192,9 +265,6 @@ const getResetButton = () => {
         <div className={styles.personal}>
             <Card className={styles.personalcard} title="Persönliche Informationen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
                 {getPersonalForm()}
-                <div className={styles.savebuttonrow}>
-                    <Button type='primary' onClick={() => {router.back()}} className={styles.save}>Speichern</Button>
-                </div>
             </Card>
         </div>
         <div className={styles.password}>

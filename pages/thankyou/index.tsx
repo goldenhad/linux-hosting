@@ -130,9 +130,15 @@ export default function Upgrade(props: InitialProps) {
 
     if(order.state == "completed") {
         return (
-            <Link href={(user.Role == "Company")? "/company": "/usage"}>
-                <Button type="primary" className={styles.backnow}>Zurück zu meinem Konto</Button>
-            </Link>
+            <div className={styles.buttongroup}>
+                <Link href={`/order/invoice/${order.id}`}>
+                    <Button className={styles.backnow}>Rechnung herunterladen</Button>
+                </Link>
+
+                <Link href={(user.Role == "Company")? "/company": "/usage"}>
+                    <Button type="primary" className={styles.backnow}>Zurück zu meinem Konto</Button>
+                </Link>
+            </div>
         );
     }else{
         return(<Button onClick={() => {setSeed(Math.random());}} className={styles.backnow}>Aktualisieren</Button>);

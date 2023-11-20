@@ -54,6 +54,7 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
   ];
 
   const getDefaultSelected = () => {
+    console.log(router.pathname)
     switch(router.pathname){
       case '/': 
         return '1';
@@ -66,6 +67,12 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
       case '/company':
         return '3';
       case '/usage':
+        return '3';
+      case '/order/invoice/[id]':
+        return '3';
+      case '/upgrade':
+        return '3';
+      case '/thankyou':
         return '3';
       case '/profiles':
         return '4';

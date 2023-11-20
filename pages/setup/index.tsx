@@ -79,7 +79,7 @@ export default function Setup(){
 
 
     const getFormSteps = () => {        
-        if(user.Role == "Company"){
+        if(user.Role == "Company" ){
             return [
                 {   step: 0,
                     title: "Erzähl mir etwas über deine Firma!",
@@ -181,7 +181,6 @@ export default function Setup(){
         let userstyles = setupForm.getFieldValue("styles");
         let userEmotions = setupForm.getFieldValue("emotions");
         
-        console.log([companyinfo, userinfo, userstyles, userEmotions]);
 
         if(companyinfo){
             await updateData("Company", user.Company, { settings: { background: companyinfo } });

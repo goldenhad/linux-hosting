@@ -82,7 +82,33 @@ export async function signUpUser(firstname, lastname, email, username, password,
                 try {
                     result = await createUserWithEmailAndPassword(auth, email, password);
                     try {
-                        let usercreationresult = await addData("User", result.user.uid, { firstname: firstname, lastname: lastname, username: username, Role: "mailagent", Company: companyid, profiles: [], usedCredits: [] });
+                        let usercreationresult = await addData("User", result.user.uid,{
+                            firstname: firstname,
+                            lastname: lastname,
+                            username: username,
+                            Role: "mailagent",
+                            Company: companyid,
+                            profiles: [],
+                            usedCredits: [],
+                            lastState: {
+                                dialog: {
+                                    profile: "",
+                                    dialog: "",
+                                    continue: "",
+                                    address: "",
+                                    order: "",
+                                    length: "",
+                                },
+                                monolog: {
+                                    profile: "",
+                                    content: "",
+                                    address: "",
+                                    order: "",
+                                    length: "",
+                                }
+                            },
+                            setupDone: false,
+                        });
                         console.log(usercreationresult);
                     } catch(e) {
                         console.log(e);

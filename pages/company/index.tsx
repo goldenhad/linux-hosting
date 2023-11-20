@@ -77,6 +77,7 @@ export default function Company(props: InitialProps) {
     const router = useRouter();
 
     useEffect(() => {
+        console.log(user.Role);
         if(user.Role != "Company" && user.Role != "mailagent") {
             router.push("/");
         }
@@ -97,7 +98,6 @@ export default function Company(props: InitialProps) {
         const load = async () => {
             let {result, error} = await getDocWhere("User", "Company", "==", user.Company);
             if(!error){
-                console.log(result);
                 setUsers(result);
             }else{
                 setUsers([]);
@@ -413,7 +413,6 @@ export default function Company(props: InitialProps) {
             dataIndex: 'timestamp',
             key: 'timestamp',
             render: (_: any, obj: any) => {
-                console.log(obj)
                 return new Date(obj.timestamp * 1000).toLocaleString('de',{timeZone:'Europe/Berlin', timeZoneName: 'short'});
             }
         },

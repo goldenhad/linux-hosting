@@ -45,8 +45,8 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
     getItem(<Link href={"/"}>Home</Link>, '1', () => { return true }, <Icon component={Home} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>, ),
     getItem(<Link href={"/dialog"}>Dialog</Link>, '2', () => { return true }, <Icon component={Main} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
     getItem(<Link href={"/monolog"}>Monolog</Link>, '5', () => { return true }, <Icon component={Main} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
-    getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return props.user.Role == "Company" }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
-    getItem(<Link href={"/usage"}>Nutzung</Link>, '3', () => { return props.user.Role != "Company"  }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return props.user.Role == "Company" || props.user.Role == "mailagent"  }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/usage"}>Nutzung</Link>, '3', () => { return props.user.Role != "Company" && props.user.Role != "mailagent"  }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
     getItem(<Link href={"/profiles"}>Profile</Link>, '4', () => { return true }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
   ];
 
@@ -54,7 +54,6 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
   ];
 
   const getDefaultSelected = () => {
-    console.log(router.pathname)
     switch(router.pathname){
       case '/': 
         return '1';

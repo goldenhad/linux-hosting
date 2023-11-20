@@ -82,11 +82,13 @@ export default function Account(props: InitialProps) {
     });
 
     if(!error){
-        let { result, error } = await updateData("Company", user.Company, { 
-            street: onlyUpdateIfSet(street, company.street),
-            postalcode: onlyUpdateIfSet(postalcode, company.postalcode),
-            city: onlyUpdateIfSet(city, company.city),
-        });
+        if(user.Role != "mailagent"){
+            let { result, error } = await updateData("Company", user.Company, { 
+                street: onlyUpdateIfSet(street, company.street),
+                postalcode: onlyUpdateIfSet(postalcode, company.postalcode),
+                city: onlyUpdateIfSet(city, company.city),
+            });
+        }
 
         if(!error){
             setIsErrVisible(false);
@@ -103,7 +105,7 @@ export default function Account(props: InitialProps) {
   }
 
   const getPersonalForm = () => {
-    if(user.Role == "Company"){
+    if(user.Role == "Company" || user.Role == "mailagent"){
         return(
             <Form layout='vertical' form={personalForm} onFinish={() => {saveAccountInfo()}} onChange={() => {setIsErrVisible(false), setEditSuccessfull(false)}}>
                 <div className={styles.formrow}>

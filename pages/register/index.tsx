@@ -93,7 +93,7 @@ export default function Register(props){
             setLoginFailed(false);
             // else successful
             console.log(result)
-            return router.push("/")
+            return router.push("/setup")
         }
     }
 

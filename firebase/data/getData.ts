@@ -28,7 +28,9 @@ export async function getDocWhere(col, state, comperator, invariant) {
         let rawdata = await getDocs(query(docRef, where(state, comperator, invariant)));
         result = [];
         rawdata.forEach((doc) => {
-            result.push(doc.data());
+            let dat = doc.data();
+            dat.id = doc.id;
+            result.push(dat);
         })
     } catch (e) {
         error = e;

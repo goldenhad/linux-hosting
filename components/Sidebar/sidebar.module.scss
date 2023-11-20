@@ -55,6 +55,11 @@
 }
 
 .avatarmenu{
+
+    .accountlink{
+        display: flex;
+    }
+    
     .profile {
         display: flex;
         flex-direction: row;

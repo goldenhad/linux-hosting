@@ -54,6 +54,11 @@ export default function Upgrade(props: InitialProps) {
   const router = useRouter();
 
   useEffect(() => {
+
+    if(company.unlimited){
+      router.push("/");
+    }
+
     const delOrderObj = async () => {
       let orderindex = company.orders.findIndex((singleorder: Order) => {
         return singleorder.id == props.Data.token;

@@ -6,11 +6,9 @@ import { Avatar, ConfigProvider, Divider, FloatButton, Layout, Menu, Popover, th
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 const { Content, Footer, Sider } = Layout;
-import {isMobile} from 'react-device-detect';
 import { User } from '../../firebase/types/User';
 import { handleEmptyString } from '../../helper/architecture';
 import styles from './sidebar.module.scss';
-
 import Home from '../../public/icons/home.svg';
 import Main from '../../public/icons/main.svg';
 import Company from '../../public/icons/company.svg';
@@ -28,8 +26,6 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
   const [ breakpoint, setBreakpoint ] = useState(undefined);
   const router = useRouter();
   const [ version, setVersion ] = useState("");
-
-  const rights = props.capabilities;
 
   function getItem( label: React.ReactNode, key: React.Key, check: () => boolean, icon?: React.ReactNode, children?: MenuItem[] ): MenuItem {
     if( check() ){
@@ -81,10 +77,12 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
 
   const profilemenu = (
     <div className={styles.avatarmenu}>
-      <div className={styles.profile}>
-        <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
-        <div className={styles.profileinfo}>{handleEmptyString(props.user.firstname)} {handleEmptyString(props.user.lastname)}</div>
-      </div>
+      <Link href={"/account"} className={styles.accountlink}>
+        <div className={styles.profile}>
+          <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
+          <div className={styles.profileinfo}>{handleEmptyString(props.user.firstname)} {handleEmptyString(props.user.lastname)}</div>
+        </div>
+      </Link>
       <Divider className={styles.menudivider} />
       <div className={styles.iconlink}>
         <Link href="/logout" className={styles.linkwrapper}>

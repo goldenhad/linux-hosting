@@ -284,6 +284,14 @@ export default function Register(props){
                             required: true,
                             message: 'Bitte geben Sie ein Password ein!',
                             },
+                            () => ({
+                                validator(_, value: string) {
+                                if (value.length >= 6) {
+                                    return Promise.resolve();
+                                }
+                                return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
+                                },
+                            }),
                         ]}
                         className={styles.loginpart}
                         >
@@ -306,14 +314,7 @@ export default function Register(props){
                                 return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
                                 },
                             }),
-                            () => ({
-                                validator(_, value: string) {
-                                if (value.length >= 6) {
-                                    return Promise.resolve();
-                                }
-                                return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
-                                },
-                            }),
+                            
                         ]}
                         className={styles.loginpart}
                         >

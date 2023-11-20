@@ -40,8 +40,6 @@ export default function Forgot_Password(){
             console.log(result)
             setWasReset(true);
         }
-
-        
     };
 
     const onFinishFailed = (errorInfo: any) => {

@@ -1,15 +1,15 @@
-import { Alert, Button, Card, Form, Input, List, Modal, Progress, Select, Space, Table, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, List, Modal, Progress, Select, Space, Table, Tag, Typography } from 'antd';
 import styles from './edit.company.module.scss'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useRouter } from 'next/router';
-import { handleEmptyString } from '../../helper/architecture';
+import { convertToCurrency, handleEmptyString } from '../../helper/architecture';
 import { useAuthContext } from '../../components/context/AuthContext';
 import { getDocWhere } from '../../firebase/data/getData';
 import updateData from '../../firebase/data/updateData';
-import { RightCircleOutlined } from '@ant-design/icons';
+import { RightCircleOutlined, FileTextOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import {
     Chart as ChartJS,
@@ -37,23 +37,8 @@ ChartJS.register(
 
 const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
-
-
 export interface InitialProps {
   Data: { currentMonth: number, currentYear: number; };
-}
-
-function pad(number: number, size: number){
-    let nstring = number.toString();
-    let leadings = "";
-
-    if(nstring.length < size){
-        for(let i=0; i < size-nstring.length; i++){
-            leadings += "0";
-        }
-    }
-
-    return leadings + nstring;
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -75,7 +60,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   
     
 };
-
 
 
 export default function Company(props: InitialProps) {
@@ -345,16 +329,8 @@ export default function Company(props: InitialProps) {
             setInviteErrMsg("Ein Nutzer mit dieser E-Mail Adresse nutzt Mailbuddy bereits!");
         }
       }
+
     
-    const getUpgradeLink = () => {
-        if(user.Role == "Company" || user.Role == "administrator") {
-            return(
-                <Paragraph className={styles.upgrade}>
-                    Entdecke jetzt mehr Möglichkeiten – upgrade auf unsere weiteren Pläne und erlebe das volle Spektrum an Funktionen und Tokens! <Link href='/upgrade'>Weitere Pläne</Link>
-                </Paragraph>
-            );
-        }
-    }
 
     const getUserOverview = () => {
         if(user.Role == "Company"){
@@ -401,6 +377,76 @@ export default function Company(props: InitialProps) {
             return <></>;
         }
     }
+
+    const purchasecolumns = [
+        {
+            title: 'Status',
+            dataIndex: 'state',
+            key: 'state',
+            render: (_: any, obj: any) => {
+                switch(obj.state){
+                    case "completed":
+                        return(
+                            <Tag icon={<CheckCircleOutlined />} color="success">
+                                abgeschlossen
+                            </Tag>
+                        );
+                    
+                    case "awaiting_payment":
+                        return(<></>);
+                    default:
+                        return(
+                            <Tag icon={<CloseCircleOutlined />} color="error">
+                                abgebrochen
+                            </Tag>
+                        );
+                }
+            }
+        },
+        {
+            title: 'Transaktion',
+            dataIndex: 'id',
+            key: 'id',
+        },
+        {
+            title: 'Datum',
+            dataIndex: 'timestamp',
+            key: 'timestamp',
+            render: (_: any, obj: any) => {
+                console.log(obj)
+                return new Date(obj.timestamp * 1000).toLocaleString('de',{timeZone:'Europe/Berlin', timeZoneName: 'short'});
+            }
+        },
+        {
+            title: 'Erworbene Tokens',
+            dataIndex: 'tokens',
+            key: 'tokens',
+        },
+        {
+            title: 'Betrag',
+            dataIndex: 'amount',
+            key: 'amount',
+            render: (_: any, obj: any) => {
+                return convertToCurrency(obj.amount);
+              }
+        },
+        {
+            title: 'Aktionen',
+            dataIndex: 'actions',
+            key: 'actions',
+            render: (_: any, obj: any) => {
+                return (
+                    <div className={styles.actionrow}>
+                        <div className={styles.singleaction}>
+                            <Link href={`/order/invoice/${obj.id}`}>
+                                <FileTextOutlined style={{ fontSize: 20 }}/>
+                            </Link>
+                        </div>
+                    </div>
+                );
+            }
+          },
+      ];
 
   
     return (
@@ -458,16 +504,18 @@ export default function Company(props: InitialProps) {
                             </div>
 
                         <div className={styles.generatebuttonrow}>
-                            <Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button>
+                            {(company.unlimited)? <></>:<Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button>}
                         </div>
+                    </Card>
+                </div>
+                <div className={styles.companyorders}>
+                    <Card title={"Einkäufe"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
+                        <Table dataSource={company.orders} columns={purchasecolumns} />
                     </Card>
                 </div>
                 <div className={styles.companyusers}>
                     {getUserOverview()}
                 </div>
-
-
-                
             </div>
         </SidebarLayout>
     );

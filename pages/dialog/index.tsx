@@ -15,7 +15,6 @@ import { handleEmptyString, listToOptions } from '../../helper/architecture';
 import ArrowRight from '../../public/icons/arrowright.svg';
 import Info from '../../public/icons/info.svg';
 import Clipboard from '../../public/icons/clipboard.svg';
-import cookieCutter from 'cookie-cutter'
 import updateData from '../../firebase/data/updateData';
 
 

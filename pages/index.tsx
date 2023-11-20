@@ -58,18 +58,20 @@ export default function Home(props: InitialProps) {
           <div className={styles.greeting_subtitle}>Wie kann ich dir heute helfen?</div>
         </div>
 
-        <div className={styles.optionrow}>
-          <Link href={"/dialog"}>
-            <div className={styles.option}>
-              <div className={styles.option_title}>Mail-Dialog fortsetzen</div>
-            </div>
-          </Link>
+        <div className={styles.optioncontainer}>
+          <div className={styles.optionrow}>
+            <Link href={"/dialog"}>
+                  <div className={styles.option}>
+                    <div className={styles.option_title}>Mail-Dialog fortsetzen</div>
+                  </div>
+                </Link>
 
-          <Link href={"/monolog"}>
-            <div className={styles.option}>
-              <div className={styles.option_title}>E-Mail schreiben</div>
-            </div>
-          </Link>
+                <Link href={"/monolog"}>
+                  <div className={styles.option}>
+                    <div className={styles.option_title}>E-Mail schreiben</div>
+                  </div>
+              </Link>
+          </div>
         </div>
       </div>
     </SidebarLayout>

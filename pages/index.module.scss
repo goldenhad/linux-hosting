@@ -20,38 +20,49 @@
         }
     }
 
-    .optionrow {
-        width: 40%;
+    .optioncontainer {
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
-        margin-top: 100px;
+        flex-wrap: wrap;
+        width: 100%;
 
-        .option {
-            width: 300px;
-            height: 100px;
-            background-color: #EAECF0;
-            border-radius: 12px;
-            padding: 25px;
+        .optionrow {
+            margin-top: 32px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: black;
+            flex-direction: row;
+            
+            gap: 16px;
 
-            &:hover {
-                cursor: pointer;
-                border-width: 3px;
-                border-style: solid;
-                border-color: #1677ff;
+    
+            .option {
+                width: 300px;
+                height: 100px;
+                background-color: #EAECF0;
+                border-radius: 12px;
+                padding: 25px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
                 color: black;
-            }
-
-            .option_title {
-                font-size: 16px;
-                font-weight: 700;
+    
+                &:hover {
+                    cursor: pointer;
+                    border-width: 3px;
+                    border-style: solid;
+                    border-color: #1677ff;
+                    color: black;
+                }
+    
+                .option_title {
+                    font-size: 16px;
+                    font-weight: 700;
+                }
             }
         }
     }
+
+    
 }

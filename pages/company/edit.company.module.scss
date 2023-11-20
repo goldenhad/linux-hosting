@@ -30,6 +30,32 @@
                 margin-top: 12px;
                 text-align: center;
             }
+
+            .generatebuttonrow{
+                width: 100%;
+                height: 44px;
+                margin-bottom: 10px;
+                margin-top: 32px;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                
+                button {
+                    width: 360px;
+                    height: 44px;
+                    font-weight: 700;
+                    font-size: 16px;
+                    line-height: 24px;
+                    padding: 10px 18px 10px 18px;
+        
+                    .buttonicon > svg{
+                      transform: translate(-1px, 4px);
+                      fill: transparent;
+                      color: inherit;
+                      stroke: inherit;
+                  }
+                }
+            }
         }
 
         .finishformrow{
@@ -51,6 +77,12 @@
             flex-direction: row;
             justify-content: center;
             align-items: center;
+
+            .tokenbudget {
+                font-size: 60px;
+                font-weight: bold;
+                margin-top: 50px;
+            }
         
             .quota {
                 font-size: 60px;

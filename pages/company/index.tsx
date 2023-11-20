@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Form, Input, List, Modal, Progress, Select, Space, Table, Tooltip, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, List, Modal, Progress, Select, Space, Table, Typography } from 'antd';
 import styles from './edit.company.module.scss'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -11,9 +11,32 @@ import { getDocWhere } from '../../firebase/data/getData';
 import updateData from '../../firebase/data/updateData';
 import { RightCircleOutlined } from '@ant-design/icons';
 import Link from 'next/link';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { User } from '../../firebase/types/User';
+import { Usage } from '../../firebase/types/Company';
 const { Paragraph } = Typography;
-
 const { TextArea } = Input;
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
+
+const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+
 
 
 export interface InitialProps {
@@ -78,10 +101,6 @@ export default function Company(props: InitialProps) {
     useEffect(() => {
         if (login == null) router.push("/login");
 
-        if(getCurrentUsage().amount > quota.tokens){
-            setOverused(true);
-        }
-
         form.setFieldValue("companyname", company.name);
         form.setFieldValue("companystreet", company.street);
         form.setFieldValue("companycity", company.city);
@@ -104,10 +123,6 @@ export default function Company(props: InitialProps) {
         load();
     }, [company])
 
-    
-    const getCurrentUsage = () => {
-        return company.Usage.find((elm, idx) => { return elm.month == props.Data.currentMonth && elm.year == props.Data.currentYear });
-    }
 
     const editCompany = async (values: any) => {
         let comp = company;
@@ -396,32 +411,55 @@ export default function Company(props: InitialProps) {
                         {getCompanyInput()}
                     </Card>
                     <Card className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Tokens"} bordered={true}>
-                        <h2>Verbrauchte Tokens (seit 01.{pad(props.Data.currentMonth, 2)}.{props.Data.currentYear})</h2>
+                        <h2>Dein Token-Budget</h2>
                         <div className={styles.quotarow}>
-                            {/* <div className={styles.quota}>{}</div> */}
-                            <Tooltip title={`${getCurrentUsage().amount} Tokens von ${quota.tokens} verbraucht.`}>
-                                <Progress type='circle' size="default" className={styles.quotaprogress} status={(overused)? "exception": undefined} percent={Math.round((getCurrentUsage().amount / quota.tokens) * 100)  } />
-                            </Tooltip>
+                            <div className={styles.tokenbudget}>{(company.unlimited)? "∞" : company.tokens} Tokens</div>
                         </div>
-                        <h2 className={styles.quotatitle}>Aktueller Plan: {company.Quota}</h2>
-                        
-                        <List
-                            className={styles.quotainfolist}
-                            bordered
-                            dataSource={quota.features}
-                            renderItem={(item) => {
-                                return(
-                                    <List.Item>
-                                        <div className={styles.quotainfo}>
-                                            <div className={styles.quotainfoicon}><RightCircleOutlined /></div>
-                                            <div className={styles.quotainfotext}>{item}</div>
-                                        </div>
-                                    </List.Item>
-                                );
-                            } }>
-                        </List>
+                        <h2>Verbrauch</h2>
+                            <div className={styles.usageinfo}>
+                                
+                                <div className={styles.barcontainer}>
+                                    <Bar
+                                        options={{
+                                            maintainAspectRatio: false,
+                                            plugins: {
+                                                legend: {
+                                                    position: 'top' as const,
+                                                },
+                                                title: {
+                                                    display: false,
+                                                    text: 'Chart.js Bar Chart',
+                                                },
+                                            },
+                                        }}
+                                        data={{
+                                            labels:  months,
+                                            datasets: [
+                                                {
+                                                    label: "Tokens",
+                                                    data: months.map((label, idx) => {
+                                                        let sum = 0;
+                                                        users.forEach((su: User) => {
+                                                          su.usedCredits.forEach((usage: Usage) => {
+                                                            if(usage.month == idx+1 && usage.year == new Date().getFullYear()){
+                                                                sum += usage.amount;
+                                                            }
+                                                          });
+                                                        })
+                                                        return sum;
+                                                    }),
+                                                    backgroundColor: 'rgba(16, 24, 40, 0.8)',
+                                                }
+                                            ]
+                                        }}
+                                    />
+                                </div>
 
-                        {getUpgradeLink()}
+                            </div>
+
+                        <div className={styles.generatebuttonrow}>
+                            <Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button>
+                        </div>
                     </Card>
                 </div>
                 <div className={styles.companyusers}>

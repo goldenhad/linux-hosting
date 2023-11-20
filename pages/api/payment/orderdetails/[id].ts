@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
-import { auth } from '../../../firebase/admin';
+import { auth } from '../../../../firebase/admin';
 import axios from 'axios';
 
 type ResponseData = {
@@ -36,44 +36,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         const token = await auth.verifyIdToken(req.cookies.token);
         
 
-        if(req.method == "POST"){
+        if(req.method == "GET"){
             
             if(token){
-                let data = req.body;
+                const { id } = req.query;
+                console.log(req.query);
                 
-                if(data.tokens){
+                if(id){
 
                   try{
-                    let price = calcPrice(parseInt(data.tokens));
-
-                    if(price > 0 && price < Number.MAX_SAFE_INTEGER){
-                      let paymentobj = {
-                        "intent": "CAPTURE",
-                        "purchase_units": [
-                          {
-                            "amount": {
-                              "currency_code": "EUR",
-                              "value": parseFloat(price.toFixed(2))
-                            }
-                          }
-                        ],
-                        "payment_source": {
-                          "paypal": {
-                            "experience_context": {
-                              "payment_method_preference": "IMMEDIATE_PAYMENT_REQUIRED",
-                              "brand_name": "Siteware GmbH",
-                              "locale": "de-DE",
-                              "landing_page": "LOGIN",
-                              "user_action": "PAY_NOW",
-                              "return_url": "http://localhost:3000/thankyou",
-                              "cancel_url": "http://localhost:3000/upgrade"
-                            }
-                          }
-                        }
-                      }
-
                       try{
-                          let data = await axios.post("https://api.sandbox.paypal.com/v2/checkout/orders", paymentobj, {
+                          let data = await axios.get(`https://api.sandbox.paypal.com/v2/checkout/orders/${id}`, {
                               headers: {
                                   "Accept": "application/json",
                                   "Accept-Language": "en_US",
@@ -85,8 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                               }
                           });
                           
-                          if(data.data.links){
-
+                          if(data.data){
                               return res.status(200).send({ errorcode: 0, message: data.data});
                           }else{
                               return res.status(200).send({ errorcode: 4, message: "Something went wrong"});
@@ -97,16 +69,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                           console.log(E.response.data);
                           return res.status(400).send({ errorcode: -4, message: "Error"});
                       }
-                    }else{
-                      return res.status(400).send({ errorcode: -3, message: "Error"});
-                    }
                   }catch(conversionerror){
                     console.log(conversionerror.response.data);
                     return res.status(400).send({ errorcode: -2, message: "Error"});
                   }
-              }else{
-                  return res.status(400).send({ errorcode: 3, message: "Data required!" });
-              }
+                }else{
+                    return res.status(400).send({ errorcode: 3, message: "Data required!" });
+                }
 
             }else{
                 return res.status(400).send({ errorcode: 2, message: "Authentication required!" });

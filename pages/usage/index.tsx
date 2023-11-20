@@ -1,15 +1,14 @@
-import { Alert, Button, Card, Form, Input, List, Modal, Progress, Select, Space, Table, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, List, Modal, Progress, Select, Space, Table, Tag, Typography } from 'antd';
 import styles from './usage.module.scss'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useRouter } from 'next/router';
-import { handleEmptyString } from '../../helper/architecture';
+import { convertToCurrency, handleEmptyString } from '../../helper/architecture';
 import { useAuthContext } from '../../components/context/AuthContext';
 import { getDocWhere } from '../../firebase/data/getData';
-import updateData from '../../firebase/data/updateData';
-import { RightCircleOutlined } from '@ant-design/icons';
+import { EyeOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, CloseOutlined, FileTextOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { Usage } from '../../firebase/types/Company';
 import {
@@ -104,52 +103,72 @@ export default function Usage(props: InitialProps) {
         load();
     }, [company])
 
-    const findUsage = (usagearr: Array<Usage>) => {
-        for(let idx=0; idx < usagearr.length; idx++){
-            let elm = usagearr[idx];
-            if(elm.month == props.Data.currentMonth && elm.year == props.Data.currentYear){
-                return elm;
-            }
-        }
-
-        return {amount: 0};
-    }
-    
-    const getUpgradeLink = () => {
-        return(
-            <div className={styles.generatebuttonrow}>
-                <Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button>
-            </div>
-        );
-    }
-
     const purchasecolumns = [
         {
-          title: 'Transaktion',
-          dataIndex: 'id',
-          key: 'id',
+            title: 'Status',
+            dataIndex: 'state',
+            key: 'state',
+            render: (_: any, obj: any) => {
+                switch(obj.state){
+                    case "completed":
+                        return(
+                            <Tag icon={<CheckCircleOutlined />} color="success">
+                                abgeschlossen
+                            </Tag>
+                        );
+                    
+                    case "awaiting_payment":
+                        return(<></>);
+                    default:
+                        return(
+                            <Tag icon={<CloseCircleOutlined />} color="error">
+                                abgebrochen
+                            </Tag>
+                        );
+                }
+            }
         },
         {
-          title: 'Datum',
-          dataIndex: 'date',
-          key: 'date',
+            title: 'Transaktion',
+            dataIndex: 'id',
+            key: 'id',
         },
         {
-          title: 'Erworbene Tokens',
-          dataIndex: 'boughtCredits',
-          key: 'boughtCredits',
+            title: 'Datum',
+            dataIndex: 'timestamp',
+            key: 'timestamp',
+            render: (_: any, obj: any) => {
+                console.log(obj)
+                return new Date(obj.timestamp * 1000).toLocaleString('de',{timeZone:'Europe/Berlin', timeZoneName: 'short'});
+            }
+        },
+        {
+            title: 'Erworbene Tokens',
+            dataIndex: 'tokens',
+            key: 'tokens',
         },
         {
             title: 'Betrag',
-            dataIndex: 'cost',
-            key: 'cost',
-          },
+            dataIndex: 'amount',
+            key: 'amount',
+            render: (_: any, obj: any) => {
+                return convertToCurrency(obj.amount);
+              }
+        },
         {
             title: 'Aktionen',
             dataIndex: 'actions',
             key: 'actions',
             render: (_: any, obj: any) => {
-              return undefined;
+                return (
+                    <div className={styles.actionrow}>
+                        <div className={styles.singleaction}>
+                            <Link href={`/order/invoice/${obj.id}`}>
+                                <FileTextOutlined style={{ fontSize: 20 }}/>
+                            </Link>
+                        </div>
+                    </div>
+                );
             }
           },
       ];
@@ -163,11 +182,13 @@ export default function Usage(props: InitialProps) {
                         <div className={styles.tokeninfocard}>
                             <h2>Dein Token-Budget</h2>
                             <div className={styles.quotarow}>
-                                <div className={styles.tokenbudget}>{company.tokens} Tokens</div>
+                            <div className={styles.tokenbudget}>{(company.unlimited)? "∞" : company.tokens} Tokens</div>
                             </div>
                         </div>
                         <div className={styles.generatebuttonrow}>
-                            <Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button>
+                            <Link href={"/upgrade"}>
+                                <Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button>
+                            </Link>
                         </div>
                     </Card>
                     <Card className={styles.tokenusage} headStyle={{backgroundColor: "#F9FAFB"}} title={"Tokens"} bordered={true}>
@@ -217,8 +238,8 @@ export default function Usage(props: InitialProps) {
                         
                     </Card>
                 </div>
-                <Card title={"Käufe"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
-                    <Table dataSource={[]} columns={purchasecolumns} />
+                <Card title={"Einkäufe"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
+                    <Table dataSource={company.orders} columns={purchasecolumns} />
                 </Card>
             </div>
         </SidebarLayout>

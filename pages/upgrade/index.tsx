@@ -1,4 +1,4 @@
-import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider, List } from 'antd';
+import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider, List, Slider, Table } from 'antd';
 import Icon from '@ant-design/icons';
 import styles from './upgrade.module.scss'
 import { db } from '../../db';
@@ -8,13 +8,14 @@ import { GetServerSideProps } from 'next';
 import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useAuthContext } from '../../components/context/AuthContext';
 import { redirect, useRouter } from 'next/navigation';
-import { Usage } from '../../firebase/types/Company';
+import { Order, Usage } from '../../firebase/types/Company';
 import { Profile } from '../../firebase/types/Profile';
 import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { convertToCurrency, handleEmptyString } from '../../helper/architecture';
 import ArrowRight from '../public/icons/arrowright.svg';
 import { getAllDocs } from '../../firebase/data/getData';
-import { RightCircleOutlined } from '@ant-design/icons';
+import { RightCircleOutlined,  } from '@ant-design/icons';
+import updateData from '../../firebase/data/updateData';
 var paypal = require('paypal-rest-sdk');
 const { Paragraph } = Typography;
 const { TextArea } = Input;
@@ -23,8 +24,7 @@ const { TextArea } = Input;
 
 export interface InitialProps {
   Data: {
-    currentMonth: number,
-    currentYear: number,
+    token: string,
   };
 }
 
@@ -34,13 +34,12 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   //Get the cookies from the current request
   const { cookies } = req;
 
-  let datum = new Date();
+  let { token } = ctx.query;
 
   return {
     props: {
         Data: {
-          currentMonth: datum.getMonth() + 1,
-          currentYear: datum.getFullYear(),
+          token: (token)? token: "",
         }
     },
   };
@@ -50,73 +49,126 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 export default function Upgrade(props: InitialProps) {
   const { login, user, company, role, quota } = useAuthContext();
   const [ plans, setPlans ] = useState([]);
+  const [ tokenstobuy, setTokenstobuy ] = useState(5);
   const { push } = useRouter();
+  const router = useRouter();
 
   useEffect(() => {
-    const getQuotas = async () => {
-        let {result, error} = await getAllDocs('Quota');
-        if(result){
-            setPlans(result);
-        }
+    const delOrderObj = async () => {
+      let orderindex = company.orders.findIndex((singleorder: Order) => {
+        return singleorder.id == props.Data.token;
+      })
+
+      if(orderindex != -1){
+        let orders = company.orders.filter((orderobj: Order) => {
+          return orderobj.id != props.Data.token;
+        })
+        await updateData("Company", user.Company, { orders: orders });
+      }
     }
 
-    getQuotas();
+    if(props.Data.token != ""){
+      delOrderObj();
+    }
   }, [])
 
+  const issuePayment = async (tokens: number) => {
+    let userlink = await axios.post("/api/payment/paypal", {tokens: tokens.toString()});
+    
+    console.log(userlink.data.message)
+    if(userlink.data.message.id && userlink.data.message.links){
+      let currentOrders = company.orders;
+      let newOrder: Order = {
+        id: userlink.data.message.id,
+        timestamp: Math.floor(Date.now() / 1000),
+        tokens: tokens * 10000,
+        amount: calculatePrice(),
+        method: "Paypal",
+        state: "awaiting_payment"
+      }
 
-  const displayPrice = (price: number) => {
-    if(price < 1){
-        return "Keine Kosten";
-    }else{
-        return convertToCurrency(price)
+      currentOrders.push(newOrder);
+      console.log(currentOrders)
+
+      await updateData("Company", user.Company, { orders: currentOrders })
+
+      push(userlink.data.message.links[1].href);
     }
   }
 
+  const calculatePrice = () => {
+    let fac = 5;
 
-  const issuePayment = async (price: number, name: string) => {
-    let userlink = await axios.post("/api/payment/paypal", {amount: price.toString()});
-    if(userlink.data.message.href){
-      push(userlink.data.message.href);
+    if(tokenstobuy >= 100 && tokenstobuy < 250){
+      fac = 4.5;
     }
+
+    if(tokenstobuy >= 250 && tokenstobuy < 500){
+      fac = 4;
+    }
+
+    if(tokenstobuy >= 500 && tokenstobuy < 1000){
+      fac = 3.5;
+    }
+
+    if(tokenstobuy >= 1000){
+      fac = 3;
+    }
+
+    return ((tokenstobuy * 10000 * (0.00003 * fac))) * 1.19;
   }
 
-  const getBuyButton = (id: string, name: string, price: number) => {
-    return <Button onClick={async () => {await issuePayment(price, name)}} type="primary" className={styles.buynow}>Jetzt upgraden</Button>
-  }
-
-
-  const getQuotaCard = () => {
-    return plans.map((plan, idx) => {
-        return (
-            <div className={styles.quoatacard} title={undefined} key={idx}>
-                <h2>{plan.name}</h2>
-                <div className={styles.quoataprice}>{displayPrice(plan.price)}</div>
-                <List
-                    className={styles.featuremap}
-                    
-                    dataSource={plan.features}
-                    renderItem={(item: string) => {
-                        return(
-                            <List.Item>
-                                <div className={styles.feature}>
-                                    <div className={styles.featureicon}><RightCircleOutlined /></div>
-                                    <div className={styles.featuretext}>{item}</div>
-                                </div>
-                            </List.Item>
-                        );
-                    } }>
-                </List>
-                <div className={styles.buyrow}>{getBuyButton(plan.uid, plan.name, plan.price)}</div>
-            </div>
-        );
-    })
+  const calculateMails = () => {
+    return tokenstobuy * 10000 /1000;
   }
 
 
   return (
     <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
       <div className={styles.main}>
-        {getQuotaCard()}
+        <h1>Du brauchst noch mehr tokens?</h1>
+        <div className={styles.cardrow}>
+          <Card className={styles.quoatacard} title={"Weitere tokens erwerben"} headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+            <div className={styles.tokenrow}>
+              <div className={styles.tokens}>{tokenstobuy * 10000} Tokens</div>
+            </div>
+            <Form>
+              <Form.Item name={"tokenamount"}>
+                <Slider defaultValue={5} step={1} min={5} max={1000} tooltip={{ formatter: null }} onChange={(val) => setTokenstobuy(val)}/>
+              </Form.Item>
+            </Form>
+            <div className={styles.details}>
+              <List bordered>
+                <List.Item><RightCircleOutlined className={styles.listicon}/>Entspricht ca. {calculateMails()} E-Mails</List.Item>
+                <List.Item><RightCircleOutlined className={styles.listicon}/>Kosten pro Mail {convertToCurrency(calculatePrice()/calculateMails())} </List.Item>
+              </List>
+              <Divider />
+            </div>
+            <div className={styles.buyrow}>
+              <div className={styles.checkouttable}>
+
+                <div className={styles.topic}>
+                  <div className={styles.sumtext}>Gesamtsumme:</div>
+                  <div className={styles.sumsubtitle}>alle Angaben in Euro inkl. Mwst</div>
+                </div>
+
+                <div className={styles.value}>
+                  {convertToCurrency(calculatePrice())}
+                </div>
+              </div>
+
+              <div className={styles.buybuttonrow}>
+                <div className={styles.buybutton}>
+                  <Button onClick={async () => {await issuePayment(tokenstobuy)}} type="primary" className={styles.buynow}>Bestellung abschließen</Button>
+                </div>
+
+                <div className={styles.buybutton}>
+                  <Button onClick={() => {router.back()}} className={styles.buynow}>Zurück zur Übersicht</Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     </SidebarLayout>
   )

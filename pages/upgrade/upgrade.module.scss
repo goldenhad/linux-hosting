@@ -1,54 +1,120 @@
 
 .main {
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
+    flex-direction: column;
+    justify-content: center;
 
-    .quoatacard{
-        width: 400px;
-        height: 600px;
-        text-align: center;
-        border-radius: 8px;
+    .cardrow{
         display: flex;
-        flex-direction: column;
-        border: 1px  solid rgb(217, 217, 217);
-        padding: 20px 20px 20px 20px;
+        flex-direction: row;
+        justify-content: center;
+        display: 100%;
 
-        .quoataprice{
-            font-size: 32px;
-            font-weight: bold;
-            margin-top: 32px;
-        }
-        
-        .featuremap{
-            margin-top: 50px;
-            height: 300px;
-            padding-left: 20px;
-            padding-right: 20px;
-            .feature{
+        .quoatacard{
+            width: 30%;
+            min-width: 400px;
+            border-radius: 12px;
+            flex-direction: column;
+            border: 1px  solid rgb(217, 217, 217);
+    
+            .tokenrow {
                 display: flex;
                 flex-direction: row;
-                text-align: left;
+                justify-content: center;
+    
+                margin-top: 32px;
+                margin-bottom: 32px;
+    
+                .tokens{
+                    font-size: 50px;
+                    font-weight: 700;
+                    text-align: center;
+                }
+            }
 
-                .featureicon{
+            .details {
+                font-size: 18px;
+
+                .listicon{
                     margin-right: 10px;
                 }
             }
-        }
-
-
-        .buyrow{
-            margin-top: 100px;
-            .buynow{
-                width: 360px;
-                height: 44px;
-                font-weight: 700;
-                font-size: 16px;
-                line-height: 24px;
-                padding: 10px 18px 10px 18px;
+    
+            .quoataprice{
+                font-size: 32px;
                 font-weight: bold;
+                margin-top: 32px;
             }
+            
+            .featuremap{
+                margin-top: 50px;
+                height: 300px;
+                padding-left: 20px;
+                padding-right: 20px;
+                .feature{
+                    display: flex;
+                    flex-direction: row;
+                    text-align: left;
+    
+                    .featureicon{
+                        margin-right: 10px;
+                    }
+                }
+            }
+    
+    
+            .buyrow{
+                .buybuttonrow{
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    margin-top: 32px;
+
+                    .buybutton{
+                        margin-bottom: 20px;
+                        button {
+                            width: 360px;
+                            height: 44px;
+                            font-weight: 700;
+                            font-size: 16px;
+                            line-height: 24px;
+                            padding: 10px 18px 10px 18px;
+                            font-weight: bold;
+                        }
+                    }
+                }
+
+                .checkouttable{
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    padding-right: 32px;
+
+                    .topic{
+                        display: flex;
+                        flex-direction: column;
+
+                        .sumtext{
+                            font-weight: 700;
+                            font-size: 16px;
+                        }
+
+                        .sumsubtitle{
+                            font-size: 11px;
+                            color: lightgray
+                        }
+                        
+                    }
+
+                    .value {
+                        font-weight: 700;
+                        font-size: 16px;
+                    }
+                    
+                }
+            }
+            
         }
-        
     }
 }

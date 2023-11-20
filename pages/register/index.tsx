@@ -53,7 +53,7 @@ export default function Register(props){
         let isPersonal = values.usecase != "Für mein Unternehmen";
 
         if(isPersonal){
-            const { result, error } = await signUp(values.firstname, values.lastname, values.email, values.username, values.password, values.firstname + " Firma", "", "", "", "DE", isPersonal);
+            const { result, error } = await signUp(values.firstname, values.lastname, values.email, values.username, values.password, "", "", "", "", "DE", isPersonal);
             
             if (error) {
                 console.log(error);

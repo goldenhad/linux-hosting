@@ -15,6 +15,15 @@ export type Usage = {
     year: number;
 }
 
+export type Order = {
+    id: string,
+    timestamp: number,
+    tokens: number,
+    amount: number,
+    method: string,
+    state: string,
+}
+
 export type Company = {
     name: string;
     street: string;
@@ -23,6 +32,8 @@ export type Company = {
     country: string;
     settings: CompanySettings;
     tokens: number;
+    unlimited: boolean;
+    orders: Array<Order>
 }
 
 export const basicCompany = {
@@ -35,4 +46,6 @@ export const basicCompany = {
         background: "",
     },
     tokens: 0,
+    unlimited: false,
+    orders: []
 }

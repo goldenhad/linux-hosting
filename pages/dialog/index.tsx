@@ -56,7 +56,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Dialogue(props: InitialProps) {
-  const { login, user, company, role, quota } = useAuthContext();
+  const { login, user, company, role } = useAuthContext();
   const [ form ] = Form.useForm();
   const [ showAnswer, setShowAnswer ] = useState(false);
   const [ isAnswerVisible, setIsAnswerVisible ] = useState(false);

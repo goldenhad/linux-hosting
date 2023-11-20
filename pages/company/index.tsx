@@ -63,7 +63,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Company(props: InitialProps) {
-    const { login, user, company, role, quota } = useAuthContext();
+    const { login, user, company, role } = useAuthContext();
     const [ errMsg, setErrMsg ] = useState([]);
     const [ isErrVisible, setIsErrVisible ] = useState(false);
     const [ inviteErrMsg, setInviteErrMsg ] = useState("");

@@ -47,7 +47,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Upgrade(props: InitialProps) {
-  const { login, user, company, role, quota } = useAuthContext();
+  const { login, user, company, role } = useAuthContext();
   const [seed, setSeed] = useState(1);
   const router = useRouter();
 

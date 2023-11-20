@@ -27,7 +27,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 }
 
 export default function Logout(){
-  const { login, user, company, role, quota } = useAuthContext();
+  const { login, user, company, role } = useAuthContext();
   const router = useRouter();
 
   const handleLogOut = async () => {

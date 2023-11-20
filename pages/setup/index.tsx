@@ -66,7 +66,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 }
 
 export default function Setup(){
-    const { login, user, company, role, quota } = useAuthContext();
+    const { login, user, company, role } = useAuthContext();
     const [current, setCurrent] = useState(0);
     const [ setupForm ] = Form.useForm();
 

@@ -48,7 +48,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Home(props: InitialProps) {
-  const { login, user, company, role, quota } = useAuthContext();
+  const { login, user, company, role } = useAuthContext();
 
   return (
     <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>

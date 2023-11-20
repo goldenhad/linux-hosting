@@ -47,7 +47,7 @@ function onlyUpdateIfSet(val, ideal){
 
 
 export default function Account(props: InitialProps) {
-  const { login, user, company, role, quota } = useAuthContext();
+  const { login, user, company, role } = useAuthContext();
   const router = useRouter();
   const [ personalForm ] = Form.useForm();
   const [ passwordForm ] = Form.useForm();

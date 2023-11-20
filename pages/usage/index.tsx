@@ -76,7 +76,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Usage(props: InitialProps) {
-    const { login, user, company, role, quota } = useAuthContext();
+    const { login, user, company, role } = useAuthContext();
     const [ overused, setOverused ] = useState(false);
     const [ currusage, setCurrusage ] = useState(0);
     const [ users, setUsers ] = useState([]);

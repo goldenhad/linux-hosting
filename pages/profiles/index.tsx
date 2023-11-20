@@ -44,7 +44,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Profiles(props: InitialProps) {
-    const { login, user, company, role, quota } = useAuthContext();
+    const { login, user, company, role } = useAuthContext();
     const [ isCreateModalOpen, setIsCreateModalOpen ]  = useState(false);
     const [ isEditModalOpen, setIsEditModalOpen ]  = useState(false);
     const [ isDeleteModalOpen, setIsDeleteModalOpen ]  = useState(false);

@@ -65,8 +65,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                               "locale": "de-DE",
                               "landing_page": "LOGIN",
                               "user_action": "PAY_NOW",
-                              "return_url": "http://localhost:3000/thankyou",
-                              "cancel_url": "http://localhost:3000/upgrade"
+                              "return_url": `${process.env.BASEURL}/thankyou`,
+                              "cancel_url": `${process.env.BASEURL}/upgrade`
                             }
                           }
                         }

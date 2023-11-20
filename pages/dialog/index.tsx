@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { Usage } from '../../firebase/types/Company';
 import { Profile } from '../../firebase/types/Profile';
 import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
-import { handleEmptyString } from '../../helper/architecture';
+import { handleEmptyString, listToOptions } from '../../helper/architecture';
 import ArrowRight from '../../public/icons/arrowright.svg';
 import Info from '../../public/icons/info.svg';
 import Clipboard from '../../public/icons/clipboard.svg';
@@ -56,7 +56,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Dialogue(props: InitialProps) {
-  const { login, user, company, role } = useAuthContext();
+  const { login, user, company, role, parameters } = useAuthContext();
   const [ form ] = Form.useForm();
   const [ showAnswer, setShowAnswer ] = useState(false);
   const [ isAnswerVisible, setIsAnswerVisible ] = useState(false);
@@ -69,28 +69,6 @@ export default function Dialogue(props: InitialProps) {
   const [ tokens, setTokens ] = useState("");
   const [ promptError, setPromptError ] = useState(false);
 
-  
-  const router = useRouter();
-
-  const lengths = [
-    "So kurz wie möglich",
-    "Sehr kurz",
-    "Kurz",
-    "Mittellang",
-    "Detailliert",
-    "Umfangreich und sehr detailliert"
-  ];
-
-  const motive = [
-    "Diplomatisch",
-    "Respektvoll",
-    "Kultiviert",
-    "Bedächtig",
-    "Persönlich",
-    "Umgangssprachlich",
-    "Unkonventionell",
-    "Emphatisch"
-  ];
 
   const updateField = (field: string, value: string) => {
     if(value && value != ""){
@@ -114,9 +92,6 @@ export default function Dialogue(props: InitialProps) {
     }
   }, []);
 
-  useEffect(() => {
-    console.log(user);
-  }, [company])
 
   useEffect(() => {
 
@@ -137,18 +112,7 @@ export default function Dialogue(props: InitialProps) {
     }
       
   }, [company]);
-
-
-  const listToOptions = (liste: Array<string>) => {
-    const arr = liste.map(element => {
-      return {
-        value: element.toLowerCase(),
-        label: element
-      };
-    });
   
-    return arr;
-  }
 
   const generateAnswer = async (values: any) => {
     let profile = user.profiles.find((singleProfile: Profile) => {
@@ -287,10 +251,7 @@ export default function Dialogue(props: InitialProps) {
               </Card>
               <Card title={"Einstellungen"} headStyle={{backgroundColor: "#F9FAFB"}} className={styles.userinputcardsub}>
                 <Form.Item className={styles.formpart} label={<b>Ansprache</b>} name="address">
-                    <Select placeholder="Bitte wähle die Form der Ansprache aus..." options={[
-                        {label: "Du", value: "du", },
-                        {label: "Sie", value: "sie", },
-                    ]}
+                    <Select placeholder="Bitte wähle die Form der Ansprache aus..." options={listToOptions(parameters.address)}
                     className={styles.formselect}
                     size='large'
                     disabled={formDisabled || quotaOverused}
@@ -298,11 +259,11 @@ export default function Dialogue(props: InitialProps) {
                 </Form.Item>
 
                 <Form.Item className={styles.formpart} label={<b>Einordnung des Gesprächpartners</b>} name="order">
-                    <Select placeholder="Wie ordnest du deinen Gesprächpartner ein?" options={listToOptions(motive)} mode="multiple" allowClear className={styles.formselect} size='large' disabled={formDisabled || quotaOverused}/>
+                    <Select placeholder="Wie ordnest du deinen Gesprächpartner ein?" options={listToOptions(parameters.motives)} mode="multiple" allowClear className={styles.formselect} size='large' disabled={formDisabled || quotaOverused}/>
                 </Form.Item>
 
                 <Form.Item className={styles.formpart} label={<b>Länge der Antwort</b>} name="length">
-                  <Select placeholder="Wie lang soll die erzeuge Antwort sein?" options={listToOptions(lengths)} disabled={formDisabled || quotaOverused} className={styles.formselect} size='large'/>
+                  <Select placeholder="Wie lang soll die erzeuge Antwort sein?" options={listToOptions(parameters.lengths)} disabled={formDisabled || quotaOverused} className={styles.formselect} size='large'/>
                 </Form.Item>
               </Card>
           </div>

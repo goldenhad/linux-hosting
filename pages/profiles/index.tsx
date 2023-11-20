@@ -11,7 +11,7 @@ import { useAuthContext } from '../../components/context/AuthContext';
 import { Profile, ProfileSettings } from '../../firebase/types/Profile';
 import updateData from '../../firebase/data/updateData';
 import { arrayUnion } from 'firebase/firestore';
-import { handleEmptyArray, handleEmptyString } from '../../helper/architecture';
+import { handleEmptyArray, handleEmptyString, listToOptions } from '../../helper/architecture';
 require('dotenv').config();
 
 const MAXPROFILES = 12;
@@ -44,7 +44,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Profiles(props: InitialProps) {
-    const { login, user, company, role } = useAuthContext();
+    const { login, user, role, parameters } = useAuthContext();
     const [ isCreateModalOpen, setIsCreateModalOpen ]  = useState(false);
     const [ isEditModalOpen, setIsEditModalOpen ]  = useState(false);
     const [ isDeleteModalOpen, setIsDeleteModalOpen ]  = useState(false);
@@ -69,71 +69,8 @@ export default function Profiles(props: InitialProps) {
       if (login == null) router.push("/login");
         
     }, [login]);
+    
 
-    const style = [
-        "Professionell",
-        "Formell",
-        "Sachlich",
-        "Komplex",
-        "Einfach",
-        "Konservativ",
-        "Modern",
-        "Wissenschaftlich",
-        "Fachspezifisch",
-        "Abstrakt",
-        "Klar",
-        "Direkt",
-        "Rhetorisch",
-        "Ausdrucksstark"
-      ];
-    
-      const emotions = [
-        "Humorvoll",
-        "Nüchtern",
-        "Sentimental",
-        "Objektiv",
-        "Subjektiv",
-        "Ehrfürchtig",
-        "Emotionell",
-        "Lebhaft",
-        "Freundlich",
-        "Höflich",
-        "Selbstbewusst",
-        "Sympathisch",
-        "Kreativ",
-        "Enthusiastisch",
-        "Eloquent",
-        "Prägnant",
-        "Blumig",
-        "Poetisch",
-        "Pathetisch",
-        "Scherzhaft",
-        "Mystisch",
-        "Ironisch",
-        "Sarkastisch",
-        "Despektierlich"
-      ];
-    
-      const lengths = [
-        "So kurz wie möglich",
-        "Sehr kurz",
-        "Kurz",
-        "Mittellang",
-        "Detailliert",
-        "Umfangreich und sehr detailliert"
-      ];
-    
-    
-      const listToOptions = (liste: Array<string>) => {
-        const arr = liste.map(element => {
-          return {
-            value: element.toLowerCase(),
-            label: element
-          };
-        });
-      
-        return arr;
-      }
   
     const setEditFields = (obj: {name: String, settings: ProfileSettings}) => {
       console.log(obj.settings)
@@ -287,7 +224,7 @@ export default function Profiles(props: InitialProps) {
             Wie genau soll die allgemeine Stilistik der Antwort sein?
           </Paragraph>
           <Form.Item className={styles.formpart} name="style">
-              <Select className={styles.formselect} placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(style)} mode="multiple" allowClear/>
+              <Select className={styles.formselect} placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(parameters.style)} mode="multiple" allowClear/>
           </Form.Item>
         </div>,
       },
@@ -299,7 +236,7 @@ export default function Profiles(props: InitialProps) {
             Welche allgemeine Gemütslage soll in der Nachricht deutlich werden?
           </Paragraph>
           <Form.Item className={styles.formpart} name="emotions">
-              <Select className={styles.formselect} placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(emotions)} mode="multiple" allowClear/>
+              <Select className={styles.formselect} placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(parameters.emotions)} mode="multiple" allowClear/>
           </Form.Item>
         </div>,
       },
@@ -415,11 +352,11 @@ export default function Profiles(props: InitialProps) {
                 </Form.Item>
 
                 <Form.Item className={styles.formpart} label={<b>Allgemeine Stilistik</b>} name="style">
-                    <Select className={styles.formselect} placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(style)} mode="multiple" allowClear/>
+                    <Select className={styles.formselect} placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(parameters.style)} mode="multiple" allowClear/>
                 </Form.Item>
 
                 <Form.Item className={styles.formpart} label={<b>Allgemeine Gemütslage</b>} name="emotions">
-                    <Select className={styles.formselect} placeholder="Wie ist deine allgemeine Gemütslage?" options={listToOptions(emotions)} mode="multiple" allowClear/>
+                    <Select className={styles.formselect} placeholder="Wie ist deine allgemeine Gemütslage?" options={listToOptions(parameters.emotions)} mode="multiple" allowClear/>
                 </Form.Item>
 
                 <Form.Item className={styles.formpart} label={<b>Tags {tokenCount}/4</b>} name="tags">

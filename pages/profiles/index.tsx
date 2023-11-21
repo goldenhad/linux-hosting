@@ -253,6 +253,19 @@ export default function Profiles(props: InitialProps) {
               { decodedProfiles.map((singleProfile: Profile, idx) => {
                 let settings: ProfileSettings = singleProfile.settings;
 
+                let actions = [];
+                if(idx != 0) {
+                  actions = [
+                    <div onClick={() => {setProfileToEdit(idx); setEditFields({name: singleProfile.name, settings: settings}); setIsEditModalOpen(true);}}><SettingOutlined key="setting" /></div>,
+                    <div onClick={() => {setProfileToDelete(idx); setIsDeleteModalOpen(true)}}><DeleteOutlined key="edit" /></div>,
+                  ];
+                }else{
+                  actions = [
+                    <div onClick={() => {setProfileToEdit(idx); setEditFields({name: singleProfile.name, settings: settings}); setIsEditModalOpen(true);}}><SettingOutlined key="setting" /></div>,
+                    <div></div>
+                  ];
+                }
+
                 return (
                   <Card
                       key={idx}
@@ -260,10 +273,7 @@ export default function Profiles(props: InitialProps) {
                         width: 300,
                         marginTop: 16,
                       }}
-                      actions={[
-                        <div onClick={() => {setProfileToEdit(idx); setEditFields({name: singleProfile.name, settings: settings}); setIsEditModalOpen(true);}}><SettingOutlined key="setting" /></div>,
-                        <div onClick={() => {setProfileToDelete(idx); setIsDeleteModalOpen(true)}}><DeleteOutlined key="edit" /></div>,
-                      ]}
+                      actions={actions}
                     >
                       <div className={styles.profilecard}>
                         <div className={styles.profilecard_title}>{singleProfile.name}</div>

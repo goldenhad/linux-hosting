@@ -10,7 +10,7 @@ import { useAuthContext } from '../../components/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Usage } from '../../firebase/types/Company';
 import { Profile } from '../../firebase/types/Profile';
-import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { handleEmptyString, listToOptions } from '../../helper/architecture';
 import ArrowRight from '../../public/icons/arrowright.svg';
 import Info from '../../public/icons/info.svg';
@@ -109,7 +109,7 @@ export default function Dialogue(props: InitialProps) {
 
     decryptAndParse();
   }, []);
-  
+
 
   useEffect(() => {
     const decryptProfiles = async () => {
@@ -278,8 +278,8 @@ export default function Dialogue(props: InitialProps) {
   }
 
   const getPrompt = () => {
-    if(user){
-      if(!(decryptedProfiles?.length > 0)){
+    if(user && user.profiles != undefined){
+      if(!(user.profiles?.length > 0)){
         return (
           <Result
             title="Bitte definiere zuerst ein Profil"
@@ -354,36 +354,36 @@ export default function Dialogue(props: InitialProps) {
   return (
     <>
       {contextHolder}
-    <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
-      <div className={styles.main}>
-        <div className={styles.welcomemessage}>
-          <h1>Willkommen zurück, {handleEmptyString(user.firstname)}</h1>
-          <Divider className={styles.welcomeseperator} />
-        </div>
+      <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
+        <div className={styles.main}>
+          <div className={styles.welcomemessage}>
+            <h1>Willkommen zurück, {handleEmptyString(user.firstname)}</h1>
+            <Divider className={styles.welcomeseperator} />
+          </div>
 
-        <div className={(!showAnswer)? styles.userinputformcontainer: styles.hiddencontainer} >
-          <Form layout='vertical' onFinish={generateAnswer} onChange={() => {setIsAnswerCardvisible(false); setIsAnswerVisible(false); setIsLoaderVisible(false)}} form={form}>
-            {getPrompt()}
-          </Form>
-        </div>
-        <div className={(showAnswer)? styles.userinputformcontainer: styles.hiddencontainer} >
-          <Card className={styles.answercard} title={"Antwort"} style={{ display: (isAnswerCardVisible)? 'block': 'none' }} headStyle={{backgroundColor: "#F9FAFB"}} extra={<div className={styles.clipboardextra} onClick={() => {navigator.clipboard.writeText(answer); messageApi.success("Antwort in die Zwischenablage kopiert.");}}><Icon component={Clipboard} className={styles.clipboardicon} viewBox='0 0 22 22' />In die Zwischenlage</div>}>
-              {(isAnswerVisible)? <><div className={styles.answer}>{answer}</div><div className={styles.tokeninfo}><Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' /> Die Anfrage hat {tokens} Tokens verbraucht</div></>: <></>}
-              {(isLoaderVisible)? <Skeleton active/>: <></>}
-              {(promptError)? <Alert type='error' message="Bei der Generierung der Anfrage ist etwas schiefgelaufen. Bitte versuche es später erneut!" />: <></>}
-          </Card>
-          <div className={styles.formfootercontainer}>
-            <div className={styles.generatebuttonrow}>
-              <Button className={styles.backbutton} onClick={() => {setShowAnswer(false);}} type='primary'>Zurück <Icon component={ArrowRight} className={styles.buttonicon} viewBox='0 0 20 20'/></Button>
+          <div className={(!showAnswer)? styles.userinputformcontainer: styles.hiddencontainer} >
+            <Form layout='vertical' onFinish={generateAnswer} onChange={() => {setIsAnswerCardvisible(false); setIsAnswerVisible(false); setIsLoaderVisible(false)}} form={form}>
+              {getPrompt()}
+            </Form>
+          </div>
+          <div className={(showAnswer)? styles.userinputformcontainer: styles.hiddencontainer} >
+            <Card className={styles.answercard} title={"Antwort"} style={{ display: (isAnswerCardVisible)? 'block': 'none' }} headStyle={{backgroundColor: "#F9FAFB"}} extra={<div className={styles.clipboardextra} onClick={() => {navigator.clipboard.writeText(answer); messageApi.success("Antwort in die Zwischenablage kopiert.");}}><Icon component={Clipboard} className={styles.clipboardicon} viewBox='0 0 22 22' />In die Zwischenlage</div>}>
+                {(isAnswerVisible)? <><div className={styles.answer}>{answer}</div><div className={styles.tokeninfo}><Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' /> Die Anfrage hat {tokens} Tokens verbraucht</div></>: <></>}
+                {(isLoaderVisible)? <Skeleton active/>: <></>}
+                {(promptError)? <Alert type='error' message="Bei der Generierung der Anfrage ist etwas schiefgelaufen. Bitte versuche es später erneut!" />: <></>}
+            </Card>
+            <div className={styles.formfootercontainer}>
+              <div className={styles.generatebuttonrow}>
+                <Button className={styles.backbutton} onClick={() => {setShowAnswer(false);}} type='primary'>Zurück <Icon component={ArrowRight} className={styles.buttonicon} viewBox='0 0 20 20'/></Button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <style>
-          {`span.ant-select-selection-placeholder{font-size: 14px !important; font-weight: normal !important}`}
-        </style>
-      </div>
-    </SidebarLayout>
+          <style>
+            {`span.ant-select-selection-placeholder{font-size: 14px !important; font-weight: normal !important}`}
+          </style>
+        </div>
+      </SidebarLayout>
     </>
   )
 }

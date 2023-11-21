@@ -59,7 +59,7 @@ const monologBasicState = {
 }
 
 export default function Monologue(props: InitialProps) {
-  const { login, user, company, role, parameters } = useAuthContext();
+  const { login, user, company, role, parameters, loading } = useAuthContext();
   const [ form ] = Form.useForm();
   const [ showAnswer, setShowAnswer ] = useState(false);
   const [ isAnswerVisible, setIsAnswerVisible ] = useState(false);
@@ -72,6 +72,7 @@ export default function Monologue(props: InitialProps) {
   const [ tokens, setTokens ] = useState("");
   const [ promptError, setPromptError ] = useState(false);
   const [ decryptedProfiles, setDecryptedProfiles ] = useState([]);
+  const [ renderAllowed, setRenderAllowed ] = useState(false);
 
 
   const updateField = (field: string, value: string) => {
@@ -156,6 +157,13 @@ export default function Monologue(props: InitialProps) {
     }
       
   }, [company]);
+
+
+  useEffect(() => {
+    if(user){
+      setRenderAllowed(true);
+    }
+  }, [])
 
 
   const generateAnswer = async (values: any) => {
@@ -273,8 +281,8 @@ export default function Monologue(props: InitialProps) {
   }
 
   const getPrompt = () => {
-    if(user){
-      if(!(decryptedProfiles?.length > 0)){
+    if(user && user.profiles != undefined){
+      if(!(user.profiles.length > 0)){
         return (
           <Result
             title="Bitte definiere zuerst ein Profil"

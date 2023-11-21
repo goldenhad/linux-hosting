@@ -21,7 +21,8 @@ interface ctx {
     user: User,
     company: Company,
     role: Role,
-    parameters: Parameters
+    parameters: Parameters,
+    loading: boolean,
 }
 
 const auth = getAuth(firebase_app);
@@ -143,7 +144,7 @@ export const AuthContextProvider = ({
     }, [login]);
 
     return (
-        <AuthContext.Provider value={{login: login, user: user, company: company, role: role, parameters: parameters}}>
+        <AuthContext.Provider value={{login: login, user: user, company: company, role: role, parameters: parameters, loading: loading}}>
             {loading ? <div style={{height: "100vh", width: "100%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}}><Spin indicator={<LoadingOutlined style={{ fontSize: 90 }} spin />} /></div> : children}
         </AuthContext.Provider>
     );

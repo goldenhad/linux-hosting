@@ -2,32 +2,11 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
 import { auth } from '../../../firebase/admin';
 import axios from 'axios';
+import { mailPriceMapping } from '../../../helper/price';
 
 type ResponseData = {
     errorcode: number,
     message: String,
-}
-
-function calcPrice(tokenstobuy: number){
-  let fac = 5;
-
-  if(tokenstobuy >= 100 && tokenstobuy < 250){
-    fac = 4.5;
-  }
-
-  if(tokenstobuy >= 250 && tokenstobuy < 500){
-    fac = 4;
-  }
-
-  if(tokenstobuy >= 500 && tokenstobuy < 1000){
-    fac = 3.5;
-  }
-
-  if(tokenstobuy >= 1000){
-    fac = 3;
-  }
-
-  return ((tokenstobuy * 10000 * (0.00003 * fac))) * 1.19
 }
 
 
@@ -44,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 if(data.tokens){
 
                   try{
-                    let price = calcPrice(parseInt(data.tokens));
+                    let price = mailPriceMapping[data.tokens];
 
                     if(price > 0 && price < Number.MAX_SAFE_INTEGER){
                       let paymentobj = {

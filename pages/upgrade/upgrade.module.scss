@@ -11,11 +11,19 @@
         display: 100%;
 
         .quoatacard{
-            width: 30%;
+            width: 40%;
             min-width: 400px;
             border-radius: 12px;
             flex-direction: column;
             border: 1px  solid rgb(217, 217, 217);
+
+            .tokenslideritem{
+                display: flex;
+                flex-direction: column;
+                padding-left: 16px;
+                padding-right: 16px;
+                
+            }
     
             .tokenrow {
                 display: flex;

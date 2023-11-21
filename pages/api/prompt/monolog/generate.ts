@@ -22,9 +22,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
             let data = req.body;
 
-            if(data.personal && data.content && data.address && data.order && data.style && data.emotions && data.length ){
+            if(data.name && data.personal && data.content && data.address && data.order && data.style && data.emotions && data.length ){
                 
-                const prompt = `Ich bin ${data.personal}. Schreibe eine E-Mail, die dabei folgende Punkte berücksichtigt: "${data.content}". Schreibe die E-Mail in der ${data.address}-Form. Der allgemeine Stil deiner Antwort sollte dabei ${data.style.toString()} sein. Schätze dein Gegenüber als ${data.order.toString()} ein. Die allgemeine Gemütslage der Nachricht sollte ${data.emotions.toString()} sein. Die Länge der Nachricht sollte ${data.length} sein.`
+                const prompt = `Mein Name ist ${data.name}. Ich bin ${data.personal}. Schreibe eine E-Mail in meinem Namen, die dabei folgende Punkte berücksichtigt: "${data.content}". Schreibe die E-Mail in der ${data.address}-Form. Der allgemeine Stil deiner Antwort sollte dabei ${data.style.toString()} sein. Schätze dein Gegenüber als ${data.order.toString()} ein. Die allgemeine Gemütslage der Nachricht sollte ${data.emotions.toString()} sein. Die Länge der Nachricht sollte ${data.length} sein.`
             
                 try{
                     const { data: completions, response: raw } = await openai.chat.completions.create({

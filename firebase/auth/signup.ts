@@ -1,12 +1,12 @@
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { firebase_app } from "../../db";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import getDocument, { getDocWhere } from "../data/getData";
-import setData, { addDataWithoutId } from "../data/setData";
+import { getDocWhere } from "../data/getData";
+import { addDataWithoutId } from "../data/setData";
 import addData from "../data/setData";
+const crypto = require("crypto");
 
 const auth = getAuth(firebase_app);
-const db = getFirestore(firebase_app);
 
 export default async function signUp(firstname, lastname, email, username, password, name, street, city, postalcode, country, isPersonal) {
     let result = null,
@@ -19,7 +19,7 @@ export default async function signUp(firstname, lastname, email, username, passw
                 try {
                     result = await createUserWithEmailAndPassword(auth, email, password);
                     try{
-                        let companycreationresult = await addDataWithoutId("Company", { name: name, street: street, city: city, postalcode: postalcode, country: country, settings: {background: ""}, Usage: [], tokens: 9000, unlimited: false, orders: [] });
+                        let companycreationresult = await addDataWithoutId("Company", { name: name, street: street, city: city, postalcode: postalcode, country: country, settings: {background: ""}, Usage: [], tokens: 33333, unlimited: false, orders: [] });
                         console.log(companycreationresult);
                         try {
                             let usercreationresult = await addData("User", result.user.uid, {
@@ -32,22 +32,10 @@ export default async function signUp(firstname, lastname, email, username, passw
                                 profiles: [],
                                 usedCredits: [],
                                 lastState: {
-                                    dialog: {
-                                        profile: "",
-                                        dialog: "",
-                                        continue: "",
-                                        address: "",
-                                        order: "",
-                                        length: "",
-                                    },
-                                    monolog: {
-                                        profile: "",
-                                        content: "",
-                                        address: "",
-                                        order: "",
-                                        length: "",
-                                    }
+                                    dialog: "",
+                                    monolog: ""
                                 },
+                                salt: crypto.randomBytes(8).toString('hex'),
                                 setupDone: false,
                             });
                             console.log(usercreationresult);
@@ -91,22 +79,10 @@ export async function signUpUser(firstname, lastname, email, username, password,
                             profiles: [],
                             usedCredits: [],
                             lastState: {
-                                dialog: {
-                                    profile: "",
-                                    dialog: "",
-                                    continue: "",
-                                    address: "",
-                                    order: "",
-                                    length: "",
-                                },
-                                monolog: {
-                                    profile: "",
-                                    content: "",
-                                    address: "",
-                                    order: "",
-                                    length: "",
-                                }
+                                dialog: "",
+                                monolog: ""
                             },
+                            salt: crypto.randomBytes(8).toString('hex'),
                             setupDone: false,
                         });
                         console.log(usercreationresult);

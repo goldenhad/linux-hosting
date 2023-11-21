@@ -14,7 +14,6 @@ import Main from '../../public/icons/main.svg';
 import Company from '../../public/icons/company.svg';
 import Profiles from '../../public/icons/profiles.svg';
 import Help from '../../public/icons/help.svg';
-import Settings from '../../public/icons/settings.svg';
 import CookieBanner from '../CookieBanner';
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -139,7 +138,7 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
               {props.children}
             </div>
           </Content>
-          <FloatButton icon={<Icon component={Help} className={styles.floaticon} viewBox='0 0 22 22' size={24} />} />
+          <FloatButton className='sosbutton' icon={<Icon component={Help} className={styles.floaticon} viewBox='0 0 22 22' size={24} />} shape='square' description={"Hilfe"}/>
           <Footer style={{ textAlign: 'center', color: "lightgrey" }}>{version}</Footer>
         </Layout>
         <CookieBanner />

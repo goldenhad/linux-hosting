@@ -49,9 +49,16 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         }
     },
   };
-
-  
 };
+
+const dialogBasicState = {
+  profile: "",
+  dialog: "",
+  continue: "",
+  address: "",
+  order: "",
+  length: "",
+}
 
 
 export default function Dialogue(props: InitialProps) {
@@ -76,19 +83,30 @@ export default function Dialogue(props: InitialProps) {
   }
 
   useEffect(() => {
-    if(user.lastState.dialog){
+    const decryptAndParse = async () => {
+      let parsed = dialogBasicState;
       try{
-        updateField('profile', user.lastState.dialog.profile);
-        updateField('dialog', user.lastState.dialog.dialog);
-        updateField('continue', user.lastState.dialog.continue);
-        updateField('address', user.lastState.dialog.address);
-        updateField('order', user.lastState.dialog.order);
-        updateField('length', user.lastState.dialog.length);
+        let decRequest = await axios.post("/api/prompt/decrypt", {
+          ciphertext: user.lastState.dialog,
+          salt: user.salt
+        })
+
+        let decryptedText = decRequest.data.message;
+        parsed = JSON.parse(decryptedText);
+        console.log(parsed);
       }catch(e){
         console.log(e);
       }
-      
-    }
+
+      updateField('profile', parsed.profile);
+      updateField('dialog', parsed.dialog);
+      updateField('continue', parsed.continue);
+      updateField('address', parsed.address);
+      updateField('order', parsed.order);
+      updateField('length', parsed.length);
+  }
+
+    decryptAndParse();
   }, []);
 
 
@@ -137,13 +155,33 @@ export default function Dialogue(props: InitialProps) {
           length: values.length
         }
 
+        let dialogObj = "";
+        
+        try{
+          dialogObj = JSON.stringify(cookieobject);
+        }catch(e){
+          dialogObj = JSON.stringify(dialogBasicState);
+        }
+
+        let encContent = "";
+        try{
+          let encData = await axios.post("/api/prompt/encrypt", {
+            content: dialogObj,
+            salt: user.salt,
+          });
+
+          encContent = encData.data.message;
+        }catch{
+          encContent = "";
+        }
 
         let newUser = user;
-        newUser.lastState.dialog = cookieobject;
+        newUser.lastState.dialog = encContent;
         await updateData('User', login.uid, newUser);
         
   
         let answer: AxiosResponse<any, any> & {timings: {elapsedTime: Number, timingEnd: Number, timingStart: Number}} = await axios.post('/api/prompt/dialog/generate', {
+          name: user.firstname + " " + user.lastname,
           personal: profile.settings.personal,
           dialog: values.dialog,
           continue: values.continue,

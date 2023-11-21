@@ -22,9 +22,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
             let data = req.body;
 
-            if(data.personal && data.dialog && data.continue && data.address && data.style && data.order && data.emotions && data.length ){
+            if(data.name && data.personal && data.dialog && data.continue && data.address && data.style && data.order && data.emotions && data.length ){
                 
-                const prompt = `Ich bin ${data.personal}. Ich habe folgenden E-Mail-Dialog erhalten ${data.dialog}. Schreibe eine Antwort auf den bisherigen Dialog, der dabei folgende Punkte berücksichtigt: "${data.continue}". Schreibe deine Antwort in der ${data.address}-Form. Der allgemeine Stil deiner Antwort sollte dabei ${data.style.toString()} sein. Schätze dein Gegenüber als ${data.order.toString()} ein. Die allgemeine Gemütslage der Nachricht sollte ${data.emotions.toString()} sein. Die Länge der Nachricht sollte ${data.length} sein.`
+                const prompt = `Mein Name ist ${data.name}. Ich bin ${data.personal}. Ich habe folgenden E-Mail-Dialog erhalten ${data.dialog}. Schreibe in meinem Namen eine Antwort auf den bisherigen Dialog, der dabei folgende Punkte berücksichtigt: "${data.continue}". Schreibe deine Antwort in der ${data.address}-Form. Der allgemeine Stil deiner Antwort sollte dabei ${data.style.toString()} sein. Schätze dein Gegenüber als ${data.order.toString()} ein. Die allgemeine Gemütslage der Nachricht sollte ${data.emotions.toString()} sein. Die Länge der Nachricht sollte ${data.length} sein.`
             
                 try{
                     const { data: completions, response: raw } = await openai.chat.completions.create({

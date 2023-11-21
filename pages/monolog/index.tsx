@@ -7,16 +7,14 @@ import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useAuthContext } from '../../components/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { Usage } from '../../firebase/types/Company';
 import { Profile } from '../../firebase/types/Profile';
 import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { handleEmptyString, listToOptions } from '../../helper/architecture';
 import ArrowRight from '../../public/icons/arrowright.svg';
 import Info from '../../public/icons/info.svg';
 import Clipboard from '../../public/icons/clipboard.svg';
-import cookieCutter from 'cookie-cutter'
 import updateData from '../../firebase/data/updateData';
+import { MonologState } from '../../firebase/types/User';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -52,7 +50,13 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   
 };
 
-
+const monologBasicState = {
+  profile: "",
+  content: "",
+  address: "",
+  order: "",
+  length: "",
+}
 
 export default function Monologue(props: InitialProps) {
   const { login, user, company, role, parameters } = useAuthContext();
@@ -76,19 +80,32 @@ export default function Monologue(props: InitialProps) {
   }
 
   useEffect(() => {
-    if(user.lastState.monolog){
+    const decryptAndParse = async () => {
+      let parsed = monologBasicState;
       try{
-        updateField('profile', user.lastState.monolog.profile);
-        updateField('content', user.lastState.monolog.content);
-        updateField('address', user.lastState.monolog.address);
-        updateField('order', user.lastState.monolog.order);
-        updateField('length', user.lastState.monolog.length);
+        let decRequest = await axios.post("/api/prompt/decrypt", {
+          ciphertext: user.lastState.monolog,
+          salt: user.salt
+        })
+
+        let decryptedText = decRequest.data.message;
+        parsed = JSON.parse(decryptedText);
+        console.log(parsed);
       }catch(e){
         console.log(e);
       }
-      
+
+      updateField('content', parsed.content);
+      updateField('profile', parsed.profile);
+      updateField('address', parsed.address);
+      updateField('order', parsed.order);
+      updateField('length', parsed.length);
     }
+
+    decryptAndParse();
   }, []);
+
+
 
   useEffect(() => {
 
@@ -134,11 +151,32 @@ export default function Monologue(props: InitialProps) {
           length: values.length
         }
 
+        let monologObj = "";
+        
+        try{
+          monologObj = JSON.stringify(cookieobject);
+        }catch(e){
+          monologObj = JSON.stringify(monologBasicState);
+        }
+
+        let encContent = "";
+        try{
+          let encData = await axios.post("/api/prompt/encrypt", {
+            content: monologObj,
+            salt: user.salt,
+          });
+
+          encContent = encData.data.message;
+        }catch{
+          encContent = "";
+        }
+
         let newUser = user;
-        newUser.lastState.monolog = cookieobject;
+        newUser.lastState.monolog = encContent;
         await updateData('User', login.uid, newUser);
   
         let answer: AxiosResponse<any, any> & {timings: {elapsedTime: Number, timingEnd: Number, timingStart: Number}} = await axios.post('/api/prompt/monolog/generate', {
+          name: user.firstname + " " + user.lastname,
           personal: profile.settings.personal,
           content: values.content,
           address: values.address,
@@ -166,6 +204,8 @@ export default function Monologue(props: InitialProps) {
           }else{
             company.tokens -= answer.data.tokens
           }
+
+          await updateDoc(doc(db, "Company", user.Company), { tokens: company.tokens});
 
           let userusageidx = user.usedCredits.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});
           if(userusageidx != -1){

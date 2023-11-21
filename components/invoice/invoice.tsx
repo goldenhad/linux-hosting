@@ -5,33 +5,6 @@ import { convertToCurrency } from "../../helper/architecture";
 
 
 const Invoice = (props: { company, order, user }, ref) => {
-
-    const calculateNetto = (tokenstobuy: number) => {
-        return (tokenstobuy * (0.00003 * getFac(tokenstobuy)));
-    }
-
-    const getFac = (tokens: number) => {
-        let tokenstobuy = tokens/10000;
-
-        if(tokenstobuy >= 100 && tokenstobuy < 250){
-            return 4.5;
-        }
-        
-        if(tokenstobuy >= 250 && tokenstobuy < 500){
-            return 4;
-        }
-
-        if(tokenstobuy >= 500 && tokenstobuy < 1000){
-            return 3.5;
-        }
-
-        if(tokenstobuy >= 1000){
-            return 3;
-        }
-
-        return 5;
-    }
-  
     
     return (
         <div className="invoice-box" ref={ref}>
@@ -45,9 +18,7 @@ const Invoice = (props: { company, order, user }, ref) => {
 										src="/full_logo.png"
 										style={{width: "100%", maxWidth: "150px"}}
 									/>
-								</td>
-
-								
+								</td>								
 							</tr>
 						</table>
 					</td>
@@ -99,7 +70,7 @@ const Invoice = (props: { company, order, user }, ref) => {
                         <td className="itemname">Mailbuddy Token</td>
                         <td>{props.order.tokens}</td>
                         <td>19%</td>
-                        <td>{parseFloat((0.00003 * getFac(props.order.tokens)).toFixed(5))} €</td>
+                        <td>{convertToCurrency(props.order.amount / (1 + 0.19))}</td>
                         <td>{convertToCurrency(props.order.amount)}</td>
                     </tr>
                 </tbody>
@@ -111,15 +82,15 @@ const Invoice = (props: { company, order, user }, ref) => {
                     <td className="totalcell">
                         <div className="totalrow">
                             <div>Gesamt netto:</div>
-                            <div>{convertToCurrency(calculateNetto(props.order.tokens))}</div>
+                            <div>{convertToCurrency(props.order.amount / (1 + 0.19))}</div>
                         </div>
                         <div className="totalrow steuerrow">
                             <div>zzgl. MwSt. 19.00 %</div>
-                            <div>{convertToCurrency(calculateNetto(props.order.tokens) * 0.19)}</div>
+                            <div>{convertToCurrency(props.order.amount)}</div>
                         </div>
                         <div className="totalrow final">
                             <div>Gesamt</div>
-                            <div>{convertToCurrency(calculateNetto(props.order.tokens) * 1.19)}</div>
+                            <div>{convertToCurrency(props.order.amount)}</div>
                         </div>
                     </td>
                 </tr>

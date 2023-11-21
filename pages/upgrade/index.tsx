@@ -16,6 +16,7 @@ import ArrowRight from '../public/icons/arrowright.svg';
 import { getAllDocs } from '../../firebase/data/getData';
 import { RightCircleOutlined,  } from '@ant-design/icons';
 import updateData from '../../firebase/data/updateData';
+import { mailAmountMapping, mailMarks, mailPriceMapping } from '../../helper/price';
 var paypal = require('paypal-rest-sdk');
 const { Paragraph } = Typography;
 const { TextArea } = Input;
@@ -48,8 +49,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 export default function Upgrade(props: InitialProps) {
   const { login, user, company, role } = useAuthContext();
-  const [ plans, setPlans ] = useState([]);
-  const [ tokenstobuy, setTokenstobuy ] = useState(5);
+  const [ tokenstobuy, setTokenstobuy ] = useState(0);
   const { push } = useRouter();
   const router = useRouter();
 
@@ -80,14 +80,13 @@ export default function Upgrade(props: InitialProps) {
   const issuePayment = async (tokens: number) => {
     let userlink = await axios.post("/api/payment/paypal", {tokens: tokens.toString()});
     
-    console.log(userlink.data.message)
     if(userlink.data.message.id && userlink.data.message.links){
       let currentOrders = company.orders;
       let newOrder: Order = {
         id: userlink.data.message.id,
         timestamp: Math.floor(Date.now() / 1000),
-        tokens: tokens * 10000,
-        amount: calculatePrice(),
+        tokens: calculateTokens(),
+        amount: mailPriceMapping[tokenstobuy],
         method: "Paypal",
         state: "awaiting_payment"
       }
@@ -101,51 +100,34 @@ export default function Upgrade(props: InitialProps) {
     }
   }
 
-  const calculatePrice = () => {
-    let fac = 5;
-
-    if(tokenstobuy >= 100 && tokenstobuy < 250){
-      fac = 4.5;
-    }
-
-    if(tokenstobuy >= 250 && tokenstobuy < 500){
-      fac = 4;
-    }
-
-    if(tokenstobuy >= 500 && tokenstobuy < 1000){
-      fac = 3.5;
-    }
-
-    if(tokenstobuy >= 1000){
-      fac = 3;
-    }
-
-    return ((tokenstobuy * 10000 * (0.00003 * fac))) * 1.19;
+  const calculateTokens = () => {
+    return Math.round((mailPriceMapping[tokenstobuy]/(0.03 * 6))*3000);
   }
 
-  const calculateMails = () => {
-    return tokenstobuy * 10000 /1000;
+  const calculatePricePerMail = () => {
+    return parseFloat((mailPriceMapping[tokenstobuy]/mailAmountMapping[tokenstobuy]).toFixed(2));
   }
 
 
   return (
     <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
       <div className={styles.main}>
-        <h1>Du brauchst noch mehr tokens?</h1>
+        <h1>Du brauchst noch mehr Token?</h1>
         <div className={styles.cardrow}>
-          <Card className={styles.quoatacard} title={"Weitere tokens erwerben"} headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+          <Card className={styles.quoatacard} title={"Weitere Token erwerben"} headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
             <div className={styles.tokenrow}>
-              <div className={styles.tokens}>{tokenstobuy * 10000} Tokens</div>
+              <div className={styles.tokens}>{mailAmountMapping[tokenstobuy]} Mails</div>
             </div>
             <Form>
-              <Form.Item name={"tokenamount"}>
-                <Slider defaultValue={5} step={1} min={5} max={1000} tooltip={{ formatter: null }} onChange={(val) => setTokenstobuy(val)}/>
+              <Form.Item className={styles.tokenslideritem} name={"tokenamount"}>
+                <Slider className={styles.tokenslider} defaultValue={0} max={6} step={null} marks={mailMarks} tooltip={{ formatter: null }} onChange={(val) => setTokenstobuy(val)}/>
               </Form.Item>
             </Form>
             <div className={styles.details}>
               <List bordered>
-                <List.Item><RightCircleOutlined className={styles.listicon}/>Entspricht ca. {calculateMails()} E-Mails</List.Item>
-                <List.Item><RightCircleOutlined className={styles.listicon}/>Kosten pro Mail {convertToCurrency(calculatePrice()/calculateMails())} </List.Item>
+                <List.Item><RightCircleOutlined className={styles.listicon}/>Entspricht {calculateTokens()} Token</List.Item>
+                <List.Item><RightCircleOutlined className={styles.listicon}/>Kosten pro Mail {convertToCurrency(calculatePricePerMail())} </List.Item>
+                <List.Item><RightCircleOutlined className={styles.listicon}/>Zeitersparniss insgesamt {Math.round((mailAmountMapping[tokenstobuy] * 5 * 0.9)/60)} h im Monat</List.Item>
               </List>
               <Divider />
             </div>
@@ -158,7 +140,7 @@ export default function Upgrade(props: InitialProps) {
                 </div>
 
                 <div className={styles.value}>
-                  {convertToCurrency(calculatePrice())}
+                  {convertToCurrency(mailPriceMapping[tokenstobuy])}
                 </div>
               </div>
 

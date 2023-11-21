@@ -4,8 +4,9 @@ import { Roboto } from 'next/font/google';
 import { AppContext, AppInitialProps, AppLayoutProps, AppProps } from 'next/app';
 import favicon from '../public/favicon.ico';
 import { AuthContextProvider } from '../components/context/AuthContext';
-import { ReactNode } from 'react';
-import type { NextComponentType } from 'next';
+import { ReactNode, useEffect } from 'react';
+import type { GetServerSideProps, NextComponentType } from 'next';
+import Chatra from '@chatra/chatra';
 
 const roboto = Roboto({
   weight: ['100', '300', '400', '500', '700', '900'],
@@ -17,6 +18,24 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ({
   pageProps,
 }: AppLayoutProps) => {
   console.log(Component.getLayout);
+
+  useEffect(() => {
+    console.log(pageProps);
+
+    let config = {
+      ID: "hmW4w975YAotbeZhQ",
+      setup: {
+        colors: {
+          buttonText: '#000',
+          buttonBg: '#fff'
+        },
+        customWidgetButton: '.sosbutton'
+      }
+    }
+
+    Chatra('init', config)
+    Chatra('pageView')
+  }, [])
 
   const getLayout = Component.getLayout || ((page) => page);
 

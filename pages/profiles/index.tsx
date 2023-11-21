@@ -12,9 +12,21 @@ import { Profile, ProfileSettings } from '../../firebase/types/Profile';
 import updateData from '../../firebase/data/updateData';
 import { arrayUnion } from 'firebase/firestore';
 import { handleEmptyArray, handleEmptyString, listToOptions } from '../../helper/architecture';
+import axios from 'axios';
 require('dotenv').config();
 
 const MAXPROFILES = 12;
+
+
+const defaultProfile = {
+  name: "",
+  settings: {
+    personal: "",
+    stil: [],
+    emotions: [],
+    tags: []
+  }
+}
 
 
 export interface InitialProps {
@@ -55,6 +67,7 @@ export default function Profiles(props: InitialProps) {
     const [ tokenCount, setTokenCount ] = useState(0);
     const [ form ] = Form.useForm();
     const [ editForm ] = Form.useForm();
+    const [ decodedProfiles, setDecodedProfiles ] = useState([]);
     const [current, setCurrent] = useState(0);
 
     const router = useRouter();
@@ -69,6 +82,35 @@ export default function Profiles(props: InitialProps) {
       if (login == null) router.push("/login");
         
     }, [login]);
+
+
+    useEffect(() => {
+      const decodeProfiles = async () => {
+        let profilearr: Array<Profile> = [];
+
+        for(let i = 0; i < user.profiles.length; i++){
+          let profilejson = "";
+          try{
+            let decoded = await axios.post("/api/prompt/decrypt", { 
+              ciphertext: user.profiles[i],
+              salt: user.salt
+              });
+              profilejson = decoded.data.message;
+          }catch(e){
+            profilejson = "";
+          }
+          
+          let singleProfile: Profile = JSON.parse(profilejson);
+          profilearr.push(singleProfile);
+        }
+
+        setDecodedProfiles(profilearr);
+      }
+
+      if(user.profiles){
+        decodeProfiles();
+      }
+    }, [decodedProfiles]);
     
 
   
@@ -114,7 +156,22 @@ export default function Profiles(props: InitialProps) {
         try {
           if ( profileToEdit != -1 ){
             let profiles = user.profiles;
-            profiles[profileToEdit] = {name: values.name, settings: { personal: handleEmptyString(values.personal), stil: handleEmptyArray(values.style), emotions: handleEmptyArray(values.emotions), tags: handleEmptyArray(values.tags) }}
+            let encdata = "";
+            let profiletoupload = JSON.stringify({name: values.name, settings: { personal: handleEmptyString(values.personal), stil: handleEmptyArray(values.style), emotions: handleEmptyArray(values.emotions), tags: handleEmptyArray(values.tags) }})
+
+            try{
+              let encreq = await axios.post("/api/prompt/encrypt", { 
+                content: profiletoupload,
+                salt: user.salt,
+              })
+
+              encdata = encreq.data.message;
+            }catch(e){
+              encdata = "";
+            }
+
+            profiles[profileToEdit] = encdata;
+            
             await updateData("User", login.uid, { profiles: profiles })
             form.resetFields([]);
           }else{
@@ -137,7 +194,31 @@ export default function Profiles(props: InitialProps) {
 
       if(values.name){
         try{
-          await updateData("User", login.uid, { profiles: arrayUnion({name: values.name, settings: { personal: handleEmptyString(values.personal), stil: handleEmptyArray(values.style), emotions: handleEmptyArray(values.emotions), tags: handleEmptyArray(values.tags) }}) })
+          let profileObj = {
+            name: values.name,
+            settings: {
+              personal: handleEmptyString(values.personal),
+              stil: handleEmptyArray(values.style),
+              emotions: handleEmptyArray(values.emotions),
+              tags: handleEmptyArray(values.tags)
+            }
+          }
+
+          let stringified = JSON.stringify(profileObj);
+          let encdata = "";
+
+          try{
+            let encreq = await axios.post("/api/prompt/encrypt", { 
+              content: stringified,
+              salt: user.salt,
+             })
+            encdata = encreq.data.message;
+          }catch(e){
+            console.log(e);
+            encdata = "";
+          }
+
+          await updateData("User", login.uid, { profiles: arrayUnion(encdata) })
           form.setFieldsValue([]);
           setIsCreateModalOpen(false);
         }catch(e){
@@ -165,11 +246,11 @@ export default function Profiles(props: InitialProps) {
     
     const getProfileDisplay = () => {
       if(user.profiles && user.profiles.length > 0){
+
         return (
           <>
             <Space wrap={true}>
-              { user.profiles.map((singleProfile: Profile, idx) => {
-                
+              { decodedProfiles.map((singleProfile: Profile, idx) => {
                 let settings: ProfileSettings = singleProfile.settings;
 
                 return (
@@ -390,7 +471,7 @@ export default function Profiles(props: InitialProps) {
             onCancel={() => {setIsDeleteModalOpen(false)}}
             footer = {[]}
           >
-            <Paragraph>Willst du das Profil {(profileToDelete != -1 && user.profiles[profileToDelete]) ? user.profiles[profileToDelete].name: "UNDEFINED"} wirklich löschen?</Paragraph>
+            <Paragraph>Willst du das Profil wirklich löschen?</Paragraph>
   
             <div className={styles.finishformrow}>
                 <Space direction='horizontal'>

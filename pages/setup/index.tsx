@@ -7,6 +7,7 @@ import Head from "next/head";
 import { useAuthContext } from "../../components/context/AuthContext";
 import updateData from "../../firebase/data/updateData";
 import { listToOptions } from "../../helper/architecture";
+import axios from "axios";
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -187,7 +188,19 @@ export default function Setup(){
         }
 
         if(userinfo){
-            await updateData("User", login.uid, { profiles: [ { name: "Hauptprofil", settings: { personal: userinfo, emotions: userEmotions, stil: userstyles } } ], setupDone: true });
+            let profileArr = [];
+            try{
+                let encreq = await axios.post("/api/prompt/encrypt", {
+                    content: JSON.stringify({ name: "Hauptprofil", settings: { personal: userinfo, emotions: userEmotions, stil: userstyles } }),
+                    salt: user.salt,
+                });
+
+                profileArr.push(encreq.data.message);
+            }catch{
+                profileArr = [];
+            }
+
+            await updateData("User", login.uid, { profiles: profileArr, setupDone: true });
         }
 
         router.push("/");

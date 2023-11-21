@@ -42,14 +42,18 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         }
     },
   };
-
-  
 };
 
 
 export default function Home(props: InitialProps) {
   const { login, user, company, role } = useAuthContext();
+  const router = useRouter();
 
+  useEffect(() => {
+    if(!user.setupDone){
+      router.push("/setup");
+    }
+  }, []);
 
   return (
     <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>

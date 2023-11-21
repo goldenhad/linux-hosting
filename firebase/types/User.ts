@@ -30,7 +30,7 @@ export type User =  {
     lastname: string,
     Company: string,
     Role: string,
-    profiles: Array<Profile>,
+    profiles: Array<string>,
     usedCredits: Array<Usage>,
     lastState: State,
     setupDone: boolean,

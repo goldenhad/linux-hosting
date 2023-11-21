@@ -74,6 +74,7 @@ export default function Dialogue(props: InitialProps) {
   const [messageApi, contextHolder] = message.useMessage();
   const [ tokens, setTokens ] = useState("");
   const [ promptError, setPromptError ] = useState(false);
+  const [ decryptedProfiles, setDecryptedProfiles ] = useState([]);
 
 
   const updateField = (field: string, value: string) => {
@@ -108,6 +109,35 @@ export default function Dialogue(props: InitialProps) {
 
     decryptAndParse();
   }, []);
+  
+
+  useEffect(() => {
+    const decryptProfiles = async () => {
+      let profilearr: Array<Profile> = [];
+
+      for(let i = 0; i < user.profiles.length; i++){
+        let profilejson = "";
+        try{
+          let decoded = await axios.post("/api/prompt/decrypt", { 
+            ciphertext: user.profiles[i],
+            salt: user.salt
+            });
+            profilejson = decoded.data.message;
+        }catch(e){
+          profilejson = "";
+        }
+        
+        let singleProfile: Profile = JSON.parse(profilejson);
+        profilearr.push(singleProfile);
+      }
+
+      setDecryptedProfiles(profilearr);
+    }
+
+    if(user.profiles){
+      decryptProfiles();
+    }
+  }, []);
 
 
   useEffect(() => {
@@ -132,7 +162,7 @@ export default function Dialogue(props: InitialProps) {
   
 
   const generateAnswer = async (values: any) => {
-    let profile = user.profiles.find((singleProfile: Profile) => {
+    let profile = decryptedProfiles.find((singleProfile: Profile) => {
       return singleProfile.name == values.profile;
     });
 
@@ -237,7 +267,7 @@ export default function Dialogue(props: InitialProps) {
   }
 
   const getProfiles = () => {
-    let profileOptions =  user.profiles.map((singleProfile: Profile, idx: number) => {
+    let profileOptions =  decryptedProfiles.map((singleProfile: Profile, idx: number) => {
       return {
         key: idx,
         value: singleProfile.name
@@ -249,7 +279,7 @@ export default function Dialogue(props: InitialProps) {
 
   const getPrompt = () => {
     if(user){
-      if(!(user.profiles?.length > 0)){
+      if(!(decryptedProfiles?.length > 0)){
         return (
           <Result
             title="Bitte definiere zuerst ein Profil"

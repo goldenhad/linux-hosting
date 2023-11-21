@@ -101,10 +101,10 @@ export default function Dialogue(props: InitialProps) {
     }
     
     if(company.tokens != undefined){
-      if(company.tokens <= 0){
-        setQuotaOverused(true);
-      }else{
+      if(company.tokens > 0 || company.unlimited){
         setQuotaOverused(false);
+      }else{
+        setQuotaOverused(true);
       }
     }else{
       createData();

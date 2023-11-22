@@ -30,6 +30,22 @@
                 background-color: #101828;
             }
 
+            .changelogrow{
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                color: white;
+
+                &:hover {
+                    cursor: pointer;
+                }
+
+                .changelog{
+                    color: #D0D5DD;
+                    font-size: 20px;
+                }
+            }
+
             .avatarcontainer {
                 display: flex;
                 flex-direction: row;
@@ -126,5 +142,14 @@
 
     > path {
         stroke: black;
+    }
+}
+
+.newscontainer {
+    max-height: 500px;
+    overflow-y: scroll;
+
+    .newsitem{
+        width: 100%;
     }
 }

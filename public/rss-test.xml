@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<rss version="2.0">
+
+  <channel>
+    <title>Titel des Feeds</title>
+    <link>URL der Webpräsenz</link>
+    <description>Kurze Beschreibung des Feeds</description>
+    <language>Sprache des Feeds (z. B. "de-de")</language>
+    <copyright>Autor des Feeds</copyright>
+    <pubDate>Erstellungsdatum("Tue, 8 Jul 2008 2:43:19")</pubDate>
+    <image>
+      <url>URL einer einzubindenden Grafik</url>
+      <title>Bildtitel</title>
+      <link>URL, mit der das Bild verknüpft ist</link>
+    </image>
+
+    <item>
+        <title>Changelog-Funktion</title>
+        <description>Neue Funktionen direkt in der App</description>
+        <link></link>
+        <author>Maximilian Krebs</author>
+        <guid>1</guid>
+        <matter>Hier werden ab sofort neue Funktionen vorgestellt. Warnhinweise bzgl. Updates und Downtimes werden ebenfalls erklärt</matter>
+    </item>
+
+    <item>
+        <title>Sicherheits Patch #1</title>
+        <description>Verschlüsselung persönlicher Daten</description>
+        <link></link>
+        <author>Maximilian Krebs</author>
+        <guid>2</guid>
+        <matter>Ab sofort werden alle persönlichen Daten mit dem AES-Verfahren verschlüsselt. Letzte Zustände der Prompts und Profile sind als Ciphertext in der Datenbank gespeichert und nicht einsehbar. Durch die Umstellung auf Verschlüsselung kann es vorkommen, dass eure letzten Prompts verloren geangen sind.</matter>
+    </item>
+
+     <item>
+        <title>Bug-Report Funktion</title>
+        <description>Bugs können direkt in Siteware.Mail eingereicht werden</description>
+        <link></link>
+        <author>Maximilian Krebs</author>
+        <guid>3</guid>
+        <matter>Solltet ihr auf ein Problem stoßen oder einen Bug finden, könnt ihr direkt über den "Hilfe"-Button unten links eine Chat-Nachricht verschicken.</matter>
+    </item>
+
+  </channel>
+
+</rss>

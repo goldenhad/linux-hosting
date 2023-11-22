@@ -1,4 +1,4 @@
-import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider, List, Slider, Table } from 'antd';
+import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider, List, Slider, Table, ConfigProvider } from 'antd';
 import Icon from '@ant-design/icons';
 import styles from './upgrade.module.scss'
 import { db } from '../../db';
@@ -16,7 +16,7 @@ import ArrowRight from '../public/icons/arrowright.svg';
 import { getAllDocs } from '../../firebase/data/getData';
 import { RightCircleOutlined,  } from '@ant-design/icons';
 import updateData from '../../firebase/data/updateData';
-import { mailAmountMapping, mailMarks, mailPriceMapping } from '../../helper/price';
+import { mailAmountMapping, mailSavingMapping, mailPriceMapping } from '../../helper/price';
 var paypal = require('paypal-rest-sdk');
 const { Paragraph } = Typography;
 const { TextArea } = Input;
@@ -108,45 +108,71 @@ export default function Upgrade(props: InitialProps) {
     return parseFloat((mailPriceMapping[tokenstobuy]/mailAmountMapping[tokenstobuy]).toFixed(2));
   }
 
+  const calculateHours = () => {
+    return Math.round((mailAmountMapping[tokenstobuy] * 5 * 0.9)/60);
+  }
+
+  const calculateSavings = () => {
+    return mailSavingMapping[tokenstobuy] * mailPriceMapping[tokenstobuy];
+  }
+
 
   return (
-    <SidebarLayout role={role} user={user} login={login}>
+    <ConfigProvider theme={{
+      components: {
+        Slider: {
+          trackBg: '#1478FD',
+          handleColor: '#1478FD',
+          handleActiveColor: '#1478FD',
+          railSize: 8,
+          dotSize: 12,
+          controlSize: 12
+        }
+      }
+    }}>
       <div className={styles.main}>
-        <h1>Du brauchst noch mehr Token?</h1>
+        <div className={styles.logorow}>
+            <div className={styles.logobox}>
+                <img src={"/logo.svg"} alt="Logo" width={100}/>
+            </div>
+        </div>
         <div className={styles.cardrow}>
-          <Card className={styles.quoatacard} title={"Weitere Token erwerben"} headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+          <div className={styles.headline}>
+            <h1 className={styles.mainheadline}>Credits Kaufen</h1>
+            <div className={styles.subheadline}>Bis zu 45% sparen!</div>
+          </div>
+          <Card className={styles.quoatacard} headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
             <div className={styles.tokenrow}>
-              <div className={styles.tokens}>{mailAmountMapping[tokenstobuy]} Mails</div>
+              <div className={styles.tokens}>{mailAmountMapping[tokenstobuy]}</div>
+              <div className={styles.tokeninfo}>Mails</div>
             </div>
             <Form>
               <Form.Item className={styles.tokenslideritem} name={"tokenamount"}>
-                <Slider className={styles.tokenslider} defaultValue={0} max={6} step={null} marks={mailMarks} tooltip={{ formatter: null }} onChange={(val) => setTokenstobuy(val)}/>
+                <Slider className={styles.tokenslider} defaultValue={0} max={6} step={1} tooltip={{ formatter: null }} onChange={(val) => setTokenstobuy(val)}/>
               </Form.Item>
             </Form>
+            <Divider className={styles.tokendivider} />
             <div className={styles.details}>
-              <List bordered>
-                <List.Item><RightCircleOutlined className={styles.listicon}/>Entspricht {calculateTokens()} Token</List.Item>
-                <List.Item><RightCircleOutlined className={styles.listicon}/>Kosten pro Mail {convertToCurrency(calculatePricePerMail())} </List.Item>
-                <List.Item><RightCircleOutlined className={styles.listicon}/>Zeitersparniss insgesamt {Math.round((mailAmountMapping[tokenstobuy] * 5 * 0.9)/60)} h im Monat</List.Item>
-              </List>
-              <Divider />
+              <div className={styles.singledetail}>Preis je Mail: <span className={styles.detailhighlight}>{convertToCurrency(calculatePricePerMail())}</span></div>
+              <div className={styles.singledetail}>Deine monatliche Ersparnis: <span className={styles.detailhighlight}>{convertToCurrency(calculateSavings())}</span></div>
+              <div className={styles.singledetail}>Entspricht: <span className={styles.detailhighlight}>{calculateTokens()} Token</span></div>
+              <div className={styles.singledetail}>Gesamtpreis: <span className={styles.detailhighlight}>{convertToCurrency(mailPriceMapping[tokenstobuy])}</span></div>
             </div>
-            <div className={styles.buyrow}>
-              <div className={styles.checkouttable}>
+          </Card>
 
-                <div className={styles.topic}>
-                  <div className={styles.sumtext}>Gesamtsumme:</div>
-                  <div className={styles.sumsubtitle}>alle Angaben in Euro inkl. Mwst</div>
-                </div>
+          <div className={styles.buyrow}>
+              <div className={styles.checkout}>
 
-                <div className={styles.value}>
-                  {convertToCurrency(mailPriceMapping[tokenstobuy])}
+                <div className={styles.checkoutheadline}>Deine Ersparnis</div>
+                <div className={styles.savings}>
+                  <div className={styles.singlesaving}>Zeitersparnis im Monat: <span className={styles.savinghighlight}>{calculateHours()} Stunden</span></div>
+                  <div className={styles.singlesaving}>Arbeitskosten: <span className={styles.savinghighlight}>{convertToCurrency(calculateHours() * 45)} (Bei 45,- EUR je Std.)</span></div>
                 </div>
               </div>
 
               <div className={styles.buybuttonrow}>
                 <div className={styles.buybutton}>
-                  <Button onClick={async () => {await issuePayment(tokenstobuy)}} type="primary" className={styles.buynow}>Bestellung abschließen</Button>
+                  <Button onClick={async () => {await issuePayment(tokenstobuy)}} type="primary" className={styles.buynow}>Weiter zur Zahlung</Button>
                 </div>
 
                 <div className={styles.buybutton}>
@@ -154,9 +180,8 @@ export default function Upgrade(props: InitialProps) {
                 </div>
               </div>
             </div>
-          </Card>
         </div>
       </div>
-    </SidebarLayout>
+    </ConfigProvider>
   )
 }

@@ -109,6 +109,10 @@ const SidebarLayout = (props: { children: ReactNode, user: User, login: any, rol
         Menu: {
           darkItemSelectedBg: '#344054',
           darkDangerItemSelectedColor: '#ffffff'
+        },
+        Slider: {
+          trackBg: '#1478FD',
+          handleColor: '#1478FD',
         }
       }
     }}>

@@ -18,6 +18,16 @@ export const mailAmountMapping = [
     5000
 ]
 
+export const mailSavingMapping = [
+    0,
+    0.1,
+    0.1573,
+    0.2184,
+    0.25,
+    0.3025,
+    0.4006
+]
+
 export const mailMarks = {
     0: '15 Mails',
     1: '50 Mails',

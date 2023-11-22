@@ -20,7 +20,7 @@ interface ctx {
     login: any,
     user: User,
     company: Company,
-    role: any,
+    role: Role,
     parameters: Parameters,
     loading: boolean,
 }

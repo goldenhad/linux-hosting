@@ -1,8 +1,8 @@
-import React, { ReactNode, useEffect, useState } from 'react';
-import { LogoutOutlined, BellOutlined } from '@ant-design/icons';
+import React, { ReactNode, useState } from 'react';
+import { LogoutOutlined } from '@ant-design/icons';
 import Icon from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Avatar, Badge, ConfigProvider, Divider, FloatButton, Layout, List, Menu, Modal, Popover, Typography, theme } from 'antd';
+import { Avatar, ConfigProvider, Divider, FloatButton, Layout, Menu, Popover } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 const { Content, Footer, Sider } = Layout;
@@ -15,44 +15,17 @@ import Company from '../../public/icons/company.svg';
 import Profiles from '../../public/icons/profiles.svg';
 import Help from '../../public/icons/help.svg';
 import CookieBanner from '../CookieBanner';
-import Parser from 'rss-parser';
-const { Paragraph } = Typography;
 
 type MenuItem = Required<MenuProps>['items'][number];
 
 
 
-const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: User, login: any}) => {
+const SidebarLayout = (props: { children: ReactNode, user: User, login: any, role: any}) => {
   const [collapsed, setCollapsed] = useState(true);
   const [ collapseWidth, setCollapseWidth ] = useState(undefined);
   const [ breakpoint, setBreakpoint ] = useState(undefined);
   const router = useRouter();
   const [ version, setVersion ] = useState("");
-  const [ newsModalOpen, setNewsModalOpen ] = useState(false);
-  const [ ellipsis, setEllipsis ] = useState([])
-  const [ news, setNews ] = useState([]);
-  let parser = new Parser({
-    customFields: {
-      item: ['matter'],
-    }
-  });
-
-  useEffect(() => {
-    const parseNews = async () => {
-      let newsfeed = [];
-      let ellipses = [];
-      let feed = await parser.parseURL("/rss-test.xml");
-      feed.items.reverse().forEach((item, idx) => {
-        newsfeed.push(item);
-        ellipses.push(false);
-      });
-
-      setNews(newsfeed);
-      setEllipsis(ellipses);
-    }
-
-    parseNews();
-  }, []);
 
   function getItem( label: React.ReactNode, key: React.Key, check: () => boolean, icon?: React.ReactNode, children?: MenuItem[] ): MenuItem {
     if( check() ){
@@ -72,8 +45,8 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
     getItem(<Link href={"/"}>Home</Link>, '1', () => { return true }, <Icon component={Home} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>, ),
     getItem(<Link href={"/dialog"}>Dialog</Link>, '2', () => { return true }, <Icon component={Main} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
     getItem(<Link href={"/monolog"}>Monolog</Link>, '5', () => { return true }, <Icon component={Main} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
-    getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return props.user.Role == "Company" || props.user.Role == "mailagent"  }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
-    getItem(<Link href={"/usage"}>Nutzung</Link>, '3', () => { return props.user.Role != "Company" && props.user.Role != "mailagent"  }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return props.role.isCompany  }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/usage"}>Nutzung</Link>, '3', () => { return !props.role.isCompany  }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
     getItem(<Link href={"/profiles"}>Profile</Link>, '4', () => { return true }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
   ];
 
@@ -151,7 +124,6 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
 
             <div>
               <Menu className={styles.secondarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={footeritems} />
-              <div className={styles.changelogrow} onClick={() => {setNewsModalOpen(true)}}><Badge ><BellOutlined className={styles.changelog} /></Badge></div>
               <div className={styles.avatarcontainer}>
                 <Popover placement="rightBottom" content={profilemenu} trigger="click">
                   <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
@@ -172,36 +144,6 @@ const SidebarLayout = (props: { children: ReactNode, capabilities: any, user: Us
         </Layout>
         <CookieBanner />
       </Layout>
-      <Modal 
-        title="Changelog"
-        open={newsModalOpen}
-        onOk={() => {setNewsModalOpen(false)}}
-        onCancel={() => {setNewsModalOpen(false)}}
-        footer={null}
-        width={800}
-      >
-        <div className={styles.newscontainer}>
-          <List
-            itemLayout="horizontal"
-            dataSource={news}
-            renderItem={(item, index) => {
-              return(
-                <List.Item>
-                  <div className={styles.newsitem}>
-                    <List.Item.Meta
-                      title={`#${item.guid} ${item.title}`}
-                      description={<p>{item.content}</p>}
-                    />
-                    <Paragraph ellipsis={!ellipsis[index] ? { rows: 2, expandable: true, symbol: 'mehr' } : false}>{item.matter}</Paragraph>
-                  </div>
-                  
-                  
-                </List.Item>
-              );
-            }}
-          />
-        </div>
-      </Modal>
     </ConfigProvider>
   );
 };

@@ -56,7 +56,7 @@ export default function Home(props: InitialProps) {
   }, []);
 
   return (
-    <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
+    <SidebarLayout role={role} user={user} login={login}>
       <div className={styles.main}>
         <div className={styles.greetingrow}>
           <div className={styles.greeting}>Willkommen {user.firstname}</div>

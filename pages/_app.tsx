@@ -47,7 +47,7 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ({
           <meta property="og:title" content="Siteware Mailbuddy dein intelligenter Mail-Assistent" />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/cartoon.jpeg" />
-          <link rel="icon" type="image/x-icon" href="mailbuddy.ico" />
+          <link rel="icon" type="image/x-icon" href="small_logo.ico" />
           <title>Siteware-Mailbuddy | mail assistant</title>
         </Head>
         <div className={roboto.className}>

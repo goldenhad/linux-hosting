@@ -39,20 +39,7 @@ const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "A
 
 
 export interface InitialProps {
-  Data: { currentMonth: number, currentYear: number; };
-}
-
-function pad(number: number, size: number){
-    let nstring = number.toString();
-    let leadings = "";
-
-    if(nstring.length < size){
-        for(let i=0; i < size-nstring.length; i++){
-            leadings += "0";
-        }
-    }
-
-    return leadings + nstring;
+  Data: { };
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -60,15 +47,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const { req, res } = ctx;
     //Get the cookies from the current request
     const { cookies } = req;
-  
-    let datum = new Date();
-  
+    
     return {
       props: {
-          Data: {
-            currentMonth: datum.getMonth() + 1,
-            currentYear: datum.getFullYear(),
-          }
+          
       },
     };
 };
@@ -83,7 +65,7 @@ export default function Usage(props: InitialProps) {
     const router = useRouter();
 
     useEffect(() => {
-        if(user.Role != "Singleuser") {
+        if(role.isCompany) {
             router.push("/");
         }
     }, []);
@@ -175,7 +157,7 @@ export default function Usage(props: InitialProps) {
 
   
     return (
-        <SidebarLayout capabilities={role.capabilities} user={user} login={login}>
+        <SidebarLayout role={role} user={user} login={login}>
             <div className={styles.main}>
                 <div className={styles.companyoverview}>
                     <Card className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Tokens"} bordered={true}>

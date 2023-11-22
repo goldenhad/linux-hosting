@@ -20,7 +20,7 @@ interface ctx {
     login: any,
     user: User,
     company: Company,
-    role: Role,
+    role: any,
     parameters: Parameters,
     loading: boolean,
 }
@@ -66,18 +66,15 @@ export const AuthContextProvider = ({
             try {
                 if (user) {
                     const userdoc = await getDocument("User", user.uid);
-                    console.log(userdoc);
 
                     if(userdoc.result){
                         let userobj = userdoc.result.data() as User;
                         const roledoc = await getDocument("Role", userobj.Role);
 
                         if(roledoc.result){
-                            console.log(userobj);
                             const companydoc = await getDocument("Company", userobj.Company);
 
                             if(companydoc.result){
-                                let companyobj = companydoc.result.data() as Company;
                                 const parameters = await getDocument("Settings", "Parameter");
 
                                 if(parameters.result){

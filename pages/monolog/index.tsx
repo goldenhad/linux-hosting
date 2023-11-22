@@ -341,7 +341,7 @@ export default function Monologue(props: InitialProps) {
               }
             </div>
             <div className={styles.generatebuttonrow}>
-              <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>E-Mail generieren <Icon component={ArrowRight} className={styles.buttonicon} viewBox='0 0 20 20'/></Button>
+              <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>E-Mail generieren</Button>
             </div>
             
           </div>
@@ -355,7 +355,7 @@ export default function Monologue(props: InitialProps) {
   return (
     <>
       {contextHolder}
-    <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
+    <SidebarLayout role={role} user={user} login={login}>
       <div className={styles.main}>
         <div className={styles.welcomemessage}>
           <h1>Willkommen zurück, {handleEmptyString(user.firstname)}</h1>
@@ -375,7 +375,7 @@ export default function Monologue(props: InitialProps) {
           </Card>
           <div className={styles.formfootercontainer}>
             <div className={styles.generatebuttonrow}>
-              <Button className={styles.backbutton} onClick={() => {setShowAnswer(false);}} type='primary'>Zurück <Icon component={ArrowRight} className={styles.buttonicon} viewBox='0 0 20 20'/></Button>
+              <Button className={styles.backbutton} onClick={() => {setShowAnswer(false);}} type='primary'>Zurück</Button>
             </div>
           </div>
         </div>

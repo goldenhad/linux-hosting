@@ -72,7 +72,7 @@ export default function InvoiceDownload(props: InitialProps) {
 
   
     return (
-        <SidebarLayout capabilities={role.capabilities} user={user} login={login}>
+        <SidebarLayout role={role} user={user} login={login}>
             <div style={{ display: "flex", flexDirection: "column", width: "100%", justifyContent: "center", alignItems: "center" }}>
                 <div style={{ display: "block", width: 800 }}>
                     <Invoice company={company} user={user} order={order} ref={componentRef}></Invoice>

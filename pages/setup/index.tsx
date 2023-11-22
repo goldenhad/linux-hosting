@@ -1,9 +1,8 @@
 import router from "next/router";
 import { GetServerSideProps } from "next";
-import { Component, useEffect, useState } from "react";
-import { Alert, Button, Checkbox, Form, Input, Select, Steps, Typography } from 'antd';
+import { useEffect, useState } from "react";
+import { Button, Form, Input, Select, Steps, Typography } from 'antd';
 import styles from './setup.module.scss'
-import Head from "next/head";
 import { useAuthContext } from "../../components/context/AuthContext";
 import updateData from "../../firebase/data/updateData";
 import { listToOptions } from "../../helper/architecture";
@@ -80,7 +79,7 @@ export default function Setup(){
 
 
     const getFormSteps = () => {        
-        if(user.Role == "Company" ){
+        if(role.canEditCompanyDetails){
             return [
                 {   step: 0,
                     title: "Erzähl mir etwas über deine Firma!",

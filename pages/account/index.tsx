@@ -1,8 +1,6 @@
 import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider, List, Slider, Table, Avatar } from 'antd';
 import Icon from '@ant-design/icons';
 import styles from './account.module.scss'
-import { db } from '../../db';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import SidebarLayout from '../../components/Sidebar/SidebarLayout';
@@ -82,7 +80,7 @@ export default function Account(props: InitialProps) {
     });
 
     if(!error){
-        if(user.Role != "mailagent"){
+        if(!role.isCompany){
             let { result, error } = await updateData("Company", user.Company, { 
                 street: onlyUpdateIfSet(street, company.street),
                 postalcode: onlyUpdateIfSet(postalcode, company.postalcode),
@@ -105,7 +103,7 @@ export default function Account(props: InitialProps) {
   }
 
   const getPersonalForm = () => {
-    if(user.Role == "Company" || user.Role == "mailagent"){
+    if(role.isCompany){
         return(
             <Form layout='vertical' form={personalForm} onFinish={() => {saveAccountInfo()}} onChange={() => {setIsErrVisible(false), setEditSuccessfull(false)}}>
                 <div className={styles.formrow}>
@@ -261,7 +259,7 @@ const getResetButton = () => {
 
 
   return (
-    <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
+    <SidebarLayout role={role} user={user} login={login}>
       <div className={styles.main}>
         <Avatar size={250} style={{ backgroundColor: '#f0f0f2', color: '#474747', fontSize: 100 }}>{handleEmptyString(user.firstname).toUpperCase().charAt(0)}{handleEmptyString(user.lastname).toUpperCase().charAt(0)}</Avatar>
         <div className={styles.personal}>

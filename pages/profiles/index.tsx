@@ -361,7 +361,7 @@ export default function Profiles(props: InitialProps) {
     const items = steps.map((item) => ({ key: item.title, title: item.title }));
 
     return (
-      <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
+      <SidebarLayout role={role} user={user} login={login}>
         <div className={styles.main}>
           <div className={styles.interactionrow}>
               <Button type='primary' onClick={() => {setIsCreateModalOpen(true)}} disabled={(user.profiles && user.profiles.length >= MAXPROFILES)}>+ Hinzufügen</Button>

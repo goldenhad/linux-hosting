@@ -31,8 +31,7 @@
     "react-chartjs-2": "^5.2.0",
     "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0",
-    "react-to-print": "^2.14.15",
-    "rss-parser": "^3.13.0"
+    "react-to-print": "^2.14.15"
   },
   "devDependencies": {
     "@types/node": "20.7.1",

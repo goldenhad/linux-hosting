@@ -27,7 +27,7 @@ export default async function signUp(firstname, lastname, email, username, passw
                                 lastname: lastname,
                                 email: email,
                                 username: username,
-                                Role: (isPersonal)? "Singleuser": "Company",
+                                Role: (isPersonal)? "Singleuser": "Company-Admin",
                                 Company: `${companycreationresult.result.id}`,
                                 profiles: [],
                                 usedCredits: [],
@@ -58,7 +58,7 @@ export default async function signUp(firstname, lastname, email, username, passw
 }
 
 
-export async function signUpUser(firstname, lastname, email, username, password, companyid,) {
+export async function signUpUser(firstname, lastname, email, username, password, companyid, role) {
     let result = null,
         error = null;
         
@@ -74,7 +74,7 @@ export async function signUpUser(firstname, lastname, email, username, password,
                             firstname: firstname,
                             lastname: lastname,
                             username: username,
-                            Role: "mailagent",
+                            Role: role,
                             Company: companyid,
                             profiles: [],
                             usedCredits: [],

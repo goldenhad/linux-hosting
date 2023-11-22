@@ -77,8 +77,7 @@ export default function Company(props: InitialProps) {
     const router = useRouter();
 
     useEffect(() => {
-        console.log(user.Role);
-        if(user.Role != "Company" && user.Role != "mailagent") {
+        if(!role.isCompany) {
             router.push("/");
         }
     }, []);
@@ -130,7 +129,7 @@ export default function Company(props: InitialProps) {
     }
 
     const getCompanyInput = () => {
-        if(role.capabilities.projects.edit){
+        if(role.canEditCompanyDetails){
             return (<Form 
                 layout='vertical'
                 onFinish={editCompany}
@@ -194,7 +193,7 @@ export default function Company(props: InitialProps) {
                     name="companybackground"
                     className={styles.formpart}
                 >
-                    <TextArea className={styles.forminput} placeholder="Was ist das Kerngeschäft der Firma?"/>
+                    <TextArea className={styles.forminput} rows={10} placeholder="Was ist das Kerngeschäft der Firma?"/>
                 </Form.Item>
 
                 <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
@@ -266,7 +265,7 @@ export default function Company(props: InitialProps) {
                     label="Background der Firma"
                     name="companybackground"
                 >
-                    <TextArea disabled/>
+                    <TextArea rows={10} disabled/>
                 </Form.Item>
 
             </Form>);
@@ -333,7 +332,7 @@ export default function Company(props: InitialProps) {
     
 
     const getUserOverview = () => {
-        if(user.Role == "Company"){
+        if(role.isCompany && role.canEditCompanyDetails){
             return(
                 <div>
                     <Card title={"Nutzer"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
@@ -451,7 +450,7 @@ export default function Company(props: InitialProps) {
 
   
     return (
-        <SidebarLayout capabilities={role.capabilities} user={user} login={login}>
+        <SidebarLayout role={role} user={user} login={login}>
             <div className={styles.main}>
                 <div className={styles.companyoverview}>
                     <Card className={styles.companysettings} title={`Ihre Firma`} headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>

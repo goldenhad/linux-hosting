@@ -135,7 +135,7 @@ export default function Upgrade(props: InitialProps) {
                     <Button className={styles.backnow}>Rechnung herunterladen</Button>
                 </Link>
 
-                <Link href={(user.Role == "Company")? "/company": "/usage"}>
+                <Link href={(role.isCompany)? "/company": "/usage"}>
                     <Button type="primary" className={styles.backnow}>Zurück zu meinem Konto</Button>
                 </Link>
             </div>
@@ -145,7 +145,7 @@ export default function Upgrade(props: InitialProps) {
     }
   }
   return (
-    <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
+    <SidebarLayout role={role} user={user} login={login}>
       <div className={styles.main}>
         <div className={styles.resultrow}>
             {getResult()}

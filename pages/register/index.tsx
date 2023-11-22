@@ -84,7 +84,7 @@ export default function Register(props){
 
 
     const onFinishRegisterUser = async (values: any) => {
-        const { result, error } = await signUpUser(values.firstname, values.lastname, values.email, values.username, values.password, props.invite.company);
+        const { result, error } = await signUpUser(values.firstname, values.lastname, values.email, values.username, values.password, props.invite.company, "Mailagent");
 
 
         if (error) {

@@ -164,4 +164,10 @@
       border-color: #D0D5DD;
       font-weight: normal;
     }
-}     
+}
+
+.actionrow {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}

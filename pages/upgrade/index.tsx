@@ -82,21 +82,22 @@ export default function Upgrade(props: InitialProps) {
     
     if(userlink.data.message.id && userlink.data.message.links){
       let currentOrders = company.orders;
+      let link = userlink.data.message.links[1].href;
+
       let newOrder: Order = {
         id: userlink.data.message.id,
         timestamp: Math.floor(Date.now() / 1000),
         tokens: calculateTokens(),
         amount: mailPriceMapping[tokenstobuy],
         method: "Paypal",
-        state: "awaiting_payment"
+        state: "awaiting_payment",
       }
 
       currentOrders.push(newOrder);
-      console.log(currentOrders)
 
       await updateData("Company", user.Company, { orders: currentOrders })
 
-      push(userlink.data.message.links[1].href);
+      push(link);
     }
   }
 
@@ -114,6 +115,11 @@ export default function Upgrade(props: InitialProps) {
 
   const calculateSavings = () => {
     return mailSavingMapping[tokenstobuy] * mailPriceMapping[tokenstobuy];
+  }
+
+  const calculateSavingPercent = () => {
+    let val = mailSavingMapping[tokenstobuy] * 100;
+    return parseFloat(val.toFixed(0));
   }
 
 
@@ -144,7 +150,7 @@ export default function Upgrade(props: InitialProps) {
           <Card className={styles.quoatacard} headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
             <div className={styles.tokenrow}>
               <div className={styles.tokens}>{mailAmountMapping[tokenstobuy]}</div>
-              <div className={styles.tokeninfo}>Mails</div>
+              <div className={styles.tokeninfo}>Anzahl E-Mails</div>
             </div>
             <Form>
               <Form.Item className={styles.tokenslideritem} name={"tokenamount"}>
@@ -154,7 +160,7 @@ export default function Upgrade(props: InitialProps) {
             <Divider className={styles.tokendivider} />
             <div className={styles.details}>
               <div className={styles.singledetail}>Preis je Mail: <span className={styles.detailhighlight}>{convertToCurrency(calculatePricePerMail())}</span></div>
-              <div className={styles.singledetail}>Deine monatliche Ersparnis: <span className={styles.detailhighlight}>{convertToCurrency(calculateSavings())}</span></div>
+              <div className={styles.singledetail}>Deine monatliche Ersparnis: <span className={styles.detailhighlight}>{convertToCurrency(calculateSavings())} ({calculateSavingPercent()} %)</span></div>
               <div className={styles.singledetail}>Entspricht: <span className={styles.detailhighlight}>{calculateTokens()} Token</span></div>
               <div className={styles.singledetail}>Gesamtpreis: <span className={styles.detailhighlight}>{convertToCurrency(mailPriceMapping[tokenstobuy])}</span></div>
             </div>
@@ -166,7 +172,7 @@ export default function Upgrade(props: InitialProps) {
                 <div className={styles.checkoutheadline}>Deine Ersparnis</div>
                 <div className={styles.savings}>
                   <div className={styles.singlesaving}>Zeitersparnis im Monat: <span className={styles.savinghighlight}>{calculateHours()} Stunden</span></div>
-                  <div className={styles.singlesaving}>Arbeitskosten: <span className={styles.savinghighlight}>{convertToCurrency(calculateHours() * 45)} (Bei 45,- EUR je Std.)</span></div>
+                  <div className={styles.singlesaving}>Arbeitskosten: {convertToCurrency(calculateHours() * 45)} (Bei 45,- EUR je Std.)</div>
                 </div>
               </div>
 
@@ -176,7 +182,7 @@ export default function Upgrade(props: InitialProps) {
                 </div>
 
                 <div className={styles.buybutton}>
-                  <Button onClick={() => {router.back()}} className={styles.buynow}>Zurück zur Übersicht</Button>
+                  <Button onClick={() => {router.push((role.isCompany)? "/company" : "/usage")}} className={styles.buynow}>Zurück zur Übersicht</Button>
                 </div>
               </div>
             </div>

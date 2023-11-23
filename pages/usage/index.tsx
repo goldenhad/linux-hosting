@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Form, Input, List, Modal, Progress, Select, Space, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, Tooltip, Modal, Progress, Select, Space, Table, Tag, Typography } from 'antd';
 import styles from './usage.module.scss'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import { convertToCurrency, handleEmptyString } from '../../helper/architecture';
 import { useAuthContext } from '../../components/context/AuthContext';
 import { getDocWhere } from '../../firebase/data/getData';
-import { EyeOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, CloseOutlined, FileTextOutlined } from '@ant-design/icons';
+import { EyeOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, ShoppingCartOutlined, FileTextOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { Usage } from '../../firebase/types/Company';
 import {
@@ -17,7 +17,7 @@ import {
     LinearScale,
     BarElement,
     Title,
-    Tooltip,
+    Tooltip as ChartTooltip,
     Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
@@ -31,7 +31,7 @@ ChartJS.register(
     LinearScale,
     BarElement,
     Title,
-    Tooltip,
+    ChartTooltip,
     Legend
 );
 
@@ -39,7 +39,7 @@ const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "A
 
 
 export interface InitialProps {
-  Data: { };
+  Data: { paypalURL: string; };
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -50,7 +50,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     
     return {
       props: {
-          
+        Data: {
+            paypalURL : process.env.PAYPALURL
+        }
       },
     };
 };
@@ -100,7 +102,11 @@ export default function Usage(props: InitialProps) {
                         );
                     
                     case "awaiting_payment":
-                        return(<></>);
+                        return(
+                            <Tag icon={<ClockCircleOutlined />} color="warning">
+                                Wartestellung
+                            </Tag>
+                        );
                     default:
                         return(
                             <Tag icon={<CloseCircleOutlined />} color="error">
@@ -142,15 +148,38 @@ export default function Usage(props: InitialProps) {
             dataIndex: 'actions',
             key: 'actions',
             render: (_: any, obj: any) => {
-                return (
-                    <div className={styles.actionrow}>
-                        <div className={styles.singleaction}>
-                            <Link href={`/order/invoice/${obj.id}`}>
-                                <FileTextOutlined style={{ fontSize: 20 }}/>
-                            </Link>
+                if(obj.state == "awaiting_payment"){
+                    return (
+                        <div className={styles.actionrow}>
+                            <div className={styles.singleaction}>
+                                <Link href={`/order/invoice/${obj.id}`}>
+                                    <Tooltip title={"Rechnung herunterladen"}>
+                                        <FileTextOutlined style={{ fontSize: 20 }}/>
+                                    </Tooltip>
+                                </Link>
+                            </div>
+                            <div className={styles.singleaction}>
+                                <Link href={`${props.Data.paypalURL}/checkoutnow?token=${obj.id}`}>
+                                    <Tooltip title={"Einkauf fortsetzen"}>
+                                        <ShoppingCartOutlined style={{ fontSize: 20 }}/>
+                                    </Tooltip>
+                                </Link>
+                            </div>
                         </div>
-                    </div>
-                );
+                    );
+                }else{
+                    return (
+                        <div className={styles.actionrow}>
+                            <div className={styles.singleaction}>
+                                <Link href={`/order/invoice/${obj.id}`}>
+                                    <Tooltip title={"Rechnung herunterladen"}>
+                                        <FileTextOutlined style={{ fontSize: 20 }}/>
+                                    </Tooltip>
+                                </Link>
+                            </div>
+                        </div>
+                    );
+                }
             }
           },
       ];

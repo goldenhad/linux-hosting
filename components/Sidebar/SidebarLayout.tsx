@@ -15,6 +15,9 @@ import Company from '../../public/icons/company.svg';
 import Profiles from '../../public/icons/profiles.svg';
 import Help from '../../public/icons/help.svg';
 import CookieBanner from '../CookieBanner';
+import Dialog from '../../public/icons/dialog.svg';
+import Monolog from '../../public/icons/monolog.svg';
+import Settings from '../../public/icons/settings.svg';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -43,10 +46,10 @@ const SidebarLayout = (props: { children: ReactNode, user: User, login: any, rol
 
   const items = [
     getItem(<Link href={"/"}>Home</Link>, '1', () => { return true }, <Icon component={Home} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>, ),
-    getItem(<Link href={"/dialog"}>Dialog</Link>, '2', () => { return true }, <Icon component={Main} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
-    getItem(<Link href={"/monolog"}>Monolog</Link>, '5', () => { return true }, <Icon component={Main} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
-    getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return props.role.isCompany  }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
-    getItem(<Link href={"/usage"}>Nutzung</Link>, '3', () => { return !props.role.isCompany  }, <Icon component={Company} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/dialog"}>Dialog</Link>, '2', () => { return true }, <Icon component={Dialog} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/monolog"}>Monolog</Link>, '5', () => { return true }, <Icon component={Monolog} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/company"}>Firma</Link>, '3', () => { return props.role.isCompany  }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
+    getItem(<Link href={"/usage"}>Nutzung</Link>, '3', () => { return !props.role.isCompany  }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
     getItem(<Link href={"/profiles"}>Profile</Link>, '4', () => { return true }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/>),
   ];
 

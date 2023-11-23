@@ -14,13 +14,11 @@ export default async function signUp(firstname, lastname, email, username, passw
         
         try {
             let usernameexistsquery = await getDocWhere('User', "username", "==", username);
-            console.log(usernameexistsquery);
             if(usernameexistsquery.result.length == 0){
                 try {
                     result = await createUserWithEmailAndPassword(auth, email, password);
                     try{
-                        let companycreationresult = await addDataWithoutId("Company", { name: name, street: street, city: city, postalcode: postalcode, country: country, settings: {background: ""}, Usage: [], tokens: 33333, unlimited: false, orders: [] });
-                        console.log(companycreationresult);
+                        let companycreationresult = await addDataWithoutId("Company", { name: name, street: street, city: city, postalcode: postalcode, country: country, settings: {background: ""}, Usage: [], tokens: 150000, unlimited: false, orders: [] });
                         try {
                             let usercreationresult = await addData("User", result.user.uid, {
                                 firstname: firstname,

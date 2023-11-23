@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Form, Input, List, Modal, Progress, Select, Space, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, List, Modal, Tooltip, Select, Space, Table, Tag, Typography } from 'antd';
 import styles from './edit.company.module.scss'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -9,7 +9,7 @@ import { convertToCurrency, handleEmptyString } from '../../helper/architecture'
 import { useAuthContext } from '../../components/context/AuthContext';
 import { getDocWhere } from '../../firebase/data/getData';
 import updateData from '../../firebase/data/updateData';
-import { RightCircleOutlined, FileTextOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, FileTextOutlined, CheckCircleOutlined, CloseCircleOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import {
     Chart as ChartJS,
@@ -17,7 +17,7 @@ import {
     LinearScale,
     BarElement,
     Title,
-    Tooltip,
+    Tooltip as ChartTooltip,
     Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
@@ -31,14 +31,14 @@ ChartJS.register(
     LinearScale,
     BarElement,
     Title,
-    Tooltip,
+    ChartTooltip,
     Legend
 );
 
 const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
 export interface InitialProps {
-  Data: { currentMonth: number, currentYear: number; };
+  Data: { currentMonth: number, currentYear: number; paypalURL: string; };
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -54,6 +54,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
           Data: {
             currentMonth: datum.getMonth() + 1,
             currentYear: datum.getFullYear(),
+            paypalURL : process.env.PAYPALURL
           }
       },
     };
@@ -394,7 +395,11 @@ export default function Company(props: InitialProps) {
                         );
                     
                     case "awaiting_payment":
-                        return(<></>);
+                        return(
+                            <Tag icon={<ClockCircleOutlined />} color="warning">
+                                Wartestellung
+                            </Tag>
+                        );
                     default:
                         return(
                             <Tag icon={<CloseCircleOutlined />} color="error">
@@ -435,15 +440,38 @@ export default function Company(props: InitialProps) {
             dataIndex: 'actions',
             key: 'actions',
             render: (_: any, obj: any) => {
-                return (
-                    <div className={styles.actionrow}>
-                        <div className={styles.singleaction}>
-                            <Link href={`/order/invoice/${obj.id}`}>
-                                <FileTextOutlined style={{ fontSize: 20 }}/>
-                            </Link>
+                if(obj.state == "awaiting_payment"){
+                    return (
+                        <div className={styles.actionrow}>
+                            <div className={styles.singleaction}>
+                                <Link href={`/order/invoice/${obj.id}`}>
+                                    <Tooltip title={"Rechnung herunterladen"}>
+                                        <FileTextOutlined style={{ fontSize: 20 }}/>
+                                    </Tooltip>
+                                </Link>
+                            </div>
+                            <div className={styles.singleaction}>
+                                <Link href={`${props.Data.paypalURL}/checkoutnow?token=${obj.id}`}>
+                                    <Tooltip title={"Einkauf fortsetzen"}>
+                                        <ShoppingCartOutlined style={{ fontSize: 20 }}/>
+                                    </Tooltip>
+                                </Link>
+                            </div>
                         </div>
-                    </div>
-                );
+                    );
+                }else{
+                    return (
+                        <div className={styles.actionrow}>
+                            <div className={styles.singleaction}>
+                                <Link href={`/order/invoice/${obj.id}`}>
+                                    <Tooltip title={"Rechnung herunterladen"}>
+                                        <FileTextOutlined style={{ fontSize: 20 }}/>
+                                    </Tooltip>
+                                </Link>
+                            </div>
+                        </div>
+                    );
+                }
             }
           },
       ];

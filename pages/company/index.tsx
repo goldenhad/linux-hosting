@@ -1,7 +1,7 @@
 import { Alert, Button, Card, Form, Input, List, Modal, Tooltip, Select, Space, Table, Tag, Typography } from 'antd';
 import styles from './edit.company.module.scss'
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useRouter } from 'next/router';
@@ -70,11 +70,11 @@ export default function Company(props: InitialProps) {
     const [ inviteErrMsg, setInviteErrMsg ] = useState("");
     const [ isInviteErrVisible, setIsInviteErrVisible ] = useState(false);
     const [ editSuccessfull, setEditSuccessfull ] = useState(false);
-    const [ overused, setOverused ] = useState(false);
-    const [ users, setUsers ] = useState([]);
+    const [ userTableData, setUserTableData ] = useState([]);
     const [ inviteUserModalOpen, setInviteUserModalOpen ] = useState(false);
     const [ inviteForm ] = Form.useForm();
     const [ form ] = Form.useForm();
+    const [ userTableLoading, setUserTableLoading ] = useState(true);
     const router = useRouter();
 
     useEffect(() => {
@@ -98,9 +98,10 @@ export default function Company(props: InitialProps) {
         const load = async () => {
             let {result, error} = await getDocWhere("User", "Company", "==", user.Company);
             if(!error){
-                setUsers(result);
+                setUserTableData(result);
+                setUserTableLoading(false);
             }else{
-                setUsers([]);
+                setUserTableData([]);
             }
         }
 
@@ -127,6 +128,10 @@ export default function Company(props: InitialProps) {
             setErrMsg(["Speichern fehlgeschlagen!"]);
             setIsErrVisible(true);
         }
+    }
+
+    const checkRoleString = (value: string) => {
+        return value == "Mailagent" || value == "Company-Admin" || value == "Company-Manager";
     }
 
     const getCompanyInput = () => {
@@ -302,11 +307,52 @@ export default function Company(props: InitialProps) {
           }
         },
         {
-            title: 'Aktionen',
-            dataIndex: 'actions',
-            key: 'actions',
-            render: (_: any, obj: any) => {
-              return undefined;
+            title: 'Rolle',
+            dataIndex: 'Role',
+            key: 'Role',
+            render: (_: any, obj: User & { id: string }, idx: number) => {
+                let rolename = "Mailagent";
+                switch(obj.Role){
+                    case "Company-Admin":
+                        rolename = "Admin";
+                        break;
+                    case "Company-Manager":
+                        rolename = "Manager";
+                        break;
+                    default:
+                        rolename = "Mailagent"
+                        break;
+                }
+
+                if(obj.Role != "Company-Admin" && user.email != obj.email && ( user.Role == "Company-Admin" || user.Role == "Company-Manager" )){
+                    return (
+                        <div>
+                            <div>
+                                <Select value={userTableData[idx].Role} style={{ width: 200 }} options={[
+                                        { label: 'Company-Manager', value: 'Company-Manager' },
+                                        { label: 'Mailagent', value: 'Mailagent' },
+                                    ]}
+                                    onChange={async (value) => {
+                                        setUserTableLoading(true);
+                                        await updateData("User", obj.id, { Role: checkRoleString(value)? value: "Mailagent" });
+                                        let userdata = userTableData;
+                                        userdata[idx].Role = checkRoleString(value)? value: "Mailagent";
+                                        setUserTableData(userdata);
+                                        setUserTableLoading(false);
+                                    }} 
+                                />
+                            </div>
+                        </div>
+                    );
+                }else{
+                    return (
+                        <div>
+                            <div>
+                                {rolename}
+                            </div>
+                        </div>
+                    );
+                }
             }
           },
       ];
@@ -337,7 +383,7 @@ export default function Company(props: InitialProps) {
             return(
                 <div>
                     <Card title={"Nutzer"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
-                        <Table dataSource={users} columns={usercolumns} />
+                        <Table loading={userTableLoading} dataSource={[...userTableData]} columns={usercolumns} rowKey={(record: User & { id: string }) => {return record.id}}/>
                         <div className={styles.inviteuserrow}>
                             <Button type='primary' onClick={() => {setInviteUserModalOpen(true)}}>Nutzer einladen</Button>
                         </div>
@@ -513,7 +559,7 @@ export default function Company(props: InitialProps) {
                                                     label: "Tokens",
                                                     data: months.map((label, idx) => {
                                                         let sum = 0;
-                                                        users.forEach((su: User) => {
+                                                        userTableData.forEach((su: User) => {
                                                           su.usedCredits.forEach((usage: Usage) => {
                                                             if(usage.month == idx+1 && usage.year == new Date().getFullYear()){
                                                                 sum += usage.amount;

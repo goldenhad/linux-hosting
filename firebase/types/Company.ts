@@ -22,6 +22,7 @@ export type Order = {
     amount: number,
     method: string,
     state: string,
+    invoiceId: string,
 }
 
 export type Company = {

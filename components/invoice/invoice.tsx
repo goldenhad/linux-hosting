@@ -2,9 +2,10 @@
 
 import React from "react";
 import { convertToCurrency } from "../../helper/architecture";
+import { Order } from "../../firebase/types/Company";
 
 
-const Invoice = (props: { company, order, user }, ref) => {
+const Invoice = (props: { company, order: Order, user }, ref) => {
     
     return (
         <div className="invoice-box" ref={ref}>
@@ -13,10 +14,10 @@ const Invoice = (props: { company, order, user }, ref) => {
 					<td colSpan={2}>
 						<table>
 							<tr>
-								<td className="title">
+								<td className="title" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
 									<img
-										src="/full_logo.png"
-										style={{width: "100%", maxWidth: "150px"}}
+										src="/sp_logo.png"
+										style={{width: "100%", maxWidth: "200px", marginBottom: 25}}
 									/>
 								</td>								
 							</tr>
@@ -28,29 +29,44 @@ const Invoice = (props: { company, order, user }, ref) => {
 					<td colSpan={2}>
 						<table>
                             <tr className="companyheader">
-                                <td><div className="companyinfo">Siteware GmbH | Am Weilsberg 11 | 51789 Lindlar</div></td>
+                                <td><div className="companyinfo">Sugarpool GmbH | Am Weilsberg 11 | 51789 Lindlar</div></td>
                             </tr>
 							<tr className="customerheader">
 								<td>
                                     {props.company.name}<br />
-                                    {props.user.firstname} {props.user.lastname}<br />
+                                    {(props.user.role == "Singleuser")? <>`${props.user.firstname} ${props.user.lastname}`<br /></>: ""}
                                     {props.company.street}<br />
                                     {props.company.postalcode} {props.company.city}<br />
 								</td>
 							</tr>
+                            <tr className="invoiceEmptyRow"></tr>
                             <tr className="orderdetails" >
-                                <td></td>
-                                <td style={{ textAlign: "right" }}>
-                                    Kundennummer: {123124214124}<br />
-                                    Auftragsdatum: {new Date(props.order.timestamp * 1000).toLocaleString('de',{timeZone:'Europe/Berlin', dateStyle: "short"})}
+                                <td>
+                                    <div className="invoicetopic">Rechnung</div>
+                                    <table style={{ display: 'block' }}>
+                                        <tbody>
+                                            <tr className="invoiceDataRow">
+                                                <td><b>Datum:</b></td>
+                                                <td>{new Date(props.order.timestamp * 1000).toLocaleString('de',{timeZone:'Europe/Berlin', dateStyle: "short"})}</td>
+                                            </tr>
+                                            <tr className="invoiceDataRow">
+                                                <td><b>Rechnungs-Nr:</b></td>
+                                                <td>{props.order.invoiceId}</td>
+                                            </tr>
+                                            <tr className="invoiceDataRow">
+                                                <td><b>Kunden-Nr:</b></td>
+                                                <td>{props.user.id}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </td>
                             </tr>
-
-                            <tr></tr>
 						</table>
 					</td>
 				</tr>
 			</table>
+
+            <div className="invoicedescription">Kauf E-Mails für Software Siteware.Mail</div>
 
             <table className="postable">
                 <tbody>
@@ -102,30 +118,28 @@ const Invoice = (props: { company, order, user }, ref) => {
 
             <div className="invoiceFooter">
                     <div className="invoiceFooterCol">
-                        <div>Sitz der Gesellschaft</div>
-                        <div>Siteware GmbH</div>
+                        <div>Verwaltung</div>
+                        <div>Sugarpool GmbH</div>
                         <div>Am Weilsberg 11</div>
-                        <div>D-51789 Lindlar</div>
-                        <div>Tel.: +49 2266 9484340</div>
+                        <div>51789 Lindlar</div>
                     </div>
                     <div className="invoiceFooterCol">
-                        <div>Bankverbindung</div>
-                        <div>Kreissparkasse XXXX</div>
-                        <div>Konto XXXXXXXXX</div>
-                        <div>BLZ XXXXXXXXX</div>
+                        <div>Telefon: +49 22 66 - 90 41 77-0</div>
+                        <div>Telefax: +49 22 66 - 90 41 77-9</div>
+                        <div>E-Mail: info@sugarpool.de</div>
+                        <div>www.sugarpool.de</div>
                     </div>
                     <div className="invoiceFooterCol">
-                        <div>IBAN XXXXXXXXXXXXXXXXXXXXXX</div>
-                        <div>BIC/SWIFT XXXXXXXXXXX</div>
-                        <div>Ust-IDNr. XXXXXXXXXXX</div>
-                        <div>E-Mail: info@mailbuddy.siteware.io</div>
-                        <div>Internet: https://mailbuddy.siteware.io</div>
+                        <div>Geschäftsführer:</div>
+                        <div>Petra Jansen,</div>
+                        <div>Andreas Jansen</div>
+                        <div>Amtsgericht Köln: HRB 72710</div>
                     </div>
                     <div className="invoiceFooterCol">
-                        <div>Geschäftsführer</div>
-                        <div>Max Mustermann</div>
-                        <div>HRB XXXXXX</div>
-                        <div>Amtsgericht: Musterstadt</div>
+                        <div>Commerzbank Overath:</div>
+                        <div>DE52370400440827031600</div>
+                        <div>BIC/SWIFT: COBADEFFXXX</div>
+                        <div>USt-IdNr.: DE-271536541</div>
                     </div>
                 </div>
 		</div>

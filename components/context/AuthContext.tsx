@@ -13,7 +13,7 @@ import nookies from "nookies";
 import { LoadingOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
 import { useRouter } from 'next/navigation';
-import { Parameters } from '../../firebase/types/Settings';
+import { InvoiceSettings, Parameters } from '../../firebase/types/Settings';
 
 
 interface ctx {
@@ -23,6 +23,7 @@ interface ctx {
     role: Role,
     parameters: Parameters,
     loading: boolean,
+    invoice_data: InvoiceSettings
 }
 
 const auth = getAuth(firebase_app);
@@ -39,6 +40,7 @@ export const AuthContextProvider = ({
     const [company, setCompany] = React.useState(null);
     const [role, setRole] = React.useState(null);
     const [parameters, setParameters] = React.useState(null);
+    const [invoiceData, setInvoiceData] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
     const router = useRouter();
 
@@ -76,13 +78,15 @@ export const AuthContextProvider = ({
 
                             if(companydoc.result){
                                 const parameters = await getDocument("Settings", "Parameter");
+                                const invoice_data = await getDocument("Settings", "Invoices");
 
-                                if(parameters.result){
+                                if(parameters.result && invoice_data.result){
                                     setLogin(user);
                                     setUser(userdoc.result.data() as User);
                                     setRole(roledoc.result.data() as Role);
                                     setCompany(companydoc.result.data() as Company);
                                     setParameters(parameters.result.data() as Parameters);
+                                    setInvoiceData(invoice_data.result.data() as InvoiceSettings);
                                     setLoading(false);
                                 }
                             }else{
@@ -103,7 +107,7 @@ export const AuthContextProvider = ({
                 setRole(null);
                 setCompany(null);
                 setParameters(null);
-                console.log(e);
+                setInvoiceData(null);
             }
         });
 
@@ -140,8 +144,18 @@ export const AuthContextProvider = ({
         }
     }, [login]);
 
+    useEffect(() => {
+        if(login){
+            const unsubscribe = onSnapshot(doc(db, "Settings", "Invoices"), (doc) => {
+                setInvoiceData(doc.data());
+            })
+    
+            return unsubscribe;
+        }
+    }, [login]);
+
     return (
-        <AuthContext.Provider value={{login: login, user: user, company: company, role: role, parameters: parameters, loading: loading}}>
+        <AuthContext.Provider value={{login: login, user: user, company: company, role: role, parameters: parameters, loading: loading, invoice_data: invoiceData}}>
             {loading ? <div style={{height: "100vh", width: "100%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}}><Spin indicator={<LoadingOutlined style={{ fontSize: 90 }} spin />} /></div> : children}
         </AuthContext.Provider>
     );

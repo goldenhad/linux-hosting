@@ -133,7 +133,8 @@
 
 .companyinfo {
   width: 300px;
-  border-bottom: #000 1px solid;
+  color: #4b4c4d;
+  font-size: 10px !important;
 }
 
 .companyheader > td{
@@ -147,6 +148,16 @@
 }
 
 
+.invoiceDataRow > td{
+  padding: 0px !important;
+  line-height: 18px !important;
+  min-width: 120px;
+}
+
+.invoiceDataRow {
+  display: block;
+  width: 250px;
+}
 
 
 
@@ -288,7 +299,7 @@
 }
 
 .invoicespacer{
-  height: 490px;
+  height: 310px;
 }
 
 .invoiceFooter{
@@ -301,4 +312,22 @@
 
 .ant-slider-track{
   border-radius: 8px !important;
+}
+
+.invoiceEmptyRow{
+  height: 50px;
+}
+
+.invoicetopic{
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #5fab28;
+  margin-bottom: 16px;
+}
+
+.invoicedescription{
+  padding-left: 10px;
+  font-weight: 700;
+  margin-top: 50px;
+  margin-bottom: 50px;
 }

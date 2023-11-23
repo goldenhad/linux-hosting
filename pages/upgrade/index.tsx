@@ -48,7 +48,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Upgrade(props: InitialProps) {
-  const { login, user, company, role } = useAuthContext();
+  const { login, user, company, role, invoice_data } = useAuthContext();
   const [ tokenstobuy, setTokenstobuy ] = useState(0);
   const { push } = useRouter();
   const router = useRouter();
@@ -83,6 +83,7 @@ export default function Upgrade(props: InitialProps) {
     if(userlink.data.message.id && userlink.data.message.links){
       let currentOrders = company.orders;
       let link = userlink.data.message.links[1].href;
+      let nextInvoiceNumber = invoice_data.last_used_number+1;
 
       let newOrder: Order = {
         id: userlink.data.message.id,
@@ -91,11 +92,13 @@ export default function Upgrade(props: InitialProps) {
         amount: mailPriceMapping[tokenstobuy],
         method: "Paypal",
         state: "awaiting_payment",
+        invoiceId: `SM${invoice_data.number_offset + nextInvoiceNumber}`
       }
 
       currentOrders.push(newOrder);
 
-      await updateData("Company", user.Company, { orders: currentOrders })
+      await updateData("Company", user.Company, { orders: currentOrders });
+      await updateData("Settings", "Invoices", { last_used_number: nextInvoiceNumber });
 
       push(link);
     }

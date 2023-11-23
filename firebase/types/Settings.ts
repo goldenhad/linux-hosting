@@ -6,3 +6,8 @@ export type Parameters = {
     style: Array<string>,
     address: Array<string>
 }
+
+export type InvoiceSettings = {
+    last_used_number: number,
+    number_offset: number
+}

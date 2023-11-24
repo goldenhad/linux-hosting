@@ -82,7 +82,7 @@ const Invoice = (props: { company, order: Order, user }, ref) => {
 
                     <tr className="item">
                         <td>1</td>
-                        <td>swmp01</td>
+                        <td>swm0001</td>
                         <td className="itemname">Mailbuddy Token</td>
                         <td>{props.order.tokens}</td>
                         <td>19%</td>

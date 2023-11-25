@@ -36,6 +36,7 @@ export type User =  {
     lastState: State,
     setupDone: boolean,
     salt: string,
+    inviteCode: string
 }
 
 export const basicUser: User = {
@@ -53,4 +54,5 @@ export const basicUser: User = {
         monolog: ""
     },
     setupDone: false,
+    inviteCode: ""
 }

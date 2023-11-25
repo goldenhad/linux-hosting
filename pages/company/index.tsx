@@ -363,7 +363,8 @@ export default function Company(props: InitialProps) {
                 email: values.email,
                 company: user.Company,
                 firstname: values.firstname,
-                lastname: values.lastname
+                lastname: values.lastname,
+                role: values.role,
             });
             
             setIsInviteErrVisible(false);
@@ -403,6 +404,14 @@ export default function Company(props: InitialProps) {
                             <Form.Item className={styles.formpart} label={<b>Nachname</b>} name="lastname" rules={[{ required: true, message: 'Eine Nachname ist erforderlich!' }]}>
                                 <Input className={styles.forminput} placeholder="Mustermann"/>
                             </Form.Item>
+
+                            <Form.Item className={styles.formpart} label={<b>Rolle</b>} name="role" rules={[{ required: true, message: 'Eine Rolle ist erforderlich!' }]}>
+                                <Select className={styles.formselect} value={"Mailagagent"} options={[
+                                        { label: 'Company-Manager', value: 'Company-Manager' },
+                                        { label: 'Mailagent', value: 'Mailagent' },
+                                    ]} 
+                                />
+                            </Form.Item>
                             
                             <div className={styles.errorrow} style={{display: (isInviteErrVisible)? "block": "none"}}>
                                 <Alert type='error' message={inviteErrMsg} />
@@ -410,8 +419,8 @@ export default function Company(props: InitialProps) {
 
                             <div className={styles.finishformrow}>
                                 <Space direction='horizontal'>
-                                <Button type='default' onClick={() => {setInviteUserModalOpen(false)}}>Abbrechen</Button>
-                                <Button type='primary' htmlType='submit' onClick={() => {}}>Einladen</Button>
+                                    <Button type='default' onClick={() => {setInviteUserModalOpen(false)}}>Abbrechen</Button>
+                                    <Button type='primary' htmlType='submit' onClick={() => {}}>Einladen</Button>
                                 </Space>
                             </div>
             

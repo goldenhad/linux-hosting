@@ -83,10 +83,6 @@
         .successrow{
             margin-bottom: 20px;
         }
-        
-        .errorrow{
-            margin-bottom: 25px;
-        }
 
         .quotarow{
             display: flex;
@@ -170,4 +166,8 @@
     display: flex;
     flex-direction: row;
     gap: 10px;
+}
+
+.errorrow{
+    margin-bottom: 25px;
 }

@@ -56,7 +56,7 @@ export default async function signUp(firstname, lastname, email, username, passw
 }
 
 
-export async function signUpUser(firstname, lastname, email, username, password, companyid, role) {
+export async function signUpUser(firstname, lastname, email, username, password, companyid, role, invitecode) {
     let result = null,
         error = null;
         
@@ -82,6 +82,7 @@ export async function signUpUser(firstname, lastname, email, username, password,
                             },
                             salt: crypto.randomBytes(8).toString('hex'),
                             setupDone: false,
+                            inviteCode: invitecode,
                         });
                         console.log(usercreationresult);
                     } catch(e) {

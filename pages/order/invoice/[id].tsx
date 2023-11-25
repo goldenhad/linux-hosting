@@ -47,6 +47,7 @@ export default function InvoiceDownload(props: InitialProps) {
         amount: 0,
         method: "",
         state: "",
+        invoiceId: ""
     });
     const componentRef = useRef(null);
 

@@ -7,8 +7,10 @@
   
     --foreground-rgb: #101828;
     --foreground-rgb-secondary: #475467;
-    --background-start-rgb: 214, 219, 220;
+    --background-start-rgb: 255, 255 , 255;
     --background-end-rgb: 255, 255, 255;
+
+    --menu-bg-rgb: 16, 24, 40;
   
     --primary-glow: conic-gradient(
       from 180deg at 50% 50%,
@@ -44,8 +46,10 @@
   @media (prefers-color-scheme: dark) {
     :root {
       --foreground-rgb: 255, 255, 255;
-      --background-start-rgb: 0, 0, 0;
+      --background-start-rgb: 16, 24, 40;
       --background-end-rgb: 0, 0, 0;
+
+      --menu-bg-rgb: 0, 0, 0;
   
       --primary-glow: radial-gradient(rgba(1, 65, 255, 0.4), rgba(1, 65, 255, 0));
       --secondary-glow: linear-gradient(
@@ -87,8 +91,8 @@
   }
   
   body {
-    color: rgb(var(--foreground-rgb));
-    background: white;
+    /*color: rgb(var(--foreground-rgb));*/
+    /*background-color: rgb(var(--background-start-rgb));*/
   }
   
   a {
@@ -103,11 +107,13 @@
   }
 
   .ant-layout{
-    background-color: #fff;
+    /*background-color: rgb(var(--background-start-rgb));*/
+    background-color: white;
   }
 
   .ant-layout-footer{
-    background-color: #fff;
+    /*background-color: rgb(var(--background-start-rgb));*/
+    background-color: white;
   }
   
 .ant-layout-sider-children {

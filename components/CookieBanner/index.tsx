@@ -21,7 +21,10 @@ const CookieBanner = (props: {  }) => {
     })
 
     const setOptIn = () => {
-        cookieCutter.set('mailbuddy-opt-consent', "1");
+        const aYearFromNow = new Date();
+        aYearFromNow.setFullYear(aYearFromNow.getFullYear() + 1);
+        
+        cookieCutter.set('mailbuddy-opt-consent', "1", { expires: aYearFromNow });
         setAccepted(true);
         setActive(false);
     }

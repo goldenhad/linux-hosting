@@ -1,9 +1,11 @@
 import type { GetServerSideProps, NextPage } from 'next'
+import { LoadingOutlined } from '@ant-design/icons';
 import Cookies from 'cookies';
 import { useEffect } from 'react';
 import { useAuthContext } from '../../components/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import signUserOut from '../../firebase/auth/signout';
+import { Spin } from 'antd';
 
 
 
@@ -25,7 +27,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 }
 
 export default function Logout(){
-  const { login, user, company, role, quota } = useAuthContext();
+  const { login, user, company, role } = useAuthContext();
   const router = useRouter();
 
   const handleLogOut = async () => {
@@ -41,7 +43,5 @@ export default function Logout(){
     //router.push('/login');
   }, [login]);
 
-  return (<div>
-      <h1>Logout</h1>
-  </div>);
+  return (<div style={{height: "100vh", width: "100%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}}><Spin indicator={<LoadingOutlined style={{ fontSize: 90 }} spin />} /></div>);
 }

@@ -6,12 +6,23 @@ export type CompanySettings = {
 export type Quota = {
     price: number;
     tokens: number;
+    features: Array<String>
 }
 
 export type Usage = {
     amount: number;
     month: number;
     year: number;
+}
+
+export type Order = {
+    id: string,
+    timestamp: number,
+    tokens: number,
+    amount: number,
+    method: string,
+    state: string,
+    invoiceId: string,
 }
 
 export type Company = {
@@ -21,8 +32,9 @@ export type Company = {
     postalcode: string;
     country: string;
     settings: CompanySettings;
-    Usage: Array<Usage>;
-    Quota: string;
+    tokens: number;
+    unlimited: boolean;
+    orders: Array<Order>
 }
 
 export const basicCompany = {
@@ -34,6 +46,7 @@ export const basicCompany = {
     settings: {
         background: "",
     },
-    Usage: [],
-    Quota: "",
+    tokens: 0,
+    unlimited: false,
+    orders: []
 }

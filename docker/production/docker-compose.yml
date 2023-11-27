@@ -4,10 +4,12 @@ services:
     mailbuddy:
         build:
             context: ../../
-            dockerfile: docker/production/Dockerfile
+            dockerfile: docker/development/Dockerfile
         image: mailbuddy
         ports:
             - '3002:3000'
+        volumes:
+            - ./stats:/app/stats
         networks:
             - mailbuddynetwork
             - proxynetwork

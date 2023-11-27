@@ -1,15 +1,19 @@
-import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert } from 'antd';
+import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider } from 'antd';
+import Icon from '@ant-design/icons';
 import styles from './index.module.scss'
 import { db } from '../db';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
-import SidebarLayout from '../components/SidebarLayout';
+import SidebarLayout from '../components/Sidebar/SidebarLayout';
 import { useAuthContext } from '../components/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Usage } from '../firebase/types/Company';
 import { Profile } from '../firebase/types/Profile';
-import { arrayUnion, doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
+import { handleEmptyString } from '../helper/architecture';
+import ArrowRight from '../public/icons/arrowright.svg';
+import Link from 'next/link';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
@@ -38,254 +42,43 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         }
     },
   };
-
-  
 };
 
 
 export default function Home(props: InitialProps) {
-  const { login, user, company, role, quota } = useAuthContext();
-  const [ form ] = Form.useForm();
-  const [ isAnswerVisible, setIsAnswerVisible ] = useState(false);
-  const [ isLoaderVisible, setIsLoaderVisible ] = useState(false);
-  const [ isAnswerCardVisible, setIsAnswerCardvisible ] = useState(false);
-  const [ answer, setAnswer ] = useState("");
-  const [ formDisabled, setFormDisabled ] = useState(false);
-  const [ quotaOverused, setQuotaOverused ] =  useState(!false);
-  const [ tokens, setTokens ] = useState("");
-
-  
+  const { login, user, company, role } = useAuthContext();
   const router = useRouter();
 
   useEffect(() => {
-    console.log(user);
-  }, [company])
-
-  useEffect(() => {
-
-    const createData = async () => {
-      await updateDoc(doc(db, "Company", user.Company), { Usage: arrayUnion({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: 0 }) });
+    if(!user.setupDone){
+      router.push("/setup");
     }
-      
-
-    let currentUsage = company.Usage.find((Usge: Usage) => {
-      return Usge.month == props.Data.currentMonth && Usge.year == props.Data.currentYear;
-    });
-
-    if(currentUsage){
-      if(currentUsage.amount > quota.tokens){
-        setQuotaOverused(true);
-      }else{
-        setQuotaOverused(false);
-      }
-    }else{
-      console.log("no usage")
-      createData();
-    }
-
-    if (login == null) router.push("/login");
-      
-}, [login]);
-
-  const lengths = [
-    "So kurz wie möglich",
-    "Sehr kurz",
-    "Kurz",
-    "Mittellang",
-    "Detailliert",
-    "Umfangreich und sehr detailliert"
-  ];
-
-  const motive = [
-    "Diplomatisch",
-    "Respektvoll",
-    "Kultiviert",
-    "Bedächtig",
-    "Persönlich",
-    "Umgangssprachlich",
-    "Unkonventionell",
-    "Emphatisch"
-  ];
-
-
-  const listToOptions = (liste: Array<string>) => {
-    const arr = liste.map(element => {
-      return {
-        value: element.toLowerCase(),
-        label: element
-      };
-    });
-  
-    return arr;
-  }
-
-  const generateAnswer = async (values: any) => {
-
-    console.log(values);
-
-    let profile = user.profiles.find((singleProfile: Profile) => {
-      return singleProfile.name == values.profile;
-    });
-
-    if(profile) {
-      try{
-        setFormDisabled(true);
-        setIsAnswerCardvisible(true);
-        setIsLoaderVisible(true);
-        setIsAnswerVisible(false);
-        setTokens("");
-  
-        let answer = await axios.post('/api/prompt/generate', {
-          personal: profile.settings.personal,
-          dialog: values.dialog,
-          continue: values.continue,
-          address: values.salutation,
-          style: profile.settings.stil,
-          order: values.order,
-          emotions: profile.settings.emotions,
-          length: values.length
-        });
-    
-        if(answer.data){
-          setIsLoaderVisible(false);
-          setIsAnswerVisible(true);
-          setAnswer(answer.data.message);
-          setTokens(answer.data.tokens);
-  
-          let usageidx = company.Usage.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});
-          
-          if(usageidx != -1){
-            let usageupdates = company.Usage;
-            usageupdates[usageidx].amount += answer.data.tokens;
-            await updateDoc(doc(db, "Company", user.Company), { Usage: usageupdates});
-
-            if(usageupdates[usageidx].amount > quota.tokens){
-              setQuotaOverused(true);
-            }
-          }else{
-            let usageupdates = [];
-            usageupdates.push({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: answer.data.tokens });
-            await updateDoc(doc(db, "Company", user.Company), { Usage: usageupdates});
-          }
-
-          let userusageidx = user.usedCredits.findIndex((val) => {return val.month == props.Data.currentMonth && val.year == props.Data.currentYear});
-          if(userusageidx != -1){
-            let usageupdates = user.usedCredits;
-            usageupdates[usageidx].amount += answer.data.tokens;
-            await updateDoc(doc(db, "User", login.uid), { usedCredits: usageupdates});
-          }else{
-            let usageupdates = [];
-            usageupdates.push({ month: props.Data.currentMonth, year: props.Data.currentYear, amount: answer.data.tokens });
-            await updateDoc(doc(db, "User", login.uid), { usedCredits: usageupdates});
-          }
-        }
-  
-        console.log(answer);
-      }catch(e){
-        console.log(e);
-        setTokens("");
-      }
-  
-      setFormDisabled(false);
-    }
-    
-  }
-
-  const getProfiles = () => {
-    let profileOptions =  user.profiles.map((singleProfile: Profile, idx: number) => {
-      return {
-        key: idx,
-        value: singleProfile.name
-      }
-    });
-
-    return profileOptions;
-  }
-
-  const getPrompt = () => {
-    if(user){
-      if(!(user.profiles?.length > 0)){
-        return (
-          <Result
-            title="Bitte definieren Sie zuerst ein Profil"
-            extra={
-              <Button href='/profiles' type="primary" key="console">
-                Profil erstellen
-              </Button>
-            }
-          />
-        );
-      }else{
-        return(
-          <Card title={"Verlauf"}>
-            <Form.Item label={<b>Profil</b>} name="profile">
-                  <Select
-                  showSearch
-                  placeholder="Wählen Sie ein Profil aus"
-                  optionFilterProp="children"
-                  onChange={(values: any) => {console.log(values)}}
-                  onSearch={() => {}}
-                  options={getProfiles()}
-                  disabled={formDisabled || quotaOverused}
-                />
-              </Form.Item>
-              <Form.Item label={<b>Bisheriger Dialog</b>} name="dialog">
-                <TextArea rows={10} placeholder="Bisheriger Dialog..." disabled={formDisabled || quotaOverused}/>
-              </Form.Item>
-
-              <Form.Item label={<b>Ansprache</b>} name="address">
-                    <Select placeholder="Bitte wählen Sie die Form der Ansprache aus..." options={[
-                        {label: "Du", value: "du", },
-                        {label: "Sie", value: "sie", },
-                    ]}/>
-                </Form.Item>
-
-                <Form.Item label={<b>Einordnung des Gesprächpartners</b>} name="order">
-                    <Select placeholder="Wie orden Sie ihren Gesprächpartner ein?" options={listToOptions(motive)} mode="multiple" allowClear/>
-                </Form.Item>
-  
-              <Form.Item label={<b>Wie soll der Dialog fortgesetzt werden?</b>} name="continue">
-                <TextArea rows={5} placeholder="Formulieren Sie kurz, wie der Dialog fortgesetzt werden soll und was sie damit erreichen wollen?" disabled={formDisabled || quotaOverused}/>
-              </Form.Item>
-  
-              <Form.Item label={<b>Länge der Antwort</b>} name="length">
-                <Select placeholder="Wie lang soll die erzeuge Antwort sein?" options={listToOptions(lengths)} disabled={formDisabled || quotaOverused}/>
-              </Form.Item>
-  
-              <div className={styles.submitrow}>
-                <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>Antwort generieren</Button>
-              </div>
-              <div className={styles.tokenalert}>
-                {
-                  (quotaOverused)? <Alert message={`Ihr Tokenbudget ist ausgeschöpft. Ihr Budget setzt sich am 01.${props.Data.currentMonth+1}.${props.Data.currentYear} zurück. Wenn Sie weitere Tokens benötigen, können Sie diese in ihrem Konto dazubuchen.`} type="error" />: <></>
-                }
-              </div>
-          </Card>
-        );
-      }
-    }
-  }
+  }, []);
 
   return (
-    <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
-      <main className={styles.main}>
-        <Space direction='vertical' size={"large"}>
-          <Form layout='vertical' onFinish={generateAnswer} onChange={() => {setIsAnswerCardvisible(false); setIsAnswerVisible(false); setIsLoaderVisible(false)}} form={form}>
-            <div className={styles.mrow}>
-              <div className={styles.mcol}>
-                {getPrompt()}
-              </div>
+    <SidebarLayout role={role} user={user} login={login}>
+      <div className={styles.main}>
+        <div className={styles.greetingrow}>
+          <div className={styles.greeting}>Willkommen {user.firstname}</div>
+          <div className={styles.greeting_subtitle}>Wie kann ich dir heute helfen?</div>
+        </div>
 
-              
-            </div>
-          </Form>
+        <div className={styles.optioncontainer}>
+          <div className={styles.optionrow}>
+            <Link href={"/dialog"}>
+                  <div className={styles.option}>
+                    <div className={styles.option_title}>Mail-Dialog fortsetzen</div>
+                  </div>
+                </Link>
 
-          <Card title={"Antwort"} style={{ display: (isAnswerCardVisible)? 'block': 'none' }}>
-              {(isAnswerVisible)? <div className={styles.answercol}><Paragraph>Die Anfrage hat {tokens} Tokens verbraucht.<pre>{answer}</pre></Paragraph><Button className={styles.clipboardbutton} onClick={() => {navigator.clipboard.writeText(answer)}}>In die Zwischenablage</Button></div>: <></>}
-              {(isLoaderVisible)? <Skeleton active/>: <></>}
-          </Card>
-        </Space>
-      </main>
+                <Link href={"/monolog"}>
+                  <div className={styles.option}>
+                    <div className={styles.option_title}>E-Mail schreiben</div>
+                  </div>
+              </Link>
+          </div>
+        </div>
+      </div>
     </SidebarLayout>
   )
 }

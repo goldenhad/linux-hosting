@@ -25,7 +25,7 @@ export async function sendMail(receiver: string, subject: string, text: string, 
         html: html 
     });
 
-    console.log(mailReturn);
+    //console.log(mailReturn);
 
     return mailReturn;
 }

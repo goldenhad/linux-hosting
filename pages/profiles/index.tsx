@@ -3,7 +3,7 @@ import { SettingOutlined, DeleteOutlined } from '@ant-design/icons';
 import styles from './list.profiles.module.scss'
 import { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
-import SidebarLayout from '../../components/SidebarLayout';
+import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useRouter } from 'next/router';
 const { Paragraph } = Typography;
 const { TextArea } = Input;
@@ -11,10 +11,22 @@ import { useAuthContext } from '../../components/context/AuthContext';
 import { Profile, ProfileSettings } from '../../firebase/types/Profile';
 import updateData from '../../firebase/data/updateData';
 import { arrayUnion } from 'firebase/firestore';
-import { handleEmptyArray, handleEmptyString } from '../../helper/architecture';
+import { handleEmptyArray, handleEmptyString, listToOptions } from '../../helper/architecture';
+import axios from 'axios';
 require('dotenv').config();
 
 const MAXPROFILES = 12;
+
+
+const defaultProfile = {
+  name: "",
+  settings: {
+    personal: "",
+    stil: [],
+    emotions: [],
+    tags: []
+  }
+}
 
 
 export interface InitialProps {
@@ -44,7 +56,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Profiles(props: InitialProps) {
-    const { login, user, company, role, quota } = useAuthContext();
+    const { login, user, role, parameters } = useAuthContext();
     const [ isCreateModalOpen, setIsCreateModalOpen ]  = useState(false);
     const [ isEditModalOpen, setIsEditModalOpen ]  = useState(false);
     const [ isDeleteModalOpen, setIsDeleteModalOpen ]  = useState(false);
@@ -55,6 +67,7 @@ export default function Profiles(props: InitialProps) {
     const [ tokenCount, setTokenCount ] = useState(0);
     const [ form ] = Form.useForm();
     const [ editForm ] = Form.useForm();
+    const [ decodedProfiles, setDecodedProfiles ] = useState([]);
     const [current, setCurrent] = useState(0);
 
     const router = useRouter();
@@ -70,73 +83,39 @@ export default function Profiles(props: InitialProps) {
         
     }, [login]);
 
-    const style = [
-        "Professionell",
-        "Formell",
-        "Sachlich",
-        "Komplex",
-        "Einfach",
-        "Konservativ",
-        "Modern",
-        "Wissenschaftlich",
-        "Fachspezifisch",
-        "Abstrakt",
-        "Klar",
-        "Direkt",
-        "Rhetorisch",
-        "Ausdrucksstark"
-      ];
-    
-      const emotions = [
-        "Humorvoll",
-        "Nüchtern",
-        "Sentimental",
-        "Objektiv",
-        "Subjektiv",
-        "Ehrfürchtig",
-        "Emotionell",
-        "Lebhaft",
-        "Freundlich",
-        "Höflich",
-        "Selbstbewusst",
-        "Sympathisch",
-        "Kreativ",
-        "Enthusiastisch",
-        "Eloquent",
-        "Prägnant",
-        "Blumig",
-        "Poetisch",
-        "Pathetisch",
-        "Scherzhaft",
-        "Mystisch",
-        "Ironisch",
-        "Sarkastisch",
-        "Despektierlich"
-      ];
-    
-      const lengths = [
-        "So kurz wie möglich",
-        "Sehr kurz",
-        "Kurz",
-        "Mittellang",
-        "Detailliert",
-        "Umfangreich und sehr detailliert"
-      ];
-    
-    
-      const listToOptions = (liste: Array<string>) => {
-        const arr = liste.map(element => {
-          return {
-            value: element.toLowerCase(),
-            label: element
-          };
-        });
-      
-        return arr;
+
+    useEffect(() => {
+      const decodeProfiles = async () => {
+        let profilearr: Array<Profile> = [];
+
+        for(let i = 0; i < user.profiles.length; i++){
+          let profilejson = "";
+          try{
+            let decoded = await axios.post("/api/prompt/decrypt", { 
+              ciphertext: user.profiles[i],
+              salt: user.salt
+              });
+              profilejson = decoded.data.message;
+          }catch(e){
+            profilejson = "";
+          }
+          
+          let singleProfile: Profile = JSON.parse(profilejson);
+          profilearr.push(singleProfile);
+        }
+
+        setDecodedProfiles(profilearr);
       }
+
+      if(user.profiles){
+        decodeProfiles();
+      }
+    }, [decodedProfiles]);
+    
+
   
     const setEditFields = (obj: {name: String, settings: ProfileSettings}) => {
-      console.log(obj.settings)
+      //console.log(obj.settings)
       editForm.setFieldValue("name", obj.name);
       editForm.setFieldValue("personal", obj.settings.personal);
       editForm.setFieldValue("style", obj.settings.stil);
@@ -160,7 +139,7 @@ export default function Profiles(props: InitialProps) {
           throw("Profile not defined");
         }
       }catch(e){
-        console.log(e);
+        //console.log(e);
         setErrMsg("Beim Löschen ist etwas fehlgeschlagen bitte versuche es später erneut.");
         setIsErrVisible(true);
       }
@@ -177,7 +156,22 @@ export default function Profiles(props: InitialProps) {
         try {
           if ( profileToEdit != -1 ){
             let profiles = user.profiles;
-            profiles[profileToEdit] = {name: values.name, settings: { personal: handleEmptyString(values.personal), stil: handleEmptyArray(values.style), emotions: handleEmptyArray(values.emotions), tags: handleEmptyArray(values.tags) }}
+            let encdata = "";
+            let profiletoupload = JSON.stringify({name: values.name, settings: { personal: handleEmptyString(values.personal), stil: handleEmptyArray(values.style), emotions: handleEmptyArray(values.emotions), tags: handleEmptyArray(values.tags) }})
+
+            try{
+              let encreq = await axios.post("/api/prompt/encrypt", { 
+                content: profiletoupload,
+                salt: user.salt,
+              })
+
+              encdata = encreq.data.message;
+            }catch(e){
+              encdata = "";
+            }
+
+            profiles[profileToEdit] = encdata;
+            
             await updateData("User", login.uid, { profiles: profiles })
             form.resetFields([]);
           }else{
@@ -200,7 +194,31 @@ export default function Profiles(props: InitialProps) {
 
       if(values.name){
         try{
-          await updateData("User", login.uid, { profiles: arrayUnion({name: values.name, settings: { personal: handleEmptyString(values.personal), stil: handleEmptyArray(values.style), emotions: handleEmptyArray(values.emotions), tags: handleEmptyArray(values.tags) }}) })
+          let profileObj = {
+            name: values.name,
+            settings: {
+              personal: handleEmptyString(values.personal),
+              stil: handleEmptyArray(values.style),
+              emotions: handleEmptyArray(values.emotions),
+              tags: handleEmptyArray(values.tags)
+            }
+          }
+
+          let stringified = JSON.stringify(profileObj);
+          let encdata = "";
+
+          try{
+            let encreq = await axios.post("/api/prompt/encrypt", { 
+              content: stringified,
+              salt: user.salt,
+             })
+            encdata = encreq.data.message;
+          }catch(e){
+            //console.log(e);
+            encdata = "";
+          }
+
+          await updateData("User", login.uid, { profiles: arrayUnion(encdata) })
           form.setFieldsValue([]);
           setIsCreateModalOpen(false);
         }catch(e){
@@ -228,12 +246,25 @@ export default function Profiles(props: InitialProps) {
     
     const getProfileDisplay = () => {
       if(user.profiles && user.profiles.length > 0){
+
         return (
           <>
             <Space wrap={true}>
-              { user.profiles.map((singleProfile: Profile, idx) => {
-                
+              { decodedProfiles.map((singleProfile: Profile, idx) => {
                 let settings: ProfileSettings = singleProfile.settings;
+
+                let actions = [];
+                if(idx != 0) {
+                  actions = [
+                    <div onClick={() => {setProfileToEdit(idx); setEditFields({name: singleProfile.name, settings: settings}); setIsEditModalOpen(true);}}><SettingOutlined key="setting" /></div>,
+                    <div onClick={() => {setProfileToDelete(idx); setIsDeleteModalOpen(true)}}><DeleteOutlined key="edit" /></div>,
+                  ];
+                }else{
+                  actions = [
+                    <div onClick={() => {setProfileToEdit(idx); setEditFields({name: singleProfile.name, settings: settings}); setIsEditModalOpen(true);}}><SettingOutlined key="setting" /></div>,
+                    <div></div>
+                  ];
+                }
 
                 return (
                   <Card
@@ -242,10 +273,7 @@ export default function Profiles(props: InitialProps) {
                         width: 300,
                         marginTop: 16,
                       }}
-                      actions={[
-                        <div onClick={() => {setProfileToEdit(idx); setEditFields({name: singleProfile.name, settings: settings}); setIsEditModalOpen(true);}}><SettingOutlined key="setting" /></div>,
-                        <div onClick={() => {setProfileToDelete(idx); setIsDeleteModalOpen(true)}}><DeleteOutlined key="edit" /></div>,
-                      ]}
+                      actions={actions}
                     >
                       <div className={styles.profilecard}>
                         <div className={styles.profilecard_title}>{singleProfile.name}</div>
@@ -272,10 +300,10 @@ export default function Profiles(props: InitialProps) {
         title: 'Persönliche Informationen',
         content: <div>
           <Paragraph>
-            Beschreiben Sie kurz wer Sie sind.
+            Beschreiben kurz wer du bist.
           </Paragraph>
-          <Form.Item name="personal">
-              <TextArea placeholder="Wer sind sie, beschreiben Sie ihre Position..."/>
+          <Form.Item className={styles.formpart} name="personal">
+              <TextArea className={styles.forminput} placeholder="Wer bist du, beschreibe dich..."/>
           </Form.Item>
         </div>,
       },
@@ -286,8 +314,8 @@ export default function Profiles(props: InitialProps) {
           <Paragraph>
             Wie genau soll die allgemeine Stilistik der Antwort sein?
           </Paragraph>
-          <Form.Item name="style">
-              <Select placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(style)} mode="multiple" allowClear/>
+          <Form.Item className={styles.formpart} name="style">
+              <Select className={styles.formselect} placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(parameters.style)} mode="multiple" allowClear/>
           </Form.Item>
         </div>,
       },
@@ -298,8 +326,8 @@ export default function Profiles(props: InitialProps) {
           <Paragraph>
             Welche allgemeine Gemütslage soll in der Nachricht deutlich werden?
           </Paragraph>
-          <Form.Item name="emotions">
-              <Select placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(emotions)} mode="multiple" allowClear/>
+          <Form.Item className={styles.formpart} name="emotions">
+              <Select className={styles.formselect} placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(parameters.emotions)} mode="multiple" allowClear/>
           </Form.Item>
         </div>,
       },
@@ -308,21 +336,22 @@ export default function Profiles(props: InitialProps) {
         title: 'Abschließen',
         content: <div>
           <Paragraph>
-            In diesem Bereich können Sie Ihrem Profil einen Namen geben und es mit Tags kategorisieren.
+            In diesem Bereich kannst du deinem Profil einen Namen geben und es mit Tags kategorisieren.
           </Paragraph>
-          <Form.Item name="name" rules={[{ required: true, message: 'Ein Name ist erforderlich!' }]}>
-            <Input placeholder='Name des Profils'></Input>
+          <Form.Item className={styles.formpart} name="name" rules={[{ required: true, message: 'Ein Name ist erforderlich!' }]}>
+            <Input className={styles.forminput} placeholder='Name des Profils'></Input>
           </Form.Item>
           <Paragraph>
-            Kategorisieren Sie ihr Profil über Tags
+            Kategorisiere dein Profil über Tags
           </Paragraph>
-          <Form.Item name="tags">
+          <Form.Item className={styles.formpart} name="tags">
               <Select
+                className={styles.formselect}
                 mode="tags"
                 style={{ width: '100%' }}
                 tokenSeparators={[',']}
                 options={[]}
-                placeholder={"Tippen Sie, um Tags hinzuzufügen, die Ihr Profil kategorisieren"}
+                placeholder={"Tippe, um Tags hinzuzufügen, die das Profil kategorisieren"}
               />
           </Form.Item>
         </div>
@@ -332,7 +361,7 @@ export default function Profiles(props: InitialProps) {
     const items = steps.map((item) => ({ key: item.title, title: item.title }));
 
     return (
-      <SidebarLayout capabilities={(role)? role.capabilities: {}} user={user} login={login}>
+      <SidebarLayout role={role} user={user} login={login}>
         <div className={styles.main}>
           <div className={styles.interactionrow}>
               <Button type='primary' onClick={() => {setIsCreateModalOpen(true)}} disabled={(user.profiles && user.profiles.length >= MAXPROFILES)}>+ Hinzufügen</Button>
@@ -405,31 +434,32 @@ export default function Profiles(props: InitialProps) {
                 onFinish={editProfile}
                 form={editForm}
             >
-                <Form.Item label={<b>Profilname</b>} name="name" rules={[{ required: true, message: 'Ein Name ist erforderlich!' }]}>
-                    <Input placeholder="Names des Profils..."/>
+                <Form.Item className={styles.formpart} label={<b>Profilname</b>} name="name" rules={[{ required: true, message: 'Ein Name ist erforderlich!' }]}>
+                    <Input className={styles.forminput}  placeholder="Names des Profils..."/>
                 </Form.Item>
   
-                <Form.Item label={<b>Persönliche Informationen</b>} name="personal">
-                    <TextArea placeholder="Wer sind sie, beschreiben Sie ihre Position..."/>
+                <Form.Item className={styles.formpart} label={<b>Persönliche Informationen</b>} name="personal">
+                    <TextArea className={styles.forminput} placeholder="Wer bist du, beschreibe dich..."/>
                 </Form.Item>
 
-                <Form.Item label={<b>Allgemeine Stilistik</b>} name="style">
-                    <Select placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(style)} mode="multiple" allowClear/>
+                <Form.Item className={styles.formpart} label={<b>Allgemeine Stilistik</b>} name="style">
+                    <Select className={styles.formselect} placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(parameters.style)} mode="multiple" allowClear/>
                 </Form.Item>
 
-                <Form.Item label={<b>Allgemeine Gemütslage</b>} name="emotions">
-                    <Select placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(emotions)} mode="multiple" allowClear/>
+                <Form.Item className={styles.formpart} label={<b>Allgemeine Gemütslage</b>} name="emotions">
+                    <Select className={styles.formselect} placeholder="Wie ist deine allgemeine Gemütslage?" options={listToOptions(parameters.emotions)} mode="multiple" allowClear/>
                 </Form.Item>
 
-                <Form.Item label={<b>Tags {tokenCount}/4</b>} name="tags">
+                <Form.Item className={styles.formpart} label={<b>Tags {tokenCount}/4</b>} name="tags">
                   <Select
+                    className={styles.formselect}
                     mode="tags"
                     style={{ width: '100%' }}
                     tokenSeparators={[',']}
                     onChange={(value) => {setTokenCount(value.length); console.log(value)}}
                     options={[]}
                     maxTagCount={5}
-                    placeholder={"Tippen Sie, um Tags hinzuzufügen, die Ihr Profil kategorisieren"}
+                    placeholder={"Tippe, um Tags hinzuzufügen, die das Profil kategorisieren"}
                   />
                 </Form.Item>
   
@@ -451,7 +481,7 @@ export default function Profiles(props: InitialProps) {
             onCancel={() => {setIsDeleteModalOpen(false)}}
             footer = {[]}
           >
-            <Paragraph>Wollen sie das Profil {(profileToDelete != -1 && user.profiles[profileToDelete]) ? user.profiles[profileToDelete].name: "UNDEFINED"} wirklich löschen?</Paragraph>
+            <Paragraph>Willst du das Profil wirklich löschen?</Paragraph>
   
             <div className={styles.finishformrow}>
                 <Space direction='horizontal'>

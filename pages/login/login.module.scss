@@ -20,3 +20,115 @@
         width: 25%;
     }
 }
+
+
+.logincontainer{
+    height: 96vh;
+    display: flex;
+    flex-direction: column;
+
+    .logorow{
+        height: 10vh;
+        margin: 20px;
+    }
+
+    .formContainer{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+
+        .formtitle{
+            margin-bottom: 20px;
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 44px;
+        }
+
+        .formexplanation{
+            color: var(--foreground-rgb-secondary);
+            font-size: 16px;
+            line-height: 24px;
+            margin-bottom: 32px;
+        }
+
+        .loginform {
+            width: 360px;
+
+            .loginpart{
+                font-weight: 700;
+                line-height: 20px;
+                size: 14px;
+                letter-spacing: 1%;
+            }
+
+            .logininput{
+                background-color: white;
+                padding: 10px 14px 10px 14px;
+                border-radius: 8px;
+            }
+
+            .rememberrow{
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+
+                a {
+                    color: #1478FD;
+                    font-weight: 700;
+                }
+            }
+
+            .loginbutton{
+                width: 360px;
+                height: 44px;
+                margin-top: 32px;
+                
+                button {
+                    width: 360px;
+                    height: 44px;
+                    font-weight: 700;
+                    font-size: 16px;
+                    line-height: 24px;
+                    padding: 10px 18px 10px 18px;
+                }
+            }
+        }
+
+        .signupnotice{
+            font-size: 14px;
+            display: flex;
+            flex-direction: row;
+
+            .signuplink{
+                margin-left: 8px;
+                color: #1478FD;
+                font-weight: 700;
+            }
+        }
+
+    }
+
+    .googleloginbutton{
+        width: 360px;
+        height: 44px;
+        margin-bottom: 32px;
+
+        button {
+            width: 360px;
+            height: 44px;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 24px;
+            padding: 10px 18px 10px 18px;
+        }
+    }
+}
+
+.copyrightfooter{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    color: #475467;
+}

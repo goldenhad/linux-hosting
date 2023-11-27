@@ -43,3 +43,5 @@ docker/staging/db/
 .env
 
 mailbuddy_priv_key.json
+
+*.log

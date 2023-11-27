@@ -8,13 +8,53 @@ export default async function userExists(email: String) {
     let result = null,
         error = null;
     try {
-        console.log(email);
+        //console.log(email);
         let { result, error } = await getDocWhere("User", "email", "==", email.toLowerCase());
-        console.log(result);
+        //console.log(result);
         return result.length > 0;
     } catch (e) {
         error = e;
-        console.log(e);
+        //console.log(e);
+    }
+
+    return { result, error };
+}
+
+export async function usernameExists(username: String) {
+    let result = null,
+        error = null;
+    try {
+        let { result, error } = await getDocWhere("User", "username", "==", username.toLowerCase());
+        //console.log(result);
+        return result.length > 0;
+    } catch (e) {
+        error = e;
+        //console.log(e);
+    }
+
+    return { result, error };
+}
+
+export async function usernameExistsAtDifferentUser(username: String, userid: string) {
+    let result = null,
+        error = null;
+    try {
+        let { result, error } = await getDocWhere("User", "username", "==", username.toLowerCase());
+        if(result.length > 0){
+            let exists = false;
+            result.forEach((user: any) => {
+                if(userid != user.id){
+                   exists = true;
+                }
+            })
+
+            return exists;
+        }else{
+            return false;
+        }
+    } catch (e) {
+        error = e;
+        //console.log(e);
     }
 
     return { result, error };

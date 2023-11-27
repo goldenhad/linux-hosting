@@ -8,8 +8,8 @@ export default async function signUserOut() {
         error = null;
     try {
         result = await signOut(auth);
-        console.log("Logged out...");
-        console.log(result);
+        //console.log("Logged out...");
+        //console.log(result);
     } catch (e) {
         error = e;
     }

@@ -1,0 +1,40 @@
+
+.main {
+    display: flex;
+    flex-direction: column;
+
+    .resultrow {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .buttonrow{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+
+        .buttongroup{
+            display: flex;
+            flex-direction: column;
+        }
+
+        .backbutton {
+            button {
+                width: 360px;
+                height: 44px;
+                font-weight: 700;
+                font-size: 16px;
+                line-height: 24px;
+                padding: 10px 18px 10px 18px;
+                font-weight: bold;
+            }
+
+            .backnow{
+                margin-bottom: 16px;
+            }
+        }
+    }
+}

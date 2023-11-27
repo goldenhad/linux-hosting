@@ -36,19 +36,19 @@ export default async function signUp(firstname, lastname, email, username, passw
                                 salt: crypto.randomBytes(8).toString('hex'),
                                 setupDone: false,
                             });
-                            console.log(usercreationresult);
+                            //console.log(usercreationresult);
                         } catch(e) {
-                            console.log(e);
+                            //console.log(e);
                         }
                     }catch(e){
-                        console.log(e);
+                        //console.log(e);
                     }
                 } catch (e) {
-                    console.log(e);
+                    //console.log(e);
                 }
             }
         } catch (ie) {
-            console.log(ie);
+            //console.log(ie);
         }
     
 
@@ -61,9 +61,9 @@ export async function signUpUser(firstname, lastname, email, username, password,
         error = null;
         
         try {
-            console.log("Entering, User signup!");
+            //console.log("Entering, User signup!");
             let usernameexistsquery = await getDocWhere('User', "username", "==", username);
-            console.log(usernameexistsquery.result.length);
+            //console.log(usernameexistsquery.result.length);
             if(usernameexistsquery.result.length == 0){
                 try {
                     result = await createUserWithEmailAndPassword(auth, email, password);
@@ -84,16 +84,16 @@ export async function signUpUser(firstname, lastname, email, username, password,
                             setupDone: false,
                             inviteCode: invitecode,
                         });
-                        console.log(usercreationresult);
+                        //console.log(usercreationresult);
                     } catch(e) {
-                        console.log(e);
+                        //console.log(e);
                     }
                 } catch (e) {
-                    console.log(e);
+                    //console.log(e);
                 }
             }
         } catch (ie) {
-            console.log(ie);
+            //console.log(ie);
         }
     
 

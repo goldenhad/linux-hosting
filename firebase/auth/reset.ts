@@ -8,8 +8,8 @@ export default async function resetpassword(code, newpassword) {
         error = null;
     try {
         result = await confirmPasswordReset(auth, code, newpassword);
-        console.log("Resetting password...");
-        console.log(result);
+        //console.log("Resetting password...");
+        //console.log(result);
     } catch (e) {
         error = e;
     }

@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             
             if(token){
                 const { id } = req.query;
-                console.log(req.query);
+                //console.log(req.query);
                 
                 if(id){
 
@@ -66,11 +66,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                           
                           
                       }catch(E){
-                          console.log(E.response.data);
+                          //console.log(E.response.data);
                           return res.status(400).send({ errorcode: -4, message: "Error"});
                       }
                   }catch(conversionerror){
-                    console.log(conversionerror.response.data);
+                    //console.log(conversionerror.response.data);
                     return res.status(400).send({ errorcode: -2, message: "Error"});
                   }
                 }else{

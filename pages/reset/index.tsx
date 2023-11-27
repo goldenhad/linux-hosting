@@ -27,7 +27,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     let code = ctx.query.oobCode;
     let apikey = ctx.query.apiKey;
 
-    console.log(mode, code, apikey);
+    //console.log(mode, code, apikey);
 
     if(mode && code && apikey){
         return { props: { mode: mode, oobCode: code, apiKey: apikey  } } 
@@ -42,18 +42,18 @@ export default function Forgot_Password(props: restprops){
     const [ resetState, setResetState ] = useState(props as restprops);
 
     useEffect(() => {
-        console.log(resetState);
+        //console.log(resetState);
     }, [])
 
     const onFinish = async (values: any) => {
         const { result, error } = await resetpassword(resetState.oobCode, values.password);
 
         if (error) {
-            console.log(error);
+            //console.log(error);
             setResetFailed(true);
         }else{
             setResetFailed(false);
-            console.log(result)
+            //console.log(result)
             setWasReset(true);
         }
 
@@ -61,7 +61,7 @@ export default function Forgot_Password(props: restprops){
     };
 
     const onFinishFailed = (errorInfo: any) => {
-        console.log('Failed:', errorInfo);
+        //console.log('Failed:', errorInfo);
         setResetFailed(true);
     };
 

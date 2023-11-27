@@ -49,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                     
                     return res.status(400).send({ errorcode: -1, message: "Error generating answer", tokens: -1});
                 }catch(E){
-                    console.log(E);
+                    //console.log(E);
                     return res.status(400).send({ errorcode: -2, message: "Error generating answer", tokens: -1});
                 }
 

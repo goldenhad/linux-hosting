@@ -94,9 +94,9 @@ export default function Dialogue(props: InitialProps) {
 
         let decryptedText = decRequest.data.message;
         parsed = JSON.parse(decryptedText);
-        console.log(parsed);
+        //console.log(parsed);
       }catch(e){
-        console.log(e);
+        //console.log(e);
       }
 
       updateField('profile', parsed.profile);
@@ -144,7 +144,7 @@ export default function Dialogue(props: InitialProps) {
 
     const createData = async () => {
       setQuotaOverused(false);
-      console.log("Creating new Quota...");
+      //console.log("Creating new Quota...");
       await updateDoc(doc(db, "Company", user.Company), { tokens: 0 });
     }
     
@@ -231,9 +231,9 @@ export default function Dialogue(props: InitialProps) {
           try{
             await axios.post("/api/stats", {tokens: answer.data.tokens, time: answer.timings.elapsedTime, type: "DIALOG"});
           }catch(e){
-            console.log(e);
-            console.log("Timing logging failed!");
-            console.log(`{tokens: ${answer.data.tokens}, time: ${answer.timings.elapsedTime}, type: "DIALOG"}`)
+            //console.log(e);
+            //console.log("Timing logging failed!");
+            //console.log(`{tokens: ${answer.data.tokens}, time: ${answer.timings.elapsedTime}, type: "DIALOG"}`)
           }
 
           if(company.tokens - answer.data.tokens <= 0){
@@ -255,7 +255,7 @@ export default function Dialogue(props: InitialProps) {
         }
   
       }catch(e){
-        console.log(e);
+        //console.log(e);
         setTokens("");
         setIsLoaderVisible(false);
         setPromptError(true);

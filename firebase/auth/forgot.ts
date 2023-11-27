@@ -8,8 +8,8 @@ export default async function forgotpassword(email) {
         error = null;
     try {
         result = await sendPasswordResetEmail(auth, email);
-        console.log("Sending forgot mail...");
-        console.log(result);
+        //console.log("Sending forgot mail...");
+        //console.log(result);
     } catch (e) {
         error = e;
     }

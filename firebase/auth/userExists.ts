@@ -8,13 +8,13 @@ export default async function userExists(email: String) {
     let result = null,
         error = null;
     try {
-        console.log(email);
+        //console.log(email);
         let { result, error } = await getDocWhere("User", "email", "==", email.toLowerCase());
-        console.log(result);
+        //console.log(result);
         return result.length > 0;
     } catch (e) {
         error = e;
-        console.log(e);
+        //console.log(e);
     }
 
     return { result, error };
@@ -25,11 +25,11 @@ export async function usernameExists(username: String) {
         error = null;
     try {
         let { result, error } = await getDocWhere("User", "username", "==", username.toLowerCase());
-        console.log(result);
+        //console.log(result);
         return result.length > 0;
     } catch (e) {
         error = e;
-        console.log(e);
+        //console.log(e);
     }
 
     return { result, error };
@@ -54,7 +54,7 @@ export async function usernameExistsAtDifferentUser(username: String, userid: st
         }
     } catch (e) {
         error = e;
-        console.log(e);
+        //console.log(e);
     }
 
     return { result, error };

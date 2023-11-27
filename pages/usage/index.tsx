@@ -77,7 +77,7 @@ export default function Usage(props: InitialProps) {
         const load = async () => {
             let {result, error} = await getDocWhere("User", "Company", "==", user.Company);
             if(!error){
-                console.log(result);
+                //console.log(result);
                 setUsers(result);
             }else{
                 setUsers([]);
@@ -126,7 +126,7 @@ export default function Usage(props: InitialProps) {
             dataIndex: 'timestamp',
             key: 'timestamp',
             render: (_: any, obj: any) => {
-                console.log(obj)
+                //console.log(obj)
                 return new Date(obj.timestamp * 1000).toLocaleString('de',{timeZone:'Europe/Berlin', timeZoneName: 'short'});
             }
         },

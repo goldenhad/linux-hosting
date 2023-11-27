@@ -9,8 +9,8 @@ export default async function signIn(email, password) {
         error = null;
     try {
         result = await signInWithEmailAndPassword(auth, email, password);
-        console.log("Logged in...");
-        console.log(result);
+        //console.log("Logged in...");
+        //console.log(result);
     } catch (e) {
         error = e;
     }
@@ -32,7 +32,7 @@ export async function signInWithGoogle() {
             if(result._tokenResponse.isNewUser){
                 try{
                     let companycreationresult = await addDataWithoutId("Company", { name: result._tokenResponse.displayName + " Firma", street: "", city: "", postalcode: "", country: "", settings: {background: ""}, Usage: [], Quota: "Free" });
-                    console.log(companycreationresult);
+                    //console.log(companycreationresult);
                     try {
                         let usercreationresult = await addData("User", result.user.uid, {
                             firstname: result._tokenResponse.firstName,
@@ -61,18 +61,18 @@ export async function signInWithGoogle() {
                                 }
                             }
                         });
-                        console.log(usercreationresult);
+                        //console.log(usercreationresult);
                     } catch(e) {
-                        console.log(e);
+                        //console.log(e);
                     }
                 }catch(e){
-                    console.log(e);
+                    //console.log(e);
                 }
             }
         }
 
-        console.log("Logged in...");
-        console.log(result);
+        //console.log("Logged in...");
+        //console.log(result);
     } catch (e) {
         error = e;
     }

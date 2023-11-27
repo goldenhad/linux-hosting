@@ -233,7 +233,7 @@ export default function Account(props: InitialProps) {
     const { result, error } = await forgotpassword(login.email);
 
     if (error) {
-        console.log(error);
+        //console.log(error);
     }else{
         setWasReset(true);
     }

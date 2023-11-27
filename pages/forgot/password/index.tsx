@@ -33,17 +33,17 @@ export default function Forgot_Password(){
         const { result, error } = await forgotpassword(values.email);
 
         if (error) {
-            console.log(error);
+            //console.log(error);
             setLoginFailed(true);
         }else{
             setLoginFailed(false);
-            console.log(result)
+            //console.log(result)
             setWasReset(true);
         }
     };
 
     const onFinishFailed = (errorInfo: any) => {
-        console.log('Failed:', errorInfo);
+        //console.log('Failed:', errorInfo);
         setLoginFailed(true);
     };
 

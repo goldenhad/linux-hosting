@@ -46,12 +46,12 @@ export const AuthContextProvider = ({
 
     useEffect(() => {
         const unsubscribe = auth.onIdTokenChanged(async (user) => {
-            console.log("Token changed!");
+            //console.log("Token changed!");
 
 
-            console.log(`token changed!`);
+            //console.log(`token changed!`);
             if (!user) {
-                console.log(`no token found...`);
+                //console.log(`no token found...`);
                 setUser(null);
                 nookies.destroy(null, "token");
                 nookies.set(null, "token", "", {path: '/'});
@@ -59,7 +59,7 @@ export const AuthContextProvider = ({
                 return;
             }
 
-            console.log(`updating token...`);
+            //console.log(`updating token...`);
             const token = await user.getIdToken();
             setUser(user);
             nookies.destroy(null, "token");
@@ -117,7 +117,7 @@ export const AuthContextProvider = ({
 
     useEffect(() => {
         const handle = setInterval(async () => {
-          console.log(`refreshing token...`);
+          //console.log(`refreshing token...`);
           const user = auth.currentUser;
           if (user) await user.getIdToken(true);
         }, 10 * 60 * 1000);

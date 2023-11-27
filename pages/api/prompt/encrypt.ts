@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
                     return res.status(200).send({ errorcode: 0, message: encrypted_data.toString() });
                 }catch(e){
-                    console.log(e);
+                    //console.log(e);
                     return res.status(400).send({ errorcode: 4, message: "Error while encrypting" });
                 }
             }else{

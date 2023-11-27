@@ -5,13 +5,13 @@ const db = getFirestore(firebase_app)
 export default async function updateData(colllection, id, data) {
     let result = null;
     let error = null;
-    console.log(data);
+    //console.log(data);
 
     try {
         result = await updateDoc(doc(db, colllection, id), data);
     } catch (e) {
         error = e;
-        console.log(e);
+        //console.log(e);
     }
 
     return { result, error };

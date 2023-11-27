@@ -17,10 +17,8 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ({
   Component,
   pageProps,
 }: AppLayoutProps) => {
-  console.log(Component.getLayout);
 
   useEffect(() => {
-    console.log(pageProps);
 
     let config = {
       ID: "hmW4w975YAotbeZhQ",

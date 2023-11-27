@@ -115,7 +115,7 @@ export default function Profiles(props: InitialProps) {
 
   
     const setEditFields = (obj: {name: String, settings: ProfileSettings}) => {
-      console.log(obj.settings)
+      //console.log(obj.settings)
       editForm.setFieldValue("name", obj.name);
       editForm.setFieldValue("personal", obj.settings.personal);
       editForm.setFieldValue("style", obj.settings.stil);
@@ -139,7 +139,7 @@ export default function Profiles(props: InitialProps) {
           throw("Profile not defined");
         }
       }catch(e){
-        console.log(e);
+        //console.log(e);
         setErrMsg("Beim Löschen ist etwas fehlgeschlagen bitte versuche es später erneut.");
         setIsErrVisible(true);
       }
@@ -214,7 +214,7 @@ export default function Profiles(props: InitialProps) {
              })
             encdata = encreq.data.message;
           }catch(e){
-            console.log(e);
+            //console.log(e);
             encdata = "";
           }
 

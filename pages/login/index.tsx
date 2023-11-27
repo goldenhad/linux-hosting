@@ -32,11 +32,11 @@ export default function Login(){
         const { result, error } = await signIn(values.email, values.password);
 
         if (error) {
-            console.log(error);
+            //console.log(error);
             setLoginFailed(true);
         }else{
             setLoginFailed(false);
-            console.log(result)
+            //console.log(result)
             return router.push("/")
         }
     };
@@ -45,17 +45,17 @@ export default function Login(){
         const { result, error } = await signInWithGoogle();
 
         if (error) {
-            console.log(error);
+            //console.log(error);
             setLoginFailed(true);
         }else{
             setLoginFailed(false);
-            console.log(result)
+            //console.log(result)
             return router.push("/")
         }
     };
 
     const onFinishFailed = (errorInfo: any) => {
-        console.log('Failed:', errorInfo);
+        //console.log('Failed:', errorInfo);
         setLoginFailed(true);
     };
 

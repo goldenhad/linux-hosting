@@ -30,7 +30,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { cookies } = req;
 
   if(ctx.query.token && ctx.query.PayerID){
-    console.log(ctx.query.token);
+    //console.log(ctx.query.token);
 
     return {
         props: {
@@ -61,7 +61,7 @@ export default function Upgrade(props: InitialProps) {
             return iter.id == order.id;
         })
 
-        console.log(paypalOrder.data.message);
+        //console.log(paypalOrder.data.message);
 
         if(orderidx != -1){
             if(paypalOrder.data.message.status == "APPROVED"){

@@ -11,6 +11,7 @@ import Head from "next/head";
 import userExists, { usernameExists } from "../../firebase/auth/userExists";
 import CookieBanner from "../../components/CookieBanner";
 import { getDocWhere } from "../../firebase/data/getData";
+import Link from "next/link";
 const CryptoJS = require("crypto-js");
 
 
@@ -77,24 +78,24 @@ export default function Register(props){
             const { result, error } = await signUp(values.firstname, values.lastname, values.email, values.username, values.password, "", "", "", "", "DE", isPersonal);
             
             if (error) {
-                console.log(error);
+                //console.log(error);
                 setLoginFailed(true);
             }else{
                 setLoginFailed(false);
                 // else successful
-                console.log(result)
+                //console.log(result)
                 return router.push("/setup")
             }
         }else{
             const { result, error } = await signUp(values.firstname, values.lastname, values.email, values.username, values.password, values.company, values.street, values.city, values.postalcode, "DE", isPersonal);
             
             if (error) {
-                console.log(error);
+                //console.log(error);
                 setLoginFailed(true);
             }else{
                 setLoginFailed(false);
                 // else successful
-                console.log(result)
+                //console.log(result)
                 return router.push("/setup")
             }
         }
@@ -107,12 +108,12 @@ export default function Register(props){
         const { result, error } = await signUpUser(values.firstname, values.lastname, values.email, values.username, values.password, props.invite.company, props.invite.role, props.invite.code);
 
         if (error) {
-            console.log(error);
+            //console.log(error);
             setLoginFailed(true);
         }else{
             setLoginFailed(false);
             // else successful
-            console.log(result)
+            //console.log(result)
             return router.push("/setup")
         }
     }
@@ -126,7 +127,7 @@ export default function Register(props){
     }, []);
 
     const onFinishFailed = (errorInfo: any) => {
-        console.log('Failed:', errorInfo);
+        //console.log('Failed:', errorInfo);
         setLoginFailed(true);
     };
 
@@ -348,6 +349,20 @@ export default function Register(props){
                             >
                             <Input.Password className={styles.logininput} />
                         </Form.Item>
+
+                        <Form.Item name={"agb"} valuePropName="checked" className={styles.loginpart} 
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '',
+                                },
+                                {
+                                    validator: (_, value) =>
+                                        value ? Promise.resolve() : Promise.reject(new Error('Du musst den allgemeinen Geschäftsbedingungen zustimmen!')),
+                                },
+                        ]}>
+                            <Checkbox className={styles.agbCheckbox}>Ich habe die <Link className={styles.agbLink} href="/agb">Allgemeinen Geschäftsbedingungen</Link> gelesen  und verstanden. Mit dem Ankreuzen dieser Box stimme ich diesen Bedingungen zu und erkläre mich damit einverstanden.</Checkbox>
+                        </Form.Item>
     
                         <Alert style={{marginBottom: 20, display: (loginFailed)? "block": "none"}} message="Beim Registrieren ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
     
@@ -503,6 +518,20 @@ export default function Register(props){
                         {
                             evalUseCase() 
                         }
+
+                        <Form.Item name={"agb"} valuePropName="checked" className={styles.loginpart} 
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '',
+                                },
+                                {
+                                    validator: (_, value) =>
+                                        value ? Promise.resolve() : Promise.reject(new Error('Du musst den allgemeinen Geschäftsbedingungen zustimmen!')),
+                                },
+                        ]}>
+                            <Checkbox className={styles.agbCheckbox}>Ich habe die <Link className={styles.agbLink} href="/agb">Allgemeinen Geschäftsbedingungen</Link> gelesen  und verstanden. Mit dem Ankreuzen dieser Box stimme ich diesen Bedingungen zu und erkläre mich damit einverstanden.</Checkbox>
+                        </Form.Item>
     
                         <Alert style={{marginBottom: 20, display: (loginFailed)? "block": "none"}} message="Beim Registrieren ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
     

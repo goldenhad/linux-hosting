@@ -1,11 +1,12 @@
-import Image from "next/image";
-import axios from "axios";
 import router from "next/router";
 import { GetServerSideProps } from "next";
-import { useState } from "react";
+import { Component, useState } from "react";
 import { Alert, Button, Checkbox, Form, Input } from 'antd';
-import logo from '../../public/mailbuddy.png'
 import styles from './login.module.scss'
+import signIn, { signInWithGoogle } from "../../firebase/auth/signin";
+import Head from "next/head";
+import Link from "next/link";
+import CookieBanner from "../../components/CookieBanner";
 
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -27,105 +28,119 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 export default function Login(){
     const [ loginFailed, setLoginFailed ] = useState(false);
 
-    const onFinish = (values: any) => {
-        axios.post('/api/login', {
-            username: values.username,
-            password: values.password
-        })
-          .then(function (response) {
-            setLoginFailed(false);
-    
-            // Make sure we're in the browser
-            if (typeof window !== 'undefined') {
-                router.push('/');
-                return; 
-            }
-    
-        })
-          .catch(function (error) {
-            console.log(error);
+    const onFinish = async (values: any) => {
+        const { result, error } = await signIn(values.email, values.password);
+
+        if (error) {
+            //console.log(error);
             setLoginFailed(true);
-        });
+        }else{
+            setLoginFailed(false);
+            //console.log(result)
+            return router.push("/")
+        }
     };
+
+    const googleOnline = async (values: any) => {
+        const { result, error } = await signInWithGoogle();
+
+        if (error) {
+            //console.log(error);
+            setLoginFailed(true);
+        }else{
+            setLoginFailed(false);
+            //console.log(result)
+            return router.push("/")
+        }
+    };
+
     const onFinishFailed = (errorInfo: any) => {
-        console.log('Failed:', errorInfo);
+        //console.log('Failed:', errorInfo);
         setLoginFailed(true);
     };
 
     return(
-        <main>
-            <div style={{
-                height: "100vh",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center"
-            }}>
-                <div style={{borderRadius: "10%", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                    <img src={"/mailbuddy.png"} alt="Logo" width={744/10} height={744/10}/>
+        <div>
+            <div className={styles.logincontainer}>
+                <div className={styles.logorow}>
+                    <div className={styles.logobox}>
+                        <img src={"/logo.svg"} alt="Logo" width={100}/>
+                    </div>
                 </div>
-                <h2 style={{marginTop: 25, marginBottom: 50}} >Mailbuddy</h2>
-                <Form
-                    name="basic"
-                    labelCol={{
-                        span: 8,
-                    }}
-                    wrapperCol={{
-                        span: 24,
-                    }}
-                    className={styles.loginform}
-                    initialValues={{
-                        remember: true,
-                    }}
-                    onFinish={onFinish}
-                    onFinishFailed={onFinishFailed}
-                    autoComplete="off"
-                    layout="vertical"
-                    onChange={() => { setLoginFailed(false) }}
-                >
-                    <Form.Item
-                    label="Username"
-                    name="username"
-                    rules={[
-                        {
-                        required: true,
-                        message: 'Bitte geben Sie ihren Benutzernamen ein!',
-                        },
-                    ]}
-                    >
-                    <Input />
-                    </Form.Item>
 
-                    <Form.Item
-                    label="Password"
-                    name="password"
-                    rules={[
-                        {
-                        required: true,
-                        message: 'Bitte geben Sie ihr Password ein!',
-                        },
-                    ]}
-                    >
-                    <Input.Password />
-                    </Form.Item>
-
-                    <Alert style={{marginBottom: 20, display: (loginFailed)? "block": "none"}} message="Beim Anmelden ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
-
-                    <Form.Item
-                        wrapperCol={{
-                            offset: 0,
-                            span: 24,
+                <div className={styles.formContainer}>
+                    <div className={styles.formtitle}>Log in</div>
+                    <div className={styles.formexplanation}>Willkommen zurück. Bitte geben Sie unten Ihre Logindaten ein.</div>
+                    <Form
+                        name="basic"
+                        className={styles.loginform}
+                        initialValues={{
+                            remember: true,
                         }}
-                        style={{
-                            textAlign: "center"
-                        }}
+                        onFinish={onFinish}
+                        onFinishFailed={onFinishFailed}
+                        autoComplete="off"
+                        layout="vertical"
+                        onChange={() => { setLoginFailed(false) }}
                     >
-                        <Button type="primary" htmlType="submit">
-                            Anmelden
+                        <Form.Item
+                            label="E-Mail"
+                            name="email"
+                            className={styles.loginpart}
+                        >
+                            <Input className={styles.logininput} />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Passwort"
+                            name="password"
+                            className={styles.loginpart}
+                        >
+                            <Input.Password className={styles.logininput} />
+                        </Form.Item>
+
+                        <div className={styles.rememberrow}>
+                            <Checkbox name="remember">Eingeloggt bleiben</Checkbox>
+                            <Link href={"/forgot/password"}>Passwort vergessen</Link>
+                        </div>
+
+                        <Alert style={{marginBottom: 20, marginTop: 20, display: (loginFailed)? "block": "none"}} message="Beim Anmelden ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
+
+                        <Form.Item className={styles.loginbutton}>
+                            <Button type="primary" htmlType="submit">
+                                Anmelden
+                            </Button>
+                        </Form.Item>
+                    </Form>
+
+                    <div className={styles.googleloginbutton}>
+                        <Button onClick={googleOnline} icon={<img src={"/Social icon.svg"} alt="google" width={12}></img>}>
+                            Mit Google anmelden
                         </Button>
-                    </Form.Item>
-                </Form>
+                    </div>
+                    
+                    <div className={styles.signupnotice}>
+                        <div>Noch keinen Account?</div><Link className={styles.signuplink} href={"/register"}>Jetzt registrieren</Link>
+                    </div>
+                </div>
             </div>
+            <div className={styles.copyrightfooter}>© Mailbuddy 2023</div>
+        </div>
+    );
+}
+
+Login.getLayout = (page) => {
+    return(
+        <>
+        <Head>
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <link rel="icon" type="image/x-icon" href="small_logo.ico" />
+            <title>Siteware-Mailbuddy | mail assistant</title>
+        </Head>
+        <main>
+            {page}
+            <CookieBanner />
         </main>
+        </>
     );
 }

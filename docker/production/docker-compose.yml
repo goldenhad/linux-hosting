@@ -1,43 +1,15 @@
 version: '3'
 
 services:
-    mail-buddy-database:
-        image: mariadb
-        container_name: mail-buddy-database
-        restart: always
-        environment:
-            MARIADB_DATABASE: Mailbuddy
-            MARIADB_USER: ${DBUSER}
-            MARIADB_PASSWORD: ${DBPASSWORD}
-            MARIADB_RANDOM_ROOT_PASSWORD: '1'
-        ports:
-            - 3309:3306
-        volumes:
-            - ${DBPATH}:/var/lib/mysql
-        networks:
-            - mailbuddynetwork
-    phpmyadmin:
-        image: phpmyadmin/phpmyadmin
-        links:
-            - mail-buddy-database
-        environment:
-            PMA_HOST: mail-buddy-database
-            PMA_PORT: 3306
-            PMA_ARBITRARY: 1
-        restart: always
-        ports:
-            - 8081:80
-        networks:
-            - mailbuddynetwork
     mailbuddy:
         build:
             context: ../../
-            dockerfile: docker/production/Dockerfile
+            dockerfile: docker/development/Dockerfile
         image: mailbuddy
         ports:
             - '3002:3000'
-        depends_on:
-            - mail-buddy-database
+        volumes:
+            - ./stats:/app/stats
         networks:
             - mailbuddynetwork
             - proxynetwork

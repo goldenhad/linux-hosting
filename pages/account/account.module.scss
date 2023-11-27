@@ -1,0 +1,96 @@
+
+.main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 32px;
+
+    .personal { 
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+        margin-top: 32px;
+
+        .personalcard {
+            width: 50%;
+
+            .multiformrow{
+                >*:nth-child(1) {
+                    margin-right: 16px;
+                }
+
+                >*:nth-child(2) {
+                    margin-left: 16px;
+                }
+
+                >*:nth-child(3) {
+                    margin-left: 32px;
+                }
+            }
+        }
+    }
+
+    .password {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+        margin-top: 32px;
+
+        .passwordcard {
+            width: 50%;
+        }
+    }
+}
+
+.formrow{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+
+
+    .formpart{
+        font-weight: 700;
+        line-height: 20px;
+        size: 14px;
+        letter-spacing: 1%;
+        width: 100%;
+    }
+}
+
+.forminput{
+    background-color: white;
+    padding: 10px 14px 10px 14px;
+    border-radius: 8px;
+    box-shadow: 0px 1px 2px 0px #1018280D;
+    border-color: #D0D5DD;
+}
+
+.formselect{
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 1px 2px 0px #1018280D;
+    border-color: #D0D5DD;
+}
+
+.savebuttonrow {
+    margin-top: 32px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    button {
+        width: 360px;
+        height: 44px;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 24px;
+        padding: 10px 18px 10px 18px;
+        font-weight: bold;
+    }
+}

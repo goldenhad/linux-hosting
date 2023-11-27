@@ -79,7 +79,7 @@ export default function Setup(){
 
 
     const getFormSteps = () => {        
-        if(role.canEditCompanyDetails){
+        if(role.canSetupCompany){
             return [
                 {   step: 0,
                     title: "Erzähl mir etwas über deine Firma!",
@@ -87,7 +87,7 @@ export default function Setup(){
                         <Paragraph>Damit wir dir das bestmögliche Nutzererlebnis bieten können, benötigen wir ein paar Infos über dich. Das hilft uns, maßgeschneiderte Lösungen für dich zu erzeugen. Keine Sorge, deine Daten sind bei uns in sicheren Händen!</Paragraph>
                         <div className={styles.formpart}>
                             <Form.Item name="company">
-                                <TextArea className={styles.forminput} rows={10} placeholder={"Beschreibe deine Firma und ihr Kerngeschäft."}></TextArea>
+                                <TextArea className={styles.forminput} rows={10} maxLength={1200} placeholder={"Beschreibe deine Firma und ihr Kerngeschäft."}></TextArea>
                             </Form.Item>
                         </div>
                     </div>
@@ -96,10 +96,10 @@ export default function Setup(){
                     step: 1,
                     title: "Erzähl mir etwas über Dich!",
                     content: <div className={styles.singlestep}>
-                        <Paragraph>Zusätzlich benötigen wir noch Informationen über dich.</Paragraph>
+                        <Paragraph>Zusätzlich benötigen wir noch Informationen über dich. Wer bist du, was treibt dich an?</Paragraph>
                         <div className={styles.formpart}>
                             <Form.Item name={"user"}>
-                                <TextArea className={styles.forminput} rows={10} placeholder={"Beschreibe dich und was dich auszeichnet."}></TextArea>
+                                <TextArea className={styles.forminput} rows={10} maxLength={1200} placeholder={"Beschreibe dich und was dich auszeichnet."}></TextArea>
                             </Form.Item>
                         </div>
                     </div>
@@ -110,12 +110,34 @@ export default function Setup(){
                     content: <div className={styles.singlestep}>
                         <Paragraph>Wir möchten mehr über deinen Schreibstil erfahren, damit Mailbuddy ihn perfekt imitieren kann. Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.</Paragraph>
                         <div className={styles.formpart}>
-                            <Form.Item name={"styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben?"}>
+                            <Form.Item name={"styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
+                                rules={[
+                                    () => ({
+                                        validator(_, value) {
+                                            if(value.length > 3){
+                                                setupForm.setFieldValue('styles', value.slice(0, 3))
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }),
+                                ]}
+                            >
                                 <Select options={listToOptions(style)} className={styles.formselect} size='large' mode="multiple" allowClear/>
                             </Form.Item>
                         </div>
                         <div className={styles.formpart}>
-                            <Form.Item name={"emotions"} label={"Welche Gemütslage hast du dabei?"}>
+                            <Form.Item name={"emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
+                                rules={[
+                                    () => ({
+                                        validator(_, value) {
+                                            if(value.length > 3){
+                                                setupForm.setFieldValue('emotions', value.slice(0, 3))
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }),
+                                ]}
+                            >
                                 <Select options={listToOptions(emotions)} className={styles.formselect} size='large' mode="multiple" allowClear/>
                             </Form.Item>
                         </div>
@@ -151,12 +173,34 @@ export default function Setup(){
                     content: <div className={styles.singlestep}>
                         <Paragraph>Wir möchten mehr über deinen Schreibstil erfahren, damit Mailbuddy ihn perfekt imitieren kann. Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.</Paragraph>
                         <div className={styles.formpart}>
-                            <Form.Item name={"styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben?"}>
+                            <Form.Item name={"styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
+                                rules={[
+                                    () => ({
+                                        validator(_, value) {
+                                            if(value.length > 3){
+                                                setupForm.setFieldValue('styles', value.slice(0, 3))
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }),
+                                ]}
+                            >
                                 <Select options={listToOptions(style)} className={styles.formselect} size='large' mode="multiple" allowClear/>
                             </Form.Item>
                         </div>
                         <div className={styles.formpart}>
-                            <Form.Item name={"emotions"} label={"Welche Gemütslage hast du dabei?"}>
+                            <Form.Item name={"emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
+                                rules={[
+                                    () => ({
+                                        validator(_, value) {
+                                            if(value.length > 3){
+                                                setupForm.setFieldValue('emotions', value.slice(0, 3))
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    }),
+                                ]}
+                            >
                                 <Select options={listToOptions(emotions)} className={styles.formselect} size='large' mode="multiple" allowClear/>
                             </Form.Item>
                         </div>

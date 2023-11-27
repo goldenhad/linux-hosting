@@ -64,7 +64,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Company(props: InitialProps) {
-    const { login, user, company, role } = useAuthContext();
+    const { login, user, company, role, calculations } = useAuthContext();
     const [ errMsg, setErrMsg ] = useState([]);
     const [ isErrVisible, setIsErrVisible ] = useState(false);
     const [ inviteErrMsg, setInviteErrMsg ] = useState("");
@@ -478,9 +478,12 @@ export default function Company(props: InitialProps) {
             }
         },
         {
-            title: 'Erworbene Tokens',
+            title: 'Erworbene Mails',
             dataIndex: 'tokens',
             key: 'tokens',
+            render: (_: any, obj: any) => {
+                return obj.amount
+            }
         },
         {
             title: 'Betrag',
@@ -531,6 +534,9 @@ export default function Company(props: InitialProps) {
           },
       ];
 
+    const calculateMails = () => {
+        return Math.floor(company.tokens/calculations.tokensPerMail);
+    }
   
     return (
         <SidebarLayout role={role} user={user} login={login}>
@@ -539,10 +545,10 @@ export default function Company(props: InitialProps) {
                     <Card className={styles.companysettings} title={`Ihre Firma`} headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
                         {getCompanyInput()}
                     </Card>
-                    <Card className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Tokens"} bordered={true}>
-                        <h2>Dein Token-Budget</h2>
+                    <Card className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Mails"} bordered={true}>
+                        <h2>Dein Mail-Budget</h2>
                         <div className={styles.quotarow}>
-                            <div className={styles.tokenbudget}>{(company.unlimited)? "∞" : company.tokens} Tokens</div>
+                            <div className={styles.tokenbudget}>{(company.unlimited)? "∞" : calculateMails()} Mails</div>
                         </div>
                         <h2>Verbrauch</h2>
                             <div className={styles.usageinfo}>
@@ -571,7 +577,7 @@ export default function Company(props: InitialProps) {
                                                         userTableData.forEach((su: User) => {
                                                           su.usedCredits.forEach((usage: Usage) => {
                                                             if(usage.month == idx+1 && usage.year == new Date().getFullYear()){
-                                                                sum += usage.amount;
+                                                                sum += Math.floor(usage.amount/calculations.tokensPerMail);
                                                             }
                                                           });
                                                         })
@@ -587,7 +593,7 @@ export default function Company(props: InitialProps) {
                             </div>
 
                         <div className={styles.generatebuttonrow}>
-                            {(company.unlimited)? <></>:<Link href={"/upgrade"}><Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button></Link>}
+                            {(company.unlimited)? <></>:<Link href={"/upgrade"}><Button className={styles.backbutton} type='primary'>Weitere Mails kaufen</Button></Link>}
                         </div>
                     </Card>
                 </div>

@@ -325,7 +325,18 @@ export default function Monologue(props: InitialProps) {
                     />
                 </Form.Item>
 
-                <Form.Item className={styles.formpart} label={<b>Einordnung des Gesprächpartners</b>} name="order">
+                <Form.Item className={styles.formpart} label={<b>Einordnung des Gesprächpartners (maximal 3)</b>} name="order"
+                  rules={[
+                    () => ({
+                        validator(_, value) {
+                            if(value.length > 3){
+                                form.setFieldValue('order', value.slice(0, 3))
+                            }
+                            return Promise.resolve();
+                        },
+                    }),
+                  ]}
+                >
                     <Select placeholder="Wie ordnest du deinen Gesprächpartner ein?" options={listToOptions(parameters.motives)} mode="multiple" allowClear className={styles.formselect} size='large' disabled={formDisabled || quotaOverused}/>
                 </Form.Item>
 

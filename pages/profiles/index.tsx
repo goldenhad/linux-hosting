@@ -312,9 +312,20 @@ export default function Profiles(props: InitialProps) {
         title: 'Allgemeine Stilistik',
         content: <div>
           <Paragraph>
-            Wie genau soll die allgemeine Stilistik der Antwort sein?
+            Wie genau soll die allgemeine Stilistik der Antwort sein? (maximal 3)
           </Paragraph>
-          <Form.Item className={styles.formpart} name="style">
+          <Form.Item className={styles.formpart} name="style"
+            rules={[
+                () => ({
+                    validator(_, value) {
+                        if(value.length > 3){
+                            form.setFieldValue('style', value.slice(0, 3))
+                        }
+                        return Promise.resolve();
+                    },
+                }),
+            ]}
+          >
               <Select className={styles.formselect} placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(parameters.style)} mode="multiple" allowClear/>
           </Form.Item>
         </div>,
@@ -326,7 +337,18 @@ export default function Profiles(props: InitialProps) {
           <Paragraph>
             Welche allgemeine Gemütslage soll in der Nachricht deutlich werden?
           </Paragraph>
-          <Form.Item className={styles.formpart} name="emotions">
+          <Form.Item className={styles.formpart} name="emotions"
+            rules={[
+                () => ({
+                    validator(_, value) {
+                        if(value.length > 3){
+                            form.setFieldValue('emotions', value.slice(0, 3))
+                        }
+                        return Promise.resolve();
+                    },
+                }),
+            ]}
+          >
               <Select className={styles.formselect} placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?" options={listToOptions(parameters.emotions)} mode="multiple" allowClear/>
           </Form.Item>
         </div>,
@@ -442,11 +464,33 @@ export default function Profiles(props: InitialProps) {
                     <TextArea className={styles.forminput} placeholder="Wer bist du, beschreibe dich..."/>
                 </Form.Item>
 
-                <Form.Item className={styles.formpart} label={<b>Allgemeine Stilistik</b>} name="style">
+                <Form.Item className={styles.formpart} label={<b>Allgemeine Stilistik (maximal 3)</b>} name="style"
+                  rules={[
+                      () => ({
+                          validator(_, value) {
+                              if(value.length > 3){
+                                  editForm.setFieldValue('style', value.slice(0, 3))
+                              }
+                              return Promise.resolve();
+                          },
+                      }),
+                  ]}
+                >
                     <Select className={styles.formselect} placeholder="In welchem Stil soll geantwortet werden?" options={listToOptions(parameters.style)} mode="multiple" allowClear/>
                 </Form.Item>
 
-                <Form.Item className={styles.formpart} label={<b>Allgemeine Gemütslage</b>} name="emotions">
+                <Form.Item className={styles.formpart} label={<b>Allgemeine Gemütslage (maximal 3)</b>} name="emotions"
+                  rules={[
+                      () => ({
+                          validator(_, value) {
+                              if(value.length > 3){
+                                  editForm.setFieldValue('emotions', value.slice(0, 3))
+                              }
+                              return Promise.resolve();
+                          },
+                      }),
+                  ]}
+                >
                     <Select className={styles.formselect} placeholder="Wie ist deine allgemeine Gemütslage?" options={listToOptions(parameters.emotions)} mode="multiple" allowClear/>
                 </Form.Item>
 

@@ -60,7 +60,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Usage(props: InitialProps) {
-    const { login, user, company, role } = useAuthContext();
+    const { login, user, company, role, calculations } = useAuthContext();
     const [ overused, setOverused ] = useState(false);
     const [ currusage, setCurrusage ] = useState(0);
     const [ users, setUsers ] = useState([]);
@@ -85,7 +85,12 @@ export default function Usage(props: InitialProps) {
         }
 
         load();
-    }, [company])
+    }, [company]);
+
+
+    const calculateMails = () => {
+        return Math.floor(company.tokens/calculations.tokensPerMail);
+    }
 
     const purchasecolumns = [
         {
@@ -131,9 +136,12 @@ export default function Usage(props: InitialProps) {
             }
         },
         {
-            title: 'Erworbene Tokens',
+            title: 'Erworbene Mails',
             dataIndex: 'tokens',
             key: 'tokens',
+            render: (_: any, obj: any) => {
+                return obj.amount
+            }
         },
         {
             title: 'Betrag',
@@ -141,7 +149,7 @@ export default function Usage(props: InitialProps) {
             key: 'amount',
             render: (_: any, obj: any) => {
                 return convertToCurrency(obj.amount);
-              }
+            }
         },
         {
             title: 'Aktionen',
@@ -189,20 +197,20 @@ export default function Usage(props: InitialProps) {
         <SidebarLayout role={role} user={user} login={login}>
             <div className={styles.main}>
                 <div className={styles.companyoverview}>
-                    <Card className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Tokens"} bordered={true}>
+                    <Card className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Mails"} bordered={true}>
                         <div className={styles.tokeninfocard}>
-                            <h2>Dein Token-Budget</h2>
+                            <h2>Dein Mail-Budget</h2>
                             <div className={styles.quotarow}>
-                            <div className={styles.tokenbudget}>{(company.unlimited)? "∞" : company.tokens} Tokens</div>
+                            <div className={styles.tokenbudget}>{(company.unlimited)? "∞" : `~ ${calculateMails()}`} Mails</div>
                             </div>
                         </div>
                         <div className={styles.generatebuttonrow}>
                             <Link href={"/upgrade"}>
-                                {(!company.unlimited)? <Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button> : <></>}
+                                {(!company.unlimited)? <Button className={styles.backbutton} type='primary'>Weitere Mails kaufen</Button> : <></>}
                             </Link>
                         </div>
                     </Card>
-                    <Card className={styles.tokenusage} headStyle={{backgroundColor: "#F9FAFB"}} title={"Tokens"} bordered={true}>
+                    <Card className={styles.tokenusage} headStyle={{backgroundColor: "#F9FAFB"}} title={"Mail-Verbrauch"} bordered={true}>
                         <div className={styles.tokeninfocard}>
                             <h2>Verbrauch</h2>
                             <div className={styles.usageinfo}>
@@ -225,13 +233,13 @@ export default function Usage(props: InitialProps) {
                                             labels:  months,
                                             datasets: [
                                                 {
-                                                    label: "Tokens",
+                                                    label: "Mails",
                                                     data: months.map((label, idx) => {
                                                         let sum = 0;
                                                         users.forEach((su: User) => {
                                                           su.usedCredits.forEach((usage: Usage) => {
                                                             if(usage.month == idx+1 && usage.year == new Date().getFullYear()){
-                                                                sum += usage.amount;
+                                                                sum += Math.floor(usage.amount/calculations.tokensPerMail);
                                                             }
                                                           });
                                                         })

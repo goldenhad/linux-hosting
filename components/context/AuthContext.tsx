@@ -13,7 +13,7 @@ import nookies from "nookies";
 import { LoadingOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
 import { useRouter } from 'next/navigation';
-import { InvoiceSettings, Parameters } from '../../firebase/types/Settings';
+import { Calculations, InvoiceSettings, Parameters } from '../../firebase/types/Settings';
 
 
 interface ctx {
@@ -23,7 +23,8 @@ interface ctx {
     role: Role,
     parameters: Parameters,
     loading: boolean,
-    invoice_data: InvoiceSettings
+    invoice_data: InvoiceSettings,
+    calculations: Calculations
 }
 
 const auth = getAuth(firebase_app);
@@ -41,6 +42,7 @@ export const AuthContextProvider = ({
     const [role, setRole] = React.useState(null);
     const [parameters, setParameters] = React.useState(null);
     const [invoiceData, setInvoiceData] = React.useState(null);
+    const [calculations, setCalculations] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
     const router = useRouter();
 
@@ -79,6 +81,7 @@ export const AuthContextProvider = ({
                             if(companydoc.result){
                                 const parameters = await getDocument("Settings", "Parameter");
                                 const invoice_data = await getDocument("Settings", "Invoices");
+                                const calculations = await getDocument("Settings", "Calculation");
 
                                 if(parameters.result && invoice_data.result){
                                     setLogin(user);
@@ -87,6 +90,7 @@ export const AuthContextProvider = ({
                                     setCompany(companydoc.result.data() as Company);
                                     setParameters(parameters.result.data() as Parameters);
                                     setInvoiceData(invoice_data.result.data() as InvoiceSettings);
+                                    setCalculations(calculations.result.data() as Calculations);
                                     setLoading(false);
                                 }
                             }else{
@@ -108,6 +112,7 @@ export const AuthContextProvider = ({
                 setCompany(null);
                 setParameters(null);
                 setInvoiceData(null);
+                setCalculations(null);
             }
         });
 
@@ -155,7 +160,7 @@ export const AuthContextProvider = ({
     }, [login]);
 
     return (
-        <AuthContext.Provider value={{login: login, user: user, company: company, role: role, parameters: parameters, loading: loading, invoice_data: invoiceData}}>
+        <AuthContext.Provider value={{login: login, user: user, company: company, role: role, parameters: parameters, loading: loading, invoice_data: invoiceData, calculations: calculations}}>
             {loading ? <div style={{height: "100vh", width: "100%", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center"}}><Spin indicator={<LoadingOutlined style={{ fontSize: 90 }} spin />} /></div> : children}
         </AuthContext.Provider>
     );

@@ -1,15 +1,17 @@
-import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider, List, Slider, Table, Avatar } from 'antd';
+import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider, List, Slider, Table, Avatar, Spin, message, QRCode } from 'antd';
 import Icon from '@ant-design/icons';
 import styles from './account.module.scss'
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useAuthContext } from '../../components/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { handleEmptyString } from '../../helper/architecture';
 import { usernameExists, usernameExistsAtDifferentUser } from '../../firebase/auth/userExists';
+import { LoadingOutlined } from '@ant-design/icons';
 import forgotpassword from '../../firebase/auth/forgot';
 import updateData from '../../firebase/data/updateData';
+import axios from 'axios';
 var paypal = require('paypal-rest-sdk');
 const { Paragraph } = Typography;
 const { TextArea } = Input;
@@ -25,7 +27,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { req, res } = ctx;
   //Get the cookies from the current request
   const { cookies } = req;
-
 
   return {
     props: {
@@ -52,6 +53,10 @@ export default function Account(props: InitialProps) {
   const [ wasReset, setWasReset ] = useState(false);
   const [ isErrVisible, setIsErrVisible ] = useState(false);
   const [ editSuccessfull, setEditSuccessfull ] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+
+
+  const [ recommendLink, setRecommendLink ] = useState("");
 
   useEffect(() => {
     personalForm.setFieldValue("username", user.username);
@@ -61,7 +66,19 @@ export default function Account(props: InitialProps) {
     personalForm.setFieldValue("street", company.street);
     personalForm.setFieldValue("postalcode", company.postalcode);
     personalForm.setFieldValue("city", company.city);
+
+
+    const getRecommendLink = async () => {
+
+        let encryptedLink = await axios.post("/api/recommend", { from: login.uid });
+        if(encryptedLink.data.message != ""){
+            setRecommendLink(encryptedLink.data.message);
+        }
+    }
+    
+    getRecommendLink();
   }, []);
+
 
 
   const saveAccountInfo = async () => {
@@ -229,100 +246,92 @@ export default function Account(props: InitialProps) {
   }
 
 
-  const sendResetMail = async () => {
-    const { result, error } = await forgotpassword(login.email);
+    const sendResetMail = async () => {
+        const { result, error } = await forgotpassword(login.email);
 
-    if (error) {
-        //console.log(error);
-    }else{
-        setWasReset(true);
-    }
-};
+        if (error) {
+            //console.log(error);
+        }else{
+            setWasReset(true);
+        }
+    };
 
-const getResetButton = () => {
-    if(wasReset){
-        return(
-            <Result
-                status="success"
-                title={<div className={styles.passwordresetnotice}>Neues Passwort, Neues Glück – Dein Reset-Link ist Unterwegs!</div>}
-                subTitle={<div className={styles.passwordresetsubtitle}>Checke deine E-Mails – wir haben dir den Link zum Zurücksetzen deines Passworts geschickt! 🚀</div>}
-            />
-        );
-    }else{
-        return(
-            <div className={styles.savebuttonrow}>
-                <Button type='primary' onClick={() => {sendResetMail()}} className={styles.save}>Passwort zurücksetzen</Button>
-            </div>
-        );
+    const getResetButton = () => {
+        if(wasReset){
+            return(
+                <Result
+                    status="success"
+                    title={<div className={styles.passwordresetnotice}>Neues Passwort, Neues Glück – Dein Reset-Link ist Unterwegs!</div>}
+                    subTitle={<div className={styles.passwordresetsubtitle}>Checke deine E-Mails – wir haben dir den Link zum Zurücksetzen deines Passworts geschickt! 🚀</div>}
+                />
+            );
+        }else{
+            return(
+                <div className={styles.savebuttonrow}>
+                    <Button type='primary' onClick={() => {sendResetMail()}} className={styles.save}>Passwort zurücksetzen</Button>
+                </div>
+            );
+        }
     }
-}
+
+  const copyLink = () => {
+    if(recommendLink != ""){
+        navigator.clipboard.writeText(recommendLink);
+        messageApi.success("Link in die Zwischenablage kopiert.");
+    }
+  }
+
+  const downloadQRCode = () => {
+        const canvas = document.getElementById('recommendqrcode')?.querySelector<HTMLCanvasElement>('canvas');
+        if (canvas) {
+            const url = canvas.toDataURL("image/png", 1.0);
+            const a = document.createElement('a');
+            a.download = 'siteware_mail_recommend.png';
+            a.href = url;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    };
 
 
   return (
-    <SidebarLayout role={role} user={user} login={login}>
-      <div className={styles.main}>
-        <Avatar size={250} style={{ backgroundColor: '#f0f0f2', color: '#474747', fontSize: 100 }}>{handleEmptyString(user.firstname).toUpperCase().charAt(0)}{handleEmptyString(user.lastname).toUpperCase().charAt(0)}</Avatar>
-        <div className={styles.personal}>
-            <Card className={styles.personalcard} title="Persönliche Informationen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
-                {getPersonalForm()}
-            </Card>
-        </div>
-        <div className={styles.password}>
-            <Card className={styles.passwordcard} title="Passwort" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
-                {/* <Form layout='vertical' form={passwordForm}>
-                    <div className={styles.formrow}>
-                        <Form.Item
-                            className={styles.formpart}
-                            name={"password"}
-                            label="Passwort"
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Bitte geben Sie ein Password ein!',
-                                },
-                                () => ({
-                                    validator(_, value: string) {
-                                    if (value.length >= 6) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
-                                    },
-                                }),
-                            ]}
-                        >
-                            <Input type='password' className={styles.forminput} />
-                        </Form.Item>
-                    </div>
+    <>
+        {contextHolder}
+        <SidebarLayout role={role} user={user} login={login}>
+        <div className={styles.main}>
+            <Avatar size={250} style={{ backgroundColor: '#f0f0f2', color: '#474747', fontSize: 100 }}>{handleEmptyString(user.firstname).toUpperCase().charAt(0)}{handleEmptyString(user.lastname).toUpperCase().charAt(0)}</Avatar>
+            <div className={styles.personal}>
+                <Card className={styles.personalcard} title="Persönliche Informationen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+                    {getPersonalForm()}
+                </Card>
+            </div>
+            <div className={styles.password}>
+                <Card className={styles.passwordcard} title="Passwort" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+                    {getResetButton()}
+                </Card>
+            </div>
 
-                    <div className={styles.formrow}>
-                        <Form.Item
-                            className={styles.formpart}
-                            name={"passwordreapeted"}
-                            label="Passwort wiederholen"
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Bitte wiederholen Sie das Passwort!',
-                                },
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                    if (!value || getFieldValue('password') === value) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
-                                    },
-                                }),
-                                
-                            ]}
-                        >
-                            <Input type='password' className={styles.forminput}/>
-                        </Form.Item>
+            <div className={styles.recommend}>
+                <Card className={styles.recommendcard} title="Mailbuddy weiterempfehlen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+                    <div className={styles.recommendContent}>
+                        <h3 className={styles.recommendHeadline}>Lade deine Freunde ein und sichere dir Gratis-Mails!</h3>
+                        <p>Du hast jetzt die Gelegenheit, deine Freunde zu unserem Service einzuladen. Für jeden Freund, der sich erfolgreich registriert, schenken wir dir 200 Gratis-Mails als Dankeschön. Teile einfach diesen Link, um deine Freunde einzuladen:</p>
+                        <div className={styles.recommendLink}>
+                            {(recommendLink == "")? <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />: <div onClick={() => {copyLink()}}>{recommendLink}</div>}
+                        </div>
+                        <p>Alternativ kannst du auch folgenden QR-Code herunterladen und deinen Freunden schicken:</p>
+                        <div className={styles.recommendqrcode} id="recommendqrcode">
+                            <QRCode errorLevel="M" status={(recommendLink == "")? "loading": undefined} value={recommendLink} bgColor="#fff" />
+                        </div>
+                        <div className={styles.downloadQRCode}>
+                            <Button type='primary' onClick={downloadQRCode} className={styles.download}>Download</Button>
+                        </div>
                     </div>
-                </Form> */}
-                {getResetButton()}
-            </Card>
+                </Card>
+            </div>
         </div>
-      </div>
-    </SidebarLayout>
+        </SidebarLayout>
+    </>
   )
 }

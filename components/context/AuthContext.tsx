@@ -5,7 +5,7 @@ import {
 } from 'firebase/auth';
 import { db, firebase_app } from '../../db';
 import getDocument from '../../firebase/data/getData';
-import { User } from '../../firebase/types/User';
+import { User, basicUser } from '../../firebase/types/User';
 import { Company, Usage, Quota } from '../../firebase/types/Company';
 import { Role } from '../../firebase/types/Role';
 import { doc, onSnapshot } from 'firebase/firestore';

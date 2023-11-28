@@ -6,7 +6,7 @@ import { Avatar, ConfigProvider, Divider, FloatButton, Layout, Menu, Popover } f
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 const { Content, Footer, Sider } = Layout;
-import { User } from '../../firebase/types/User';
+import { User, basicUser } from '../../firebase/types/User';
 import { handleEmptyString } from '../../helper/architecture';
 import styles from './sidebar.module.scss';
 import Home from '../../public/icons/home.svg';
@@ -84,13 +84,21 @@ const SidebarLayout = (props: { children: ReactNode, user: User, login: any, rol
     }
   }
 
+  const getUser = () =>{
+    if(props.user != null){
+        return props.user;
+    }else{
+        return basicUser;
+    }
+  }
+
 
   const profilemenu = (
     <div className={styles.avatarmenu}>
       <Link href={"/account"} className={styles.accountlink}>
         <div className={styles.profile}>
-          <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
-          <div className={styles.profileinfo}>{handleEmptyString(props.user.firstname)} {handleEmptyString(props.user.lastname)}</div>
+          <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(getUser().firstname).toUpperCase().charAt(0)}{handleEmptyString(getUser().lastname).toUpperCase().charAt(0)}</Avatar>
+          <div className={styles.profileinfo}>{handleEmptyString(getUser().firstname)} {handleEmptyString(getUser().lastname)}</div>
         </div>
       </Link>
       <Divider className={styles.menudivider} />
@@ -133,7 +141,7 @@ const SidebarLayout = (props: { children: ReactNode, user: User, login: any, rol
               <Menu className={styles.secondarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={footeritems} />
               <div className={styles.avatarcontainer}>
                 <Popover placement="rightBottom" content={profilemenu} trigger="click">
-                  <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(props.user.firstname).toUpperCase().charAt(0)}{handleEmptyString(props.user.lastname).toUpperCase().charAt(0)}</Avatar>
+                  <Avatar size={40} style={{ backgroundColor: '#f0f0f2', color: '#474747' }}>{handleEmptyString(getUser().firstname).toUpperCase().charAt(0)}{handleEmptyString(getUser().lastname).toUpperCase().charAt(0)}</Avatar>
                 </Popover>
               </div>
             </div>

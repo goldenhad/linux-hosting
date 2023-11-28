@@ -1,4 +1,4 @@
-import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider, List, Slider, Table, Avatar, Spin, message, QRCode } from 'antd';
+import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider, List, Slider, Table, Avatar, Spin, message, QRCode, Modal } from 'antd';
 import Icon from '@ant-design/icons';
 import styles from './account.module.scss'
 import { useEffect, useReducer, useState } from 'react';
@@ -12,7 +12,11 @@ import { LoadingOutlined } from '@ant-design/icons';
 import forgotpassword from '../../firebase/auth/forgot';
 import updateData from '../../firebase/data/updateData';
 import axios from 'axios';
-import { TourState } from '../../firebase/types/User';
+import { TourState, User, basicUser } from '../../firebase/types/User';
+import deleteData from '../../firebase/data/deleteData';
+import deleteSitewareUser from '../../firebase/auth/delete';
+import { getDocWhere } from '../../firebase/data/getData';
+import reauthUser from '../../firebase/auth/reauth';
 var paypal = require('paypal-rest-sdk');
 const { Paragraph } = Typography;
 const { TextArea } = Input;
@@ -55,6 +59,9 @@ export default function Account(props: InitialProps) {
   const [ isErrVisible, setIsErrVisible ] = useState(false);
   const [ editSuccessfull, setEditSuccessfull ] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const [ deleteAccountModal, setDeleteAccountModal ] = useState(false);
+  const [ reauthSuccessfull, setReauthSuccessfull] = useState(false);
+  const [ reauthErr, setReauthErr ] = useState(false);
 
   const [ recommendLink, setRecommendLink ] = useState("");
 
@@ -318,13 +325,105 @@ export default function Account(props: InitialProps) {
         }
     };
 
+    const deleteUser = async () => {
+        // Check role of user...
+
+        switch (user.Role) {
+            case "Company-Admin":
+                let {result, error} = await getDocWhere("User", "Company", "==", user.Company);
+                if(result){
+                    // Test if the current company-admin is the last person in the company
+                    if(result.length > 1){
+                        // If we are no the last person in the company, query the remaining users
+                        let userOfCompany: Array<User & { id: string }> = result;
+                    
+                        let companyManager = userOfCompany.filter((Singleuser: User & { id: string }) => {
+                            return Singleuser.Role == "Company-Manager";
+                        });
+
+                        // Test if the remaining users contain at least one company-manager
+                        if(companyManager.length == 0){
+                            // Query for any Mail-Agent
+                            let mailagents = userOfCompany.filter((Singleuser: User & { id: string }) => {
+                                return Singleuser.Role == "Mailagent";
+                            });
+
+                            // Make the first agent you find the new company owner
+                            let firstAgent = mailagents[0];
+                            let {result, error} = await updateData("User", firstAgent.id, { Role: "Company-Admin" });
+                            let snglSerDeleteData = await deleteData("User", login.uid);
+                            if(!snglSerDeleteData.error){
+                                await deleteSitewareUser()
+                            }
+                        }else{
+                            // Override the company ownership the the first company-manager you find
+                            let firstManager = companyManager[0];
+                            let {result, error} = await updateData("User", firstManager.id, { Role: "Company-Admin" });
+                            let snglSerDeleteData = await deleteData("User", login.uid);
+                            if(!snglSerDeleteData.error){
+                                await deleteSitewareUser()
+                            }
+                        }
+                    }else{
+                        // We can savely delete the company if we are the last person in it
+                        let cmpnysnglSerDeleteData = await deleteData("Company", user.Company);
+                        if(!cmpnysnglSerDeleteData.error){
+                            let snglSerDeleteData = await deleteData("User", login.uid);
+                            if(!snglSerDeleteData.error){
+                                await deleteSitewareUser()
+                            }
+                        }
+                    }
+                }
+                break;
+
+            case "Company-Manager":
+                let cpmngrDeleteData = await deleteData("User", login.uid);
+                if(!cpmngrDeleteData.error){
+                    await deleteSitewareUser()
+                }
+                break;
+            
+            case "Mailagent":
+                // Mailagents can be deleted easily as they have no constraint on the company
+                let mlgntDeleteData = await deleteData("User", login.uid);
+                if(!mlgntDeleteData.error){
+                    await deleteSitewareUser()
+                }
+                break;
+
+            case "Singleuser":
+                let cmpnysnglSerDeleteData = await deleteData("Company", user.Company);
+                console.log(cmpnysnglSerDeleteData);
+                if(!cmpnysnglSerDeleteData.error){
+                    let snglSerDeleteData = await deleteData("User", login.uid);
+                    console.log(snglSerDeleteData);
+                    if(!snglSerDeleteData.error){
+                        let deleteUserCall = await deleteSitewareUser();
+                        console.log(deleteUserCall);
+                    }
+                }
+                break;
+        
+            default:
+                break;
+        }
+    }
+
+    const getUser = () =>{
+        if(user != null){
+            return user;
+        }else{
+            return basicUser;
+        }
+    }
 
     return (
         <>
             {contextHolder}
             <SidebarLayout role={role} user={user} login={login}>
             <div className={styles.main}>
-                <Avatar size={250} style={{ backgroundColor: '#f0f0f2', color: '#474747', fontSize: 100 }}>{handleEmptyString(user.firstname).toUpperCase().charAt(0)}{handleEmptyString(user.lastname).toUpperCase().charAt(0)}</Avatar>
+                <Avatar size={250} style={{ backgroundColor: '#f0f0f2', color: '#474747', fontSize: 100 }}>{handleEmptyString(getUser().firstname).toUpperCase().charAt(0)}{handleEmptyString(getUser().lastname).toUpperCase().charAt(0)}</Avatar>
                 <div className={styles.personal}>
                     <Card className={styles.personalcard} title="Persönliche Informationen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
                         {getPersonalForm()}
@@ -360,6 +459,59 @@ export default function Account(props: InitialProps) {
                         </div>
                     </Card>
                 </div>
+
+                <div className={styles.deleteRow}>
+                    <Button type='primary' danger onClick={() => {setDeleteAccountModal(true)}} className={styles.deleteAccount}>Konto löschen</Button>
+
+                    <Modal
+                        open={deleteAccountModal}
+                        title="Account wirklich löschen?"
+                        onCancel={() => {setDeleteAccountModal(false)}}
+                        footer={null}
+                    >
+                        <div>
+                            <p>
+                            Achtung: Du bist dabei, dein Konto zu löschen. Beachte, dass nach der Löschung alle Daten endgültig entfernt werden und nicht wiederhergestellt werden können. Bitte logge dich noch einmal ein, um die Löschung abzuschließen.</p>
+                            <div className={styles.reauthform}>
+                                {(!reauthSuccessfull)? <Form name="reauth" className={styles.loginform} layout='vertical' onFinish={async (values) => {
+                                    let {result, error} = await reauthUser(values.email, values.password);
+                                    if(error){
+                                        setReauthErr(true);
+                                        setReauthSuccessfull(false);
+                                    }else{
+                                        setReauthErr(false);
+                                        setReauthSuccessfull(true);
+                                    }
+                                }}
+                                onChange={() => {setReauthErr(false)}}
+                                >
+                                    <Form.Item
+                                        label="E-Mail"
+                                        name="email"
+                                        className={styles.loginpart}
+                                    >
+                                        <Input className={styles.logininput} />
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        label="Passwort"
+                                        name="password"
+                                        className={styles.loginpart}
+                                    >
+                                        <Input.Password className={styles.logininput} />
+                                    </Form.Item>
+
+                                    {(reauthErr)? <Alert type='error' className={styles.reautherrormsg} message="Beim Login ist etwas schief gelaufen oder die Login-Daten sind falsch!" />: <></>}
+
+                                    <div className={styles.reauthloginbuttonrow}>
+                                        <Button type='primary' className={styles.reauthloginbutton} htmlType='submit'>Login</Button>
+                                    </div>
+                                </Form>: <div className={styles.deletefinaly}><Button danger onClick={() => {deleteUser()}}>Konto entgültig löschen!</Button></div>}
+                            </div>
+                        </div>
+                    </Modal>
+                </div>
+
             </div>
             </SidebarLayout>
         </>

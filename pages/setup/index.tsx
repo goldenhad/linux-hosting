@@ -69,6 +69,7 @@ export default function Setup(){
     const { login, user, company, role } = useAuthContext();
     const [current, setCurrent] = useState(0);
     const [ setupForm ] = Form.useForm();
+    const [ bareMinimum, setBareMinimum ] = useState(false);
 
     useEffect(() => {
         // Check if the user already has profiles. In this Case the setup was not run yet;
@@ -81,25 +82,25 @@ export default function Setup(){
     const getFormSteps = () => {        
         if(role.canSetupCompany){
             return [
-                {   step: 0,
+                {
+                    step: 0,
+                    title: "Erzähl mir etwas über Dich!",
+                    content: <div className={styles.singlestep}>
+                        <Paragraph>Zusätzlich benötigen wir noch Informationen über dich. Wer bist du, was treibt dich an?</Paragraph>
+                        <div className={styles.formpart}>
+                            <Form.Item name={"user"}>
+                                <TextArea className={styles.forminput} onChange={(value) => {setBareMinimum(value.currentTarget.value != "")}} rows={10} maxLength={1200} placeholder={"Beschreibe dich und was dich auszeichnet."}></TextArea>
+                            </Form.Item>
+                        </div>
+                    </div>
+                },
+                {   step: 1,
                     title: "Erzähl mir etwas über deine Firma!",
                     content: <div className={styles.singlestep}>
                         <Paragraph>Damit wir dir das bestmögliche Nutzererlebnis bieten können, benötigen wir ein paar Infos über dich. Das hilft uns, maßgeschneiderte Lösungen für dich zu erzeugen. Keine Sorge, deine Daten sind bei uns in sicheren Händen!</Paragraph>
                         <div className={styles.formpart}>
                             <Form.Item name="company">
                                 <TextArea className={styles.forminput} rows={10} maxLength={1200} placeholder={"Beschreibe deine Firma und ihr Kerngeschäft."}></TextArea>
-                            </Form.Item>
-                        </div>
-                    </div>
-                },
-                {
-                    step: 1,
-                    title: "Erzähl mir etwas über Dich!",
-                    content: <div className={styles.singlestep}>
-                        <Paragraph>Zusätzlich benötigen wir noch Informationen über dich. Wer bist du, was treibt dich an?</Paragraph>
-                        <div className={styles.formpart}>
-                            <Form.Item name={"user"}>
-                                <TextArea className={styles.forminput} rows={10} maxLength={1200} placeholder={"Beschreibe dich und was dich auszeichnet."}></TextArea>
                             </Form.Item>
                         </div>
                     </div>
@@ -161,8 +162,13 @@ export default function Setup(){
                     content: <div className={styles.singlestep}>
                         <Paragraph>Damit wir dir das bestmögliche Nutzererlebnis bieten können, benötigen wir ein paar Infos über deine Firma. Das hilft uns, maßgeschneiderte Lösungen für dich zu erzeugen. Keine Sorge, deine Daten sind bei uns in sicheren Händen!</Paragraph>
                         <div className={styles.formpart}>
-                            <Form.Item name={"user"}>
-                                <TextArea className={styles.forminput} rows={10} placeholder={"Beschreibe dich und was dich auszeichnet."}></TextArea>
+                            <Form.Item name={"user"} rules={[
+                                {
+                                    required: true,
+                                    message: "Bitte beschreibe dich kurz!"
+                                }
+                            ]}>
+                                <TextArea onChange={(value) => {setBareMinimum(value.currentTarget.value != "")}} className={styles.forminput} rows={10} placeholder={"Beschreibe dich und was dich auszeichnet."}></TextArea>
                             </Form.Item>
                         </div>
                     </div>
@@ -274,7 +280,7 @@ export default function Setup(){
 
                         <div className={styles.continue}>
                             {current < getFormSteps().length - 1 && (
-                            <Button type="primary" onClick={() => setCurrent(current + 1)}>
+                            <Button disabled={!bareMinimum} type="primary" onClick={() => setCurrent(current + 1)}>
                                 Weiter
                             </Button>
                             )}

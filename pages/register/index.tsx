@@ -35,6 +35,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             let deciphered = CryptoJS.AES.decrypt(readableCipher, process.env.MAILENC).toString(CryptoJS.enc.Utf8);
             const json = Buffer.from(deciphered as string, "base64").toString();
             let invitiparams = JSON.parse(json);
+            console.log(invitiparams);
 
             let currTime = Math.floor(Date.now() / 1000);
             let timeDifference =  currTime - invitiparams.timestamp;

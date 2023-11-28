@@ -1,7 +1,7 @@
-import { Alert, Button, Card, Form, Input, Tooltip, Modal, Progress, Select, Space, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, Tooltip, Modal, Progress, Select, Space, Table, Tag, Typography, TourProps, Tour } from 'antd';
 import styles from './usage.module.scss'
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useRouter } from 'next/router';
@@ -22,6 +22,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { User } from '../../firebase/types/User';
+import updateData from '../../firebase/data/updateData';
 const { Paragraph } = Typography;
 
 const { TextArea } = Input;
@@ -65,6 +66,96 @@ export default function Usage(props: InitialProps) {
     const [ currusage, setCurrusage ] = useState(0);
     const [ users, setUsers ] = useState([]);
     const router = useRouter();
+    const [open, setOpen] = useState<boolean>(!user.tour.usage);
+
+    const budgetRef = useRef(null);
+    const statRef = useRef(null);
+    const buyRef = useRef(null);
+    const orderRef = useRef(null);
+
+
+    let steps: TourProps['steps'] = [
+        {
+            title: 'Nutzung und Mail-Budget',
+            description: 'Willkommen in den Nutzungsinformationen. Hier kannst du dein Mail-Budget überprüfen und Statistiken zur Nutzung unseres Tools einsehen. Außerdem hast du die Möglichkeit, weitere Mails zu kaufen und deine bisherigen Bestellungen einzusehen.',
+            nextButtonProps: {
+                children: (
+                "Weiter"
+                )
+            },
+            prevButtonProps: {
+                children: (
+                "Zurück"
+                )
+            }
+        },
+        {
+            title: 'Mail-Budget',
+            description: 'Hier wird dein aktuelles Mail-Budget angezeigt. Die angegebene Zahl gibt dir einen Überblick darüber, wie viele Mails du ungefähr noch schreiben kannst.',
+            target: () => budgetRef.current,
+            nextButtonProps: {
+                children: (
+                "Weiter"
+                )
+            },
+            prevButtonProps: {
+                children: (
+                "Zurück"
+                )
+            }
+        },
+        {
+            title: 'Ihr wollt noch mehr E-Mails optimieren?',
+            description: 'Solltet du den Bedarf haben, mehr E-Mails zu optimieren, kannst du zusätzliche E-Mail-Kapazitäten hier direkt erwerben.',
+            target: () => buyRef.current,
+            nextButtonProps: {
+                children: (
+                "Weiter"
+                )
+            },
+            prevButtonProps: {
+                children: (
+                "Zurück"
+                )
+            }
+        },
+        {
+            title: 'Statistik',
+            description: 'Hier findest du eine kurze und klare Übersicht darüber, wie viele Mails du über das aktuelle Jahr mit Siteware.Mail bereits verbraucht hast.',
+            target: () => statRef.current,
+            nextButtonProps: {
+              children: (
+                "Weiter"
+              )
+            },
+            prevButtonProps: {
+              children: (
+                "Zurück"
+              )
+            }
+        },
+        {
+            title: 'Eure bisherigen Einkäufe',
+            description: 'In dieser Tabelle findet ihr eine Übersicht deiner bisherigen Einkäufe bei Siteware.Mail. Hier hast du die Möglichkeit, Rechnungen herunterzuladen und unterbrochene Einkäufe abzuschließen.',
+            target: () => orderRef.current,
+            nextButtonProps: {
+                children: (
+                "Alles klar"
+                ),
+                onClick: async () => {
+                let currstate = user.tour;
+                currstate.usage = true;
+                updateData("User", login.uid, { tour: currstate })
+                }
+            },
+            prevButtonProps: {
+                children: (
+                "Zurück"
+                )
+            }
+        }
+    ];
+
 
     useEffect(() => {
         if(role.isCompany) {
@@ -197,7 +288,7 @@ export default function Usage(props: InitialProps) {
         <SidebarLayout role={role} user={user} login={login}>
             <div className={styles.main}>
                 <div className={styles.companyoverview}>
-                    <Card className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Mails"} bordered={true}>
+                    <Card ref={budgetRef} className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Mails"} bordered={true}>
                         <div className={styles.tokeninfocard}>
                             <h2>Dein Mail-Budget</h2>
                             <div className={styles.quotarow}>
@@ -206,11 +297,11 @@ export default function Usage(props: InitialProps) {
                         </div>
                         <div className={styles.generatebuttonrow}>
                             <Link href={"/upgrade"}>
-                                {(!company.unlimited)? <Button className={styles.backbutton} type='primary'>Weitere Mails kaufen</Button> : <></>}
+                                {(!company.unlimited)? <Button ref={buyRef} className={styles.backbutton} type='primary'>Weitere Mails kaufen</Button> : <></>}
                             </Link>
                         </div>
                     </Card>
-                    <Card className={styles.tokenusage} headStyle={{backgroundColor: "#F9FAFB"}} title={"Mail-Verbrauch"} bordered={true}>
+                    <Card ref={statRef} className={styles.tokenusage} headStyle={{backgroundColor: "#F9FAFB"}} title={"Mail-Verbrauch"} bordered={true}>
                         <div className={styles.tokeninfocard}>
                             <h2>Verbrauch</h2>
                             <div className={styles.usageinfo}>
@@ -257,9 +348,15 @@ export default function Usage(props: InitialProps) {
                         
                     </Card>
                 </div>
-                <Card title={"Einkäufe"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
+                <Card ref={orderRef} title={"Einkäufe"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
                     <Table dataSource={company.orders} columns={purchasecolumns} />
                 </Card>
+                <Tour open={open} onClose={async () => {
+                    let currstate = user.tour;
+                    currstate.usage = true;
+                    updateData("User", login.uid, { tour: currstate });
+                    setOpen(false);
+                }} steps={steps} />
             </div>
         </SidebarLayout>
     );

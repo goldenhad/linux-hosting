@@ -1,7 +1,7 @@
-import { Alert, Button, Card, Form, Input, Modal, Select, Space, Steps, Table, Tag, Typography, message } from 'antd';
+import { Alert, Button, Card, Form, Input, Modal, Select, Space, Steps, Table, Tag, Tour, TourProps, Typography, message } from 'antd';
 import { SettingOutlined, DeleteOutlined } from '@ant-design/icons';
 import styles from './list.profiles.module.scss'
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useRouter } from 'next/router';
@@ -69,8 +69,65 @@ export default function Profiles(props: InitialProps) {
     const [ editForm ] = Form.useForm();
     const [ decodedProfiles, setDecodedProfiles ] = useState([]);
     const [current, setCurrent] = useState(0);
+    const [open, setOpen] = useState<boolean>(!user.tour.profiles);
+
+    const addRef = useRef(null);
+    const profileRef = useRef(null);
 
     const router = useRouter();
+
+
+    const toursteps: TourProps['steps'] = [
+      {
+        title: 'Profile',
+        description: 'Willkommen auf der Profil-Seite. Hier findest du eine Übersicht deiner verschiedenen Profile, mit denen du E-Mails schreiben kannst. Du hast die Möglichkeit, weitere Profile anzulegen, bestehende Profile zu bearbeiten oder zu löschen.',
+        nextButtonProps: {
+          children: (
+            "Weiter"
+          )
+        },
+        prevButtonProps: {
+          children: (
+            "Zurück"
+          )
+        }
+      },
+      {
+        title: 'Neue Profile',
+        description: 'Über diesen Button kannst du neue Profile anlegen. Du hast die Möglichkeit, insgesamt bis zu 12 verschiedene Profile zu erzeugen.',
+        target: () => addRef.current,
+        nextButtonProps: {
+          children: (
+            "Weiter"
+          )
+        },
+        prevButtonProps: {
+          children: (
+            "Zurück"
+          )
+        }
+      },
+      {
+        title: 'Ein Profil',
+        description: 'Hier werden die einzelnen Profile angezeigt. Über das Zahnrad-Symbol unten rechts kannst du die Profile bearbeiten.',
+        target: () => profileRef.current,
+        nextButtonProps: {
+          children: (
+            "Alles klar"
+          ),
+          onClick: async () => {
+            let currstate = user.tour;
+            currstate.profiles = true;
+            updateData("User", login.uid, { tour: currstate })
+          }
+        },
+        prevButtonProps: {
+          children: (
+            "Zurück"
+          )
+        }
+      }
+    ];
 
   
     const refreshData = () => {
@@ -249,7 +306,7 @@ export default function Profiles(props: InitialProps) {
 
         return (
           <>
-            <Space wrap={true}>
+            <Space ref={profileRef} wrap={true}>
               { decodedProfiles.map((singleProfile: Profile, idx) => {
                 let settings: ProfileSettings = singleProfile.settings;
 
@@ -386,7 +443,7 @@ export default function Profiles(props: InitialProps) {
       <SidebarLayout role={role} user={user} login={login}>
         <div className={styles.main}>
           <div className={styles.interactionrow}>
-              <Button type='primary' onClick={() => {setIsCreateModalOpen(true)}} disabled={(user.profiles && user.profiles.length >= MAXPROFILES)}>+ Hinzufügen</Button>
+              <Button ref={addRef} type='primary' onClick={() => {setIsCreateModalOpen(true)}} disabled={(user.profiles && user.profiles.length >= MAXPROFILES)}>+ Hinzufügen</Button>
           </div>
           <div className={styles.projecttable}>
             { getProfileDisplay() }
@@ -400,11 +457,11 @@ export default function Profiles(props: InitialProps) {
             onCancel={() => {setIsCreateModalOpen(false)}}
             footer = {[]}
           >
-            <Form 
+            <Form
                 layout='vertical'
                 onFinish={createProfile}
                 form={form}
-            >
+              >
                 <Steps current={current} items={items} />
                 
                 {steps.map((item) => (
@@ -534,6 +591,12 @@ export default function Profiles(props: InitialProps) {
                 </Space>
               </div>
           </Modal>
+          <Tour open={open} onClose={async () => {
+              let currstate = user.tour;
+              currstate.profiles = true;
+              updateData("User", login.uid, { tour: currstate });
+              setOpen(false);
+          }} steps={toursteps} />
         </div>
       </SidebarLayout>
     )

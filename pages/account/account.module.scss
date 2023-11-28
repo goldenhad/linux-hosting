@@ -152,3 +152,22 @@
         font-weight: bold;
     }
 }
+
+.tutorialbuttonrow{
+    margin-top: 32px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    button {
+        width: 360px;
+        height: 44px;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 24px;
+        padding: 10px 18px 10px 18px;
+        font-weight: bold;
+    }
+}

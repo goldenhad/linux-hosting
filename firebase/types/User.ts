@@ -28,7 +28,7 @@ type RecommendState = {
     timesUsed: number,
 }
 
-type TourState = {
+export type TourState = {
     home: boolean,
     dialog: boolean,
     monolog: boolean,

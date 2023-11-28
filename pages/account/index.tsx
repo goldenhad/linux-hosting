@@ -12,6 +12,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import forgotpassword from '../../firebase/auth/forgot';
 import updateData from '../../firebase/data/updateData';
 import axios from 'axios';
+import { TourState } from '../../firebase/types/User';
 var paypal = require('paypal-rest-sdk');
 const { Paragraph } = Typography;
 const { TextArea } = Input;
@@ -54,7 +55,6 @@ export default function Account(props: InitialProps) {
   const [ isErrVisible, setIsErrVisible ] = useState(false);
   const [ editSuccessfull, setEditSuccessfull ] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-
 
   const [ recommendLink, setRecommendLink ] = useState("");
 
@@ -274,14 +274,38 @@ export default function Account(props: InitialProps) {
         }
     }
 
-  const copyLink = () => {
-    if(recommendLink != ""){
-        navigator.clipboard.writeText(recommendLink);
-        messageApi.success("Link in die Zwischenablage kopiert.");
+    const resetTutorial = async () => {
+        let resetTutObj: TourState = {
+            home: false,
+            dialog: false,
+            monolog: false,
+            usage: false,
+            profiles: false
+        }
+        const { result, error } = await updateData("User", login.uid, { tour: resetTutObj });
+        if(error){
+            messageApi.error("Beim zurücksetzen des Tutorials ist etwas schiefgelaufen. Versuche es später nochmal!");
+        }else{
+            messageApi.success("Tutorial zurückgesetzt!");
+        }
     }
-  }
 
-  const downloadQRCode = () => {
+    const getSettings = () => {
+        return(
+            <div className={styles.tutorialbuttonrow}>
+                <Button type='primary' onClick={() => {resetTutorial()}} className={styles.resettutorial}>Tutorial zurücksetzen</Button>
+            </div>
+        );
+    }
+
+    const copyLink = () => {
+        if(recommendLink != ""){
+            navigator.clipboard.writeText(recommendLink);
+            messageApi.success("Link in die Zwischenablage kopiert.");
+        }
+    }
+
+    const downloadQRCode = () => {
         const canvas = document.getElementById('recommendqrcode')?.querySelector<HTMLCanvasElement>('canvas');
         if (canvas) {
             const url = canvas.toDataURL("image/png", 1.0);
@@ -295,43 +319,49 @@ export default function Account(props: InitialProps) {
     };
 
 
-  return (
-    <>
-        {contextHolder}
-        <SidebarLayout role={role} user={user} login={login}>
-        <div className={styles.main}>
-            <Avatar size={250} style={{ backgroundColor: '#f0f0f2', color: '#474747', fontSize: 100 }}>{handleEmptyString(user.firstname).toUpperCase().charAt(0)}{handleEmptyString(user.lastname).toUpperCase().charAt(0)}</Avatar>
-            <div className={styles.personal}>
-                <Card className={styles.personalcard} title="Persönliche Informationen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
-                    {getPersonalForm()}
-                </Card>
-            </div>
-            <div className={styles.password}>
-                <Card className={styles.passwordcard} title="Passwort" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
-                    {getResetButton()}
-                </Card>
-            </div>
+    return (
+        <>
+            {contextHolder}
+            <SidebarLayout role={role} user={user} login={login}>
+            <div className={styles.main}>
+                <Avatar size={250} style={{ backgroundColor: '#f0f0f2', color: '#474747', fontSize: 100 }}>{handleEmptyString(user.firstname).toUpperCase().charAt(0)}{handleEmptyString(user.lastname).toUpperCase().charAt(0)}</Avatar>
+                <div className={styles.personal}>
+                    <Card className={styles.personalcard} title="Persönliche Informationen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+                        {getPersonalForm()}
+                    </Card>
+                </div>
+                <div className={styles.password}>
+                    <Card className={styles.passwordcard} title="Passwort" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+                        {getResetButton()}
+                    </Card>
+                </div>
 
-            <div className={styles.recommend}>
-                <Card className={styles.recommendcard} title="Mailbuddy weiterempfehlen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
-                    <div className={styles.recommendContent}>
-                        <h3 className={styles.recommendHeadline}>Lade deine Freunde ein und sichere dir Gratis-Mails!</h3>
-                        <p>Du hast jetzt die Gelegenheit, deine Freunde zu unserem Service einzuladen. Für jeden Freund, der sich erfolgreich registriert, schenken wir dir 200 Gratis-Mails als Dankeschön. Teile einfach diesen Link, um deine Freunde einzuladen:</p>
-                        <div className={styles.recommendLink}>
-                            {(recommendLink == "")? <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />: <div onClick={() => {copyLink()}}>{recommendLink}</div>}
+                <div className={styles.password}>
+                    <Card className={styles.passwordcard} title="Einstellungen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+                        {getSettings()}
+                    </Card>
+                </div>
+
+                <div className={styles.recommend}>
+                    <Card className={styles.recommendcard} title="Mailbuddy weiterempfehlen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+                        <div className={styles.recommendContent}>
+                            <h3 className={styles.recommendHeadline}>Lade deine Freunde ein und sichere dir Gratis-Mails!</h3>
+                            <p>Du hast jetzt die Gelegenheit, deine Freunde zu unserem Service einzuladen. Für jeden Freund, der sich erfolgreich registriert, schenken wir dir 200 Gratis-Mails als Dankeschön. Teile einfach diesen Link, um deine Freunde einzuladen:</p>
+                            <div className={styles.recommendLink}>
+                                {(recommendLink == "")? <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />: <div onClick={() => {copyLink()}}>{recommendLink}</div>}
+                            </div>
+                            <p>Alternativ kannst du auch folgenden QR-Code herunterladen und deinen Freunden schicken:</p>
+                            <div className={styles.recommendqrcode} id="recommendqrcode">
+                                <QRCode errorLevel="M" status={(recommendLink == "")? "loading": undefined} value={recommendLink} bgColor="#fff" />
+                            </div>
+                            <div className={styles.downloadQRCode}>
+                                <Button type='primary' onClick={downloadQRCode} className={styles.download}>Download</Button>
+                            </div>
                         </div>
-                        <p>Alternativ kannst du auch folgenden QR-Code herunterladen und deinen Freunden schicken:</p>
-                        <div className={styles.recommendqrcode} id="recommendqrcode">
-                            <QRCode errorLevel="M" status={(recommendLink == "")? "loading": undefined} value={recommendLink} bgColor="#fff" />
-                        </div>
-                        <div className={styles.downloadQRCode}>
-                            <Button type='primary' onClick={downloadQRCode} className={styles.download}>Download</Button>
-                        </div>
-                    </div>
-                </Card>
+                    </Card>
+                </div>
             </div>
-        </div>
-        </SidebarLayout>
-    </>
-  )
+            </SidebarLayout>
+        </>
+    )
 }

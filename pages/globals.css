@@ -101,9 +101,9 @@
   }
   
   @media (prefers-color-scheme: dark) {
-    html {
+    /* html {
       color-scheme: dark;
-    }
+    } */
   }
 
   .ant-layout{

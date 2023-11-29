@@ -19,7 +19,7 @@ import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
-import { convertToCurrency, handleEmptyString, handleEmptyUser } from "../../helper/architecture";
+import { convertToCurrency, handleEmptyString, handleUndefinedTour } from "../../helper/architecture";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { getDocWhere } from "../../firebase/data/getData";
 import updateData from "../../firebase/data/updateData";
@@ -101,7 +101,7 @@ export default function Company( props: InitialProps ) {
   const [ form ] = Form.useForm();
   const [ userTableLoading, setUserTableLoading ] = useState( true );
   const router = useRouter();
-  const [open, setOpen] = useState<boolean>( !handleEmptyUser( user ).tour.usage );
+  const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).usage );
 
   const companyRef = useRef( null );
   const backgroundRef = useRef( null );

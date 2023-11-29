@@ -1,4 +1,4 @@
-import { User, basicUser } from "../firebase/types/User";
+import { TourState, User, basicUser } from "../firebase/types/User";
 
 export function handleEmptyString( input: any ){
   return ( input )? input: "";
@@ -32,5 +32,19 @@ export const handleEmptyUser = ( user: User ) => {
     return user;
   }else{
     return basicUser;
+  }
+}
+
+export const handleUndefinedTour = ( tour: TourState ) => {
+  if( tour ){
+    return tour;
+  }else{
+    return {
+      home: false,
+      dialog: false,
+      monolog: false,
+      usage: false,
+      profiles: false
+    };
   }
 }

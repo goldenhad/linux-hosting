@@ -7,7 +7,7 @@ import { useAuthContext } from "../components/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import updateData from "../firebase/data/updateData";
-import { handleEmptyUser } from "../helper/architecture";
+import { handleEmptyUser, handleUndefinedTour } from "../helper/architecture";
 
 
 export interface InitialProps {
@@ -36,7 +36,7 @@ export default function Home() {
   const router = useRouter();
   const dialogRef = useRef( null );
   const monologRef = useRef( null );
-  const [open, setOpen] = useState<boolean>( !handleEmptyUser( user ).tour.home );
+  const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).home );
 
   useEffect( () => {
     if( !user.setupDone ){

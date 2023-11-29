@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
-import { convertToCurrency, handleEmptyUser } from "../../helper/architecture";
+import { convertToCurrency, handleUndefinedTour } from "../../helper/architecture";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { getDocWhere } from "../../firebase/data/getData";
 import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, ShoppingCartOutlined, FileTextOutlined } from "@ant-design/icons";
@@ -56,7 +56,7 @@ export default function Usage( props: InitialProps ) {
   const { login, user, company, role, calculations } = useAuthContext();
   const [ users, setUsers ] = useState( [] );
   const router = useRouter();
-  const [open, setOpen] = useState<boolean>( !handleEmptyUser( user ).tour.usage );
+  const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).usage );
 
   const budgetRef = useRef( null );
   const statRef = useRef( null );

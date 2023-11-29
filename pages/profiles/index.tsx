@@ -11,7 +11,7 @@ import { useAuthContext } from "../../components/context/AuthContext";
 import { Profile, ProfileSettings } from "../../firebase/types/Profile";
 import updateData from "../../firebase/data/updateData";
 import { arrayUnion } from "firebase/firestore";
-import { handleEmptyArray, handleEmptyString, handleEmptyUser, listToOptions } from "../../helper/architecture";
+import { handleEmptyArray, handleEmptyString, handleUndefinedTour, listToOptions } from "../../helper/architecture";
 import axios from "axios";
 import environment from "dotenv";
 environment.config();
@@ -54,7 +54,7 @@ export default function Profiles() {
   const [ editForm ] = Form.useForm();
   const [ decodedProfiles, setDecodedProfiles ] = useState( [] );
   const [current, setCurrent] = useState( 0 );
-  const [open, setOpen] = useState<boolean>( !handleEmptyUser( user ).tour.profiles );
+  const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).profiles );
 
   const addRef = useRef( null );
   const profileRef = useRef( null );

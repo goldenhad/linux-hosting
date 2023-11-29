@@ -1,0 +1,11 @@
+{
+  "extends": [
+    "./node_modules/gts/",
+    "plugin:react/recommended",
+    "next/core-web-vitals"
+  ],
+  "env": {
+    "browser": true,
+    "jest": true
+  }
+}

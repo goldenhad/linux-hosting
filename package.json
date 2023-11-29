@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@chatra/chatra": "^1.0.3",
@@ -36,6 +37,9 @@
   "devDependencies": {
     "@types/node": "20.7.1",
     "@types/react": "18.2.23",
+    "eslint": "8.54.0",
+    "eslint-config-next": "14.0.3",
+    "gts": "^5.2.0",
     "sass": "^1.68.0",
     "typescript": "5.2.2"
   }

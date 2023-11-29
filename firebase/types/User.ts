@@ -1,6 +1,4 @@
 import { Usage } from "./Company";
-import { Profile } from "./Profile";
-
 
 export type MonologState = {
     profile: string,
@@ -54,29 +52,29 @@ export type User =  {
 }
 
 export const basicUser: User = {
-    username: "",
-    Company: "",
-    firstname: "",
-    lastname: "",
-    email: "",
-    Role: "",
-    profiles: [],
-    usedCredits: [],
-    salt: "",
-    lastState: {
-        dialog: "",
-        monolog: ""
-    },
-    setupDone: false,
-    inviteCode: "",
-    recommend: {
-        timesUsed: 0,
-    },
-    tour: {
-        home: false,
-        dialog: false,
-        monolog: false,
-        usage: false,
-        profiles: false
-    }
+  username: "",
+  Company: "",
+  firstname: "",
+  lastname: "",
+  email: "",
+  Role: "",
+  profiles: [],
+  usedCredits: [],
+  salt: "",
+  lastState: {
+    dialog: "",
+    monolog: ""
+  },
+  setupDone: false,
+  inviteCode: "",
+  recommend: {
+    timesUsed: 0
+  },
+  tour: {
+    home: false,
+    dialog: false,
+    monolog: false,
+    usage: false,
+    profiles: false
+  }
 }

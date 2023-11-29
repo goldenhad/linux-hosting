@@ -1,43 +1,40 @@
-import './globals.css'
-import Head from 'next/head';
-import { Roboto } from 'next/font/google';
-import { AppContext, AppInitialProps, AppLayoutProps, AppProps } from 'next/app';
-import favicon from '../public/favicon.ico';
-import { AuthContextProvider } from '../components/context/AuthContext';
-import { ReactNode, useEffect } from 'react';
-import type { GetServerSideProps, NextComponentType } from 'next';
-import Chatra from '@chatra/chatra';
+import "./globals.css"
+import Head from "next/head";
+import { Roboto } from "next/font/google";
+import { AppContext, AppInitialProps, AppLayoutProps } from "next/app";
+import { AuthContextProvider } from "../components/context/AuthContext";
+import { useEffect } from "react";
+import type { NextComponentType } from "next";
+import Chatra from "@chatra/chatra";
 
-const roboto = Roboto({
-  weight: ['100', '300', '400', '500', '700', '900'],
-  subsets: ['latin'],
-})
+const roboto = Roboto( {
+  weight: ["100", "300", "400", "500", "700", "900"],
+  subsets: ["latin"]
+} )
 
-const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ({
+const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( {
   Component,
-  pageProps,
-}: AppLayoutProps) => {
+  pageProps
+}: AppLayoutProps ) => {
 
-  useEffect(() => {
+  useEffect( () => {
 
-    let config = {
+    const config = {
       ID: "hmW4w975YAotbeZhQ",
       setup: {
         colors: {
-          buttonText: '#000',
-          buttonBg: '#fff'
+          buttonText: "#000",
+          buttonBg: "#fff"
         },
-        customWidgetButton: '.sosbutton'
+        customWidgetButton: ".sosbutton"
       }
     }
 
-    Chatra('init', config)
-    Chatra('pageView')
-  }, [])
+    Chatra( "init", config )
+    Chatra( "pageView" )
+  }, [] )
 
-  const getLayout = Component.getLayout || ((page) => page);
-
-  if(Component.getLayout){
+  if( Component.getLayout ){
     return Component.getLayout(
       <>
         <Head>

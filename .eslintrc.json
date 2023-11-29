@@ -1,11 +1,30 @@
 {
-  "extends": [
-    "./node_modules/gts/",
-    "plugin:react/recommended",
-    "next/core-web-vitals"
-  ],
   "env": {
     "browser": true,
-    "jest": true
-  }
+    "es2021": true
+  },
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "next",
+    "next/core-web-vitals"
+  ],
+  "rules": {
+    "@stylistic/js/max-len": ["error", { "code": 170 }],
+    "@stylistic/js/indent": ["error", 2],
+    "@stylistic/js/object-curly-spacing": ["error", "always"],
+    "@stylistic/js/arrow-parens": "error",
+    "@stylistic/js/brace-style": "error",
+    "@stylistic/js/comma-dangle": ["error", "never"],
+    "@stylistic/js/space-in-parens": ["error", "always"],
+    "@stylistic/js/quotes": ["error", "double"]
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint", "@stylistic/js"]
 }

@@ -1,5 +1,3 @@
-import { type } from "os";
-
 export type ProfileSettings = {
     personal: string;
     stil: string;
@@ -13,11 +11,11 @@ export type Profile = {
 }
 
 export const basicProfile = {
-    name: "",
-    settings: {
-        personal: "",
-        stil: [],
-        tags: [],
-    },
-    salt: "",
+  name: "",
+  settings: {
+    personal: "",
+    stil: [],
+    tags: []
+  },
+  salt: ""
 }

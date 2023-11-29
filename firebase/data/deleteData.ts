@@ -1,19 +1,19 @@
 import { firebase_app } from "../../db";
-import { getFirestore, doc, getDoc, query, where, getDocs, collection, deleteDoc } from "firebase/firestore";
+import { getFirestore, doc, deleteDoc } from "firebase/firestore";
 
-const db = getFirestore(firebase_app);
+const db = getFirestore( firebase_app );
 
-export default async function deleteData(collection, id) {
-    let docRef = doc(db, collection, id);
+export default async function deleteData( collection, id ) {
+  const docRef = doc( db, collection, id );
 
-    let result = null;
-    let error = null;
+  let result = null;
+  let error = null;
 
-    try {
-        result = await deleteDoc(docRef);
-    } catch (e) {
-        error = e;
-    }
+  try {
+    result = await deleteDoc( docRef );
+  } catch ( e ) {
+    error = e;
+  }
 
-    return { result, error };
+  return { result, error };
 }

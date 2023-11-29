@@ -1,15 +1,22 @@
-import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider, List, Slider, Table, Avatar } from 'antd';
+import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider, List, Slider, Table, Avatar, Spin, message, QRCode, Modal } from 'antd';
 import Icon from '@ant-design/icons';
 import styles from './account.module.scss'
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useAuthContext } from '../../components/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { handleEmptyString } from '../../helper/architecture';
 import { usernameExists, usernameExistsAtDifferentUser } from '../../firebase/auth/userExists';
+import { LoadingOutlined } from '@ant-design/icons';
 import forgotpassword from '../../firebase/auth/forgot';
 import updateData from '../../firebase/data/updateData';
+import axios from 'axios';
+import { TourState, User, basicUser } from '../../firebase/types/User';
+import deleteData from '../../firebase/data/deleteData';
+import deleteSitewareUser from '../../firebase/auth/delete';
+import { getDocWhere } from '../../firebase/data/getData';
+import reauthUser from '../../firebase/auth/reauth';
 var paypal = require('paypal-rest-sdk');
 const { Paragraph } = Typography;
 const { TextArea } = Input;
@@ -25,7 +32,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { req, res } = ctx;
   //Get the cookies from the current request
   const { cookies } = req;
-
 
   return {
     props: {
@@ -52,6 +58,12 @@ export default function Account(props: InitialProps) {
   const [ wasReset, setWasReset ] = useState(false);
   const [ isErrVisible, setIsErrVisible ] = useState(false);
   const [ editSuccessfull, setEditSuccessfull ] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+  const [ deleteAccountModal, setDeleteAccountModal ] = useState(false);
+  const [ reauthSuccessfull, setReauthSuccessfull] = useState(false);
+  const [ reauthErr, setReauthErr ] = useState(false);
+
+  const [ recommendLink, setRecommendLink ] = useState("");
 
   useEffect(() => {
     personalForm.setFieldValue("username", user.username);
@@ -61,7 +73,19 @@ export default function Account(props: InitialProps) {
     personalForm.setFieldValue("street", company.street);
     personalForm.setFieldValue("postalcode", company.postalcode);
     personalForm.setFieldValue("city", company.city);
+
+
+    const getRecommendLink = async () => {
+
+        let encryptedLink = await axios.post("/api/recommend", { from: login.uid });
+        if(encryptedLink.data.message != ""){
+            setRecommendLink(encryptedLink.data.message);
+        }
+    }
+    
+    getRecommendLink();
   }, []);
+
 
 
   const saveAccountInfo = async () => {
@@ -229,100 +253,267 @@ export default function Account(props: InitialProps) {
   }
 
 
-  const sendResetMail = async () => {
-    const { result, error } = await forgotpassword(login.email);
+    const sendResetMail = async () => {
+        const { result, error } = await forgotpassword(login.email);
 
-    if (error) {
-        //console.log(error);
-    }else{
-        setWasReset(true);
+        if (error) {
+            //console.log(error);
+        }else{
+            setWasReset(true);
+        }
+    };
+
+    const getResetButton = () => {
+        if(wasReset){
+            return(
+                <Result
+                    status="success"
+                    title={<div className={styles.passwordresetnotice}>Neues Passwort, Neues Glück – Dein Reset-Link ist Unterwegs!</div>}
+                    subTitle={<div className={styles.passwordresetsubtitle}>Checke deine E-Mails – wir haben dir den Link zum Zurücksetzen deines Passworts geschickt! 🚀</div>}
+                />
+            );
+        }else{
+            return(
+                <div className={styles.savebuttonrow}>
+                    <Button type='primary' onClick={() => {sendResetMail()}} className={styles.save}>Passwort zurücksetzen</Button>
+                </div>
+            );
+        }
     }
-};
 
-const getResetButton = () => {
-    if(wasReset){
+    const resetTutorial = async () => {
+        let resetTutObj: TourState = {
+            home: false,
+            dialog: false,
+            monolog: false,
+            usage: false,
+            profiles: false
+        }
+        const { result, error } = await updateData("User", login.uid, { tour: resetTutObj });
+        if(error){
+            messageApi.error("Beim zurücksetzen des Tutorials ist etwas schiefgelaufen. Versuche es später nochmal!");
+        }else{
+            messageApi.success("Tutorial zurückgesetzt!");
+        }
+    }
+
+    const getSettings = () => {
         return(
-            <Result
-                status="success"
-                title={<div className={styles.passwordresetnotice}>Neues Passwort, Neues Glück – Dein Reset-Link ist Unterwegs!</div>}
-                subTitle={<div className={styles.passwordresetsubtitle}>Checke deine E-Mails – wir haben dir den Link zum Zurücksetzen deines Passworts geschickt! 🚀</div>}
-            />
-        );
-    }else{
-        return(
-            <div className={styles.savebuttonrow}>
-                <Button type='primary' onClick={() => {sendResetMail()}} className={styles.save}>Passwort zurücksetzen</Button>
+            <div className={styles.tutorialbuttonrow}>
+                <Button type='primary' onClick={() => {resetTutorial()}} className={styles.resettutorial}>Tutorial zurücksetzen</Button>
             </div>
         );
     }
-}
 
+    const copyLink = () => {
+        if(recommendLink != ""){
+            navigator.clipboard.writeText(recommendLink);
+            messageApi.success("Link in die Zwischenablage kopiert.");
+        }
+    }
 
-  return (
-    <SidebarLayout role={role} user={user} login={login}>
-      <div className={styles.main}>
-        <Avatar size={250} style={{ backgroundColor: '#f0f0f2', color: '#474747', fontSize: 100 }}>{handleEmptyString(user.firstname).toUpperCase().charAt(0)}{handleEmptyString(user.lastname).toUpperCase().charAt(0)}</Avatar>
-        <div className={styles.personal}>
-            <Card className={styles.personalcard} title="Persönliche Informationen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
-                {getPersonalForm()}
-            </Card>
-        </div>
-        <div className={styles.password}>
-            <Card className={styles.passwordcard} title="Passwort" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
-                {/* <Form layout='vertical' form={passwordForm}>
-                    <div className={styles.formrow}>
-                        <Form.Item
-                            className={styles.formpart}
-                            name={"password"}
-                            label="Passwort"
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Bitte geben Sie ein Password ein!',
-                                },
-                                () => ({
-                                    validator(_, value: string) {
-                                    if (value.length >= 6) {
-                                        return Promise.resolve();
+    const downloadQRCode = () => {
+        const canvas = document.getElementById('recommendqrcode')?.querySelector<HTMLCanvasElement>('canvas');
+        if (canvas) {
+            const url = canvas.toDataURL("image/png", 1.0);
+            const a = document.createElement('a');
+            a.download = 'siteware_mail_recommend.png';
+            a.href = url;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    };
+
+    const deleteUser = async () => {
+        // Check role of user...
+
+        switch (user.Role) {
+            case "Company-Admin":
+                let {result, error} = await getDocWhere("User", "Company", "==", user.Company);
+                if(result){
+                    // Test if the current company-admin is the last person in the company
+                    if(result.length > 1){
+                        // If we are no the last person in the company, query the remaining users
+                        let userOfCompany: Array<User & { id: string }> = result;
+                    
+                        let companyManager = userOfCompany.filter((Singleuser: User & { id: string }) => {
+                            return Singleuser.Role == "Company-Manager";
+                        });
+
+                        // Test if the remaining users contain at least one company-manager
+                        if(companyManager.length == 0){
+                            // Query for any Mail-Agent
+                            let mailagents = userOfCompany.filter((Singleuser: User & { id: string }) => {
+                                return Singleuser.Role == "Mailagent";
+                            });
+
+                            // Make the first agent you find the new company owner
+                            let firstAgent = mailagents[0];
+                            let {result, error} = await updateData("User", firstAgent.id, { Role: "Company-Admin" });
+                            let snglSerDeleteData = await deleteData("User", login.uid);
+                            if(!snglSerDeleteData.error){
+                                await deleteSitewareUser()
+                            }
+                        }else{
+                            // Override the company ownership the the first company-manager you find
+                            let firstManager = companyManager[0];
+                            let {result, error} = await updateData("User", firstManager.id, { Role: "Company-Admin" });
+                            let snglSerDeleteData = await deleteData("User", login.uid);
+                            if(!snglSerDeleteData.error){
+                                await deleteSitewareUser()
+                            }
+                        }
+                    }else{
+                        // We can savely delete the company if we are the last person in it
+                        let cmpnysnglSerDeleteData = await deleteData("Company", user.Company);
+                        if(!cmpnysnglSerDeleteData.error){
+                            let snglSerDeleteData = await deleteData("User", login.uid);
+                            if(!snglSerDeleteData.error){
+                                await deleteSitewareUser()
+                            }
+                        }
+                    }
+                }
+                break;
+
+            case "Company-Manager":
+                let cpmngrDeleteData = await deleteData("User", login.uid);
+                if(!cpmngrDeleteData.error){
+                    await deleteSitewareUser()
+                }
+                break;
+            
+            case "Mailagent":
+                // Mailagents can be deleted easily as they have no constraint on the company
+                let mlgntDeleteData = await deleteData("User", login.uid);
+                if(!mlgntDeleteData.error){
+                    await deleteSitewareUser()
+                }
+                break;
+
+            case "Singleuser":
+                let cmpnysnglSerDeleteData = await deleteData("Company", user.Company);
+                console.log(cmpnysnglSerDeleteData);
+                if(!cmpnysnglSerDeleteData.error){
+                    let snglSerDeleteData = await deleteData("User", login.uid);
+                    console.log(snglSerDeleteData);
+                    if(!snglSerDeleteData.error){
+                        let deleteUserCall = await deleteSitewareUser();
+                        console.log(deleteUserCall);
+                    }
+                }
+                break;
+        
+            default:
+                break;
+        }
+    }
+
+    const getUser = () =>{
+        if(user != null){
+            return user;
+        }else{
+            return basicUser;
+        }
+    }
+
+    return (
+        <>
+            {contextHolder}
+            <SidebarLayout role={role} user={user} login={login}>
+            <div className={styles.main}>
+                <Avatar size={250} style={{ backgroundColor: '#f0f0f2', color: '#474747', fontSize: 100 }}>{handleEmptyString(getUser().firstname).toUpperCase().charAt(0)}{handleEmptyString(getUser().lastname).toUpperCase().charAt(0)}</Avatar>
+                <div className={styles.personal}>
+                    <Card className={styles.personalcard} title="Persönliche Informationen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+                        {getPersonalForm()}
+                    </Card>
+                </div>
+                <div className={styles.password}>
+                    <Card className={styles.passwordcard} title="Passwort" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+                        {getResetButton()}
+                    </Card>
+                </div>
+
+                <div className={styles.password}>
+                    <Card className={styles.passwordcard} title="Einstellungen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+                        {getSettings()}
+                    </Card>
+                </div>
+
+                <div className={styles.recommend}>
+                    <Card className={styles.recommendcard} title="Mailbuddy weiterempfehlen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
+                        <div className={styles.recommendContent}>
+                            <h3 className={styles.recommendHeadline}>Lade deine Freunde ein und sichere dir Gratis-Mails!</h3>
+                            <p>Du hast jetzt die Gelegenheit, deine Freunde zu unserem Service einzuladen. Für jeden Freund, der sich erfolgreich registriert, schenken wir dir 200 Gratis-Mails als Dankeschön. Teile einfach diesen Link, um deine Freunde einzuladen:</p>
+                            <div className={styles.recommendLink}>
+                                {(recommendLink == "")? <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />: <div onClick={() => {copyLink()}}>{recommendLink}</div>}
+                            </div>
+                            <p>Alternativ kannst du auch folgenden QR-Code herunterladen und deinen Freunden schicken:</p>
+                            <div className={styles.recommendqrcode} id="recommendqrcode">
+                                <QRCode errorLevel="M" status={(recommendLink == "")? "loading": undefined} value={recommendLink} bgColor="#fff" />
+                            </div>
+                            <div className={styles.downloadQRCode}>
+                                <Button type='primary' onClick={downloadQRCode} className={styles.download}>Download</Button>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+
+                <div className={styles.deleteRow}>
+                    <Button type='primary' danger onClick={() => {setDeleteAccountModal(true)}} className={styles.deleteAccount}>Konto löschen</Button>
+
+                    <Modal
+                        open={deleteAccountModal}
+                        title="Account wirklich löschen?"
+                        onCancel={() => {setDeleteAccountModal(false)}}
+                        footer={null}
+                    >
+                        <div>
+                            <p>
+                            Achtung: Du bist dabei, dein Konto zu löschen. Beachte, dass nach der Löschung alle Daten endgültig entfernt werden und nicht wiederhergestellt werden können. Bitte logge dich noch einmal ein, um die Löschung abzuschließen.</p>
+                            <div className={styles.reauthform}>
+                                {(!reauthSuccessfull)? <Form name="reauth" className={styles.loginform} layout='vertical' onFinish={async (values) => {
+                                    let {result, error} = await reauthUser(values.email, values.password);
+                                    if(error){
+                                        setReauthErr(true);
+                                        setReauthSuccessfull(false);
+                                    }else{
+                                        setReauthErr(false);
+                                        setReauthSuccessfull(true);
                                     }
-                                    return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
-                                    },
-                                }),
-                            ]}
-                        >
-                            <Input type='password' className={styles.forminput} />
-                        </Form.Item>
-                    </div>
+                                }}
+                                onChange={() => {setReauthErr(false)}}
+                                >
+                                    <Form.Item
+                                        label="E-Mail"
+                                        name="email"
+                                        className={styles.loginpart}
+                                    >
+                                        <Input className={styles.logininput} />
+                                    </Form.Item>
 
-                    <div className={styles.formrow}>
-                        <Form.Item
-                            className={styles.formpart}
-                            name={"passwordreapeted"}
-                            label="Passwort wiederholen"
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Bitte wiederholen Sie das Passwort!',
-                                },
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                    if (!value || getFieldValue('password') === value) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
-                                    },
-                                }),
-                                
-                            ]}
-                        >
-                            <Input type='password' className={styles.forminput}/>
-                        </Form.Item>
-                    </div>
-                </Form> */}
-                {getResetButton()}
-            </Card>
-        </div>
-      </div>
-    </SidebarLayout>
-  )
+                                    <Form.Item
+                                        label="Passwort"
+                                        name="password"
+                                        className={styles.loginpart}
+                                    >
+                                        <Input.Password className={styles.logininput} />
+                                    </Form.Item>
+
+                                    {(reauthErr)? <Alert type='error' className={styles.reautherrormsg} message="Beim Login ist etwas schief gelaufen oder die Login-Daten sind falsch!" />: <></>}
+
+                                    <div className={styles.reauthloginbuttonrow}>
+                                        <Button type='primary' className={styles.reauthloginbutton} htmlType='submit'>Login</Button>
+                                    </div>
+                                </Form>: <div className={styles.deletefinaly}><Button danger onClick={() => {deleteUser()}}>Konto entgültig löschen!</Button></div>}
+                            </div>
+                        </div>
+                    </Modal>
+                </div>
+
+            </div>
+            </SidebarLayout>
+        </>
+    )
 }

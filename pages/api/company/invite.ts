@@ -23,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             let data = req.body;
 
             if( data.email && data.company && data.firstname && data.lastname && data.role ){
-                
+                console.log(data.role);
                 let exists = await userExists(data.email);
 
                 if(!exists){

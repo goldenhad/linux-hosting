@@ -43,6 +43,81 @@
             width: 50%;
         }
     }
+
+    .recommend{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+        margin-top: 32px;
+
+        .recommendcard {
+            width: 50%;
+
+            .recommendContent{
+                display: flex;
+                flex-direction: column;
+
+                .recommendHeadline{
+                    margin-bottom: 16px;
+                }
+
+                .recommendLink{
+                    overflow-wrap: break-word;
+                    text-align: center;
+                    margin-top: 32px;
+                    margin-bottom: 32px;
+                    color: #1677ff;
+
+                    &:hover {
+                        cursor: pointer;
+                        color: #0f4faa;
+                    }
+                }
+
+                .recommendqrcode{
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
+                    margin-top: 32px;
+                    margin-bottom: 32px;
+                }
+
+                .downloadQRCode{
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
+        
+                    button {
+                        width: 360px;
+                        height: 44px;
+                        font-weight: 700;
+                        font-size: 16px;
+                        line-height: 24px;
+                        padding: 10px 18px 10px 18px;
+                        font-weight: bold;
+                    }
+                }
+            }
+        }
+    }
+
+    .deleteRow{
+        margin-top: 60px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+
+        button {
+            width: 360px;
+            height: 44px;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 24px;
+            padding: 10px 18px 10px 18px;
+            font-weight: bold;
+        }
+    }
 }
 
 .formrow{
@@ -92,5 +167,76 @@
         line-height: 24px;
         padding: 10px 18px 10px 18px;
         font-weight: bold;
+    }
+}
+
+.tutorialbuttonrow{
+    margin-top: 32px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    button {
+        width: 360px;
+        height: 44px;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 24px;
+        padding: 10px 18px 10px 18px;
+        font-weight: bold;
+    }
+}
+
+.reauthform{
+    margin-top: 16px;
+    .loginpart{
+        font-weight: 700;
+        line-height: 20px;
+        size: 14px;
+        letter-spacing: 1%;
+    }
+
+    .logininput{
+        background-color: white;
+        padding: 10px 14px 10px 14px;
+        border-radius: 8px;
+    }
+
+    .reautherrormsg{
+        margin-bottom: 16px;
+    }
+
+    .reauthloginbuttonrow{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+
+        .reauthloginbutton{
+            width: 360px;
+            height: 44px;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 24px;
+            padding: 10px 18px 10px 18px;
+            font-weight: bold;
+        }
+    }
+
+    .deletefinaly{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+
+        button {
+            width: 360px;
+            height: 44px;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 24px;
+            padding: 10px 18px 10px 18px;
+            font-weight: bold;
+        }
     }
 }

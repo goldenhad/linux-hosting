@@ -24,6 +24,18 @@ type State = {
     monolog: string
 }
 
+type RecommendState = {
+    timesUsed: number,
+}
+
+export type TourState = {
+    home: boolean,
+    dialog: boolean,
+    monolog: boolean,
+    usage: boolean,
+    profiles: boolean
+}
+
 export type User =  {
     username: string,
     firstname: string,
@@ -36,7 +48,9 @@ export type User =  {
     lastState: State,
     setupDone: boolean,
     salt: string,
-    inviteCode: string
+    inviteCode: string,
+    recommend: RecommendState,
+    tour: TourState
 }
 
 export const basicUser: User = {
@@ -54,5 +68,15 @@ export const basicUser: User = {
         monolog: ""
     },
     setupDone: false,
-    inviteCode: ""
+    inviteCode: "",
+    recommend: {
+        timesUsed: 0,
+    },
+    tour: {
+        home: false,
+        dialog: false,
+        monolog: false,
+        usage: false,
+        profiles: false
+    }
 }

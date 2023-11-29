@@ -35,6 +35,16 @@ export default async function signUp(firstname, lastname, email, username, passw
                                 },
                                 salt: crypto.randomBytes(8).toString('hex'),
                                 setupDone: false,
+                                recommend: {
+                                    timesUsed: 0
+                                },
+                                tour: {
+                                    home: false,
+                                    dialog: false,
+                                    monolog: false,
+                                    usage: false,
+                                    profiles: false
+                                }
                             });
                             //console.log(usercreationresult);
                         } catch(e) {
@@ -83,6 +93,16 @@ export async function signUpUser(firstname, lastname, email, username, password,
                             salt: crypto.randomBytes(8).toString('hex'),
                             setupDone: false,
                             inviteCode: invitecode,
+                            recommend: {
+                                timesUsed: 0
+                            },
+                            tour: {
+                                home: false,
+                                dialog: false,
+                                monolog: false,
+                                usage: false,
+                                profiles: false
+                            }
                         });
                         //console.log(usercreationresult);
                     } catch(e) {

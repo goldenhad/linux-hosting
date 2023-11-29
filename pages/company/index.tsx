@@ -1,7 +1,7 @@
-import { Alert, Button, Card, Form, Input, List, Modal, Tooltip, Select, Space, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, List, Modal, Tooltip, Select, Space, Table, Tag, Typography, TourProps, Tour } from 'antd';
 import styles from './edit.company.module.scss'
 import axios from 'axios';
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import SidebarLayout from '../../components/Sidebar/SidebarLayout';
 import { useRouter } from 'next/router';
@@ -58,13 +58,11 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
           }
       },
     };
-  
-    
 };
 
 
 export default function Company(props: InitialProps) {
-    const { login, user, company, role } = useAuthContext();
+    const { login, user, company, role, calculations } = useAuthContext();
     const [ errMsg, setErrMsg ] = useState([]);
     const [ isErrVisible, setIsErrVisible ] = useState(false);
     const [ inviteErrMsg, setInviteErrMsg ] = useState("");
@@ -76,6 +74,229 @@ export default function Company(props: InitialProps) {
     const [ form ] = Form.useForm();
     const [ userTableLoading, setUserTableLoading ] = useState(true);
     const router = useRouter();
+    const [open, setOpen] = useState<boolean>(!user.tour.usage);
+
+    const companyRef = useRef(null);
+    const backgroundRef = useRef(null);
+    const budgetRef = useRef(null);
+    const buyRef = useRef(null);
+    const orderRef = useRef(null);
+    const userRef = useRef(null);
+    const inviteRef = useRef(null);
+
+
+    let steps: TourProps['steps'] = [];
+
+    if(role.canEditCompanyDetails){
+        steps = [
+            {
+                title: 'Firmeneinstellungen',
+                description: 'Willkommen in den Firmeneinstellungen! Hier kannst du alle relevanten Details und Hintergründe zu deinem Unternehmen finden. Die wichtigsten Informationen zu den Firmeneinstellungen werde ich dir jetzt kurz erklären!',
+                nextButtonProps: {
+                    children: (
+                    "Weiter"
+                    )
+                },
+                prevButtonProps: {
+                    children: (
+                    "Zurück"
+                    )
+                }
+            },
+            {
+                title: 'Informationen',
+                description: 'Hier werden die Informationen zu deiner Firma angezeigt. Du hast die Möglichkeit, diese Daten zu bearbeiten und Änderungen für alle Mitarbeiter deiner Firma vorzunehmen.',
+                target: () => companyRef.current,
+                nextButtonProps: {
+                    children: (
+                    "Weiter"
+                    )
+                },
+                prevButtonProps: {
+                    children: (
+                    "Zurück"
+                    )
+                }
+            },
+            {
+                title: 'Hintergrundinfos zu ihrer Firma',
+                description: 'Hier hast du die Möglichkeit, die Hintergrundinformationen zu deiner Firma zu bearbeiten. Diese Informationen fließen in deine Anfragen an unsere KI mit ein und beeinflussen somit die generierten Inhalte.',
+                target: () => backgroundRef.current,
+                nextButtonProps: {
+                  children: (
+                    "Weiter"
+                  )
+                },
+                prevButtonProps: {
+                  children: (
+                    "Zurück"
+                  )
+                }
+              },
+            {
+                title: 'Statistik zur Nutzung',
+                description: 'Hier findest du eine kurze und klare Übersicht darüber, wie viele Mails deine Firma über das aktuelle Jahr mit Siteware.Mail bereits verbraucht hat und wie viele Mails noch auf eurem Konto verfügbar sind.',
+                target: () => budgetRef.current,
+                nextButtonProps: {
+                    children: (
+                    "Weiter"
+                    )
+                },
+                prevButtonProps: {
+                    children: (
+                    "Zurück"
+                    )
+                }
+            },
+            {
+                title: 'Ihr wollt noch mehr E-Mails optimieren?',
+                description: 'Solltet ihr den Bedarf haben, mehr E-Mails zu optimieren, könnt ihr zusätzliche E-Mail-Kapazitäten hier direkt erwerben.',
+                target: () => buyRef.current,
+                nextButtonProps: {
+                children: (
+                    "Weiter"
+                )
+                },
+                prevButtonProps: {
+                children: (
+                    "Zurück"
+                )
+            }
+              },
+            {
+                title: 'Eure bisherigen Einkäufe',
+                description: 'In dieser Tabelle findet ihr eine Übersicht eurer bisherigen Einkäufe bei Siteware.Mail. Hier habt ihr die Möglichkeit, Rechnungen herunterzuladen und unterbrochene Einkäufe abzuschließen.',
+                target: () => orderRef.current,
+                nextButtonProps: {
+                    children: (
+                    "Weiter"
+                    )
+                },
+                prevButtonProps: {
+                    children: (
+                    "Zurück"
+                    )
+                }
+            },
+            {
+                title: 'Mitglieder deiner Firma',
+                description: 'In dieser Tabelle findest du eine Auflistung aller Mitglieder deiner Firma. Du hast die Möglichkeit, Statistiken zu den von den einzelnen Mitgliedern geschriebenen Mails einzusehen und Einstellungen zu den Rollen und Berechtigungen der Mitglieder vorzunehmen.',
+                target: () => userRef.current,
+                nextButtonProps: {
+                    children: (
+                    "Weiter"
+                    )
+                },
+                prevButtonProps: {
+                    children: (
+                    "Zurück"
+                    )
+                }
+            },
+            {
+                title: 'Weitere Teammitglieder einladen',
+                description: 'Falls weitere Mitglieder deiner Firma die Funktionen von Siteware.Mail benötigen, hast du hier die Möglichkeit, sie direkt einzuladen.',
+                target: () => inviteRef.current,
+                nextButtonProps: {
+                    children: (
+                    "Alles klar"
+                    ),
+                    onClick: async () => {
+                    let currstate = user.tour;
+                    currstate.usage = true;
+                    updateData("User", login.uid, { tour: currstate })
+                    }
+                },
+                prevButtonProps: {
+                    children: (
+                    "Zurück"
+                    )
+                }
+            }
+        ];
+    }else{
+        steps = [
+            {
+              title: 'Firmeneinstellungen',
+              description: 'Willkommen in den Firmeneinstellungen! Hier kannst du alle relevanten Details und Hintergründe zu deinem Unternehmen finden. Die wichtigsten Informationen zu den Firmeneinstellungen werde ich dir jetzt kurz erklären!',
+              nextButtonProps: {
+                children: (
+                  "Weiter"
+                )
+              },
+              prevButtonProps: {
+                children: (
+                  "Zurück"
+                )
+              }
+            },
+            {
+              title: 'Informationen',
+              description: 'Hier werden die Informationen zu deiner Firma angezeigt. Beachte bitte, dass die Eingabemöglichkeit für dich deaktiviert ist. Falls du Änderungen an den Firmeninformationen vornehmen möchtest, musst du einen Firmen-Admin kontaktieren.',
+              target: () => companyRef.current,
+              nextButtonProps: {
+                children: (
+                  "Weiter"
+                )
+              },
+              prevButtonProps: {
+                children: (
+                  "Zurück"
+                )
+              }
+            },
+            {
+              title: 'Statistik zur Nutzung',
+              description: 'Hier findest du eine kurze und klare Übersicht darüber, wie viele Mails deine Firma über das aktuelle Jahr mit Siteware.Mail bereits verbraucht hat und wie viele Mails noch auf eurem Konto verfügbar sind.',
+              target: () => budgetRef.current,
+              nextButtonProps: {
+                children: (
+                  "Weiter"
+                )
+              },
+              prevButtonProps: {
+                children: (
+                  "Zurück"
+                )
+              }
+            },
+            {
+                title: 'Ihr wollt noch mehr E-Mails optimieren?',
+                description: 'Solltet ihr den Bedarf haben, mehr E-Mails zu optimieren, könnt ihr zusätzliche E-Mail-Kapazitäten hier direkt erwerben.',
+                target: () => buyRef.current,
+                nextButtonProps: {
+                  children: (
+                    "Weiter"
+                  )
+                },
+                prevButtonProps: {
+                  children: (
+                    "Zurück"
+                  )
+                }
+              },
+            {
+              title: 'Eure bisherigen Einkäufe',
+              description: 'In der untenstehenden Tabelle findet ihr eine Übersicht eurer bisherigen Einkäufe bei Siteware.Mail. Hier habt ihr die Möglichkeit, Rechnungen herunterzuladen und unterbrochene Einkäufe abzuschließen.',
+              target: () => orderRef.current,
+              nextButtonProps: {
+                children: (
+                  "Alles klar"
+                ),
+                onClick: async () => {
+                  let currstate = user.tour;
+                  currstate.usage = true;
+                  updateData("User", login.uid, { tour: currstate })
+                }
+              },
+              prevButtonProps: {
+                children: (
+                  "Zurück"
+                )
+              }
+            }
+        ];
+    }
 
     useEffect(() => {
         if(!role.isCompany) {
@@ -136,145 +357,155 @@ export default function Company(props: InitialProps) {
 
     const getCompanyInput = () => {
         if(role.canEditCompanyDetails){
-            return (<Form 
-                layout='vertical'
-                onFinish={editCompany}
-                onChange={() => {setIsErrVisible(false), setEditSuccessfull(false)}}
-                form={form}
-            >
+            return (
+                <div ref={companyRef}>
+                    <Form 
+                        layout='vertical'
+                        onFinish={editCompany}
+                        onChange={() => {setIsErrVisible(false), setEditSuccessfull(false)}}
+                        form={form}
+                    >
 
-                <Form.Item
-                    label="Firmenname"
-                    name="companyname"
-                    className={styles.formpart}
-                >
-                    <Input className={styles.forminput} placeholder="Name der Firma..." />
-                </Form.Item>
+                        <Form.Item
+                            label="Firmenname"
+                            name="companyname"
+                            className={styles.formpart}
+                        >
+                            <Input className={styles.forminput} placeholder="Name der Firma..." />
+                        </Form.Item>
 
-                <Space direction='horizontal' wrap>
-                <Form.Item
-                    label="Straße"
-                    name="companystreet"
-                    className={styles.formpart}
-                >
-                    <Input className={styles.forminput} placeholder="Musterstraße 1..." />
-                </Form.Item>
+                        <Space direction='horizontal' wrap>
+                        <Form.Item
+                            label="Straße"
+                            name="companystreet"
+                            className={styles.formpart}
+                        >
+                            <Input className={styles.forminput} placeholder="Musterstraße 1..." />
+                        </Form.Item>
 
-                <Form.Item
-                    label="Ort"
-                    name="companycity"
-                    className={styles.formpart}
-                >
-                    <Input className={styles.forminput} placeholder="Musterstadt..." />
-                </Form.Item>
+                        <Form.Item
+                            label="Ort"
+                            name="companycity"
+                            className={styles.formpart}
+                        >
+                            <Input className={styles.forminput} placeholder="Musterstadt..." />
+                        </Form.Item>
 
-                <Form.Item
-                    label="Plz"
-                    name="companypostalcode"
-                    className={styles.formpart}
-                >
-                    <Input className={styles.forminput} placeholder="123456"/>
-                </Form.Item>
+                        <Form.Item
+                            label="Plz"
+                            name="companypostalcode"
+                            className={styles.formpart}
+                        >
+                            <Input className={styles.forminput} placeholder="123456"/>
+                        </Form.Item>
 
-                <Form.Item
-                    label="Land"
-                    name="companycountry"
-                    className={styles.formpart}
-                >
-                    <Select
-                        className={styles.formselect}
-                        options={[
-                        {
-                            value: 'de',
-                            label: 'Deutschland',
-                        },
-                        ]}
-                        style={{ width: 150 }}
-                    />
-                </Form.Item>
-                </Space>
+                        <Form.Item
+                            label="Land"
+                            name="companycountry"
+                            className={styles.formpart}
+                        >
+                            <Select
+                                className={styles.formselect}
+                                options={[
+                                {
+                                    value: 'de',
+                                    label: 'Deutschland',
+                                },
+                                ]}
+                                style={{ width: 150 }}
+                            />
+                        </Form.Item>
+                        </Space>
 
-                <Form.Item
-                    label="Background der Firma"
-                    name="companybackground"
-                    className={styles.formpart}
-                >
-                    <TextArea className={styles.forminput} rows={10} placeholder="Was ist das Kerngeschäft der Firma?"/>
-                </Form.Item>
+                        <div ref={backgroundRef}>
+                            <Form.Item
+                                label="Background der Firma"
+                                name="companybackground"
+                                className={styles.formpart}
+                            >
+                                <TextArea className={styles.forminput} rows={10} placeholder="Was ist das Kerngeschäft der Firma?"/>
+                            </Form.Item>
+                        </div>
 
-                <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
-                    <Alert type='error' message={errMsg} />
+                        <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
+                            <Alert type='error' message={errMsg} />
+                        </div>
+
+                        <div className={styles.successrow} style={{display: (editSuccessfull)? "block": "none"}}>
+                            <Alert type='success' message="Speichern erfolgreich!" />
+                        </div>
+
+                        <div className={styles.finishformrow}>
+                            <Button className={styles.savebutton} type='primary' htmlType='submit'>Speichern</Button>
+                        </div>
+
+                    </Form>
                 </div>
-
-                <div className={styles.successrow} style={{display: (editSuccessfull)? "block": "none"}}>
-                    <Alert type='success' message="Speichern erfolgreich!" />
-                </div>
-
-                <div className={styles.finishformrow}>
-                    <Button className={styles.savebutton} type='primary' htmlType='submit'>Speichern</Button>
-                </div>
-
-            </Form>);
+            );
         }else{
-            return (<Form 
-                layout='vertical'
-                onFinish={() => {}}
-                form={form}
-            >
+            return (
+                <div ref={companyRef}>
+                    <Form 
+                        layout='vertical'
+                        onFinish={() => {}}
+                        form={form}
+                    >
 
-                <Form.Item
-                    label="Firmenname"
-                    name="companyname"
-                >
-                    <Input disabled/>
-                </Form.Item>
+                        <Form.Item
+                            label="Firmenname"
+                            name="companyname"
+                        >
+                            <Input disabled/>
+                        </Form.Item>
 
-                <Space direction='horizontal' wrap>
-                <Form.Item
-                    label="Straße"
-                    name="companystreet"
-                >
-                    <Input disabled/>
-                </Form.Item>
+                        <Space direction='horizontal' wrap>
+                        <Form.Item
+                            label="Straße"
+                            name="companystreet"
+                        >
+                            <Input disabled/>
+                        </Form.Item>
 
-                <Form.Item
-                    label="Ort"
-                    name="companycity"
-                >
-                    <Input disabled/>
-                </Form.Item>
+                        <Form.Item
+                            label="Ort"
+                            name="companycity"
+                        >
+                            <Input disabled/>
+                        </Form.Item>
 
-                <Form.Item
-                    label="Plz"
-                    name="companypostalcode"
-                >
-                    <Input disabled/>
-                </Form.Item>
+                        <Form.Item
+                            label="Plz"
+                            name="companypostalcode"
+                        >
+                            <Input disabled/>
+                        </Form.Item>
 
-                <Form.Item
-                    label="Land"
-                    name="companycountry"
-                >
-                    <Select
-                        options={[
-                        {
-                            value: 'de',
-                            label: 'Deutschland',
-                        },
-                        ]}
-                        disabled
-                    />
-                </Form.Item>
-                </Space>
+                        <Form.Item
+                            label="Land"
+                            name="companycountry"
+                        >
+                            <Select
+                                options={[
+                                {
+                                    value: 'de',
+                                    label: 'Deutschland',
+                                },
+                                ]}
+                                disabled
+                            />
+                        </Form.Item>
+                        </Space>
 
-                <Form.Item
-                    label="Background der Firma"
-                    name="companybackground"
-                >
-                    <TextArea rows={10} disabled/>
-                </Form.Item>
+                        <Form.Item
+                            label="Background der Firma"
+                            name="companybackground"
+                        >
+                            <TextArea rows={10} disabled/>
+                        </Form.Item>
 
-            </Form>);
+                    </Form>
+                </div>
+            );
         }
     }
 
@@ -386,7 +617,7 @@ export default function Company(props: InitialProps) {
                     <Card title={"Nutzer"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
                         <Table loading={userTableLoading} dataSource={[...userTableData]} columns={usercolumns} rowKey={(record: User & { id: string }) => {return record.id}}/>
                         <div className={styles.inviteuserrow}>
-                            <Button type='primary' onClick={() => {setInviteUserModalOpen(true)}}>Nutzer einladen</Button>
+                            <Button ref={inviteRef} type='primary' onClick={() => {setInviteUserModalOpen(true)}}>Nutzer einladen</Button>
                         </div>
                     </Card>
 
@@ -423,9 +654,7 @@ export default function Company(props: InitialProps) {
                                     <Button type='primary' htmlType='submit' onClick={() => {}}>Einladen</Button>
                                 </Space>
                             </div>
-            
                         </Form>
-
                     </Modal>
                 </div>
                 
@@ -478,9 +707,12 @@ export default function Company(props: InitialProps) {
             }
         },
         {
-            title: 'Erworbene Tokens',
+            title: 'Erworbene Mails',
             dataIndex: 'tokens',
             key: 'tokens',
+            render: (_: any, obj: any) => {
+                return obj.amount
+            }
         },
         {
             title: 'Betrag',
@@ -531,6 +763,9 @@ export default function Company(props: InitialProps) {
           },
       ];
 
+    const calculateMails = () => {
+        return Math.floor(company.tokens/calculations.tokensPerMail);
+    }
   
     return (
         <SidebarLayout role={role} user={user} login={login}>
@@ -539,66 +774,74 @@ export default function Company(props: InitialProps) {
                     <Card className={styles.companysettings} title={`Ihre Firma`} headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
                         {getCompanyInput()}
                     </Card>
-                    <Card className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Tokens"} bordered={true}>
-                        <h2>Dein Token-Budget</h2>
-                        <div className={styles.quotarow}>
-                            <div className={styles.tokenbudget}>{(company.unlimited)? "∞" : company.tokens} Tokens</div>
-                        </div>
-                        <h2>Verbrauch</h2>
-                            <div className={styles.usageinfo}>
-                                
-                                <div className={styles.barcontainer}>
-                                    <Bar
-                                        options={{
-                                            maintainAspectRatio: false,
-                                            plugins: {
-                                                legend: {
-                                                    position: 'top' as const,
+                    <Card className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Mails"} bordered={true}>
+                        <div ref={budgetRef}>
+                            <h2>Dein Mail-Budget</h2>
+                            <div className={styles.quotarow}>
+                                <div className={styles.tokenbudget}>{(company.unlimited)? "∞" : calculateMails()} Mails</div>
+                            </div>
+                            <h2>Verbrauch</h2>
+                                <div className={styles.usageinfo}>
+                                    
+                                    <div className={styles.barcontainer}>
+                                        <Bar
+                                            options={{
+                                                maintainAspectRatio: false,
+                                                plugins: {
+                                                    legend: {
+                                                        position: 'top' as const,
+                                                    },
+                                                    title: {
+                                                        display: false,
+                                                        text: 'Chart.js Bar Chart',
+                                                    },
                                                 },
-                                                title: {
-                                                    display: false,
-                                                    text: 'Chart.js Bar Chart',
-                                                },
-                                            },
-                                        }}
-                                        data={{
-                                            labels:  months,
-                                            datasets: [
-                                                {
-                                                    label: "Tokens",
-                                                    data: months.map((label, idx) => {
-                                                        let sum = 0;
-                                                        userTableData.forEach((su: User) => {
-                                                          su.usedCredits.forEach((usage: Usage) => {
-                                                            if(usage.month == idx+1 && usage.year == new Date().getFullYear()){
-                                                                sum += usage.amount;
-                                                            }
-                                                          });
-                                                        })
-                                                        return sum;
-                                                    }),
-                                                    backgroundColor: 'rgba(16, 24, 40, 0.8)',
-                                                }
-                                            ]
-                                        }}
-                                    />
+                                            }}
+                                            data={{
+                                                labels:  months,
+                                                datasets: [
+                                                    {
+                                                        label: "Tokens",
+                                                        data: months.map((label, idx) => {
+                                                            let sum = 0;
+                                                            userTableData.forEach((su: User) => {
+                                                            su.usedCredits.forEach((usage: Usage) => {
+                                                                if(usage.month == idx+1 && usage.year == new Date().getFullYear()){
+                                                                    sum += Math.floor(usage.amount/calculations.tokensPerMail);
+                                                                }
+                                                            });
+                                                            })
+                                                            return sum;
+                                                        }),
+                                                        backgroundColor: 'rgba(16, 24, 40, 0.8)',
+                                                    }
+                                                ]
+                                            }}
+                                        />
+                                    </div>
+
                                 </div>
 
+                            <div className={styles.generatebuttonrow}>
+                                {(company.unlimited)? <></>:<Link href={"/upgrade"}><Button ref={buyRef} className={styles.backbutton} type='primary'>Weitere Mails kaufen</Button></Link>}
                             </div>
-
-                        <div className={styles.generatebuttonrow}>
-                            {(company.unlimited)? <></>:<Link href={"/upgrade"}><Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button></Link>}
                         </div>
                     </Card>
                 </div>
                 <div className={styles.companyorders}>
                     <Card title={"Einkäufe"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
-                        <Table dataSource={company.orders} columns={purchasecolumns} />
+                        <Table ref={orderRef} dataSource={company.orders} columns={purchasecolumns} />
                     </Card>
                 </div>
-                <div className={styles.companyusers}>
+                <div ref={userRef} className={styles.companyusers}>
                     {getUserOverview()}
                 </div>
+                <Tour open={open} onClose={async () => {
+                    let currstate = user.tour;
+                    currstate.usage = true;
+                    updateData("User", login.uid, { tour: currstate });
+                    setOpen(false);
+                }} steps={steps} />
             </div>
         </SidebarLayout>
     );

@@ -6,7 +6,7 @@ export type CompanySettings = {
 export type Quota = {
     price: number;
     tokens: number;
-    features: Array<String>
+    features: Array<string>
 }
 
 export type Usage = {
@@ -38,15 +38,15 @@ export type Company = {
 }
 
 export const basicCompany = {
-    name: "",
-    street: "",
-    city: "",
-    postalcode: "",
-    country: "",
-    settings: {
-        background: "",
-    },
-    tokens: 0,
-    unlimited: false,
-    orders: []
+  name: "",
+  street: "",
+  city: "",
+  postalcode: "",
+  country: "",
+  settings: {
+    background: ""
+  },
+  tokens: 0,
+  unlimited: false,
+  orders: []
 }

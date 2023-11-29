@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@chatra/chatra": "^1.0.3",
@@ -19,6 +20,8 @@
     "cookies": "^0.8.0",
     "crypto-js": "^4.1.1",
     "dotenv": "^16.3.1",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
     "firebase": "^10.5.0",
     "firebase-admin": "^11.11.0",
     "import": "^0.0.6",
@@ -34,8 +37,15 @@
     "react-to-print": "^2.14.15"
   },
   "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^1.4.1",
     "@types/node": "20.7.1",
     "@types/react": "18.2.23",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.54.0",
+    "eslint-config-next": "14.0.3",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "gts": "^5.2.0",
+    "prettier": "^3.1.0",
     "sass": "^1.68.0",
     "typescript": "5.2.2"
   }

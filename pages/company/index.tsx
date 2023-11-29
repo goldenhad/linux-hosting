@@ -868,7 +868,7 @@ export default function Company( props: InitialProps ) {
                       labels:  months,
                       datasets: [
                         {
-                          label: "Tokens",
+                          label: "Mails",
                           data: months.map( ( label, idx ) => {
                             let sum = 0;
                             userTableData.forEach( ( su: User ) => {

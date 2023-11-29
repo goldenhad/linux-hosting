@@ -9,7 +9,7 @@ import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { Profile } from "../../firebase/types/Profile";
 import { doc, updateDoc } from "firebase/firestore";
-import { handleEmptyString, listToOptions } from "../../helper/architecture";
+import { handleEmptyString, handleEmptyUser, listToOptions } from "../../helper/architecture";
 import Info from "../../public/icons/info.svg";
 import Clipboard from "../../public/icons/clipboard.svg";
 import updateData from "../../firebase/data/updateData";
@@ -64,7 +64,7 @@ export default function Dialogue( props: InitialProps ) {
   const [ tokens, setTokens ] = useState( "" );
   const [ promptError, setPromptError ] = useState( false );
   const [ decryptedProfiles, setDecryptedProfiles ] = useState( [] );
-  const [open, setOpen] = useState<boolean>( !user.tour.dialog );
+  const [open, setOpen] = useState<boolean>( !handleEmptyUser( user ).tour.dialog );
 
   const profileRef = useRef( null );
   const dialogRef = useRef( null );

@@ -136,7 +136,7 @@ export const AuthContextProvider = ( {
     
       return unsubscribe;
     }
-  }, [login, user] );
+  }, [login] );
 
   useEffect( () => {
     if( login ){

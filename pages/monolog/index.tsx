@@ -9,7 +9,7 @@ import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { Profile } from "../../firebase/types/Profile";
 import { doc, updateDoc } from "firebase/firestore";
-import { handleEmptyString, listToOptions } from "../../helper/architecture";
+import { handleEmptyString, handleEmptyUser, listToOptions } from "../../helper/architecture";
 import Info from "../../public/icons/info.svg";
 import Clipboard from "../../public/icons/clipboard.svg";
 import updateData from "../../firebase/data/updateData";
@@ -63,7 +63,7 @@ export default function Monologue( props: InitialProps ) {
   const [ promptError, setPromptError ] = useState( false );
   const [ decryptedProfiles, setDecryptedProfiles ] = useState( [] );
   const [ renderAllowed, setRenderAllowed ] = useState( false );
-  const [open, setOpen] = useState<boolean>( !user.tour.monolog );
+  const [open, setOpen] = useState<boolean>( !handleEmptyUser( user ).tour.monolog );
 
   const profileRef = useRef( null );
   const continueRef = useRef( null );

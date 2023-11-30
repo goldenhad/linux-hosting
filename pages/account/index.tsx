@@ -15,6 +15,7 @@ import deleteData from "../../firebase/data/deleteData";
 import deleteSitewareUser from "../../firebase/auth/delete";
 import { getDocWhere } from "../../firebase/data/getData";
 import reauthUser from "../../firebase/auth/reauth";
+import { useRouter } from "next/router";
 
 
 export interface InitialProps {
@@ -50,8 +51,8 @@ export default function Account() {
   const [ deleteAccountModal, setDeleteAccountModal ] = useState( false );
   const [ reauthSuccessfull, setReauthSuccessfull] = useState( false );
   const [ reauthErr, setReauthErr ] = useState( false );
-
   const [ recommendLink, setRecommendLink ] = useState( "" );
+  const router = useRouter();
 
   useEffect( () => {
     personalForm.setFieldValue( "username", user.username );
@@ -65,14 +66,14 @@ export default function Account() {
 
     const getRecommendLink = async () => {
 
-      const encryptedLink = await axios.post( "/api/recommend", { from: login.uid } );
+      const encryptedLink = await axios.post( "/api/recommend", { from: user.Company } );
       if( encryptedLink.data.message != "" ){
         setRecommendLink( encryptedLink.data.message );
       }
     }
     
     getRecommendLink();
-  }, [company.city, company.postalcode, company.street, login.email, login.uid, personalForm, user.firstname, user.lastname, user.username] );
+  }, [] );
 
 
 
@@ -111,7 +112,38 @@ export default function Account() {
       setIsErrVisible( true );
       setEditSuccessfull( false );
     }
+  }
 
+  const getRecommendCard = () => {
+    if( company ){
+      if( !company.recommended ){
+        return(
+          <div className={styles.recommend}>
+            <Card className={styles.recommendcard} title="Siteware.Mail weiterempfehlen" headStyle={{ backgroundColor: "#F9FAFB" }} bordered={true}>
+              <div className={styles.recommendContent}>
+                <h3 className={styles.recommendHeadline}>Lade deine Freunde ein und sichere dir Gratis-Mails!</h3>
+                <p>Du hast jetzt die Gelegenheit, deine Freunde zu unserem Service einzuladen.
+                      Für jeden Freund, der sich erfolgreich registriert, schenken wir dir 200 Gratis-Mails als Dankeschön.
+                      Teile einfach diesen Link, um deine Freunde einzuladen:
+                </p>
+                <div className={styles.recommendLink}>
+                  {( recommendLink == "" )? <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />: <div onClick={() => {
+                    copyLink()
+                  }}>{recommendLink}</div>}
+                </div>
+                <p>Alternativ kannst du auch folgenden QR-Code herunterladen und deinen Freunden schicken:</p>
+                <div className={styles.recommendqrcode} id="recommendqrcode">
+                  <QRCode errorLevel="M" status={( recommendLink == "" )? "loading": undefined} value={recommendLink} bgColor="#fff" />
+                </div>
+                <div className={styles.downloadQRCode}>
+                  <Button type='primary' onClick={downloadQRCode} className={styles.download}>Download</Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        );
+      }
+    }
   }
 
   const getPersonalForm = () => {
@@ -408,6 +440,8 @@ export default function Account() {
     default:
       break;
     }
+
+    router.push( "/login" );
   }
 
   const getUser = () =>{
@@ -443,29 +477,7 @@ export default function Account() {
             </Card>
           </div>
 
-          <div className={styles.recommend}>
-            <Card className={styles.recommendcard} title="Mailbuddy weiterempfehlen" headStyle={{ backgroundColor: "#F9FAFB" }} bordered={true}>
-              <div className={styles.recommendContent}>
-                <h3 className={styles.recommendHeadline}>Lade deine Freunde ein und sichere dir Gratis-Mails!</h3>
-                <p>Du hast jetzt die Gelegenheit, deine Freunde zu unserem Service einzuladen.
-                    Für jeden Freund, der sich erfolgreich registriert, schenken wir dir 200 Gratis-Mails als Dankeschön.
-                    Teile einfach diesen Link, um deine Freunde einzuladen:
-                </p>
-                <div className={styles.recommendLink}>
-                  {( recommendLink == "" )? <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />: <div onClick={() => {
-                    copyLink()
-                  }}>{recommendLink}</div>}
-                </div>
-                <p>Alternativ kannst du auch folgenden QR-Code herunterladen und deinen Freunden schicken:</p>
-                <div className={styles.recommendqrcode} id="recommendqrcode">
-                  <QRCode errorLevel="M" status={( recommendLink == "" )? "loading": undefined} value={recommendLink} bgColor="#fff" />
-                </div>
-                <div className={styles.downloadQRCode}>
-                  <Button type='primary' onClick={downloadQRCode} className={styles.download}>Download</Button>
-                </div>
-              </div>
-            </Card>
-          </div>
+          {getRecommendCard()}
 
           <div className={styles.deleteRow}>
             <Button type='primary' danger onClick={() => {

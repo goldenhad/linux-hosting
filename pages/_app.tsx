@@ -39,11 +39,11 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
       <>
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <meta property="og:title" content="Siteware Mailbuddy dein intelligenter Mail-Assistent" />
+          <meta property="og:title" content="Siteware.Mail dein intelligenter Mail-Assistent" />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/cartoon.jpeg" />
           <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-          <title>Siteware-Mailbuddy | mail assistant</title>
+          <title>Siteware.Mail | mail assistant</title>
         </Head>
         <div className={roboto.className}>
           <Component {...pageProps}/> 
@@ -55,11 +55,11 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
       <>
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <meta property="og:title" content="Siteware Mailbuddy dein intelligenter Mail-Assistent" />
+          <meta property="og:title" content="Siteware.Mail dein intelligenter Mail-Assistent" />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/cartoon.jpeg" />
           <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-          <title>Siteware-Mailbuddy | mail assistant</title>
+          <title>Siteware.Mail | mail assistant</title>
         </Head>
         <AuthContextProvider>
           <div className={roboto.className}>

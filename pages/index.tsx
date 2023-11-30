@@ -1,4 +1,4 @@
-import { TourProps, Tour } from "antd";
+import { TourProps, Tour, Button } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import updateData from "../firebase/data/updateData";
 import { handleEmptyUser, handleUndefinedTour } from "../helper/architecture";
+import getDocument from "../firebase/data/getData";
 
 
 export interface InitialProps {

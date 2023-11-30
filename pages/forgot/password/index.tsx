@@ -121,7 +121,7 @@ export default function Forgot_Password(){
           {getResetForm()}
         </div>
       </div>
-      <div className={styles.copyrightfooter}>© Mailbuddy 2023</div>
+      <div className={styles.copyrightfooter}>© Siteware.Mail 2023</div>
     </div>
   );
 }
@@ -132,7 +132,7 @@ Forgot_Password.getLayout = ( page ) => {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware-Mailbuddy | mail assistant</title>
+        <title>Siteware.Mail | mail assistant</title>
       </Head>
       <main>
         {page}

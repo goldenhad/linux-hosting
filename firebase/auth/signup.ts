@@ -1,13 +1,14 @@
 import { firebase_app } from "../../db";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import { getDocWhere } from "../data/getData";
+import getDocument, { getDocWhere } from "../data/getData";
 import { addDataWithoutId } from "../data/setData";
 import addData from "../data/setData";
 import crypto from "crypto";
+import updateData from "../data/updateData";
 
 const auth = getAuth( firebase_app );
 
-export default async function signUp( firstname, lastname, email, username, password, name, street, city, postalcode, country, isPersonal ) {
+export default async function signUp( firstname, lastname, email, username, password, name, street, city, postalcode, country, isPersonal, recommended ) {
   let result = null;
   const error = null;
         
@@ -56,6 +57,18 @@ export default async function signUp( firstname, lastname, email, username, pass
                 profiles: false
               }
             } );
+
+            if( recommended ){
+              const cmpny_result = await getDocument( "Company", "Y2X7TnZOGc5RGkLLJcv4" );
+              const cmpny = cmpny_result.result.data();
+
+              const setting_result = await getDocument( "Settings", "Calculation" );
+              const settings = setting_result.result.data();
+
+              if( !cmpny.recommended ){
+                await updateData( "Company", "Y2X7TnZOGc5RGkLLJcv4", { tokens: cmpny.tokens + settings.tokensPerMail * 200, recommended: true } );
+              }
+            }
             //console.log(usercreationresult);
           } catch( e ) {
             //console.log(e);

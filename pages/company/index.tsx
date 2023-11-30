@@ -658,7 +658,7 @@ export default function Company( props: InitialProps ) {
       setInviteUserModalOpen( false );
     }catch( e ){
       setIsInviteErrVisible( true );
-      setInviteErrMsg( "Ein Nutzer mit dieser E-Mail Adresse nutzt Mailbuddy bereits!" );
+      setInviteErrMsg( "Ein Nutzer mit dieser E-Mail Adresse nutzt Siteware.Mail bereits!" );
     }
   }
 

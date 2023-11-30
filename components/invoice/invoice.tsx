@@ -79,7 +79,7 @@ const Invoice = ( props: { company, order: Order, user }, ref ) => {
           <tr className="item">
             <td>1</td>
             <td>swm0001</td>
-            <td className="itemname">Mailbuddy Token</td>
+            <td className="itemname">Siteware.Mail Token</td>
             <td>{props.order.tokens}</td>
             <td>19%</td>
             <td>{convertToCurrency( props.order.amount / ( 1 + 0.19 ) )}</td>

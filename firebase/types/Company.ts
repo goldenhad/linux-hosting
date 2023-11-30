@@ -34,7 +34,8 @@ export type Company = {
     settings: CompanySettings;
     tokens: number;
     unlimited: boolean;
-    orders: Array<Order>
+    orders: Array<Order>;
+    recommended: boolean;
 }
 
 export const basicCompany = {
@@ -48,5 +49,6 @@ export const basicCompany = {
   },
   tokens: 0,
   unlimited: false,
-  orders: []
+  orders: [],
+  recommended: false
 }

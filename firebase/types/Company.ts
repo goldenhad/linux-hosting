@@ -25,6 +25,12 @@ export type Order = {
     invoiceId: string,
 }
 
+export type InvitedUser = {
+    email: string;
+    name: string;
+    role: string;
+}
+
 export type Company = {
     name: string;
     street: string;
@@ -36,6 +42,7 @@ export type Company = {
     unlimited: boolean;
     orders: Array<Order>;
     recommended: boolean;
+    invitedUsers: Array<InvitedUser>;
 }
 
 export const basicCompany = {
@@ -50,5 +57,6 @@ export const basicCompany = {
   tokens: 0,
   unlimited: false,
   orders: [],
-  recommended: false
+  recommended: false,
+  invitedUsers: []
 }

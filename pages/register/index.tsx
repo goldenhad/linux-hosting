@@ -100,6 +100,7 @@ export default function Register( props ){
 
   const onFinishRegisterCompany = async ( values ) => {
     const isPersonal = values.usecase != "Für mein Unternehmen";
+    
 
     if( isPersonal ){
       const { error } = await signUp(

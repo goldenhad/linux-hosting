@@ -1,13 +1,15 @@
 import { firebase_app } from "../../db";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import { getDocWhere } from "../data/getData";
+import getDocument, { getDocWhere } from "../data/getData";
 import { addDataWithoutId } from "../data/setData";
 import addData from "../data/setData";
 import crypto from "crypto";
+import updateData from "../data/updateData";
+import { InvitedUser } from "../types/Company";
 
 const auth = getAuth( firebase_app );
 
-export default async function signUp( firstname, lastname, email, username, password, name, street, city, postalcode, country, isPersonal ) {
+export default async function signUp( firstname, lastname, email, username, password, name, street, city, postalcode, country, isPersonal, recommended ) {
   let result = null;
   const error = null;
         
@@ -27,7 +29,8 @@ export default async function signUp( firstname, lastname, email, username, pass
             Usage: [],
             tokens: 150000,
             unlimited: false,
-            orders: [] 
+            orders: [],
+            invitedUsers: []
           } );
           try {
             await addData( "User", result.user.uid, {
@@ -56,6 +59,18 @@ export default async function signUp( firstname, lastname, email, username, pass
                 profiles: false
               }
             } );
+
+            if( recommended ){
+              const cmpny_result = await getDocument( "Company", recommended );
+              const cmpny = cmpny_result.result.data();
+
+              const setting_result = await getDocument( "Settings", "Calculation" );
+              const settings = setting_result.result.data();
+
+              if( !cmpny.recommended ){
+                await updateData( "Company", recommended, { tokens: cmpny.tokens + settings.tokensPerMail * 200, recommended: true } );
+              }
+            }
             //console.log(usercreationresult);
           } catch( e ) {
             //console.log(e);
@@ -92,6 +107,7 @@ export async function signUpUser( firstname, lastname, email, username, password
             firstname: firstname,
             lastname: lastname,
             username: username,
+            email: email,
             Role: role,
             Company: companyid,
             profiles: [],
@@ -114,6 +130,19 @@ export async function signUpUser( firstname, lastname, email, username, password
               profiles: false
             }
           } );
+
+          const invusers = await getDocument( "Company", companyid );
+          if( invusers.result.data() ){
+            const data = invusers.result.data();
+            if( data.invitedUsers ){
+              const invited = data.invitedUsers;
+              const cleaned = invited.filter( ( elm: InvitedUser ) => {
+                return elm.email != email;
+              } );
+
+              await updateData( "Company", companyid, { invitedUsers: cleaned } );
+            }
+          }
           //console.log(usercreationresult);
         } catch( e ) {
           //console.log(e);

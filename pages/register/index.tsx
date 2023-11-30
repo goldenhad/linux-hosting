@@ -7,7 +7,7 @@ import signUp, { signUpUser } from "../../firebase/auth/signup";
 import Head from "next/head";
 import userExists, { usernameExists } from "../../firebase/auth/userExists";
 import CookieBanner from "../../components/CookieBanner";
-import { getDocWhere } from "../../firebase/data/getData";
+import getDocument, { getDocWhere } from "../../firebase/data/getData";
 import Link from "next/link";
 import CryptoJS from "crypto-js";
 
@@ -67,6 +67,24 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
     } catch( e ) {
       return { props: {  } };
     }
+  }else if( query.recommend ){
+    const readableCipher = Buffer.from( query.recommend as string, "base64" ).toString();
+    const deciphered = CryptoJS.AES.decrypt( readableCipher, process.env.MAILENC ).toString( CryptoJS.enc.Utf8 );
+    const json = Buffer.from( deciphered as string, "base64" ).toString();
+    const recommendparams = JSON.parse( json );
+    
+    if( recommendparams.from ){
+
+      return { props: { 
+        invitedBy: {
+          code: recommendparams.from
+        }
+      } };
+    }else{
+      return { props: { } };
+    }
+
+    
   }else{
     return { props: {  } };
   }
@@ -82,9 +100,23 @@ export default function Register( props ){
 
   const onFinishRegisterCompany = async ( values ) => {
     const isPersonal = values.usecase != "Für mein Unternehmen";
+    
 
     if( isPersonal ){
-      const { error } = await signUp( values.firstname, values.lastname, values.email, values.username, values.password, "", "", "", "", "DE", isPersonal );
+      const { error } = await signUp(
+        values.firstname,
+        values.lastname,
+        values.email,
+        values.username,
+        values.password,
+        "",
+        "",
+        "",
+        "",
+        "DE",
+        isPersonal,
+        props.invitedBy.code
+      );
             
       if ( error ) {
         //console.log(error);
@@ -107,7 +139,8 @@ export default function Register( props ){
         values.city,
         values.postalcode,
         "DE",
-        isPersonal
+        isPersonal,
+        undefined
       );
             
       if ( error ) {
@@ -554,7 +587,8 @@ export default function Register( props ){
           <Form.Item label="Nutzung" name={"usecase"} className={styles.loginpart}>
             <Select onChange={( value ) => {
               ( value == "Für mein Unternehmen" )? setRegisteringCompany( true ): setRegisteringCompany( false ) 
-            }} placeholder={"Wie planst du Mailbuddy zu nutzen?"} options={[{ key: 0, value: "Nur für mich persönlich" }, { key: 1, value: "Für mein Unternehmen" }]}/>
+            }} placeholder={"Wie planst du Siteware.Mail zu nutzen?"}
+            options={[{ key: 0, value: "Nur für mich persönlich" }, { key: 1, value: "Für mein Unternehmen" }]}/>
           </Form.Item>
     
           {
@@ -607,7 +641,7 @@ export default function Register( props ){
           {getForm()}
         </div>
       </div>
-      <div className={styles.copyrightfooter}>© Mailbuddy 2023</div>
+      <div className={styles.copyrightfooter}>© Siteware.Mail 2023</div>
     </div>
   );
 }
@@ -617,8 +651,12 @@ Register.getLayout = ( page ) => {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content="Siteware.Mail dein intelligenter Mail-Assistent" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="/ogimage.jpeg" />
+        <meta property="og:url" content={`${process.env.BASEURL}`} />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware-Mailbuddy | mail assistant</title>
+        <title>Siteware.Mail | mail assistant</title>
       </Head>
       <main>
         {page}

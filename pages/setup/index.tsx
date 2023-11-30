@@ -110,7 +110,7 @@ export default function Setup(){
           title: "Wie schreibst du deine Mails?",
           content: <div className={styles.singlestep}>
             <Paragraph>
-                Wir möchten mehr über deinen Schreibstil erfahren, damit Mailbuddy ihn perfekt imitieren kann. 
+                Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
                 Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
             </Paragraph>
             <div className={styles.formpart}>
@@ -152,7 +152,7 @@ export default function Setup(){
           title: "Abschließen",
           content: <div className={styles.singlestep}>
             <Paragraph>
-                Du bist jetzt startklar für Mailbuddy! Alles, was du brauchst, ist einsatzbereit. Los geht&apos;s. 
+                Du bist jetzt startklar für Siteware.Mail! Alles, was du brauchst, ist einsatzbereit. Los geht&apos;s. 
                 Erlebe eine neue Dimension der E-Mail-Kommunikation!
             </Paragraph>
           </div>
@@ -187,7 +187,7 @@ export default function Setup(){
           title: "Wie schreibst du deine Mails?",
           content: <div className={styles.singlestep}>
             <Paragraph>
-                Wir möchten mehr über deinen Schreibstil erfahren, damit Mailbuddy ihn perfekt imitieren kann. 
+                Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
                 Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
             </Paragraph>
             <div className={styles.formpart}>
@@ -229,7 +229,7 @@ export default function Setup(){
           title: "Abschließen",
           content: <div className={styles.singlestep}>
             <Paragraph>
-                Du bist jetzt startklar für Mailbuddy! Alles, was du brauchst, ist einsatzbereit. Los geht&apos;s. 
+                Du bist jetzt startklar für Siteware.Mail! Alles, was du brauchst, ist einsatzbereit. Los geht&apos;s. 
                 Erlebe eine neue Dimension der E-Mail-Kommunikation!
             </Paragraph>
           </div>
@@ -278,7 +278,7 @@ export default function Setup(){
         </div>
 
         <div className={styles.formContainer}>
-          <div className={styles.formtitle}>Willkommen bei Mailbuddy</div>
+          <div className={styles.formtitle}>Willkommen bei Siteware.Mail</div>
           <div className={styles.formexplanation}>Wir müssen zuerst dein Konto einrichten</div>
                     
           <div className={styles.stepcontainer}>
@@ -299,7 +299,7 @@ export default function Setup(){
               )}
               {current === getFormSteps().length - 1 && (
                 <Button type="primary" onClick={() => setupUser()}>
-                                Zu Mailbuddy
+                                Zu Siteware.Mail
                 </Button>
               )}
               {current > 0 && (
@@ -311,7 +311,7 @@ export default function Setup(){
           </div>
         </div>
       </div>
-      <div className={styles.copyrightfooter}>© Mailbuddy 2023</div>
+      <div className={styles.copyrightfooter}>© Siteware.Mail 2023</div>
     </div>
   );
 }

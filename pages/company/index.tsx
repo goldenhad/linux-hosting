@@ -42,7 +42,7 @@ import {
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import { User } from "../../firebase/types/User";
-import { Usage } from "../../firebase/types/Company";
+import { InvitedUser, Usage } from "../../firebase/types/Company";
 const { TextArea } = Input;
 
 ChartJS.register(
@@ -366,6 +366,18 @@ export default function Company( props: InitialProps ) {
   useEffect( () => {
     const load = async () => {
       const { result, error } = await getDocWhere( "User", "Company", "==", user.Company );
+      let users: Array<any> = [];
+      users = result;
+
+      if( company.invitedUsers ){
+        company.invitedUsers.forEach( ( inv: InvitedUser ) => {
+          if( users ){
+            users.push( inv );
+          }
+        } );
+      }
+      
+
       if( !error ){
         setUserTableData( result );
         setUserTableLoading( false );
@@ -579,13 +591,15 @@ export default function Company( props: InitialProps ) {
       dataIndex: "usedCredits",
       key: "usedCredits",
       render: ( _, obj ) => {
-        const usageidx = obj.usedCredits.findIndex( ( val ) => {
-          return val.month == props.Data.currentMonth && val.year == props.Data.currentYear
-        } );
-        if( usageidx != -1 ){
-          return obj.usedCredits[usageidx].amount;
-        }else{
-          return "0";
+        if( obj.username ){
+          const usageidx = obj.usedCredits.findIndex( ( val ) => {
+            return val.month == props.Data.currentMonth && val.year == props.Data.currentYear
+          } );
+          if( usageidx != -1 ){
+            return obj.usedCredits[usageidx].amount;
+          }else{
+            return "0";
+          }
         }
       }
     },
@@ -607,36 +621,50 @@ export default function Company( props: InitialProps ) {
           break;
         }
 
-        if( obj.Role != "Company-Admin" &&
-        user.email != obj.email &&
-        ( user.Role == "Company-Admin" || user.Role == "Company-Manager" ) ){
-          return (
-            <div>
+        if( obj.username ){
+          if( obj.Role != "Company-Admin" &&
+            user.email != obj.email &&
+            ( user.Role == "Company-Admin" || user.Role == "Company-Manager" ) ){
+            return (
               <div>
-                <Select value={userTableData[idx].Role} style={{ width: 200 }} options={[
-                  { label: "Company-Manager", value: "Company-Manager" },
-                  { label: "Mailagent", value: "Mailagent" }
-                ]}
-                onChange={async ( value ) => {
-                  setUserTableLoading( true );
-                  await updateData( "User", obj.id, { Role: checkRoleString( value )? value: "Mailagent" } );
-                  const userdata = userTableData;
-                  userdata[idx].Role = checkRoleString( value )? value: "Mailagent";
-                  setUserTableData( userdata );
-                  setUserTableLoading( false );
-                }} 
-                />
+                <div>
+                  <Select value={userTableData[idx].Role} style={{ width: 200 }} options={[
+                    { label: "Company-Manager", value: "Company-Manager" },
+                    { label: "Mailagent", value: "Mailagent" }
+                  ]}
+                  onChange={async ( value ) => {
+                    setUserTableLoading( true );
+                    await updateData( "User", obj.id, { Role: checkRoleString( value )? value: "Mailagent" } );
+                    const userdata = userTableData;
+                    userdata[idx].Role = checkRoleString( value )? value: "Mailagent";
+                    setUserTableData( userdata );
+                    setUserTableLoading( false );
+                  }} 
+                  />
+                </div>
               </div>
-            </div>
-          );
+            );
+          }else{
+            return (
+              <div>
+                <div>
+                  {rolename}
+                </div>
+              </div>
+            );
+          }
         }else{
-          return (
-            <div>
-              <div>
-                {rolename}
-              </div>
-            </div>
-          );
+          return obj.Role;
+        }
+      }
+    },
+    {
+      title: "Status",
+      dataIndex: "state",
+      key: "state",
+      render: ( _, obj: User & { id: string } ) => { 
+        if( !obj.username ){
+          return <Tag icon={<ClockCircleOutlined />} color="warning">eingeladen</Tag>
         }
       }
     }
@@ -651,6 +679,15 @@ export default function Company( props: InitialProps ) {
         lastname: values.lastname,
         role: values.role
       } );
+
+      let invusers = [];
+      if( company.invitedUsers ){
+        invusers = company.invitedUsers;
+      }
+
+      invusers.push( { email: values.email, firstname: values.firstname, lastname: values.lastname, Role: values.role } );
+
+      await updateData( "Company", user.Company, { invitedUsers: invusers } );
             
       setIsInviteErrVisible( false );
       setInviteErrMsg( "" );
@@ -658,7 +695,7 @@ export default function Company( props: InitialProps ) {
       setInviteUserModalOpen( false );
     }catch( e ){
       setIsInviteErrVisible( true );
-      setInviteErrMsg( "Ein Nutzer mit dieser E-Mail Adresse nutzt Mailbuddy bereits!" );
+      setInviteErrMsg( "Ein Nutzer mit dieser E-Mail Adresse nutzt Siteware.Mail bereits!" );
     }
   }
 
@@ -872,11 +909,13 @@ export default function Company( props: InitialProps ) {
                           data: months.map( ( label, idx ) => {
                             let sum = 0;
                             userTableData.forEach( ( su: User ) => {
-                              su.usedCredits.forEach( ( usage: Usage ) => {
-                                if( usage.month == idx+1 && usage.year == new Date().getFullYear() ){
-                                  sum += Math.floor( usage.amount/calculations.tokensPerMail );
-                                }
-                              } );
+                              if( su.username ){
+                                su.usedCredits.forEach( ( usage: Usage ) => {
+                                  if( usage.month == idx+1 && usage.year == new Date().getFullYear() ){
+                                    sum += Math.floor( usage.amount/calculations.tokensPerMail );
+                                  }
+                                } );
+                              }
                             } )
                             return sum;
                           } ),

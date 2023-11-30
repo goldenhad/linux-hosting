@@ -371,7 +371,7 @@ export default function Company( props: InitialProps ) {
 
       if( company.invitedUsers ){
         company.invitedUsers.forEach( ( inv: InvitedUser ) => {
-          if(users){
+          if( users ){
             users.push( inv );
           }
         } );

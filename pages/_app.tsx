@@ -41,7 +41,8 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <meta property="og:title" content="Siteware.Mail dein intelligenter Mail-Assistent" />
           <meta property="og:type" content="website" />
-          <meta property="og:image" content="/cartoon.jpeg" />
+          <meta property="og:image" content="/ogimage.jpeg" />
+          <meta property="og:url" content={`${process.env.BASEURL}`} />
           <link rel="icon" type="image/x-icon" href="small_logo.ico" />
           <title>Siteware.Mail | mail assistant</title>
         </Head>
@@ -57,7 +58,8 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <meta property="og:title" content="Siteware.Mail dein intelligenter Mail-Assistent" />
           <meta property="og:type" content="website" />
-          <meta property="og:image" content="/cartoon.jpeg" />
+          <meta property="og:image" content="/ogimage.jpeg" />
+          <meta property="og:url" content={`${process.env.BASEURL}`} />
           <link rel="icon" type="image/x-icon" href="small_logo.ico" />
           <title>Siteware.Mail | mail assistant</title>
         </Head>

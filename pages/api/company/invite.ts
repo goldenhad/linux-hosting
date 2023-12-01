@@ -20,13 +20,13 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
       const data = req.body;
 
-      if( data.email && data.company && data.firstname && data.lastname && data.role ){
+      if( data.email && data.companyId && data.companyname && data.firstname && data.lastname && data.role && data.invitedbyname ){
         console.log( data.role );
         const exists = await userExists( data.email );
 
         if( !exists ){
           const inviteobj = {
-            company: data.company,
+            company: data.companyId,
             email: data.email,
             firstname: data.firstname,
             lastname: data.lastname,
@@ -41,14 +41,15 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           const baseurl = process.env.BASEURL;
 
           try {
-            const text = `Hallo ${data.firstname} ${data.lastname},\n\ndu wurdest zu Siteware.Mail eingeladen, unserem innovativen Tool, 
+            const text = `Hallo ${data.firstname} ${data.lastname},\n\ndu wurdest von ${data.invitedbyname} von ${data.companyname} zu Siteware.Mail eingeladen, unserem innovativen Tool, 
             das das E-Mail-Schreiben revolutioniert.\n\nKlicke hier, um dich zu registrieren: ${baseurl}/register?invite=${invitecode}\n\nMit Siteware.Mail 
             erlebst du E-Mail-Kommunikation schneller, smarter und effizienter. Melde dich an und entdecke die Vorteile!\n\nBei Fragen sind wir jederzeit für 
-            dich da.\n\nViel Spaß!\n\nBeste Grüße,\nSiteware.Mail Team`
+            dich da.\n\nViel Spaß!\n\nBeste Grüße,\nSiteware.Mail Team`;
+
             const html = `<div>
                             <p>Hallo ${data.firstname} ${data.lastname},</p>
 
-                            <p>du wurdest zu Siteware.Mail eingeladen, unserem innovativen Tool, das das E-Mail-Schreiben revolutioniert.</p>
+                            <p>du wurdest von ${data.invitedbyname} von ${data.companyname} zu Siteware.Mail eingeladen, unserem innovativen Tool, das das E-Mail-Schreiben revolutioniert.</p>
                     
                             <p><a href="${baseurl}/register?invite=${invitecode}">Klicke hier, um dich zu registrieren</a></p>
                     
@@ -70,10 +71,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           }
         }else{
           return res.status( 400 ).send( { errorcode: 4, message: "A User with this E-Mail already exists!" } );
-        }
-            
-                
-                
+        }      
       }else{
         return res.status( 400 ).send( { errorcode: 3, message: "Missing Input!" } );
       }

@@ -226,7 +226,7 @@ export default function Monologue( props: InitialProps ) {
     }
 
     decryptAndParse();
-  }, [form, user.lastState.monolog, user.salt] );
+  }, [form, user.salt] );
 
   
 

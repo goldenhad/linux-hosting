@@ -245,7 +245,7 @@ export default function Dialogue( props: InitialProps ) {
     }
 
     decryptAndParse();
-  }, [form, user.lastState.dialog, user.salt] );
+  }, [form, user.salt] );
 
 
   useEffect( () => {

@@ -605,10 +605,12 @@ export default function Company( props: InitialProps ) {
     try{
       await axios.post( "/api/company/invite", {
         email: values.email,
-        company: user.Company,
+        companyId: user.Company,
+        companyname: company.name,
         firstname: values.firstname,
         lastname: values.lastname,
-        role: values.role
+        role: values.role,
+        invitedbyname: `${user.firstname} ${user.lastname}`
       } );
 
       let invusers = [];

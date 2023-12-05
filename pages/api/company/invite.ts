@@ -41,7 +41,8 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           const baseurl = process.env.BASEURL;
 
           try {
-            const text = `Hallo ${data.firstname} ${data.lastname},\n\ndu wurdest von ${data.invitedbyname} von ${data.companyname} zu Siteware.Mail eingeladen, unserem innovativen Tool, 
+            const text = `Hallo ${data.firstname} ${data.lastname},\n\ndu wurdest von ${data.invitedbyname} von ${data.companyname} 
+            zu Siteware.Mail eingeladen, unserem innovativen Tool, 
             das das E-Mail-Schreiben revolutioniert.\n\nKlicke hier, um dich zu registrieren: ${baseurl}/register?invite=${invitecode}\n\nMit Siteware.Mail 
             erlebst du E-Mail-Kommunikation schneller, smarter und effizienter. Melde dich an und entdecke die Vorteile!\n\nBei Fragen sind wir jederzeit für 
             dich da.\n\nViel Spaß!\n\nBeste Grüße,\nSiteware.Mail Team`;
@@ -49,7 +50,8 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             const html = `<div>
                             <p>Hallo ${data.firstname} ${data.lastname},</p>
 
-                            <p>du wurdest von ${data.invitedbyname} von ${data.companyname} zu Siteware.Mail eingeladen, unserem innovativen Tool, das das E-Mail-Schreiben revolutioniert.</p>
+                            <p>du wurdest von ${data.invitedbyname} von ${data.companyname} zu Siteware.Mail eingeladen, unserem innovativen Tool, 
+                            das das E-Mail-Schreiben revolutioniert.</p>
                     
                             <p><a href="${baseurl}/register?invite=${invitecode}">Klicke hier, um dich zu registrieren</a></p>
                     

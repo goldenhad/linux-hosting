@@ -51,7 +51,8 @@ const dialogBasicState = {
 
 
 export default function Dialogue( props: InitialProps ) {
-  const { login, user, company, role, parameters } = useAuthContext();
+  const context = useAuthContext();
+  const { login, user, company, parameters } = context;
   const [ form ] = Form.useForm();
   const [ showAnswer, setShowAnswer ] = useState( false );
   const [ isAnswerVisible, setIsAnswerVisible ] = useState( false );
@@ -245,7 +246,8 @@ export default function Dialogue( props: InitialProps ) {
     }
 
     decryptAndParse();
-  }, [form, user.lastState.dialog, user.salt] );
+    // eslint-disable-next-line
+  }, [] );
 
 
   useEffect( () => {
@@ -544,7 +546,7 @@ export default function Dialogue( props: InitialProps ) {
   return (
     <>
       {contextHolder}
-      <SidebarLayout role={role} user={user} login={login}>
+      <SidebarLayout context={context}>
         <div className={styles.main}>
           <div className={styles.welcomemessage}>
             <h1>Willkommen zurück, {handleEmptyString( user.firstname )}</h1>
@@ -575,7 +577,7 @@ export default function Dialogue( props: InitialProps ) {
                   {answer}
                 </div>
                 <div className={styles.tokeninfo}>
-                  <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' /> Die Anfrage hat {tokens} Tokens verbraucht
+                  <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' /> Die Anfrage hat {parseFloat( tokens )/1000} Tokens verbraucht
                 </div>
                 </>
                 : <></>}

@@ -1,3 +1,10 @@
+/**
+ *  Helper File for sending emails
+ *  Keep all methods relevant for the sending of
+ *  mails in this file
+ * 
+ */
+
 import nodemailer from "nodemailer";
 require( "dotenv" ).config();
 
@@ -24,8 +31,6 @@ export async function sendMail( receiver: string, subject: string, text: string,
     text: text,
     html: html 
   } );
-
-  //console.log(mailReturn);
 
   return mailReturn;
 }

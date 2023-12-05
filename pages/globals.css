@@ -337,3 +337,9 @@
   margin-top: 50px;
   margin-bottom: 50px;
 }
+
+.ant-upload{
+  width: 200px !important;
+  height: 200px !important;
+  overflow: hidden;
+}

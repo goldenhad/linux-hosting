@@ -7,7 +7,7 @@ import signUp, { signUpUser } from "../../firebase/auth/signup";
 import Head from "next/head";
 import userExists, { usernameExists } from "../../firebase/auth/userExists";
 import CookieBanner from "../../components/CookieBanner";
-import getDocument, { getDocWhere } from "../../firebase/data/getData";
+import { getDocWhere } from "../../firebase/data/getData";
 import Link from "next/link";
 import CryptoJS from "crypto-js";
 
@@ -93,6 +93,7 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 
 export default function Register( props ){
   const [ loginFailed, setLoginFailed ] = useState( false );
+  {/*eslint-disable-next-line */}
   const [ usedInvite, setUsedInvite ] = useState( props.invite != undefined );
   const [ registerUserForm ] = Form.useForm();
   const [ registerForm ] = Form.useForm();
@@ -629,6 +630,7 @@ export default function Register( props ){
       <div className={styles.logincontainer}>
         <div className={styles.logorow}>
           <div className={styles.logobox}>
+            {/*eslint-disable-next-line */}
             <img src={"/logo.svg"} alt="Logo" width={100}/>
           </div>
         </div>
@@ -653,7 +655,7 @@ Register.getLayout = ( page ) => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta property="og:title" content="Siteware.Mail dein intelligenter Mail-Assistent" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="/ogimage.jpeg" />
+        <meta property="og:image" content="/ogimage.jpg" />
         <meta property="og:url" content={`${process.env.BASEURL}`} />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
         <title>Siteware.Mail | mail assistant</title>

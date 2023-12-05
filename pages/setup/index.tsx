@@ -11,57 +11,12 @@ const { Paragraph } = Typography;
 const { TextArea } = Input;
 
 
-const style = [
-  "Professionell",
-  "Formell",
-  "Sachlich",
-  "Komplex",
-  "Einfach",
-  "Konservativ",
-  "Modern",
-  "Wissenschaftlich",
-  "Fachspezifisch",
-  "Abstrakt",
-  "Klar",
-  "Direkt",
-  "Rhetorisch",
-  "Ausdrucksstark"
-];
-
-const emotions = [
-  "Humorvoll",
-  "Nüchtern",
-  "Sentimental",
-  "Objektiv",
-  "Subjektiv",
-  "Ehrfürchtig",
-  "Emotionell",
-  "Lebhaft",
-  "Freundlich",
-  "Höflich",
-  "Selbstbewusst",
-  "Sympathisch",
-  "Kreativ",
-  "Enthusiastisch",
-  "Eloquent",
-  "Prägnant",
-  "Blumig",
-  "Poetisch",
-  "Pathetisch",
-  "Scherzhaft",
-  "Mystisch",
-  "Ironisch",
-  "Sarkastisch",
-  "Despektierlich"
-];
-
-
 export const getServerSideProps: GetServerSideProps = async () => {
   return { props: { InitialState: {} } }
 }
 
 export default function Setup(){
-  const { login, user, role } = useAuthContext();
+  const { login, user, role, parameters } = useAuthContext();
   const [current, setCurrent] = useState( 0 );
   const [ setupForm ] = Form.useForm();
   const [ bareMinimum, setBareMinimum ] = useState( false );
@@ -126,7 +81,7 @@ export default function Setup(){
                   } )
                 ]}
               >
-                <Select options={listToOptions( style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
+                <Select options={listToOptions( parameters.style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
               </Form.Item>
             </div>
             <div className={styles.formpart}>
@@ -142,7 +97,7 @@ export default function Setup(){
                   } )
                 ]}
               >
-                <Select options={listToOptions( emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
+                <Select options={listToOptions( parameters.emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
               </Form.Item>
             </div>
           </div>
@@ -203,7 +158,7 @@ export default function Setup(){
                   } )
                 ]}
               >
-                <Select options={listToOptions( style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
+                <Select options={listToOptions( parameters.style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
               </Form.Item>
             </div>
             <div className={styles.formpart}>
@@ -219,7 +174,7 @@ export default function Setup(){
                   } )
                 ]}
               >
-                <Select options={listToOptions( emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
+                <Select options={listToOptions( parameters.emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
               </Form.Item>
             </div>
           </div>

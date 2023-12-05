@@ -31,7 +31,8 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 
 
 export default function Upgrade( props: InitialProps ) {
-  const { user, company, role, invoice_data } = useAuthContext();
+  const context = useAuthContext();
+  const { user, company, role, invoice_data } = context;
   const [ tokenstobuy, setTokenstobuy ] = useState( 0 );
   const { push } = useRouter();
   const router = useRouter();
@@ -125,6 +126,7 @@ export default function Upgrade( props: InitialProps ) {
       <div className={styles.main}>
         <div className={styles.logorow}>
           <div className={styles.logobox}>
+            {/*eslint-disable-next-line */}
             <img src={"/logo.svg"} alt="Logo" width={100}/>
           </div>
         </div>

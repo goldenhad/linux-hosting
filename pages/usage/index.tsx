@@ -1,13 +1,20 @@
-import { Button, Card, Tooltip, Table, Tag, TourProps, Tour } from "antd";
+import { Button, Card, Tooltip, Table, Tag, TourProps, Tour, Popover, List } from "antd";
 import styles from "./usage.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
-import { useRouter } from "next/router";
 import { convertToCurrency, handleUndefinedTour } from "../../helper/architecture";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { getDocWhere } from "../../firebase/data/getData";
-import { CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, ShoppingCartOutlined, FileTextOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
+  ShoppingCartOutlined,
+  FileTextOutlined,
+  InfoCircleOutlined,
+  MailOutlined
+} from "@ant-design/icons";
 import Link from "next/link";
 import { Usage } from "../../firebase/types/Company";
 import {
@@ -53,9 +60,9 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 
 export default function Usage( props: InitialProps ) {
-  const { login, user, company, role, calculations } = useAuthContext();
+  const context = useAuthContext();
+  const { login, user, company, calculations } = context
   const [ users, setUsers ] = useState( [] );
-  const router = useRouter();
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).usage );
 
   const budgetRef = useRef( null );
@@ -66,9 +73,9 @@ export default function Usage( props: InitialProps ) {
 
   const steps: TourProps["steps"] = [
     {
-      title: "Nutzung und Mail-Budget",
-      description: "Willkommen in den Nutzungsinformationen. Hier kannst du dein Mail-Budget überprüfen und Statistiken zur "+
-      "Nutzung unseres Tools einsehen. Außerdem hast du die Möglichkeit, weitere Mails zu kaufen und deine bisherigen Bestellungen einzusehen.",
+      title: "Nutzung und Token-Budget",
+      description: "Willkommen in den Nutzungsinformationen. Hier kannst du dein Token-Budget überprüfen und Statistiken zur "+
+      "Nutzung unseres Tools einsehen. Außerdem hast du die Möglichkeit, weitere Token zu kaufen und deine bisherigen Bestellungen einzusehen.",
       nextButtonProps: {
         children: (
           "Weiter"
@@ -81,8 +88,8 @@ export default function Usage( props: InitialProps ) {
       }
     },
     {
-      title: "Mail-Budget",
-      description: "Hier wird dein aktuelles Mail-Budget angezeigt. Die angegebene Zahl gibt dir einen Überblick darüber, wie viele Mails"+
+      title: "Token-Budget",
+      description: "Hier wird dein aktuelles Token-Budget angezeigt. Die angegebene Zahl gibt dir einen Überblick darüber, wie viele Token"+
       " du ungefähr noch schreiben kannst.",
       target: () => budgetRef.current,
       nextButtonProps: {
@@ -113,7 +120,7 @@ export default function Usage( props: InitialProps ) {
     },
     {
       title: "Statistik",
-      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Mails du über das aktuelle Jahr mit Siteware.Mail bereits verbraucht hast.",
+      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Token du über das aktuelle Jahr mit Siteware.Mail bereits verbraucht hast.",
       target: () => statRef.current,
       nextButtonProps: {
         children: (
@@ -127,7 +134,7 @@ export default function Usage( props: InitialProps ) {
       }
     },
     {
-      title: "Eure bisherigen Einkäufe",
+      title: "Deine bisherigen Einkäufe",
       description: "In dieser Tabelle findet ihr eine Übersicht deiner bisherigen Einkäufe bei Siteware.Mail. Hier hast du die Möglichkeit, "+
       "Rechnungen herunterzuladen und unterbrochene Einkäufe abzuschließen.",
       target: () => orderRef.current,
@@ -148,14 +155,6 @@ export default function Usage( props: InitialProps ) {
       }
     }
   ];
-
-
-  useEffect( () => {
-    if( role.isCompany ) {
-      router.push( "/" );
-    }
-  }, [role.isCompany, router] );
-
 
   useEffect( () => {
     const load = async () => {
@@ -220,11 +219,11 @@ export default function Usage( props: InitialProps ) {
       }
     },
     {
-      title: "Erworbene Mails",
+      title: "Erworbene Token",
       dataIndex: "tokens",
       key: "tokens",
       render: ( _, obj ) => {
-        return obj.amount
+        return Math.floor( obj.tokens/1000 )
       }
     },
     {
@@ -276,25 +275,41 @@ export default function Usage( props: InitialProps ) {
     }
   ];
 
+  const getTokenDetailInformation = () => {
+    return(
+      <div>
+        <p>Entspricht:</p>
+        <List>
+          <List.Item><span className={styles.listarrow}><MailOutlined /></span>~{calculateMails()} Mails</List.Item>
+        </List>
+      </div>
+    );
+  }
+
   
   return (
-    <SidebarLayout role={role} user={user} login={login}>
+    <SidebarLayout context={context}>
       <div className={styles.main}>
         <div className={styles.companyoverview}>
-          <Card ref={budgetRef} className={styles.tokeninformation} headStyle={{ backgroundColor: "#F9FAFB" }} title={"Mails"} bordered={true}>
+          <Card ref={budgetRef} className={styles.tokeninformation} headStyle={{ backgroundColor: "#F9FAFB" }} title={"Token"} bordered={true}>
             <div className={styles.tokeninfocard}>
-              <h2>Dein Mail-Budget</h2>
+              <h2>
+                Dein Token-Budget
+                <Popover content={getTokenDetailInformation} placement="bottom" title="Details">
+                  <span className={styles.tokeninformation}><InfoCircleOutlined /></span>
+                </Popover>
+              </h2>
               <div className={styles.quotarow}>
-                <div className={styles.tokenbudget}>{( company.unlimited )? "∞" : `~ ${calculateMails()}`} Mails</div>
+                <div className={styles.tokenbudget}>{( company.unlimited )? "∞" : `${Math.floor( company.tokens/1000 )}`} Token</div>
               </div>
             </div>
             <div className={styles.generatebuttonrow}>
               <Link href={"/upgrade"}>
-                {( !company.unlimited )? <Button ref={buyRef} className={styles.backbutton} type='primary'>Weitere Mails kaufen</Button> : <></>}
+                {( !company.unlimited )? <Button ref={buyRef} className={styles.backbutton} type='primary'>Weitere Token kaufen</Button> : <></>}
               </Link>
             </div>
           </Card>
-          <Card ref={statRef} className={styles.tokenusage} headStyle={{ backgroundColor: "#F9FAFB" }} title={"Mail-Verbrauch"} bordered={true}>
+          <Card ref={statRef} className={styles.tokenusage} headStyle={{ backgroundColor: "#F9FAFB" }} title={"Token-Verbrauch"} bordered={true}>
             <div className={styles.tokeninfocard}>
               <h2>Verbrauch</h2>
               <div className={styles.usageinfo}>
@@ -317,13 +332,13 @@ export default function Usage( props: InitialProps ) {
                       labels:  months,
                       datasets: [
                         {
-                          label: "Mails",
+                          label: "Token",
                           data: months.map( ( label, idx ) => {
                             let sum = 0;
                             users.forEach( ( su: User ) => {
                               su.usedCredits.forEach( ( usage: Usage ) => {
                                 if( usage.month == idx+1 && usage.year == new Date().getFullYear() ){
-                                  sum += Math.floor( usage.amount/calculations.tokensPerMail );
+                                  sum += Math.floor( usage.amount/1000 );
                                 }
                               } );
                             } )

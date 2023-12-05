@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { Dispatch, useEffect } from "react";
 import {
   getAuth
 } from "firebase/auth";
@@ -13,9 +13,11 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
 import { useRouter } from "next/navigation";
 import { Calculations, InvoiceSettings, Parameters } from "../../firebase/types/Settings";
+import { getImageUrl } from "../../firebase/drive/upload_file";
 
 
 interface ctx {
+    // eslint-disable-next-line
     login: any,
     user: User,
     company: Company,
@@ -23,7 +25,13 @@ interface ctx {
     parameters: Parameters,
     loading: boolean,
     invoice_data: InvoiceSettings,
-    calculations: Calculations
+    calculations: Calculations,
+    profile: {
+      // eslint-disable-next-line
+      picture: any,
+      // eslint-disable-next-line
+      setProfilePicture: Dispatch<any>
+    }
 }
 
 const auth = getAuth( firebase_app );
@@ -43,6 +51,7 @@ export const AuthContextProvider = ( {
   const [invoiceData, setInvoiceData] = React.useState( null );
   const [calculations, setCalculations] = React.useState( null );
   const [loading, setLoading] = React.useState( true );
+  const [profilePicture, setProfilePicture] = React.useState( null );
   const router = useRouter();
 
   useEffect( () => {
@@ -81,8 +90,12 @@ export const AuthContextProvider = ( {
                 const parameters = await getDocument( "Settings", "Parameter" );
                 const invoice_data = await getDocument( "Settings", "Invoices" );
                 const calculations = await getDocument( "Settings", "Calculation" );
+                const url = await getImageUrl( user.uid );
 
                 if( parameters.result && invoice_data.result ){
+                  
+                  setProfilePicture( url );
+
                   setLogin( user );
                   setUser( userdoc.result.data() as User );
                   setRole( roledoc.result.data() as Role );
@@ -112,6 +125,7 @@ export const AuthContextProvider = ( {
         setParameters( null );
         setInvoiceData( null );
         setCalculations( null );
+        setLoading( true );
       }
     } );
 
@@ -119,12 +133,18 @@ export const AuthContextProvider = ( {
     return () => unsubscribe();
   }, [router] );
 
+  
+
   useEffect( () => {
     const handle = setInterval( async () => {
-      //console.log(`refreshing token...`);
+      console.log( "refreshing token..." );
       const user = auth.currentUser;
+      setLoading( true );
       if ( user ) await user.getIdToken( true );
-    }, 10 * 60 * 1000 );
+      setLoading( false );
+      // The Refresh-rate still needs tweaking
+      // The Refresh of the token will cause a rerender!
+    }, 100 * 60 * 1000 );
     return () => clearInterval( handle );
   }, [] );
 
@@ -136,6 +156,7 @@ export const AuthContextProvider = ( {
     
       return unsubscribe;
     }
+    // eslint-disable-next-line
   }, [login] );
 
   useEffect( () => {
@@ -169,7 +190,11 @@ export const AuthContextProvider = ( {
           parameters: parameters,
           loading: loading,
           invoice_data: invoiceData,
-          calculations: calculations 
+          calculations: calculations,
+          profile: {
+            picture: profilePicture,
+            setProfilePicture: setProfilePicture
+          }
         }
       }
     >

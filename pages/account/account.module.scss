@@ -6,6 +6,11 @@
     align-items: center;
     margin-top: 32px;
 
+    .uploadavatar{
+        width: 200px;
+        height: 200px;
+    }
+
     .personal { 
         display: flex;
         flex-direction: row;

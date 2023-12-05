@@ -49,7 +49,8 @@ const monologBasicState = {
 }
 
 export default function Monologue( props: InitialProps ) {
-  const { login, user, company, role, parameters } = useAuthContext();
+  const context = useAuthContext();
+  const { login, user, company, parameters } = context;
   const [ form ] = Form.useForm();
   const [ showAnswer, setShowAnswer ] = useState( false );
   const [ isAnswerVisible, setIsAnswerVisible ] = useState( false );
@@ -62,6 +63,7 @@ export default function Monologue( props: InitialProps ) {
   const [ tokens, setTokens ] = useState( "" );
   const [ promptError, setPromptError ] = useState( false );
   const [ decryptedProfiles, setDecryptedProfiles ] = useState( [] );
+  // eslint-disable-next-line
   const [ renderAllowed, setRenderAllowed ] = useState( false );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).monolog );
 
@@ -226,7 +228,8 @@ export default function Monologue( props: InitialProps ) {
     }
 
     decryptAndParse();
-  }, [form, user.lastState.monolog, user.salt] );
+    // eslint-disable-next-line
+  }, [] );
 
   
 
@@ -523,7 +526,7 @@ export default function Monologue( props: InitialProps ) {
   return (
     <>
       {contextHolder}
-      <SidebarLayout role={role} user={user} login={login}>
+      <SidebarLayout context={context}>
         <div className={styles.main}>
           <div className={styles.welcomemessage}>
             <h1>Willkommen zurück, {handleEmptyString( user.firstname )}</h1>
@@ -558,7 +561,7 @@ export default function Monologue( props: InitialProps ) {
                   <div className={styles.answer}>{answer}</div>
                   <div className={styles.tokeninfo}>
                     <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' />
-                  Die Anfrage hat {tokens} Tokens verbraucht</div></>
+                  Die Anfrage hat {parseFloat( tokens )/1000} Tokens verbraucht</div></>
                 : <></>}
               {( isLoaderVisible )? <Skeleton active/>: <></>}
               {( promptError )? <Alert type='error' message="Bei der Generierung der Anfrage ist etwas schiefgelaufen. Bitte versuche es später erneut!" />: <></>}

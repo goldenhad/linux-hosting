@@ -27,7 +27,8 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 
 
 export default function InvoiceDownload( props: InitialProps ) {
-  const { login, user, company, role } = useAuthContext();
+  const context = useAuthContext();
+  const { user, company } = context;
   const [ order, setOrder ] = useState( {
     id: "",
     timestamp: 0,
@@ -61,7 +62,7 @@ export default function InvoiceDownload( props: InitialProps ) {
 
   
   return (
-    <SidebarLayout role={role} user={user} login={login}>
+    <SidebarLayout context={context}>
       <div style={{ display: "flex", flexDirection: "column", width: "100%", justifyContent: "center", alignItems: "center" }}>
         <div style={{ display: "block", width: 800 }}>
           <Invoice company={company} user={user} order={order} ref={componentRef}></Invoice>

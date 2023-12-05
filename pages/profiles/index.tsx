@@ -41,7 +41,8 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 
 export default function Profiles() {
-  const { login, user, role, parameters } = useAuthContext();
+  const context = useAuthContext();
+  const { login, user, parameters } = context;
   const [ isCreateModalOpen, setIsCreateModalOpen ]  = useState( false );
   const [ isEditModalOpen, setIsEditModalOpen ]  = useState( false );
   const [ isDeleteModalOpen, setIsDeleteModalOpen ]  = useState( false );
@@ -452,7 +453,7 @@ export default function Profiles() {
   const items = steps.map( ( item ) => ( { key: item.title, title: item.title } ) );
 
   return (
-    <SidebarLayout role={role} user={user} login={login}>
+    <SidebarLayout context={context}>
       <div className={styles.main}>
         <div className={styles.interactionrow}>
           <Button ref={addRef} type='primary' onClick={() => {

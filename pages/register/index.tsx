@@ -7,7 +7,7 @@ import signUp, { signUpUser } from "../../firebase/auth/signup";
 import Head from "next/head";
 import userExists, { usernameExists } from "../../firebase/auth/userExists";
 import CookieBanner from "../../components/CookieBanner";
-import getDocument, { getDocWhere } from "../../firebase/data/getData";
+import { getDocWhere } from "../../firebase/data/getData";
 import Link from "next/link";
 import CryptoJS from "crypto-js";
 
@@ -93,6 +93,7 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 
 export default function Register( props ){
   const [ loginFailed, setLoginFailed ] = useState( false );
+  {/*eslint-disable-next-line */}
   const [ usedInvite, setUsedInvite ] = useState( props.invite != undefined );
   const [ registerUserForm ] = Form.useForm();
   const [ registerForm ] = Form.useForm();
@@ -629,6 +630,7 @@ export default function Register( props ){
       <div className={styles.logincontainer}>
         <div className={styles.logorow}>
           <div className={styles.logobox}>
+            {/*eslint-disable-next-line */}
             <img src={"/logo.svg"} alt="Logo" width={100}/>
           </div>
         </div>

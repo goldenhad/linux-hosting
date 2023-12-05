@@ -64,6 +64,7 @@ export default function Login(){
       <div className={styles.logincontainer}>
         <div className={styles.logorow}>
           <div className={styles.logobox}>
+            {/*eslint-disable-next-line */}
             <img src={"/logo.svg"} alt="Logo" width={100}/>
           </div>
         </div>
@@ -120,6 +121,7 @@ export default function Login(){
           </Form>
 
           <div className={styles.googleloginbutton}>
+            {/*eslint-disable-next-line */}
             <Button onClick={googleOnline} icon={<img src={"/Social icon.svg"} alt="google" width={12}></img>}>
                             Mit Google anmelden
             </Button>

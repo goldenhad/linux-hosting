@@ -1,4 +1,4 @@
-import { TourProps, Tour, Button } from "antd";
+import { TourProps, Tour } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -7,8 +7,7 @@ import { useAuthContext } from "../components/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import updateData from "../firebase/data/updateData";
-import { handleEmptyUser, handleUndefinedTour } from "../helper/architecture";
-import getDocument from "../firebase/data/getData";
+import { handleUndefinedTour } from "../helper/architecture";
 
 
 export interface InitialProps {
@@ -33,7 +32,8 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 
 export default function Home() {
-  const { login, user, role } = useAuthContext();
+  const context = useAuthContext();
+  const { login, user } = context;
   const router = useRouter();
   const dialogRef = useRef( null );
   const monologRef = useRef( null );
@@ -121,7 +121,7 @@ export default function Home() {
   ];
 
   return (
-    <SidebarLayout role={role} user={user} login={login}>
+    <SidebarLayout context={context}>
       <div className={styles.main}>
         <div className={styles.greetingrow}>
           <div className={styles.greeting}>Willkommen {user.firstname}</div>

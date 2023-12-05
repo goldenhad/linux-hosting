@@ -38,7 +38,8 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 
 
 export default function Upgrade( props: InitialProps ) {
-  const { login, user, company, role } = useAuthContext();
+  const context = useAuthContext();
+  const { user, company, role } = context;
   const [seed, setSeed] = useState( 1 );
   const router = useRouter();
 
@@ -142,7 +143,7 @@ export default function Upgrade( props: InitialProps ) {
     }
   }
   return (
-    <SidebarLayout role={role} user={user} login={login}>
+    <SidebarLayout context={context}>
       <div className={styles.main}>
         <div className={styles.resultrow}>
           {getResult()}

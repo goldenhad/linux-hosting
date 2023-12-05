@@ -1,21 +1,24 @@
-import { Card, Button, Form, Input, Result, Alert, Avatar, Spin, message, QRCode, Modal } from "antd";
+import { Card, Button, Form, Input, Result, Alert, Spin, message, QRCode, Modal, Upload, UploadProps } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 import styles from "./account.module.scss"
 import { useEffect, useState } from "react";
 import { GetServerSideProps } from "next";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useAuthContext } from "../../components/context/AuthContext";
-import { handleEmptyString } from "../../helper/architecture";
 import { usernameExistsAtDifferentUser } from "../../firebase/auth/userExists";
 import { LoadingOutlined } from "@ant-design/icons";
 import forgotpassword from "../../firebase/auth/forgot";
 import updateData from "../../firebase/data/updateData";
 import axios from "axios";
-import { TourState, User, basicUser } from "../../firebase/types/User";
+import { TourState, User } from "../../firebase/types/User";
 import deleteData from "../../firebase/data/deleteData";
 import deleteSitewareUser from "../../firebase/auth/delete";
 import { getDocWhere } from "../../firebase/data/getData";
 import reauthUser from "../../firebase/auth/reauth";
 import { useRouter } from "next/router";
+import { getBase64 } from "../../helper/upload";
+import { RcFile, UploadChangeParam, UploadFile } from "antd/es/upload/interface";
+import ImgCrop from "antd-img-crop";
 
 
 export interface InitialProps {
@@ -42,7 +45,8 @@ function onlyUpdateIfSet( val, ideal ){
 
 
 export default function Account() {
-  const { login, user, company, role } = useAuthContext();
+  const context = useAuthContext();
+  const { login, user, company, role, profile } = context;
   const [ personalForm ] = Form.useForm();
   const [ wasReset, setWasReset ] = useState( false );
   const [ isErrVisible, setIsErrVisible ] = useState( false );
@@ -52,6 +56,8 @@ export default function Account() {
   const [ reauthSuccessfull, setReauthSuccessfull] = useState( false );
   const [ reauthErr, setReauthErr ] = useState( false );
   const [ recommendLink, setRecommendLink ] = useState( "" );
+  const [imageUrl, setImageUrl] = useState<string>( profile.picture );
+  const [loading, setLoading] = useState( false );
   const router = useRouter();
 
   useEffect( () => {
@@ -73,9 +79,8 @@ export default function Account() {
     }
     
     getRecommendLink();
+    // eslint-disable-next-line
   }, [] );
-
-
 
   const saveAccountInfo = async () => {
     const username = personalForm.getFieldValue( "username" );
@@ -317,7 +322,8 @@ export default function Account() {
       dialog: false,
       monolog: false,
       usage: false,
-      profiles: false
+      profiles: false,
+      company: false
     }
     const { error } = await updateData( "User", login.uid, { tour: resetTutObj } );
     if( error ){
@@ -444,22 +450,112 @@ export default function Account() {
     router.push( "/login" );
   }
 
-  const getUser = () =>{
-    if( user != null ){
-      return user;
-    }else{
-      return basicUser;
+  const handleChange: UploadProps["onChange"] = ( info: UploadChangeParam<UploadFile> ) => {
+    if ( info.file.status === "uploading" ) {
+      setLoading( true );
+      return;
     }
+    if ( info.file.status === "done" ) {
+      // Get this url from response in real world.
+      getBase64( info.file.originFileObj as RcFile, ( url ) => {
+        setLoading( false );
+        profile.setProfilePicture( url );
+        setImageUrl( url )
+      } );
+    }
+  };
+
+
+  const uploadImage = ( options ) => {
+    console.log( Upload.LIST_IGNORE );
+    if( beforeUpload( options.file, undefined ) ){
+      const { onSuccess, onError, file, onProgress } = options;
+      const fmData = new FormData();
+      const config = {
+        headers: { "content-type": "multipart/form-data" },
+        onUploadProgress: ( event ) => {
+          console.log( ( event.loaded / event.total ) * 100 );
+          onProgress( { percent: ( event.loaded / event.total ) * 100 },file );
+        }
+      };
+      fmData.append( "image", file );
+      fmData.append( "user", login.uid );
+      axios
+        .post( "/api/account/upload", fmData, config )
+        .then( ( res ) => {
+          onSuccess( file );
+          console.log( res );
+        } )
+        .catch( ( )=>{
+          const error = new Error( "Some error" );
+          onError( { event:error } );
+        } );
+    }
+    
+    
+  }
+
+  const uploadButton = (
+    <div>
+      {loading ? <LoadingOutlined /> : <PlusOutlined />}
+      <div style={{ marginTop: 8 }}>Profilbild hochladen</div>
+    </div>
+  );
+  
+  const beforeUpload = ( file: RcFile, message ) => {
+    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
+    if ( !isJpgOrPng ) {
+      message.error( "You can only upload JPG/PNG file!" );
+    }
+    
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if ( !isLt2M ) {
+      message.error( "Image must smaller than 2MB!" );
+    }
+
+    const uploadAllowed = ( Upload.LIST_IGNORE == "true" )? true: false;
+    if( uploadAllowed ){
+      setLoading( false );
+    }
+  
+    return ( isJpgOrPng && isLt2M ) && !uploadAllowed ;
   }
 
   return (
     <>
       {contextHolder}
-      <SidebarLayout role={role} user={user} login={login}>
+      <SidebarLayout context={context}>
         <div className={styles.main}>
-          <Avatar size={250} style={{ backgroundColor: "#f0f0f2", color: "#474747", fontSize: 100 }}>
-            {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
-          </Avatar>
+          <div>
+            <ImgCrop
+              onModalCancel={() => {
+                Upload.LIST_IGNORE = "true";
+              }}
+              onModalOk={() => {
+                Upload.LIST_IGNORE = "false";
+              }}
+            >
+              <Upload
+                name="avatar"
+                listType="picture-circle"
+                className="avatar-uploader"
+                showUploadList={false}
+                customRequest={uploadImage}
+                onChange={handleChange}
+                style={{ overflow: "hidden" }}
+                rootClassName={styles.uploadavatar}
+              >
+
+                {imageUrl ?
+                // eslint-disable-next-line
+                <img src={imageUrl} alt="avatar" style={{ width: "100%" }} /> : uploadButton}
+              </Upload>
+            </ImgCrop>
+            
+            {/* <Avatar size={250} style={{ backgroundColor: "#f0f0f2", color: "#474747", fontSize: 100 }}>
+              {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
+            </Avatar> */}
+          </div>
           <div className={styles.personal}>
             <Card className={styles.personalcard} title="Persönliche Informationen" headStyle={{ backgroundColor: "#F9FAFB" }} bordered={true}>
               {getPersonalForm()}

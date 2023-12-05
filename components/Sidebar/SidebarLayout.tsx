@@ -1,6 +1,6 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { LogoutOutlined } from "@ant-design/icons";
-import Icon from "@ant-design/icons";
+import Icon, { ApartmentOutlined, BarChartOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Avatar, ConfigProvider, Divider, FloatButton, Layout, Menu, Popover } from "antd";
 import Link from "next/link";
@@ -13,20 +13,33 @@ import Home from "../../public/icons/home.svg";
 import Profiles from "../../public/icons/profiles.svg";
 import Help from "../../public/icons/help.svg";
 import CookieBanner from "../CookieBanner";
-import Dialog from "../../public/icons/dialog.svg";
-import Monolog from "../../public/icons/monolog.svg";
-import Settings from "../../public/icons/settings.svg";
+import { getImageUrl } from "../../firebase/drive/upload_file";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
 
 
-const SidebarLayout = ( props: { children: ReactNode, user: User, login, role} ) => {
+const SidebarLayout = ( props: { children: ReactNode, context: {user: User, login, role, profile}} ) => {
   const [collapsed, setCollapsed] = useState( true );
+  // eslint-disable-next-line
   const [ collapseWidth, setCollapseWidth ] = useState( undefined );
+  // eslint-disable-next-line
   const [ breakpoint, setBreakpoint ] = useState( undefined );
+  // eslint-disable-next-line
+  const [ imageUrl, setImageUrl ] = useState( undefined );
   const router = useRouter();
+  // eslint-disable-next-line
   const [ version, setVersion ] = useState( "" );
+
+
+  useEffect( () => {
+    const setProfileImage = async () => {
+      const url = await getImageUrl( props.context.login.uid );
+      setImageUrl( url );
+    }
+
+    setProfileImage();
+  }, [props.context.login] )
 
   function getItem( label: React.ReactNode, key: React.Key, check: () => boolean, icon?: React.ReactNode, children?: MenuItem[] ): MenuItem {
     if( check() ){
@@ -46,25 +59,18 @@ const SidebarLayout = ( props: { children: ReactNode, user: User, login, role} )
     getItem( <Link href={"/"}>Home</Link>, "1", () => {
       return true 
     }, <Icon component={Home} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/dialog"}>Dialog</Link>, "2", () => {
-      return true 
-    }, <Icon component={Dialog} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/monolog"}>Monolog</Link>, "5", () => {
-      return true 
-    }, <Icon component={Monolog} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/company"}>Firma</Link>, "3", () => {
-      return props.role.isCompany  
-    }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/usage"}>Nutzung</Link>, "3", () => {
-      return !props.role.isCompany  
-    }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
     getItem( <Link href={"/profiles"}>Profile</Link>, "4", () => {
       return true 
-    }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
+    }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
+    getItem( <Link href={"/usage"}>Nutzung</Link>, "3", () => {
+      return true
+    }, <Icon component={BarChartOutlined} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
   ];
 
   const footeritems = [
-
+    getItem( <Link href={"/company"}>Firma</Link>, "5", () => {
+      return props.context.role.isCompany 
+    }, <Icon component={ApartmentOutlined} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
   ];
 
   const getDefaultSelected = () => {
@@ -78,7 +84,7 @@ const SidebarLayout = ( props: { children: ReactNode, user: User, login, role} )
     case "/monolog":
       return "5";
     case "/company":
-      return "3";
+      return "5";
     case "/usage":
       return "3";
     case "/order/invoice/[id]":
@@ -95,8 +101,8 @@ const SidebarLayout = ( props: { children: ReactNode, user: User, login, role} )
   }
 
   const getUser = () =>{
-    if( props.user != null ){
-      return props.user;
+    if( props.context.user != null ){
+      return props.context.user;
     }else{
       return basicUser;
     }
@@ -110,6 +116,7 @@ const SidebarLayout = ( props: { children: ReactNode, user: User, login, role} )
           <Avatar
             size={40}
             style={{ backgroundColor: "#f0f0f2", color: "#474747" }}
+            src={props.context.profile.picture}
           >
             {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
           </Avatar>
@@ -122,12 +129,9 @@ const SidebarLayout = ( props: { children: ReactNode, user: User, login, role} )
           <LogoutOutlined />
           <div className={styles.iconlinktext}>Ausloggen</div>
         </Link>
-        
       </div>
-      
     </div>
   );
-
   
   return (
     <ConfigProvider theme={{
@@ -146,9 +150,12 @@ const SidebarLayout = ( props: { children: ReactNode, user: User, login, role} )
         <Sider className={styles.sidebar} breakpoint={breakpoint} collapsedWidth={collapseWidth} collapsed={collapsed} onCollapse={( value ) => {
           setCollapsed( value )
         }}>
-          <div className={styles.logobox}>
-            <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
-          </div>
+          <Link href={"/"}>
+            <div className={styles.logobox}>
+              {/*eslint-disable-next-line */}
+              <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
+            </div>
+          </Link>
 
           <div className={styles.navigation}>
             
@@ -161,8 +168,9 @@ const SidebarLayout = ( props: { children: ReactNode, user: User, login, role} )
                   <Avatar
                     size={40}
                     style={{ backgroundColor: "#f0f0f2", color: "#474747" }}
+                    src={props.context.profile.picture}
                   >
-                    {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
+                    <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
                   </Avatar>
                 </Popover>
               </div>

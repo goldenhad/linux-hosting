@@ -56,7 +56,8 @@ export default async function signUp( firstname, lastname, email, username, pass
                 dialog: false,
                 monolog: false,
                 usage: false,
-                profiles: false
+                profiles: false,
+                company: false
               }
             } );
 
@@ -127,7 +128,8 @@ export async function signUpUser( firstname, lastname, email, username, password
               dialog: false,
               monolog: false,
               usage: false,
-              profiles: false
+              profiles: false,
+              company: false
             }
           } );
 

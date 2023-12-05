@@ -5,7 +5,6 @@ import {
   Form,
   Input,
   Modal,
-  Tooltip,
   Select,
   Space,
   Table,
@@ -19,18 +18,13 @@ import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
-import { convertToCurrency, handleEmptyString, handleUndefinedTour } from "../../helper/architecture";
+import { handleEmptyString, handleUndefinedTour } from "../../helper/architecture";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { getDocWhere } from "../../firebase/data/getData";
 import updateData from "../../firebase/data/updateData";
 import {
-  ClockCircleOutlined,
-  FileTextOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  ShoppingCartOutlined
+  ClockCircleOutlined
 } from "@ant-design/icons";
-import Link from "next/link";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -40,9 +34,8 @@ import {
   Tooltip as ChartTooltip,
   Legend
 } from "chart.js";
-import { Bar } from "react-chartjs-2";
 import { User } from "../../firebase/types/User";
-import { InvitedUser, Usage } from "../../firebase/types/Company";
+import { InvitedUser } from "../../firebase/types/Company";
 const { TextArea } = Input;
 
 ChartJS.register(
@@ -53,21 +46,6 @@ ChartJS.register(
   ChartTooltip,
   Legend
 );
-
-const months = [
-  "Januar",
-  "Februar",
-  "März",
-  "April",
-  "Mai",
-  "Juni",
-  "Juli",
-  "August",
-  "September",
-  "Oktober",
-  "November",
-  "Dezember"
-];
 
 export interface InitialProps {
   Data: { currentMonth: number, currentYear: number; paypalURL: string; };
@@ -89,7 +67,8 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 
 export default function Company( props: InitialProps ) {
-  const { login, user, company, role, calculations } = useAuthContext();
+  const context = useAuthContext();
+  const { login, user, company, role } = context;
   const [ errMsg, setErrMsg ] = useState( [] );
   const [ isErrVisible, setIsErrVisible ] = useState( false );
   const [ inviteErrMsg, setInviteErrMsg ] = useState( "" );
@@ -101,7 +80,7 @@ export default function Company( props: InitialProps ) {
   const [ form ] = Form.useForm();
   const [ userTableLoading, setUserTableLoading ] = useState( true );
   const router = useRouter();
-  const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).usage );
+  const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).company );
 
   const companyRef = useRef( null );
   const backgroundRef = useRef( null );
@@ -166,55 +145,6 @@ export default function Company( props: InitialProps ) {
         }
       },
       {
-        title: "Statistik zur Nutzung",
-        description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Mails deine Firma über das "+
-        "aktuelle Jahr mit Siteware.Mail bereits verbraucht hat und wie viele Mails noch auf eurem "+
-        "Konto verfügbar sind.",
-        target: () => budgetRef.current,
-        nextButtonProps: {
-          children: (
-            "Weiter"
-          )
-        },
-        prevButtonProps: {
-          children: (
-            "Zurück"
-          )
-        }
-      },
-      {
-        title: "Ihr wollt noch mehr E-Mails optimieren?",
-        description: "Solltet ihr den Bedarf haben, mehr E-Mails zu optimieren, könnt ihr zusätzliche "+
-        "E-Mail-Kapazitäten hier direkt erwerben.",
-        target: () => buyRef.current,
-        nextButtonProps: {
-          children: (
-            "Weiter"
-          )
-        },
-        prevButtonProps: {
-          children: (
-            "Zurück"
-          )
-        }
-      },
-      {
-        title: "Eure bisherigen Einkäufe",
-        description: "In dieser Tabelle findet ihr eine Übersicht eurer bisherigen Einkäufe bei Siteware.Mail."+
-        " Hier habt ihr die Möglichkeit, Rechnungen herunterzuladen und unterbrochene Einkäufe abzuschließen.",
-        target: () => orderRef.current,
-        nextButtonProps: {
-          children: (
-            "Weiter"
-          )
-        },
-        prevButtonProps: {
-          children: (
-            "Zurück"
-          )
-        }
-      },
-      {
         title: "Mitglieder deiner Firma",
         description: "In dieser Tabelle findest du eine Auflistung aller Mitglieder deiner Firma."+
         " Du hast die Möglichkeit, Statistiken zu den von den einzelnen Mitgliedern geschriebenen Mails einzusehen und"+
@@ -242,7 +172,7 @@ export default function Company( props: InitialProps ) {
           ),
           onClick: async () => {
             const currstate = user.tour;
-            currstate.usage = true;
+            currstate.company = true;
             updateData( "User", login.uid, { tour: currstate } )
           }
         },
@@ -333,7 +263,7 @@ export default function Company( props: InitialProps ) {
           ),
           onClick: async () => {
             const currstate = user.tour;
-            currstate.usage = true;
+            currstate.company = true;
             updateData( "User", login.uid, { tour: currstate } )
           }
         },
@@ -366,6 +296,7 @@ export default function Company( props: InitialProps ) {
   useEffect( () => {
     const load = async () => {
       const { result, error } = await getDocWhere( "User", "Company", "==", user.Company );
+      // eslint-disable-next-line
       let users: Array<any> = [];
       users = result;
 
@@ -433,7 +364,7 @@ export default function Company( props: InitialProps ) {
               name="companyname"
               className={styles.formpart}
             >
-              <Input className={styles.forminput} placeholder="Name der Firma..." />
+              <Input className={styles.forminput} style={{ width: "50%" }} placeholder="Name der Firma..." />
             </Form.Item>
 
             <Space direction='horizontal' wrap>
@@ -587,7 +518,7 @@ export default function Company( props: InitialProps ) {
       key: "username"
     },
     {
-      title: "Credits diesen Monat",
+      title: "Token diesen Monat",
       dataIndex: "usedCredits",
       key: "usedCredits",
       render: ( _, obj ) => {
@@ -767,178 +698,13 @@ export default function Company( props: InitialProps ) {
       return <></>;
     }
   }
-
-  const purchasecolumns = [
-    {
-      title: "Status",
-      dataIndex: "state",
-      key: "state",
-      render: ( _, obj ) => {
-        switch( obj.state ){
-        case "completed":
-          return(
-            <Tag icon={<CheckCircleOutlined />} color="success">
-              abgeschlossen
-            </Tag>
-          );
-                    
-        case "awaiting_payment":
-          return(
-            <Tag icon={<ClockCircleOutlined />} color="warning">
-              Wartestellung
-            </Tag>
-          );
-        default:
-          return(
-            <Tag icon={<CloseCircleOutlined />} color="error">
-              abgebrochen
-            </Tag>
-          );
-        }
-      }
-    },
-    {
-      title: "Transaktion",
-      dataIndex: "id",
-      key: "id"
-    },
-    {
-      title: "Datum",
-      dataIndex: "timestamp",
-      key: "timestamp",
-      render: ( _, obj ) => {
-        return new Date( obj.timestamp * 1000 ).toLocaleString( "de",{ timeZone:"Europe/Berlin", timeZoneName: "short" } );
-      }
-    },
-    {
-      title: "Erworbene Mails",
-      dataIndex: "tokens",
-      key: "tokens",
-      render: ( _, obj ) => {
-        return obj.amount
-      }
-    },
-    {
-      title: "Betrag",
-      dataIndex: "amount",
-      key: "amount",
-      render: ( _, obj ) => {
-        return convertToCurrency( obj.amount );
-      }
-    },
-    {
-      title: "Aktionen",
-      dataIndex: "actions",
-      key: "actions",
-      render: ( _, obj ) => {
-        if( obj.state == "awaiting_payment" ){
-          return (
-            <div className={styles.actionrow}>
-              <div className={styles.singleaction}>
-                <Link href={`/order/invoice/${obj.id}`}>
-                  <Tooltip title={"Rechnung herunterladen"}>
-                    <FileTextOutlined style={{ fontSize: 20 }}/>
-                  </Tooltip>
-                </Link>
-              </div>
-              <div className={styles.singleaction}>
-                <Link href={`${props.Data.paypalURL}/checkoutnow?token=${obj.id}`}>
-                  <Tooltip title={"Einkauf fortsetzen"}>
-                    <ShoppingCartOutlined style={{ fontSize: 20 }}/>
-                  </Tooltip>
-                </Link>
-              </div>
-            </div>
-          );
-        }else{
-          return (
-            <div className={styles.actionrow}>
-              <div className={styles.singleaction}>
-                <Link href={`/order/invoice/${obj.id}`}>
-                  <Tooltip title={"Rechnung herunterladen"}>
-                    <FileTextOutlined style={{ fontSize: 20 }}/>
-                  </Tooltip>
-                </Link>
-              </div>
-            </div>
-          );
-        }
-      }
-    }
-  ];
-
-  const calculateMails = () => {
-    return Math.floor( company.tokens/calculations.tokensPerMail );
-  }
   
   return (
-    <SidebarLayout role={role} user={user} login={login}>
+    <SidebarLayout context={context}>
       <div className={styles.main}>
         <div className={styles.companyoverview}>
           <Card className={styles.companysettings} title={"Ihre Firma"} headStyle={{ backgroundColor: "#F9FAFB" }} bordered={true}>
             {getCompanyInput()}
-          </Card>
-          <Card className={styles.tokeninformation} headStyle={{ backgroundColor: "#F9FAFB" }} title={"Mails"} bordered={true}>
-            <div ref={budgetRef}>
-              <h2>Dein Mail-Budget</h2>
-              <div className={styles.quotarow}>
-                <div className={styles.tokenbudget}>{( company.unlimited )? "∞" : calculateMails()} Mails</div>
-              </div>
-              <h2>Verbrauch</h2>
-              <div className={styles.usageinfo}>
-                                    
-                <div className={styles.barcontainer}>
-                  <Bar
-                    options={{
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          position: "top" as const
-                        },
-                        title: {
-                          display: false,
-                          text: "Chart.js Bar Chart"
-                        }
-                      }
-                    }}
-                    data={{
-                      labels:  months,
-                      datasets: [
-                        {
-                          label: "Mails",
-                          data: months.map( ( label, idx ) => {
-                            let sum = 0;
-                            userTableData.forEach( ( su: User ) => {
-                              if( su.username ){
-                                su.usedCredits.forEach( ( usage: Usage ) => {
-                                  if( usage.month == idx+1 && usage.year == new Date().getFullYear() ){
-                                    sum += Math.floor( usage.amount/calculations.tokensPerMail );
-                                  }
-                                } );
-                              }
-                            } )
-                            return sum;
-                          } ),
-                          backgroundColor: "rgba(16, 24, 40, 0.8)"
-                        }
-                      ]
-                    }}
-                  />
-                </div>
-
-              </div>
-
-              <div className={styles.generatebuttonrow}>
-                {
-                  ( company.unlimited )?
-                    <></>:<Link href={"/upgrade"}><Button ref={buyRef} className={styles.backbutton} type='primary'>Weitere Mails kaufen</Button></Link>}
-              </div>
-            </div>
-          </Card>
-        </div>
-        <div className={styles.companyorders}>
-          <Card title={"Einkäufe"} bordered={true} headStyle={{ backgroundColor: "#F9FAFB" }}>
-            <Table ref={orderRef} dataSource={company.orders} columns={purchasecolumns} />
           </Card>
         </div>
         <div ref={userRef} className={styles.companyusers}>
@@ -946,7 +712,7 @@ export default function Company( props: InitialProps ) {
         </div>
         <Tour open={open} onClose={async () => {
           const currstate = user.tour;
-          currstate.usage = true;
+          currstate.company = true;
           updateData( "User", login.uid, { tour: currstate } );
           setOpen( false );
         }} steps={steps} />

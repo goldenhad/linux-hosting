@@ -40,11 +40,12 @@ export const handleUndefinedTour = ( tour: TourState ) => {
     return tour;
   }else{
     return {
-      home: false,
-      dialog: false,
-      monolog: false,
-      usage: false,
-      profiles: false
+      home: true,
+      dialog: true,
+      monolog: true,
+      usage: true,
+      profiles: true,
+      company: true
     };
   }
 }

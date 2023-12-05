@@ -31,7 +31,8 @@ export type TourState = {
     dialog: boolean,
     monolog: boolean,
     usage: boolean,
-    profiles: boolean
+    profiles: boolean,
+    company: boolean
 }
 
 export type User =  {
@@ -48,7 +49,7 @@ export type User =  {
     salt: string,
     inviteCode: string,
     recommend: RecommendState,
-    tour: TourState
+    tour: TourState,
 }
 
 export const basicUser: User = {
@@ -75,6 +76,7 @@ export const basicUser: User = {
     dialog: false,
     monolog: false,
     usage: false,
-    profiles: false
+    profiles: false,
+    company: false
   }
 }

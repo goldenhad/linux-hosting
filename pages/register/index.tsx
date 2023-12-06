@@ -430,7 +430,7 @@ export default function Register( props ){
               }
             ]}>
             <Checkbox className={styles.agbCheckbox}>
-                Ich habe die <Link className={styles.agbLink} href="/agb">Allgemeinen Geschäftsbedingungen</Link> gelesen und verstanden.
+                Ich habe die <Link className={styles.agbLink} href="/datenschutz">Datenschutzvereinbarung</Link> gelesen und verstanden.
                  Mit dem Ankreuzen dieser Box stimme ich diesen Bedingungen zu und erkläre mich damit einverstanden.
             </Checkbox>
           </Form.Item>
@@ -608,7 +608,7 @@ export default function Register( props ){
               }
             ]}>
             <Checkbox className={styles.agbCheckbox}>
-                Ich habe die <Link className={styles.agbLink} href="/agb">Allgemeinen Geschäftsbedingungen</Link> gelesen und verstanden. 
+                Ich habe die <Link className={styles.agbLink} href="/datenschutz">Datenschutzvereinbarung</Link> gelesen und verstanden. 
                 Mit dem Ankreuzen dieser Box stimme ich diesen Bedingungen zu und erkläre mich damit einverstanden.</Checkbox>
           </Form.Item>
     
@@ -643,7 +643,7 @@ export default function Register( props ){
           {getForm()}
         </div>
       </div>
-      <div className={styles.copyrightfooter}>© Siteware.Mail 2023</div>
+      <div className={`${styles.copyrightfooter} ${( registeringCompany )? styles.lowerfooter : ""}`}>© Siteware.Mail 2023</div>
     </div>
   );
 }

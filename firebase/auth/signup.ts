@@ -94,7 +94,7 @@ export default async function signUp( firstname, lastname, email, username, pass
 
 export async function signUpUser( firstname, lastname, email, username, password, companyid, role, invitecode ) {
   let result = null;
-  const error = null;
+  let error = false;
         
   try {
     //console.log("Entering, User signup!");
@@ -102,59 +102,79 @@ export async function signUpUser( firstname, lastname, email, username, password
     //console.log(usernameexistsquery.result.length);
     if( usernameexistsquery.result.length == 0 ){
       try {
-        result = await createUserWithEmailAndPassword( auth, email, password );
         try {
-          await addData( "User", result.user.uid,{
-            firstname: firstname,
-            lastname: lastname,
-            username: username,
-            email: email,
-            Role: role,
-            Company: companyid,
-            profiles: [],
-            usedCredits: [],
-            lastState: {
-              dialog: "",
-              monolog: ""
-            },
-            salt: crypto.randomBytes( 8 ).toString( "hex" ),
-            setupDone: false,
-            inviteCode: invitecode,
-            recommend: {
-              timesUsed: 0
-            },
-            tour: {
-              home: false,
-              dialog: false,
-              monolog: false,
-              usage: false,
-              profiles: false,
-              company: false
-            }
-          } );
-
           const invusers = await getDocument( "Company", companyid );
           if( invusers.result.data() ){
             const data = invusers.result.data();
             if( data.invitedUsers ){
               const invited = data.invitedUsers;
-              const cleaned = invited.filter( ( elm: InvitedUser ) => {
-                return elm.email != email;
+              
+              const userWasInvited = invited.find( ( elm: InvitedUser ) => {
+                return elm.email == email;
               } );
 
-              await updateData( "Company", companyid, { invitedUsers: cleaned } );
+              console.log( "Was the user invited?" );
+              console.log( userWasInvited );
+
+              if( userWasInvited ){
+                result = await createUserWithEmailAndPassword( auth, email, password );
+                await addData( "User", result.user.uid,{
+                  firstname: firstname,
+                  lastname: lastname,
+                  username: username,
+                  email: email,
+                  Role: role,
+                  Company: companyid,
+                  profiles: [],
+                  usedCredits: [],
+                  lastState: {
+                    dialog: "",
+                    monolog: ""
+                  },
+                  salt: crypto.randomBytes( 8 ).toString( "hex" ),
+                  setupDone: false,
+                  inviteCode: invitecode,
+                  recommend: {
+                    timesUsed: 0
+                  },
+                  tour: {
+                    home: false,
+                    dialog: false,
+                    monolog: false,
+                    usage: false,
+                    profiles: false,
+                    company: false
+                  }
+                } );
+
+
+                const cleaned = invited.filter( ( elm: InvitedUser ) => {
+                  return elm.email != email;
+                } );
+
+                console.log( cleaned );
+  
+                await updateData( "Company", companyid, { invitedUsers: cleaned } );
+              }else{
+                error = true;
+              }
+            }else{
+              error = true;
             }
+          }else{
+            error = true;
           }
-          //console.log(usercreationresult);
+          
+          console.log( error );
         } catch( e ) {
-          //console.log(e);
+          console.log( e );
         }
       } catch ( e ) {
-        //console.log(e);
+        console.log( e );
       }
     }
   } catch ( ie ) {
-    //console.log(ie);
+    console.log( ie );
   }
     
 

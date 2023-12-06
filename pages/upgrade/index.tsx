@@ -137,22 +137,27 @@ export default function Upgrade( props: InitialProps ) {
           </div>
           <Card className={styles.quoatacard} headStyle={{ backgroundColor: "#F9FAFB" }} bordered={true}>
             <div className={styles.tokenrow}>
-              <div className={styles.tokens}>{mailAmountMapping[tokenstobuy]}</div>
-              <div className={styles.tokeninfo}>Anzahl E-Mails</div>
+              <div className={styles.tokens}>{parseFloat( ( calculateTokens()/1000 ).toFixed( 0 ) )}</div>
+              <div className={styles.tokeninfo}>Anzahl Credits</div>
             </div>
             <Form>
               <Form.Item className={styles.tokenslideritem} name={"tokenamount"}>
                 <Slider className={styles.tokenslider} defaultValue={0} max={6} step={1} tooltip={{ formatter: null }} onChange={( val ) => setTokenstobuy( val )}/>
               </Form.Item>
             </Form>
-            <Divider className={styles.tokendivider} />
             <div className={styles.details}>
+              <div className={styles.singledetail}>Entspricht: <span className={styles.detailhighlight}>{mailAmountMapping[tokenstobuy]} Mails</span></div>
               <div className={styles.singledetail}>Preis je Mail: <span className={styles.detailhighlight}>{convertToCurrency( calculatePricePerMail() )}</span></div>
               <div className={styles.singledetail}>
                 Deine monatliche Ersparnis: <span className={styles.detailhighlight}>{convertToCurrency( calculateSavings() )} ({calculateSavingPercent()} %)</span>
               </div>
-              <div className={styles.singledetail}>Entspricht: <span className={styles.detailhighlight}>{calculateTokens()} Token</span></div>
-              <div className={styles.singledetail}>Gesamtpreis: <span className={styles.detailhighlight}>{convertToCurrency( mailPriceMapping[tokenstobuy] )}</span></div>
+            </div>
+
+            <Divider className={styles.tokendivider} />
+
+            <div className={styles.summary}>
+              <div className={styles.summarytext}>Gesamtpreis</div>
+              <div className={styles.summarysum}>{convertToCurrency( mailPriceMapping[tokenstobuy] )}</div>
             </div>
           </Card>
 

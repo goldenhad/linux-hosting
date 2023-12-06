@@ -1,5 +1,5 @@
 import { Card, Button, Form, Input, Select, Result, Skeleton, Alert, Divider, message, TourProps, Tour } from "antd";
-import Icon from "@ant-design/icons";
+import Icon, { ArrowLeftOutlined } from "@ant-design/icons";
 import styles from "./index.module.scss"
 import { db } from "../../db";
 import axios, { AxiosResponse } from "axios";
@@ -14,6 +14,7 @@ import Info from "../../public/icons/info.svg";
 import Clipboard from "../../public/icons/clipboard.svg";
 import updateData from "../../firebase/data/updateData";
 import axiosTime from "axios-time";
+import { useRouter } from "next/router";
 const { TextArea } = Input;
 axiosTime( axios );
 
@@ -66,6 +67,7 @@ export default function Monologue( props: InitialProps ) {
   // eslint-disable-next-line
   const [ renderAllowed, setRenderAllowed ] = useState( false );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).monolog );
+  const router = useRouter();
 
   const profileRef = useRef( null );
   const continueRef = useRef( null );
@@ -378,12 +380,13 @@ export default function Monologue( props: InitialProps ) {
           const userusageidx = user.usedCredits.findIndex( ( val ) => {
             return val.month == props.Data.currentMonth && val.year == props.Data.currentYear
           } );
+
           if( userusageidx != -1 ){
             const usageupdates = user.usedCredits;
             usageupdates[userusageidx].amount += answer.data.tokens;
             await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
           }else{
-            const usageupdates = [];
+            const usageupdates = user.usedCredits;
             usageupdates.push( { month: props.Data.currentMonth, year: props.Data.currentYear, amount: answer.data.tokens } );
             await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
           }
@@ -507,7 +510,7 @@ export default function Monologue( props: InitialProps ) {
               <div className={styles.tokenalert}>
                 {
                   ( quotaOverused )?
-                    <Alert message={"Das Tokenbudget ist ausgeschöpft. Weitere Tokens, kannst du in der Kontoübersicht dazubuchen."} type="error" />
+                    <Alert message={"Das Creditbudget ist ausgeschöpft. Weitere Credits, kannst du in der Kontoübersicht dazubuchen."} type="error" />
                     : <></>
                 }
               </div>
@@ -529,7 +532,12 @@ export default function Monologue( props: InitialProps ) {
       <SidebarLayout context={context}>
         <div className={styles.main}>
           <div className={styles.welcomemessage}>
-            <h1>Willkommen zurück, {handleEmptyString( user.firstname )}</h1>
+            <div className={styles.messagcnt}>
+              <Button onClick={() => {
+                router.push( "/" ) 
+              }} icon={<ArrowLeftOutlined />}></Button>
+              <h1>Willkommen zurück, {handleEmptyString( user.firstname )}</h1>
+            </div>
             <Divider className={styles.welcomeseperator} />
           </div>
 
@@ -561,7 +569,7 @@ export default function Monologue( props: InitialProps ) {
                   <div className={styles.answer}>{answer}</div>
                   <div className={styles.tokeninfo}>
                     <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' />
-                  Die Anfrage hat {parseFloat( tokens )/1000} Tokens verbraucht</div></>
+                  Die Anfrage hat {parseFloat( tokens )/1000} Credits verbraucht</div></>
                 : <></>}
               {( isLoaderVisible )? <Skeleton active/>: <></>}
               {( promptError )? <Alert type='error' message="Bei der Generierung der Anfrage ist etwas schiefgelaufen. Bitte versuche es später erneut!" />: <></>}

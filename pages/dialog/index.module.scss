@@ -7,6 +7,12 @@
     .welcomemessage {
       margin-bottom: 25px;
 
+      .messagcnt{
+        display: flex;
+        flex-direction: row;
+        gap: 16px;
+      }
+
       .welcomeseperator{
         margin-top: 25px;
         margin-bottom: 0px;

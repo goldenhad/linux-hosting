@@ -47,7 +47,7 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
           <title>Siteware.Mail | mail assistant</title>
         </Head>
         <div className={roboto.className}>
-          <Component {...pageProps}/> 
+          <Component {...pageProps}/>
         </div>
       </>
     );
@@ -65,7 +65,7 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
         </Head>
         <AuthContextProvider>
           <div className={roboto.className}>
-            <Component {...pageProps}/> 
+            <Component {...pageProps}/>
           </div>
         </AuthContextProvider>
       </>

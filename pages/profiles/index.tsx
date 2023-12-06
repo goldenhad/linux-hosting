@@ -343,6 +343,11 @@ export default function Profiles() {
               );
             } ) }
           </Space>
+          <div className={styles.addProfileRow}>
+            <Button ref={addRef} type='primary' onClick={() => {
+              setIsCreateModalOpen( true )
+            }} disabled={( user.profiles && user.profiles.length >= MAXPROFILES )}>+ Hinzufügen</Button>
+          </div>
           <div className={styles.profilecounter}>{user.profiles? user.profiles.length : 0} von 12 erstellt</div>
         </>
       );
@@ -456,9 +461,7 @@ export default function Profiles() {
     <SidebarLayout context={context}>
       <div className={styles.main}>
         <div className={styles.interactionrow}>
-          <Button ref={addRef} type='primary' onClick={() => {
-            setIsCreateModalOpen( true )
-          }} disabled={( user.profiles && user.profiles.length >= MAXPROFILES )}>+ Hinzufügen</Button>
+          
         </div>
         <div className={styles.projecttable}>
           { getProfileDisplay() }

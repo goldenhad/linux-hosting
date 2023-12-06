@@ -1,4 +1,4 @@
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { getDownloadURL, getMetadata, ref, uploadBytes } from "firebase/storage";
 import { drive } from "../../db";
 
 export async function uploadFile( blob: any, id: string ) {
@@ -20,8 +20,19 @@ export async function getImageUrl( id: string ) {
 
     const url = await getDownloadURL( storageRef );
     return url;
+  } catch( error ) {
+    return undefined;
+  }
+}
+
+export async function fileExists( id: string ) {
+  try{
+    const storageRef = ref( drive, `profilepictures/${id}` );
+
+    await getMetadata( storageRef );
+    return true;
   } catch( e ) {
     console.log( e );
-    return undefined;
+    return false;
   }
 }

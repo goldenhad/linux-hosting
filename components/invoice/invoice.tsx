@@ -49,10 +49,7 @@ const Invoice = ( props: { company, order: Order, user }, ref ) => {
                         <td><b>Rechnungs-Nr:</b></td>
                         <td>{props.order.invoiceId}</td>
                       </tr>
-                      <tr className="invoiceDataRow">
-                        <td><b>Kunden-Nr:</b></td>
-                        <td>{props.user.id}</td>
-                      </tr>
+                      
                     </tbody>
                   </table>
                 </td>
@@ -79,7 +76,7 @@ const Invoice = ( props: { company, order: Order, user }, ref ) => {
           <tr className="item">
             <td>1</td>
             <td>swm0001</td>
-            <td className="itemname">Siteware.Mail Token</td>
+            <td className="itemname">Siteware.Mail Credits</td>
             <td>{props.order.tokens}</td>
             <td>19%</td>
             <td>{convertToCurrency( props.order.amount / ( 1 + 0.19 ) )}</td>

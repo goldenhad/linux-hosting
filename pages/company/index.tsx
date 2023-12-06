@@ -10,7 +10,11 @@ import {
   Table,
   Tag,
   TourProps,
-  Tour
+  Tour,
+  Avatar,
+  Statistic,
+  message,
+  Tooltip
 } from "antd";
 import styles from "./edit.company.module.scss"
 import axios from "axios";
@@ -23,7 +27,11 @@ import { useAuthContext } from "../../components/context/AuthContext";
 import { getDocWhere } from "../../firebase/data/getData";
 import updateData from "../../firebase/data/updateData";
 import {
-  ClockCircleOutlined
+  ClockCircleOutlined,
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  EditOutlined,
+  DeleteOutlined
 } from "@ant-design/icons";
 import {
   Chart as ChartJS,
@@ -36,6 +44,7 @@ import {
 } from "chart.js";
 import { User } from "../../firebase/types/User";
 import { InvitedUser } from "../../firebase/types/Company";
+import { getImageUrl } from "../../firebase/drive/upload_file";
 const { TextArea } = Input;
 
 ChartJS.register(
@@ -78,7 +87,13 @@ export default function Company( props: InitialProps ) {
   const [ inviteUserModalOpen, setInviteUserModalOpen ] = useState( false );
   const [ inviteForm ] = Form.useForm();
   const [ form ] = Form.useForm();
+  const [ memberToEdit, setMemberToEdit ] = useState( undefined );
+  const [ editMemberModal, setEditMemberModal ] = useState( false );
+  const [ memberToDelete, setMemberToDelete ] = useState( undefined );
+  const [ deleteMemberModal, setDeleteMemberModal ] = useState( false );
   const [ userTableLoading, setUserTableLoading ] = useState( true );
+  const [ deleteCounter, setDeleteCounter ] = useState( 0 );
+  const [messageApi, contextHolder] = message.useMessage();
   const router = useRouter();
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).company );
 
@@ -303,22 +318,38 @@ export default function Company( props: InitialProps ) {
       if( company.invitedUsers ){
         company.invitedUsers.forEach( ( inv: InvitedUser ) => {
           if( users ){
-            users.push( inv );
+            const invUser = inv;
+            invUser.wasInvited = true;
+            users.push( invUser );
           }
         } );
       }
+
+      const usersWithPictures = [];
+      if( users ){
+        for( let i=0; i < users.length; i++ ){
+          const imageurl = await getImageUrl( users[i].id );
+          if( imageurl ){
+            users[i].profilepicture = imageurl;
+          }
+  
+          usersWithPictures.push( users[i] );
+        }
+      }
+      
       
 
       if( !error ){
-        setUserTableData( result );
+        setUserTableData( usersWithPictures );
         setUserTableLoading( false );
       }else{
         setUserTableData( [] );
+        setUserTableLoading( false );
       }
     }
 
     load();
-  }, [company, user.Company] )
+  }, [company, user.Company, deleteCounter] )
 
 
   const editCompany = async ( values ) => {
@@ -502,100 +533,143 @@ export default function Company( props: InitialProps ) {
     }
   }
 
+  const displayUserName = ( username: string, wasInvited: boolean ) => {
+    if( !wasInvited ){
+      return `@${username}`;
+    }else{
+      return <Tag icon={<ClockCircleOutlined />} color="warning">eingeladen</Tag>;
+    }
+  };
+
+  const getRoleName = ( rolename: string ) => {
+    switch( rolename ){
+    case "Company-Admin":
+      return "Admin";
+
+    case "Company-Manager":
+      return "Manager";
+
+    default:
+      return "Mailagent"
+    }
+  }
+
 
   const usercolumns = [
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      render: ( _, obj ) => {
-        return obj.firstname + " " + obj.lastname;
+      title: "Mitarbeiter",
+      dataIndex: "member",
+      key: "member",
+      render: ( _, obj, idx ) => {
+        return(
+          <div className={styles.memberprofile}>
+            <div className={styles.avatarcontainer}>
+              <Avatar
+                size={40}
+                style={{ backgroundColor: "#f0f0f2", color: "#474747" }}
+                src={userTableData[idx].profilepicture}
+              >
+                <>{handleEmptyString( obj.firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( obj.lastname ).toUpperCase().charAt( 0 )}</>
+              </Avatar>
+            </div>
+            <div className={styles.namecontainer}>
+              <div>{obj.firstname + " " + obj.lastname}</div>
+              <div className={styles.rolecontainer}>{getRoleName( obj.Role )}</div>
+              <div className={styles.usernamecontainer}>{displayUserName( obj.username, obj.wasInvited )}</div>
+            </div>
+          </div>
+        );
       }
     },
     {
-      title: "Username",
-      dataIndex: "username",
-      key: "username"
-    },
-    {
-      title: "Token diesen Monat",
+      title: "Credits diesen Monat",
       dataIndex: "usedCredits",
       key: "usedCredits",
       render: ( _, obj ) => {
-        if( obj.username ){
-          const usageidx = obj.usedCredits.findIndex( ( val ) => {
-            return val.month == props.Data.currentMonth && val.year == props.Data.currentYear
-          } );
-          if( usageidx != -1 ){
-            return obj.usedCredits[usageidx].amount;
-          }else{
-            return "0";
-          }
-        }
-      }
-    },
-    {
-      title: "Rolle",
-      dataIndex: "Role",
-      key: "Role",
-      render: ( _, obj: User & { id: string }, idx: number ) => {
-        let rolename = "Mailagent";
-        switch( obj.Role ){
-        case "Company-Admin":
-          rolename = "Admin";
-          break;
-        case "Company-Manager":
-          rolename = "Manager";
-          break;
-        default:
-          rolename = "Mailagent"
-          break;
-        }
+        let iconToDisplay = <></>;
+        let colorToDisplay = "#00000";
 
         if( obj.username ){
-          if( obj.Role != "Company-Admin" &&
-            user.email != obj.email &&
-            ( user.Role == "Company-Admin" || user.Role == "Company-Manager" ) ){
-            return (
-              <div>
-                <div>
-                  <Select value={userTableData[idx].Role} style={{ width: 200 }} options={[
-                    { label: "Company-Manager", value: "Company-Manager" },
-                    { label: "Mailagent", value: "Mailagent" }
-                  ]}
-                  onChange={async ( value ) => {
-                    setUserTableLoading( true );
-                    await updateData( "User", obj.id, { Role: checkRoleString( value )? value: "Mailagent" } );
-                    const userdata = userTableData;
-                    userdata[idx].Role = checkRoleString( value )? value: "Mailagent";
-                    setUserTableData( userdata );
-                    setUserTableLoading( false );
-                  }} 
-                  />
-                </div>
-              </div>
-            );
+          const usageidx = obj.usedCredits.findIndex( ( val ) => {
+            return val.month == props.Data.currentMonth && val.year == props.Data.currentYear;
+          } );
+
+          const lastUsageIdx = obj.usedCredits.findIndex( ( val ) => {
+            let yearToSearch = props.Data.currentYear;
+            let monthToSearch = props.Data.currentMonth - 1;
+            if( val.month == 1 ){
+              yearToSearch = yearToSearch - 1;
+              monthToSearch = 1;
+            }
+
+            return val.month == monthToSearch && val.year == yearToSearch;
+          } );
+
+          if( usageidx != -1 && lastUsageIdx != -1 ) {
+            const currentvalue = obj.usedCredits[usageidx].amount;
+            const valueBefore = obj.usedCredits[lastUsageIdx].amount;
+
+            if( valueBefore < currentvalue ){
+              iconToDisplay = <ArrowUpOutlined />;
+              colorToDisplay = "#3f8600";
+            }else if( valueBefore > currentvalue ){
+              iconToDisplay = <ArrowDownOutlined />;
+              colorToDisplay = "#cf1322";
+            }
           }else{
-            return (
-              <div>
-                <div>
-                  {rolename}
-                </div>
-              </div>
-            );
+            iconToDisplay = <></>;
+            colorToDisplay = "#00000";
           }
-        }else{
-          return obj.Role;
+
+
+          return (
+            <Statistic
+              value={( usageidx != -1 )? obj.usedCredits[usageidx].amount: 0}
+              precision={0}
+              valueStyle={{ color: colorToDisplay, fontSize: 14 }}
+              prefix={iconToDisplay}
+              suffix="Credits"
+              groupSeparator="."
+              decimalSeparator=","
+            />
+          )
+        }else{          
+          return (
+            <Statistic
+              value={0}
+              precision={0}
+              valueStyle={{ color: colorToDisplay, fontSize: 14 }}
+              prefix={iconToDisplay}
+              suffix="Credits"
+              groupSeparator="."
+              decimalSeparator=","
+            />
+          )
         }
       }
     },
     {
-      title: "Status",
-      dataIndex: "state",
-      key: "state",
-      render: ( _, obj: User & { id: string } ) => { 
-        if( !obj.username ){
-          return <Tag icon={<ClockCircleOutlined />} color="warning">eingeladen</Tag>
+      title: "Aktionen",
+      dataIndex: "actions",
+      key: "actions",
+      render: ( _, obj: User & { id: string }, indx: number ) => { 
+        if( obj.Role != "Company-Admin" && obj.id != login.uid ){
+          return ( <div className={styles.useractions}>
+            <Tooltip title={"Mitarbeiter bearbeiten"}>
+              <EditOutlined onClick={() => {
+                setMemberToEdit( indx );
+                setEditMemberModal( true )
+              }}
+              />
+            </Tooltip>
+            <Tooltip title={"Mitarbeiter löschen"}>
+              <DeleteOutlined onClick={() => {
+                setMemberToDelete( indx );
+                setDeleteMemberModal( true )
+              }}/>
+            </Tooltip>
+            
+          </div> );
         }
       }
     }
@@ -632,13 +706,63 @@ export default function Company( props: InitialProps ) {
     }
   }
 
+
+  const getRoleSelect = () => {
+
+    if( memberToEdit ){
+      const obj = userTableData[memberToEdit];
+
+      let rolename = "Mailagent";
+      rolename = getRoleName( obj.Role );
+
+      if( obj.username ){
+        if( obj.Role != "Company-Admin" &&
+              user.email != obj.email &&
+              ( user.Role == "Company-Admin" || user.Role == "Company-Manager" ) ){
+          return (
+            <div>
+              <div>
+                <Form layout="vertical">
+                  <Form.Item label="Rolle" style={{ fontWeight: 700 }}>
+                    <Select value={userTableData[memberToEdit].Role} style={{ width: "100%" }} options={[
+                      { label: "Company-Manager", value: "Company-Manager" },
+                      { label: "Mailagent", value: "Mailagent" }
+                    ]}
+                    onChange={async ( value ) => {
+                      setUserTableLoading( true );
+                      await updateData( "User", obj.id, { Role: checkRoleString( value )? value: "Mailagent" } );
+                      const userdata = userTableData;
+                      userdata[memberToEdit].Role = checkRoleString( value )? value: "Mailagent";
+                      setUserTableData( userdata );
+                      setUserTableLoading( false );
+                    }} 
+                    />
+                  </Form.Item>
+                </Form>
+              </div>
+            </div>
+          );
+        }else{
+          return (
+            <div>
+              <div>
+                {rolename}
+              </div>
+            </div>
+          );
+        }
+      }else{
+        return obj.Role;
+      }
+    }
+  }
     
 
   const getUserOverview = () => {
     if( role.isCompany && role.canEditCompanyDetails ){
       return(
         <div>
-          <Card title={"Nutzer"} bordered={true} headStyle={{ backgroundColor: "#F9FAFB" }}>
+          <Card title={"Mitarbeiter"} bordered={true} headStyle={{ backgroundColor: "#F9FAFB" }}>
             <Table
               loading={userTableLoading}
               dataSource={[...userTableData]} columns={usercolumns}
@@ -684,12 +808,9 @@ export default function Company( props: InitialProps ) {
               </div>
 
               <div className={styles.finishformrow}>
-                <Space direction='horizontal'>
-                  <Button type='default' onClick={() => {
-                    setInviteUserModalOpen( false )
-                  }}>Abbrechen</Button>
+                <div className={styles.finisinvite}>
                   <Button type='primary' htmlType='submit' onClick={undefined}>Einladen</Button>
-                </Space>
+                </div>
               </div>
             </Form>
           </Modal>
@@ -703,6 +824,7 @@ export default function Company( props: InitialProps ) {
   
   return (
     <SidebarLayout context={context}>
+      {contextHolder}
       <div className={styles.main}>
         <div className={styles.companyoverview}>
           <Card className={styles.companysettings} title={"Ihre Firma"} headStyle={{ backgroundColor: "#F9FAFB" }} bordered={true}>
@@ -712,6 +834,67 @@ export default function Company( props: InitialProps ) {
         <div ref={userRef} className={styles.companyusers}>
           {getUserOverview()}
         </div>
+        <Modal title={`Mitarbeiter @${( userTableData[memberToEdit] )? userTableData[memberToEdit].username : "FEHLER"} bearbeiten`} open={editMemberModal} onOk={() => {
+          return true
+        }}
+        onCancel={() => {
+          setEditMemberModal( false )
+        }}
+        footer={null}
+        >
+          {getRoleSelect()}
+        </Modal>
+        <Modal
+          title={`Mitarbeiter ${( userTableData[memberToDelete] )
+            ?userTableData[memberToDelete].firstname + " " + userTableData[memberToDelete].lastname
+            : "FEHLER"} löschen?`}
+          open={deleteMemberModal}
+          footer={null}
+          onOk={() => {
+            return true
+          }}
+          onCancel={() => {
+            setDeleteMemberModal( false )
+          }}>
+          <div className={styles.deleteMemberRow}>
+            <Button
+              type="primary"
+              danger
+              onClick={async () => {
+                if( !userTableData[memberToDelete].wasInvited ) {
+                  try{
+                    await axios.post( "/api/company/member", { id:  userTableData[memberToDelete].id } );
+                    setDeleteMemberModal( false );
+                    setDeleteCounter( deleteCounter + 1 );
+                  } catch {
+                    messageApi.open( {
+                      type: "error",
+                      content: "Beim löschen ist etwas schiefgelaufen. Bitte versuche es erneut!"
+                    } );
+                  }
+                }else{
+                  const cleaned = company.invitedUsers.filter( ( elm: InvitedUser ) => {
+                    return elm.email != userTableData[memberToDelete].email;
+                  } );
+
+                  try{
+                    await updateData( "Company", user.Company, { invitedUsers: cleaned } );
+
+                    setDeleteMemberModal( false );
+                    setDeleteCounter( deleteCounter + 1 );
+                  }catch{
+                    messageApi.open( {
+                      type: "error",
+                      content: "Beim löschen ist etwas schiefgelaufen. Bitte versuche es erneut!"
+                    } );
+                  }
+                }
+              }}
+            >
+              Mitarbeiter löschen
+            </Button>
+          </div>
+        </Modal>
         <Tour open={open} onClose={async () => {
           const currstate = user.tour;
           currstate.company = true;

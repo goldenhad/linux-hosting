@@ -73,9 +73,9 @@ export default function Usage( props: InitialProps ) {
 
   const steps: TourProps["steps"] = [
     {
-      title: "Nutzung und Token-Budget",
-      description: "Willkommen in den Nutzungsinformationen. Hier kannst du dein Token-Budget überprüfen und Statistiken zur "+
-      "Nutzung unseres Tools einsehen. Außerdem hast du die Möglichkeit, weitere Token zu kaufen und deine bisherigen Bestellungen einzusehen.",
+      title: "Nutzung und Credit-Budget",
+      description: "Willkommen in den Nutzungsinformationen. Hier kannst du dein Credit-Budget überprüfen und Statistiken zur "+
+      "Nutzung unseres Tools einsehen. Außerdem hast du die Möglichkeit, weitere Credits zu kaufen und deine bisherigen Bestellungen einzusehen.",
       nextButtonProps: {
         children: (
           "Weiter"
@@ -88,9 +88,9 @@ export default function Usage( props: InitialProps ) {
       }
     },
     {
-      title: "Token-Budget",
-      description: "Hier wird dein aktuelles Token-Budget angezeigt. Die angegebene Zahl gibt dir einen Überblick darüber, wie viele Token"+
-      " du ungefähr noch schreiben kannst.",
+      title: "Credit-Budget",
+      description: "Hier wird dein aktuelles Credit-Budget angezeigt. Die angegebene Zahl gibt dir einen Überblick darüber, wie viele Credits"+
+      " du noch zur Verfügung hast.",
       target: () => budgetRef.current,
       nextButtonProps: {
         children: (
@@ -120,7 +120,7 @@ export default function Usage( props: InitialProps ) {
     },
     {
       title: "Statistik",
-      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Token du über das aktuelle Jahr mit Siteware.Mail bereits verbraucht hast.",
+      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Credits du über das aktuelle Jahr mit Siteware.Mail bereits verbraucht hast.",
       target: () => statRef.current,
       nextButtonProps: {
         children: (
@@ -219,7 +219,7 @@ export default function Usage( props: InitialProps ) {
       }
     },
     {
-      title: "Erworbene Token",
+      title: "Erworbene Credits",
       dataIndex: "tokens",
       key: "tokens",
       render: ( _, obj ) => {
@@ -242,13 +242,6 @@ export default function Usage( props: InitialProps ) {
         if( obj.state == "awaiting_payment" ){
           return (
             <div className={styles.actionrow}>
-              <div className={styles.singleaction}>
-                <Link href={`/order/invoice/${obj.id}`}>
-                  <Tooltip title={"Rechnung herunterladen"}>
-                    <FileTextOutlined style={{ fontSize: 20 }}/>
-                  </Tooltip>
-                </Link>
-              </div>
               <div className={styles.singleaction}>
                 <Link href={`${props.Data.paypalURL}/checkoutnow?token=${obj.id}`}>
                   <Tooltip title={"Einkauf fortsetzen"}>
@@ -291,25 +284,25 @@ export default function Usage( props: InitialProps ) {
     <SidebarLayout context={context}>
       <div className={styles.main}>
         <div className={styles.companyoverview}>
-          <Card ref={budgetRef} className={styles.tokeninformation} headStyle={{ backgroundColor: "#F9FAFB" }} title={"Token"} bordered={true}>
+          <Card ref={budgetRef} className={styles.tokeninformation} headStyle={{ backgroundColor: "#F9FAFB" }} title={"Credits"} bordered={true}>
             <div className={styles.tokeninfocard}>
               <h2>
-                Dein Token-Budget
+                Dein Credit-Budget
                 <Popover content={getTokenDetailInformation} placement="bottom" title="Details">
                   <span className={styles.tokeninformation}><InfoCircleOutlined /></span>
                 </Popover>
               </h2>
               <div className={styles.quotarow}>
-                <div className={styles.tokenbudget}>{( company.unlimited )? "∞" : `${Math.floor( company.tokens/1000 )}`} Token</div>
+                <div className={styles.tokenbudget}>{( company.unlimited )? "∞" : `${Math.floor( company.tokens/1000 )}`} Credits</div>
               </div>
             </div>
             <div className={styles.generatebuttonrow}>
               <Link href={"/upgrade"}>
-                {( !company.unlimited )? <Button ref={buyRef} className={styles.backbutton} type='primary'>Weitere Token kaufen</Button> : <></>}
+                {( !company.unlimited )? <Button ref={buyRef} className={styles.backbutton} type='primary'>Weitere Credits kaufen</Button> : <></>}
               </Link>
             </div>
           </Card>
-          <Card ref={statRef} className={styles.tokenusage} headStyle={{ backgroundColor: "#F9FAFB" }} title={"Token-Verbrauch"} bordered={true}>
+          <Card ref={statRef} className={styles.tokenusage} headStyle={{ backgroundColor: "#F9FAFB" }} title={"Credit-Verbrauch"} bordered={true}>
             <div className={styles.tokeninfocard}>
               <h2>Verbrauch</h2>
               <div className={styles.usageinfo}>
@@ -332,13 +325,13 @@ export default function Usage( props: InitialProps ) {
                       labels:  months,
                       datasets: [
                         {
-                          label: "Token",
+                          label: "Credits",
                           data: months.map( ( label, idx ) => {
                             let sum = 0;
                             users.forEach( ( su: User ) => {
                               su.usedCredits.forEach( ( usage: Usage ) => {
                                 if( usage.month == idx+1 && usage.year == new Date().getFullYear() ){
-                                  sum += Math.floor( usage.amount/1000 );
+                                  sum += parseFloat( ( usage.amount/1000 ).toFixed( 2 ) );
                                 }
                               } );
                             } )

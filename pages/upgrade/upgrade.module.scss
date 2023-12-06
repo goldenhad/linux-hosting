@@ -111,6 +111,22 @@
                     }
                 }
             }
+
+            .summary{
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+
+                .summarytext{
+                    font-weight: 700;
+                    font-size: 18px;
+                }
+
+                .summarysum{
+                    font-weight: 700;
+                    font-size: 18px;
+                }
+            }
         }
 
         .buyrow{

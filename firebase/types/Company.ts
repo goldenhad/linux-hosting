@@ -29,6 +29,7 @@ export type InvitedUser = {
     email: string;
     name: string;
     role: string;
+    wasInvited: boolean;
 }
 
 export type Company = {

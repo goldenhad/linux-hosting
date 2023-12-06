@@ -101,7 +101,7 @@ export default function Upgrade( props: InitialProps ) {
         <Result
           status="success"
           title="Kauf erfolgreich abgeschlossen!"
-          subTitle={`Transaktion #${props.Data.orderId} abgeschlossen. Die erworbenen Token sollten umgehend in dein Konto gebucht werden.`}
+          subTitle={`Transaktion #${props.Data.orderId} abgeschlossen. Die erworbenen Credits sollten umgehend in dein Konto gebucht werden.`}
         />
       );
     }else{
@@ -111,7 +111,7 @@ export default function Upgrade( props: InitialProps ) {
           title="Kauf noch nicht autorisiert!"
           subTitle={
             `Transaktion #${props.Data.orderId} ist noch nicht autorisiert. 
-            Sobald der Kaufvorgang abgeschlossen ist verbuchen wir deine Tokens. Lade diese Seite in den kommenden Minuten nochmal neu!
+            Sobald der Kaufvorgang abgeschlossen ist verbuchen wir deine Credits. Lade diese Seite in den kommenden Minuten nochmal neu!
             `
           }
         />

@@ -343,3 +343,11 @@
   height: 200px !important;
   overflow: hidden;
 }
+
+.copyrightnotice{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  color: lightgray;
+  position: relative;
+}

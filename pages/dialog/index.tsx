@@ -53,7 +53,7 @@ const dialogBasicState = {
 
 export default function Dialogue( props: InitialProps ) {
   const context = useAuthContext();
-  const { login, user, company, parameters } = context;
+  const { role, login, user, company, parameters } = context;
   const [ form ] = Form.useForm();
   const [ showAnswer, setShowAnswer ] = useState( false );
   const [ isAnswerVisible, setIsAnswerVisible ] = useState( false );
@@ -349,6 +349,11 @@ export default function Dialogue( props: InitialProps ) {
         const newUser = user;
         newUser.lastState.dialog = encContent;
         await updateData( "User", login.uid, newUser );
+
+        let companyinfo = "";
+        if( role.isCompany ){
+          companyinfo = `Ich arbeite für ${company.name}. Wir beschäftigen uns mit: ${company.settings.background}`;
+        }
         
   
         const answer: AxiosResponse & {
@@ -359,6 +364,7 @@ export default function Dialogue( props: InitialProps ) {
           }} = await axios.post( "/api/prompt/dialog/generate", {
             name: user.firstname + " " + user.lastname,
             personal: profile.settings.personal,
+            company: companyinfo,
             dialog: values.dialog,
             continue: values.continue,
             address: values.address,

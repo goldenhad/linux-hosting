@@ -504,9 +504,9 @@ export default function Account() {
     if( imageUrl ){
       return <DeleteOutlined className={styles.deleteProfilePictureButton} onClick={async () => {
         await deleteProfilePicture( login.uid );
-        console.log("Deleted Picture successfully!")
-        profile.setProfilePicture(undefined);
-        setImageUrl(undefined);
+        console.log( "Deleted Picture successfully!" )
+        profile.setProfilePicture( undefined );
+        setImageUrl( undefined );
       }}/>
     }
   }

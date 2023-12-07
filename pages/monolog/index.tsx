@@ -51,7 +51,7 @@ const monologBasicState = {
 
 export default function Monologue( props: InitialProps ) {
   const context = useAuthContext();
-  const { login, user, company, parameters } = context;
+  const { role, login, user, company, parameters } = context;
   const [ form ] = Form.useForm();
   const [ showAnswer, setShowAnswer ] = useState( false );
   const [ isAnswerVisible, setIsAnswerVisible ] = useState( false );
@@ -338,6 +338,12 @@ export default function Monologue( props: InitialProps ) {
         const newUser = user;
         newUser.lastState.monolog = encContent;
         await updateData( "User", login.uid, newUser );
+
+        let companyinfo = "";
+        if( role.isCompany ){
+          companyinfo = `Ich arbeite für ${company.name}. Wir beschäftigen uns mit: ${company.settings.background}`;
+        }
+        
   
         const answer: AxiosResponse & {
           timings: {
@@ -348,6 +354,7 @@ export default function Monologue( props: InitialProps ) {
         } = await axios.post( "/api/prompt/monolog/generate", {
           name: user.firstname + " " + user.lastname,
           personal: profile.settings.personal,
+          company: companyinfo,
           content: values.content,
           address: values.address,
           style: profile.settings.stil,

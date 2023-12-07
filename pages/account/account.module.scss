@@ -11,6 +11,25 @@
         height: 200px;
     }
 
+    .profilepicturerow{
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+
+        .deleteProfilePictureButton{
+            font-size: 20px;
+            position: relative;
+            right: 20px;
+
+            &:hover{
+                color: #cf1322;
+                cursor: pointer;
+            }
+        }
+    }
+
+    
+
     .personal { 
         display: flex;
         flex-direction: row;

@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { auth } from "../../../firebase/admin"
 import getDocument from "../../../firebase/data/getData";
 import deleteData from "../../../firebase/data/deleteData";
+import { deleteAllUserData } from "../../../helper/userManagement";
 
 type ResponseData = {
     errorcode: number,
@@ -29,8 +30,9 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
               if( deleterepresentation ){
                 if( deleterepresentation.Role != "Company-Admin" && deleterepresentation.Company == userrepresentation.Company ){
                   
-                  await auth.deleteUser( data.id );
-                  await deleteData( "User", data.id );
+                  //await auth.deleteUser( data.id );
+                  //await deleteData( "User", data.id );
+                  deleteAllUserData( data.id );
 
                   return res.status( 200 ).send( { errorcode: -1, message: "OK" } );
                 }else{

@@ -48,6 +48,11 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             const { data: completions } = await openai.chat.completions.create( {
               model: "gpt-4-1106-preview",
               messages: [
+                {
+                  role: "system",
+                  content: "Du bist ein Assistent zum Erstellen von Mails. Nutzer geben dir Informationen zu sich und ihrem Schreibstil, du erzeugst daraus eine E-Mail."+
+                  "Der Stil sollte sich am Nutzer orientieren"
+                },
                 { 
                   role: "user",
                   content: prompt

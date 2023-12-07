@@ -1,5 +1,5 @@
 import { Card, Button, Form, Input, Result, Alert, Spin, message, QRCode, Modal, Upload, UploadProps } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import styles from "./account.module.scss"
 import { useEffect, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -19,6 +19,7 @@ import { useRouter } from "next/router";
 import { getBase64 } from "../../helper/upload";
 import { RcFile, UploadChangeParam, UploadFile } from "antd/es/upload/interface";
 import ImgCrop from "antd-img-crop";
+import { deleteProfilePicture } from "../../firebase/drive/delete";
 
 
 export interface InitialProps {
@@ -374,43 +375,18 @@ export default function Account() {
         if( result.length > 1 ){
           // If we are no the last person in the company, query the remaining users
           const userOfCompany: Array<User & { id: string }> = result;
-                    
-          const companyManager = userOfCompany.filter( ( Singleuser: User & { id: string } ) => {
-            return Singleuser.Role == "Company-Manager";
-          } );
 
-          // Test if the remaining users contain at least one company-manager
-          if( companyManager.length == 0 ){
-            // Query for any Mail-Agent
-            const mailagents = userOfCompany.filter( ( Singleuser: User & { id: string } ) => {
-              return Singleuser.Role == "Mailagent";
-            } );
-
-            // Make the first agent you find the new company owner
-            const firstAgent = mailagents[0];
-            await updateData( "User", firstAgent.id, { Role: "Company-Admin" } );
-            const snglSerDeleteData = await deleteData( "User", login.uid );
-            if( !snglSerDeleteData.error ){
-              await deleteSitewareUser()
-            }
-          }else{
-            // Override the company ownership the the first company-manager you find
-            const firstManager = companyManager[0];
-            await updateData( "User", firstManager.id, { Role: "Company-Admin" } );
-            const snglSerDeleteData = await deleteData( "User", login.uid );
-            if( !snglSerDeleteData.error ){
-              await deleteSitewareUser()
+          for( let i=0; i < userOfCompany.length; i++ ){
+            const userobj = userOfCompany[i];
+            if( userobj.id != login.uid ){
+              await axios.post( "/api/company/member", { id: userobj.id } );
             }
           }
-        }else{
-          // We can savely delete the company if we are the last person in it
-          const cmpnysnglSerDeleteData = await deleteData( "Company", user.Company );
-          if( !cmpnysnglSerDeleteData.error ){
-            const snglSerDeleteData = await deleteData( "User", login.uid );
-            if( !snglSerDeleteData.error ){
-              await deleteSitewareUser()
-            }
-          }
+
+          await deleteProfilePicture( login.uid );
+          await deleteData( "User", login.uid );
+          await deleteData( "Company", user.Company );
+          await deleteSitewareUser();
         }
       }
       break;
@@ -418,6 +394,7 @@ export default function Account() {
     case "Company-Manager":
       const cpmngrDeleteData = await deleteData( "User", login.uid );
       if( !cpmngrDeleteData.error ){
+        await deleteProfilePicture( login.uid );
         await deleteSitewareUser()
       }
       break;
@@ -426,6 +403,7 @@ export default function Account() {
       // Mailagents can be deleted easily as they have no constraint on the company
       const mlgntDeleteData = await deleteData( "User", login.uid );
       if( !mlgntDeleteData.error ){
+        await deleteProfilePicture( login.uid );
         await deleteSitewareUser()
       }
       break;
@@ -437,6 +415,7 @@ export default function Account() {
         const snglSerDeleteData = await deleteData( "User", login.uid );
         console.log( snglSerDeleteData );
         if( !snglSerDeleteData.error ){
+          await deleteProfilePicture( login.uid );
           const deleteUserCall = await deleteSitewareUser();
           console.log( deleteUserCall );
         }
@@ -505,12 +484,12 @@ export default function Account() {
   const beforeUpload = ( file: RcFile, message ) => {
     const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
     if ( !isJpgOrPng ) {
-      message.error( "You can only upload JPG/PNG file!" );
+      messageApi.error( "Das Format muss .png oder jpg sein!" );
     }
     
     const isLt2M = file.size / 1024 / 1024 < 2;
     if ( !isLt2M ) {
-      message.error( "Image must smaller than 2MB!" );
+      messageApi.error( "Das Bild ist zu groß. Maximal sind 2MB erlaubt!" );
     }
 
     const uploadAllowed = ( Upload.LIST_IGNORE == "true" )? true: false;
@@ -521,12 +500,23 @@ export default function Account() {
     return ( isJpgOrPng && isLt2M ) && !uploadAllowed ;
   }
 
+  const getDeleteButton = () => {
+    if( imageUrl ){
+      return <DeleteOutlined className={styles.deleteProfilePictureButton} onClick={async () => {
+        await deleteProfilePicture( login.uid );
+        console.log("Deleted Picture successfully!")
+        profile.setProfilePicture(undefined);
+        setImageUrl(undefined);
+      }}/>
+    }
+  }
+
   return (
     <>
       {contextHolder}
       <SidebarLayout context={context}>
         <div className={styles.main}>
-          <div>
+          <div className={styles.profilepicturerow}>
             <ImgCrop
               onModalCancel={() => {
                 Upload.LIST_IGNORE = "true";
@@ -555,6 +545,7 @@ export default function Account() {
             {/* <Avatar size={250} style={{ backgroundColor: "#f0f0f2", color: "#474747", fontSize: 100 }}>
               {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
             </Avatar> */}
+            {getDeleteButton()}
           </div>
           <div className={styles.personal}>
             <Card className={styles.personalcard} title="Persönliche Informationen" headStyle={{ backgroundColor: "#F9FAFB" }} bordered={true}>
@@ -592,6 +583,13 @@ export default function Account() {
                 <p>
                     Achtung: Du bist dabei, dein Konto zu löschen. Beachte, dass nach der Löschung alle Daten endgültig entfernt werden und nicht wiederhergestellt
                     werden können. Bitte logge dich noch einmal ein, um die Löschung abzuschließen.</p>
+                {( role.isCompany && role.canSetupCompany )?
+                  <>
+                    <br/>
+                    <p>
+                      <b>Wenn du dein Konto löschst, werden alle Konten deiner Firma gelöscht. Deine Mitarbeiter können sich dann nicht mehr einloggen!</b>
+                    </p>
+                  </> : <></>}
                 <div className={styles.reauthform}>
                   {( !reauthSuccessfull )? <Form name="reauth" className={styles.loginform} layout='vertical' onFinish={async ( values ) => {
                     const { error } = await reauthUser( values.email, values.password );
@@ -632,7 +630,8 @@ export default function Account() {
                       <Button type='primary' className={styles.reauthloginbutton} htmlType='submit'>Login</Button>
                     </div>
                   </Form>: <div className={styles.deletefinaly}><Button danger onClick={() => {
-                    deleteUser()
+                    
+                    deleteUser();
                   }}>Konto entgültig löschen!</Button></div>}
                 </div>
               </div>

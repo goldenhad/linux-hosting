@@ -37,10 +37,7 @@ export function parseDialogPrompt(
     .replace( "<style>", style.toString() )
     .replace( "<order>", order.toString() )
     .replace( "<emotions>", emotions.toString() )
-    .replace( "<length>", length )
-
-    console.log(parsed);
-      
+    .replace( "<length>", length )      
       
   return parsed
 }

@@ -38,10 +38,10 @@ export default function Setup(){
           content: <div className={styles.singlestep}>
             <Paragraph>Zusätzlich benötigen wir noch Informationen über dich. Wer bist du, was treibt dich an?</Paragraph>
             <div className={styles.formpart}>
-              <Form.Item name={"user"}>
+              <Form.Item name={"user.positon"}>
                 <TextArea className={styles.forminput} onChange={( value ) => {
                   setBareMinimum( value.currentTarget.value != "" )
-                }} rows={10} maxLength={1200} placeholder={"Beschreibe dich und was dich auszeichnet."}></TextArea>
+                }} rows={8} maxLength={300} placeholder={"Beschreibe dich und was dich auszeichnet."}></TextArea>
               </Form.Item>
             </div>
           </div>
@@ -228,13 +228,14 @@ export default function Setup(){
       <div className={styles.logincontainer}>
         <div className={styles.logorow}>
           <div className={styles.logobox}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={"/logo.svg"} alt="Logo" width={100}/>
           </div>
         </div>
 
         <div className={styles.formContainer}>
           <div className={styles.formtitle}>Willkommen bei Siteware.Mail</div>
-          <div className={styles.formexplanation}>Wir müssen zuerst dein Konto einrichten</div>
+          <div className={styles.formexplanation}>Wir müssen zuerst dein Konto einrichten<br/>Keine Sorge, es dauert nicht lang!</div>
                     
           <div className={styles.stepcontainer}>
             <Steps className={styles.stepbanner} current={current} items={getFormSteps()} />

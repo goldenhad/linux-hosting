@@ -3,7 +3,6 @@ import { auth } from "../../../firebase/admin"
 import { Formidable } from "formidable";
 import { uploadFile } from "../../../firebase/drive/upload_file";
 import fs from "fs";
-import PersistentFile from "formidable/PersistentFile";
 
 type ResponseData = {
     errorcode: number,

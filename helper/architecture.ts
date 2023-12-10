@@ -95,3 +95,12 @@ export const handleUndefinedTour = ( tour: TourState ) => {
     };
   }
 }
+
+
+export const onlyUpdateIfSet = ( val, ideal ) => {
+  if( val != "" ){
+    return val;
+  }else{
+    return ideal;
+  }
+}

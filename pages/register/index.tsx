@@ -104,6 +104,8 @@ export default function Register( props ){
     
 
     if( isPersonal ){
+      const recommendCode = props.invitedBy?.code;
+
       const { error } = await signUp(
         values.firstname,
         values.lastname,
@@ -116,7 +118,7 @@ export default function Register( props ){
         "",
         "DE",
         isPersonal,
-        props.invitedBy.code
+        recommendCode
       );
             
       if ( error ) {

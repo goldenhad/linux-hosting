@@ -46,8 +46,10 @@ jobs:
           echo -e "${{ secrets.SENTRY_FILE }}" > .sentryclirc
 
     - name: Create Firebase File
+      env:
+        JSON: ${{ secrets.FIREBASE_FILE }}
       run: |
-          cat >> mailbuddy_priv_key.json << ${{ secrets.FIREBASE_FILE }}
+          echo $JSON > mailbuddy_priv_key.json
 
     - name: Read Firebase File
       run: |

@@ -1,7 +1,6 @@
 import router from "next/router";
-import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
-import { Button, Form, Input, Select, Space, Steps, Typography, message } from "antd";
+import { Button, Form, Input, Select, Steps, Typography, message } from "antd";
 import styles from "./setup.module.scss"
 import { useAuthContext } from "../../components/context/AuthContext";
 import updateData from "../../firebase/data/updateData";
@@ -12,10 +11,12 @@ const { Paragraph } = Typography;
 const { TextArea } = Input;
 
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  return { props: { InitialState: {} } }
-}
-
+/**
+ * Setup Page used for setting up the user and company information after the first login
+ * All data that is needed for the requesting of the user should be defined
+ * here.
+ * 
+ */
 export default function Setup(){
   const { login, user, role, profile, parameters, company } = useAuthContext();
   const [current, setCurrent] = useState( 0 );
@@ -29,13 +30,17 @@ export default function Setup(){
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect( () => {
-    // Check if the user already has profiles. In this Case the setup was not run yet;
+    // Check if the user already has gone trough setup
     if( user.setupDone ){
       router.push( "/" );
     }
   }, [user.setupDone] )
 
 
+  /**
+   * Returns the steps used for the setup depentend on the role of the current user
+   * @returns Antd Steps for the setup
+   */
   const getFormSteps = () => {        
     if(role.isCompany){
       if( role.canSetupCompany ){
@@ -459,27 +464,37 @@ export default function Setup(){
       ];
     }
   }
-    
-  const setupUser = async () => {
+  
+
+  /**
+   * Function to be called after setup completes. Creates a first profile for the user
+   * and sets the company background if the user is a company admin.
+   */
+  async function setupUser(){
+    // Get the user realated input from the form
     const positioninfo = setupForm.getFieldValue( "user.position" );
     const tasksinfo = setupForm.getFieldValue( "user.tasks" );
     const knowledgeinfo = setupForm.getFieldValue( "user.knowledge" );
     const communicationstyleinfo = setupForm.getFieldValue( "user.communicationstyle" );
 
+    // Create a sample text containing the user information
     const userinfo = `Mein Name ist ${user.firstname} ${user.lastname}. Ich arbeite bei ${company.name}. Meine Position im Unternehmen ist "${positioninfo}."
     In der Firma beschäftige ich mich mit "${tasksinfo.join(", ")}". Mich zeichnet besonders aus: "${knowledgeinfo.join(", ")}".
     Bei der Kommunikation lege ich besonders Wert auf ${communicationstyleinfo}.`;
 
-    
-    if( role.canEditCompanyDetails ){
+    // If the current user is Company Admin
+    if( role.canSetupCompany ){
+      // Get the company info from the form
       const coreinfo = setupForm.getFieldValue("company.core");
       const teaminfo = setupForm.getFieldValue("company.team");
       const philosophyinfo = setupForm.getFieldValue("company.philosophy");
       const productinfo = setupForm.getFieldValue("company.products");
 
+      // Construct the company text used as company background
       const companyinfo = `Wir sind ${company.name}. Unser Kerngeschäft ist "${coreinfo}". Mein Team und ich zeichnet sich aus durch: "${teaminfo}".
       Die Philosophie meines Unternehmens ist ${philosophyinfo}. Wir bieten ${productinfo.join(", ")} als Produkte bzw. Dienstleistungen an.`;
 
+      // Update the company with the background text
       await updateData( "Company", user.Company, {
         settings: {
           background: companyinfo.replace(/\s\s+/g, "")
@@ -487,31 +502,33 @@ export default function Setup(){
       } );
     }
 
-    if( userinfo ){
-      let profileArr = [];
-      const userstyles = setupForm.getFieldValue( "mail.styles" );
-      const userEmotions = setupForm.getFieldValue( "mail.emotions" );
+    // Get the mail relevant information from the prompt
+    let profileArr = [];
+    const userstyles = setupForm.getFieldValue( "mail.styles" );
+    const userEmotions = setupForm.getFieldValue( "mail.emotions" );
 
-      try{
-        const encreq = await axios.post( "/api/prompt/encrypt", {
-          content: JSON.stringify({
-            name: "Hauptprofil",
-            settings: {
-              personal: userinfo.replace(/\s\s+/g, ""),
-              emotions: userEmotions, stil: userstyles 
-            } 
-          }),
-          salt: user.salt
-        } );
+    try{
+      // Construct the main profile and request encryption of it
+      const encreq = await axios.post( "/api/prompt/encrypt", {
+        content: JSON.stringify({
+          name: "Hauptprofil",
+          settings: {
+            personal: userinfo.replace(/\s\s+/g, ""),
+            emotions: userEmotions, stil: userstyles 
+          } 
+        }),
+        salt: user.salt
+      } );
 
-        profileArr.push( encreq.data.message );
-      }catch{
-        profileArr = [];
-      }
-
-      await updateData( "User", login.uid, { profiles: profileArr, setupDone: true } );
+      profileArr.push( encreq.data.message );
+    }catch{
+      profileArr = [];
     }
 
+    // Update the user with the new constructed profile
+    await updateData( "User", login.uid, { profiles: profileArr, setupDone: true } );
+
+    // Redirect to the home page
     router.push( "/" );
   }
 

@@ -49,8 +49,11 @@ jobs:
       run: |
           echo -e -n "${{ secrets.FIREBASE_FILE }}" > mailbuddy_priv_key.json
 
+    - name: Set Imagename
+      run: echo "IMAGENAME=sitware-business-${{ steps.extract_branch.outputs.branch }}:$(date +%s)" >> $GITHUB_ENV
+
     - name: Create .env File
       run: |
           echo -e "${{ secrets.ENV_FILE }}" > .env
     - name: Build the Docker image
-      run: docker build . --file docker/production/Dockerfile --tag sitware-business-${{ steps.extract_branch.outputs.branch }}:$(date +%s)
+      run: docker build . --file docker/production/Dockerfile --tag $IMAGENAME

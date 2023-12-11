@@ -34,11 +34,13 @@ const EditUserForm = (
     const city = props.form.getFieldValue( "city" );
 
     // Update the data of the props.user if it is defined
-    const { error } = await updateData( "props.user", props.login.uid, { 
+    const { error } = await updateData( "User", props.login.uid, { 
       username: onlyUpdateIfSet( username, props.user.username ),
       firstname: onlyUpdateIfSet( firstname, props.user.firstname ),
       lastname: onlyUpdateIfSet( lastname, props.user.lastname )
     } );
+
+    console.log(error);
 
     if( !error ){
       // Only update the company information if the props.user is not a SingleUser

@@ -1,6 +1,6 @@
 import { Upload } from "antd";
 import ImgCrop from "antd-img-crop";
-import styles from "./uploadprofileimge.module.scss"
+import styles from "./uploadprofileimage.module.scss"
 import { RcFile, UploadChangeParam, UploadFile, UploadProps } from "antd/es/upload";
 import axios from "axios";
 import { deleteProfilePicture } from "../../firebase/drive/delete";

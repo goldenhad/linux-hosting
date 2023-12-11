@@ -43,14 +43,14 @@ jobs:
       
     - name: Create sentry File
       run: |
-          echo "${{ secrets.SENTRY_FILE }}" > .sentryclirc
+          echo -e "${{ secrets.SENTRY_FILE }}" > .sentryclirc
 
     - name: Create Firebase File
       run: |
-          echo "${{ secrets.FIREBASE_FILE }}" > mailbuddy_priv_key.json
+          echo -e "${{ secrets.FIREBASE_FILE }}" > mailbuddy_priv_key.json
 
     - name: Create .env File
       run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
+          echo -e "${{ secrets.ENV_FILE }}" > .env
     - name: Build the Docker image
       run: docker build . --file docker/production/Dockerfile --tag sitware-business-${{ steps.extract_branch.outputs.branch }}:$(date +%s)

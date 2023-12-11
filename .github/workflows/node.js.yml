@@ -47,7 +47,7 @@ jobs:
 
     - name: Create Firebase File
       run: |
-          echo -e "${{ secrets.FIREBASE_FILE }}" > mailbuddy_priv_key.json
+          echo -e -n "${{ secrets.FIREBASE_FILE }}" > mailbuddy_priv_key.json
 
     - name: Create .env File
       run: |

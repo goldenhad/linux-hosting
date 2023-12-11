@@ -49,6 +49,10 @@ jobs:
       run: |
           echo -e -n "${{ secrets.FIREBASE_FILE }}" > mailbuddy_priv_key.json
 
+    - name: Read Firebase File
+      run: |
+          ls mailbuddy_priv_key.json 
+
     - name: Set Imagename
       run: echo "IMAGENAME=sitware-business-${{ steps.extract_branch.outputs.branch }}:$(date +%s)" >> $GITHUB_ENV
 

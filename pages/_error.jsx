@@ -6,6 +6,7 @@ const CustomErrorComponent = (props) => {
 };
 
 CustomErrorComponent.getInitialProps = async (contextData) => {
+  await Sentry.captureUnderscoreErrorException(contextData);
   // In case this is running in a serverless function, await this in order to give Sentry
   // time to send the error before the lambda exits
   await Sentry.captureUnderscoreErrorException(contextData);

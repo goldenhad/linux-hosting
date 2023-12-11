@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
-  output: 'standalone',
+  output: "standalone",
   webpack: (config, options) => {
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
-      use: ['@svgr/webpack'],
+      use: ["@svgr/webpack"]
     })
  
     return config;
@@ -15,6 +15,7 @@ module.exports = {
 
 // Injected content via Sentry wizard below
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { withSentryConfig } = require("@sentry/nextjs");
 
 module.exports = withSentryConfig(
@@ -26,7 +27,7 @@ module.exports = withSentryConfig(
     // Suppresses source map uploading logs during build
     silent: true,
     org: "sugarpool-gmbh",
-    project: "javascript-nextjs",
+    project: "siteware-business"
   },
   {
     // For all available options, see:
@@ -51,6 +52,6 @@ module.exports = withSentryConfig(
     // See the following for more information:
     // https://docs.sentry.io/product/crons/
     // https://vercel.com/docs/cron-jobs
-    automaticVercelMonitors: true,
+    automaticVercelMonitors: true
   }
 );

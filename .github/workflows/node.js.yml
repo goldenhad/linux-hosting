@@ -31,12 +31,26 @@ jobs:
     - run: npm run lint
 
   deploy:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
+    - name: Extract branch name
+      shell: bash
+      run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+      id: extract_branch
+      
+    - name: Create sentry File
+      run: |
+          echo "${{ secrets.SENTRY_FILE }}" > .sentryclirc
+
+    - name: Create Firebase File
+      run: |
+          echo "${{ secrets.FIREBASE_FILE }}" > mailbuddy_priv_key.json
+
     - name: Create .env File
       run: |
           echo "${{ secrets.ENV_FILE }}" > .env
     - name: Build the Docker image
-      run: docker build . --file docker/production/Dockerfile --tag sitware-business:$(date +%s)
+      run: docker build . --file docker/production/Dockerfile --tag sitware-business-${{ steps.extract_branch.outputs.branch }}:$(date +%s)

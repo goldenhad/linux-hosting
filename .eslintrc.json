@@ -15,7 +15,6 @@
     "@stylistic/js/arrow-parens": "error",
     "@stylistic/js/brace-style": "error",
     "@stylistic/js/comma-dangle": ["error", "never"],
-    "@stylistic/js/space-in-parens": ["error", "always"],
     "@stylistic/js/quotes": ["error", "double"]
   },
   "parser": "@typescript-eslint/parser",

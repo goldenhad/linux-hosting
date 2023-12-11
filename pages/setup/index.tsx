@@ -1,139 +1,402 @@
 import router from "next/router";
-import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
-import { Button, Form, Input, Select, Steps, Typography } from "antd";
+import { Button, Form, Input, Select, Steps, Typography, message } from "antd";
 import styles from "./setup.module.scss"
 import { useAuthContext } from "../../components/context/AuthContext";
 import updateData from "../../firebase/data/updateData";
 import { listToOptions } from "../../helper/architecture";
 import axios from "axios";
+import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  return { props: { InitialState: {} } }
-}
-
+/**
+ * Setup Page used for setting up the user and company information after the first login
+ * All data that is needed for the requesting of the user should be defined
+ * here.
+ * 
+ */
 export default function Setup(){
-  const { login, user, role, parameters } = useAuthContext();
+  const { login, user, role, profile, parameters, company } = useAuthContext();
   const [current, setCurrent] = useState( 0 );
   const [ setupForm ] = Form.useForm();
-  const [ bareMinimum, setBareMinimum ] = useState( false );
+  const [ position, setPosition ] = useState(false);
+  const [ tasks, setTasks ] = useState(false);
+  const [ knowledge, setKnowledge ] = useState(false);
+  const [ communicationstyle, setCommunicationstyle ] = useState(false);
+  const [ profileImage, setProfileimage ] = useState("");
+  const [ loading, setLoading ] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect( () => {
-    // Check if the user already has profiles. In this Case the setup was not run yet;
+    // Check if the user already has gone trough setup
     if( user.setupDone ){
       router.push( "/" );
     }
   }, [user.setupDone] )
 
 
+  /**
+   * Returns the steps used for the setup depentend on the role of the current user
+   * @returns Antd Steps for the setup
+   */
   const getFormSteps = () => {        
-    if( role.canSetupCompany ){
+    if(role.isCompany){
+      if( role.canSetupCompany ){
+        // Company-Admin
+        return [
+          {
+            step: 0,
+            title: "Erzähl mir etwas über Dich!",
+            content: <div className={styles.singlestep}>
+              <Paragraph>Zusätzlich benötigen wir noch Informationen über dich. Wer bist du, was treibt dich an?</Paragraph>
+              <div className={styles.quadform}>
+                <div className={styles.halfformcontainer}>
+                  <div className={styles.formpart}>
+                    <Form.Item name={"user.position"} label={"Wie lautet Deine Funktion im Unternehmen?"} className={styles.formitemlabel}>
+                      <TextArea className={styles.forminput} onChange={( value ) => {
+                        setPosition((value.currentTarget.value != ""));
+                      }} rows={2} maxLength={100} placeholder={"Beschreibe kurz deine Rolle und Hauptaufgaben in deinem Unternehmen"}></TextArea>
+                    </Form.Item>
+                  </div>
+                  <div className={styles.formpart}>
+                    <Form.Item name={"user.tasks"} label={"Was sind Deine Aufgaben im Unternehmen?"}>
+                      <Select
+                        mode="tags"
+                        style={{ width: "100%", fontWeight: "normal" }}
+                        tokenSeparators={[","]}
+                        placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                        notFoundContent={null}
+                        onChange={( values ) => {
+                          setTasks((values.length != 0));
+                        }}
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+  
+                <div className={styles.halfformcontainer}>
+                  <div className={styles.formpart}>
+                    <Form.Item name={"user.communicationstyle"} label={"Was ist das wichtigste Element in deinem Kommunikationsstil?"}>
+                      <TextArea className={styles.forminput} onChange={( value ) => {
+                        setCommunicationstyle((value.currentTarget.value != ""));
+                      }} rows={2} maxLength={100} placeholder={"Bitte beschreibe das Schlüsselelement deines Kommunikationsstils."}></TextArea>
+                    </Form.Item>
+                  </div>
+                  <div className={styles.formpart}>
+                    <Form.Item name={"user.knowledge"} label={"Was sind Deine Fachkenntnisse und Spezialisierungen?"}>
+                      <Select
+                        mode="tags"
+                        style={{ width: "100%", fontWeight: "normal" }}
+                        tokenSeparators={[","]}
+                        placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                        notFoundContent={null}
+                        onChange={( values ) => {
+                          setKnowledge((values.length != 0));
+                        }}
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+              </div>
+            </div>
+          },
+          {
+            step: 1,
+            title: "Erzähl mir etwas über deine Firma!",
+            content: <div className={styles.singlestep}>
+              <Paragraph>Zusätzlich benötigen wir noch Informationen über dich. Wer bist du, was treibt dich an?</Paragraph>
+              <div className={styles.quadform}>
+                <div className={styles.halfformcontainer}>
+                  <div className={styles.formpart}>
+                    <Form.Item name={"company.core"} label={"Was ist das Kerngeschäft deiner Firma?"} className={styles.formitemlabel}>
+                      <TextArea
+                        className={styles.forminput}
+                        rows={2}
+                        maxLength={100}
+                        placeholder={"Bitte erläutere das Hauptgeschäftsfeld deiner Firma."}
+                      ></TextArea>
+                    </Form.Item>
+                  </div>
+                  <div className={styles.formpart}>
+                    <Form.Item name={"company.team"} label={"Was zeichnet dich und dein Team aus?"}>
+                      <TextArea
+                        className={styles.forminput}
+                        rows={2}
+                        maxLength={100}
+                        placeholder={"Bitte beschreibe die besonderen Stärken von dir und deinem Team."}
+                      ></TextArea>
+                    </Form.Item>
+                  </div>
+                </div>
+  
+                <div className={styles.halfformcontainer}>
+                  <div className={styles.formpart}>
+                    <Form.Item name={"company.philosophy"} label={"Wie würdest Du die Philosophie Deines Unternehmens beschreiben?"}>
+                      <TextArea
+                        className={styles.forminput}
+                        rows={2}
+                        maxLength={100}
+                        placeholder={"Bitte umreiße kurz die Philosophie deines Unternehmens."}
+                      ></TextArea>
+                    </Form.Item>
+                  </div>
+                  <div className={styles.formpart}>
+                    <Form.Item name={"company.products"} label={"Welche Produkte und Dienstleistungen bietet Ihr an?"}>
+                      <Select
+                        mode="tags"
+                        style={{ width: "100%", fontWeight: "normal" }}
+                        tokenSeparators={[","]}
+                        placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                        notFoundContent={null}
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+              </div>
+            </div>
+          },
+          {
+            step: 2,
+            title: "Wie schreibst du deine Mails?",
+            content: <div className={styles.singlestep}>
+              <Paragraph>
+                Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
+                Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
+              </Paragraph>
+              <div className={styles.formpart}>
+                <Form.Item name={"mail.styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
+                  rules={[
+                    () => ( {
+                      validator( _, value ) {
+                        if( value.length > 3 ){
+                          setupForm.setFieldValue( "styles", value.slice( 0, 3 ) )
+                        }
+                        return Promise.resolve();
+                      }
+                    } )
+                  ]}
+                >
+                  <Select options={listToOptions( parameters.style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
+                </Form.Item>
+              </div>
+              <div className={styles.formpart}>
+                <Form.Item name={"mail.emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
+                  rules={[
+                    () => ( {
+                      validator( _, value ) {
+                        if( value.length > 3 ){
+                          setupForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
+                        }
+                        return Promise.resolve();
+                      }
+                    } )
+                  ]}
+                >
+                  <Select options={listToOptions( parameters.emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
+                </Form.Item>
+              </div>
+            </div>
+          },
+          {
+            step: 3,
+            title: "Lade ein Profilbild hoch",
+            content: <div className={styles.singlestep}>
+              <Paragraph>
+                Hey! Bereit, dein Profil zum Leben zu erwecken? Lade jetzt ein Profilbild hoch! Keine Sorge, falls du gerade keins zur Hand hast 
+                – du kannst es auch später jederzeit hinzufügen.
+              </Paragraph>
+              <div className={styles.uploadcontainer}>
+                <UploadProfileImage
+                  login={login}
+                  loading={{ state: loading, set: setLoading }}
+                  image={{ url: profileImage, set: setProfileimage }}
+                  messageApi={messageApi}
+                  profile={profile}
+                />
+              </div>
+            </div>
+          }
+        ];
+      }else{
+        // Mailagent or Company-Manager
+        return [
+          {
+            step: 0,
+            title: "Erzähl mir etwas über Dich!",
+            content: <div className={styles.singlestep}>
+              <Paragraph>Zusätzlich benötigen wir noch Informationen über dich. Wer bist du, was treibt dich an?</Paragraph>
+              <div className={styles.quadform}>
+                <div className={styles.halfformcontainer}>
+                  <div className={styles.formpart}>
+                    <Form.Item name={"user.position"} label={"Wie lautet Deine Funktion im Unternehmen?"} className={styles.formitemlabel}>
+                      <TextArea className={styles.forminput} onChange={( value ) => {
+                        setPosition((value.currentTarget.value != ""));
+                      }} rows={2} maxLength={100} placeholder={"Beschreibe kurz deine Rolle und Hauptaufgaben in deinem Unternehmen"}></TextArea>
+                    </Form.Item>
+                  </div>
+                  <div className={styles.formpart}>
+                    <Form.Item name={"user.tasks"} label={"Was sind Deine Aufgaben im Unternehmen?"}>
+                      <Select
+                        mode="tags"
+                        style={{ width: "100%", fontWeight: "normal" }}
+                        tokenSeparators={[","]}
+                        placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                        notFoundContent={null}
+                        onChange={( values ) => {
+                          setTasks((values.length != 0));
+                        }}
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+  
+                <div className={styles.halfformcontainer}>
+                  <div className={styles.formpart}>
+                    <Form.Item name={"user.communicationstyle"} label={"Was ist das wichtigste Element in deinem Kommunikationsstil?"}>
+                      <TextArea className={styles.forminput} onChange={( value ) => {
+                        setCommunicationstyle((value.currentTarget.value != ""));
+                      }} rows={2} maxLength={100} placeholder={"Bitte beschreibe das Schlüsselelement deines Kommunikationsstils."}></TextArea>
+                    </Form.Item>
+                  </div>
+                  <div className={styles.formpart}>
+                    <Form.Item name={"user.knowledge"} label={"Was sind Deine Fachkenntnisse und Spezialisierungen?"}>
+                      <Select
+                        mode="tags"
+                        style={{ width: "100%", fontWeight: "normal" }}
+                        tokenSeparators={[","]}
+                        placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                        notFoundContent={null}
+                        onChange={( values ) => {
+                          setKnowledge((values.length != 0));
+                        }}
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+              </div>
+            </div>
+          },
+          {
+            step: 1,
+            title: "Wie schreibst du deine Mails?",
+            content: <div className={styles.singlestep}>
+              <Paragraph>
+                Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
+                Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
+              </Paragraph>
+              <div className={styles.formpart}>
+                <Form.Item name={"mail.styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
+                  rules={[
+                    () => ( {
+                      validator( _, value ) {
+                        if( value.length > 3 ){
+                          setupForm.setFieldValue( "styles", value.slice( 0, 3 ) )
+                        }
+                        return Promise.resolve();
+                      }
+                    } )
+                  ]}
+                >
+                  <Select options={listToOptions( parameters.style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
+                </Form.Item>
+              </div>
+              <div className={styles.formpart}>
+                <Form.Item name={"mail.emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
+                  rules={[
+                    () => ( {
+                      validator( _, value ) {
+                        if( value.length > 3 ){
+                          setupForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
+                        }
+                        return Promise.resolve();
+                      }
+                    } )
+                  ]}
+                >
+                  <Select options={listToOptions( parameters.emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
+                </Form.Item>
+              </div>
+            </div>
+          },
+          {
+            step: 2,
+            title: "Lade ein Profilbild hoch",
+            content: <div className={styles.singlestep}>
+              <Paragraph>
+                Hey! Bereit, dein Profil zum Leben zu erwecken? Lade jetzt ein Profilbild hoch! Keine Sorge, falls du gerade keins zur Hand hast 
+                – du kannst es auch später jederzeit hinzufügen.
+              </Paragraph>
+              <div className={styles.uploadcontainer}>
+                <UploadProfileImage
+                  login={login}
+                  loading={{ state: loading, set: setLoading }}
+                  image={{ url: profileImage, set: setProfileimage }}
+                  messageApi={messageApi}
+                  profile={profile}
+                />
+              </div>
+            </div>
+          }
+        ];
+      }
+    }else{
+      // Singleuser
       return [
         {
           step: 0,
           title: "Erzähl mir etwas über Dich!",
           content: <div className={styles.singlestep}>
             <Paragraph>Zusätzlich benötigen wir noch Informationen über dich. Wer bist du, was treibt dich an?</Paragraph>
-            <div className={styles.formpart}>
-              <Form.Item name={"user.positon"}>
-                <TextArea className={styles.forminput} onChange={( value ) => {
-                  setBareMinimum( value.currentTarget.value != "" )
-                }} rows={8} maxLength={300} placeholder={"Beschreibe dich und was dich auszeichnet."}></TextArea>
-              </Form.Item>
-            </div>
-          </div>
-        },
-        {   step: 1,
-          title: "Erzähl mir etwas über deine Firma!",
-          content: <div className={styles.singlestep}>
-            <Paragraph>
-                Damit wir dir das bestmögliche Nutzererlebnis bieten können, benötigen wir ein paar Infos über dich. Das hilft uns, 
-                maßgeschneiderte Lösungen für dich zu erzeugen. Keine Sorge, deine Daten sind bei uns in sicheren Händen!
-            </Paragraph>
-            <div className={styles.formpart}>
-              <Form.Item name="company">
-                <TextArea className={styles.forminput} rows={10} maxLength={1200} placeholder={"Beschreibe deine Firma und ihr Kerngeschäft."}></TextArea>
-              </Form.Item>
-            </div>
-          </div>
-        },
-        {
-          step: 2,
-          title: "Wie schreibst du deine Mails?",
-          content: <div className={styles.singlestep}>
-            <Paragraph>
-                Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
-                Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
-            </Paragraph>
-            <div className={styles.formpart}>
-              <Form.Item name={"styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
-                rules={[
-                  () => ( {
-                    validator( _, value ) {
-                      if( value.length > 3 ){
-                        setupForm.setFieldValue( "styles", value.slice( 0, 3 ) )
-                      }
-                      return Promise.resolve();
-                    }
-                  } )
-                ]}
-              >
-                <Select options={listToOptions( parameters.style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
-              </Form.Item>
-            </div>
-            <div className={styles.formpart}>
-              <Form.Item name={"emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
-                rules={[
-                  () => ( {
-                    validator( _, value ) {
-                      if( value.length > 3 ){
-                        setupForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
-                      }
-                      return Promise.resolve();
-                    }
-                  } )
-                ]}
-              >
-                <Select options={listToOptions( parameters.emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
-              </Form.Item>
-            </div>
-          </div>
-        },
-        {
-          step: 3,
-          title: "Abschließen",
-          content: <div className={styles.singlestep}>
-            <Paragraph>
-                Du bist jetzt startklar für Siteware.Mail! Alles, was du brauchst, ist einsatzbereit. Los geht&apos;s. 
-                Erlebe eine neue Dimension der E-Mail-Kommunikation!
-            </Paragraph>
-          </div>
-        }
-      ];
-    }else{
-      return [
-        {
-          step: 0,
-          title: "Erzähl mir etwas über Dich!",
-          content: <div className={styles.singlestep}>
-            <Paragraph>
-                Damit wir dir das bestmögliche Nutzererlebnis bieten können, benötigen wir ein paar Infos über deine Firma. 
-                Das hilft uns, maßgeschneiderte Lösungen für dich zu erzeugen. Keine Sorge, deine Daten sind bei uns in sicheren Händen!
-            </Paragraph>
-            <div className={styles.formpart}>
-              <Form.Item name={"user"} rules={[
-                {
-                  required: true,
-                  message: "Bitte beschreibe dich kurz!"
-                }
-              ]}>
-                <TextArea onChange={( value ) => {
-                  setBareMinimum( value.currentTarget.value != "" )
-                }} className={styles.forminput} rows={10} placeholder={"Beschreibe dich und was dich auszeichnet."}></TextArea>
-              </Form.Item>
+            <div className={styles.quadform}>
+              <div className={styles.halfformcontainer}>
+                <div className={styles.formpart}>
+                  <Form.Item name={"user.position"} label={"Wie lautet Deine Funktion im Unternehmen?"} className={styles.formitemlabel}>
+                    <TextArea className={styles.forminput} onChange={( value ) => {
+                      setPosition((value.currentTarget.value != ""));
+                    }} rows={2} maxLength={100} placeholder={"Beschreibe kurz deine Rolle und Hauptaufgaben in deinem Unternehmen"}></TextArea>
+                  </Form.Item>
+                </div>
+                <div className={styles.formpart}>
+                  <Form.Item name={"user.tasks"} label={"Was sind Deine Aufgaben im Unternehmen?"}>
+                    <Select
+                      mode="tags"
+                      style={{ width: "100%", fontWeight: "normal" }}
+                      tokenSeparators={[","]}
+                      placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                      notFoundContent={null}
+                      onChange={( values ) => {
+                        setTasks((values.length != 0));
+                      }}
+                    />
+                  </Form.Item>
+                </div>
+              </div>
+
+              <div className={styles.halfformcontainer}>
+                <div className={styles.formpart}>
+                  <Form.Item name={"user.communicationstyle"} label={"Was ist das wichtigste Element in deinem Kommunikationsstil?"}>
+                    <TextArea className={styles.forminput} onChange={( value ) => {
+                      setCommunicationstyle((value.currentTarget.value != ""));
+                    }} rows={2} maxLength={100} placeholder={"Bitte beschreibe das Schlüsselelement deines Kommunikationsstils."}></TextArea>
+                  </Form.Item>
+                </div>
+                <div className={styles.formpart}>
+                  <Form.Item name={"user.knowledge"} label={"Was sind Deine Fachkenntnisse und Spezialisierungen?"}>
+                    <Select
+                      mode="tags"
+                      style={{ width: "100%", fontWeight: "normal" }}
+                      tokenSeparators={[","]}
+                      placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                      notFoundContent={null}
+                      onChange={( values ) => {
+                        setKnowledge((values.length != 0));
+                      }}
+                    />
+                  </Form.Item>
+                </div>
+              </div>
             </div>
           </div>
         },
@@ -142,11 +405,11 @@ export default function Setup(){
           title: "Wie schreibst du deine Mails?",
           content: <div className={styles.singlestep}>
             <Paragraph>
-                Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
-                Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
+              Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
+              Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
             </Paragraph>
             <div className={styles.formpart}>
-              <Form.Item name={"styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
+              <Form.Item name={"mail.styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
                 rules={[
                   () => ( {
                     validator( _, value ) {
@@ -162,7 +425,7 @@ export default function Setup(){
               </Form.Item>
             </div>
             <div className={styles.formpart}>
-              <Form.Item name={"emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
+              <Form.Item name={"mail.emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
                 rules={[
                   () => ( {
                     validator( _, value ) {
@@ -181,50 +444,97 @@ export default function Setup(){
         },
         {
           step: 2,
-          title: "Abschließen",
+          title: "Lade ein Profilbild hoch",
           content: <div className={styles.singlestep}>
             <Paragraph>
-                Du bist jetzt startklar für Siteware.Mail! Alles, was du brauchst, ist einsatzbereit. Los geht&apos;s. 
-                Erlebe eine neue Dimension der E-Mail-Kommunikation!
+              Hey! Bereit, dein Profil zum Leben zu erwecken? Lade jetzt ein Profilbild hoch! Keine Sorge, falls du gerade keins zur Hand hast 
+              – du kannst es auch später jederzeit hinzufügen.
             </Paragraph>
+            <div className={styles.uploadcontainer}>
+              <UploadProfileImage
+                login={login}
+                loading={{ state: loading, set: setLoading }}
+                image={{ url: profileImage, set: setProfileimage }}
+                messageApi={messageApi}
+                profile={profile}
+              />
+            </div>
           </div>
         }
       ];
     }
   }
-    
-  const setupUser = async () => {
-    const companyinfo = setupForm.getFieldValue( "company" );
-    const userinfo = setupForm.getFieldValue( "user" );
-    const userstyles = setupForm.getFieldValue( "styles" );
-    const userEmotions = setupForm.getFieldValue( "emotions" );
-        
+  
 
-    if( companyinfo ){
-      await updateData( "Company", user.Company, { settings: { background: companyinfo } } );
+  /**
+   * Function to be called after setup completes. Creates a first profile for the user
+   * and sets the company background if the user is a company admin.
+   */
+  async function setupUser(){
+    // Get the user realated input from the form
+    const positioninfo = setupForm.getFieldValue( "user.position" );
+    const tasksinfo = setupForm.getFieldValue( "user.tasks" );
+    const knowledgeinfo = setupForm.getFieldValue( "user.knowledge" );
+    const communicationstyleinfo = setupForm.getFieldValue( "user.communicationstyle" );
+
+    // Create a sample text containing the user information
+    const userinfo = `Mein Name ist ${user.firstname} ${user.lastname}. Ich arbeite bei ${company.name}. Meine Position im Unternehmen ist "${positioninfo}."
+    In der Firma beschäftige ich mich mit "${tasksinfo.join(", ")}". Mich zeichnet besonders aus: "${knowledgeinfo.join(", ")}".
+    Bei der Kommunikation lege ich besonders Wert auf ${communicationstyleinfo}.`;
+
+    // If the current user is Company Admin
+    if( role.canSetupCompany ){
+      // Get the company info from the form
+      const coreinfo = setupForm.getFieldValue("company.core");
+      const teaminfo = setupForm.getFieldValue("company.team");
+      const philosophyinfo = setupForm.getFieldValue("company.philosophy");
+      const productinfo = setupForm.getFieldValue("company.products");
+
+      // Construct the company text used as company background
+      const companyinfo = `Wir sind ${company.name}. Unser Kerngeschäft ist "${coreinfo}". Mein Team und ich zeichnet sich aus durch: "${teaminfo}".
+      Die Philosophie meines Unternehmens ist ${philosophyinfo}. Wir bieten ${productinfo.join(", ")} als Produkte bzw. Dienstleistungen an.`;
+
+      // Update the company with the background text
+      await updateData( "Company", user.Company, {
+        settings: {
+          background: companyinfo.replace(/\s\s+/g, "")
+        }
+      } );
     }
 
-    if( userinfo ){
-      let profileArr = [];
-      try{
-        const encreq = await axios.post( "/api/prompt/encrypt", {
-          content: JSON.stringify( { name: "Hauptprofil", settings: { personal: userinfo, emotions: userEmotions, stil: userstyles } } ),
-          salt: user.salt
-        } );
+    // Get the mail relevant information from the prompt
+    let profileArr = [];
+    const userstyles = setupForm.getFieldValue( "mail.styles" );
+    const userEmotions = setupForm.getFieldValue( "mail.emotions" );
 
-        profileArr.push( encreq.data.message );
-      }catch{
-        profileArr = [];
-      }
+    try{
+      // Construct the main profile and request encryption of it
+      const encreq = await axios.post( "/api/prompt/encrypt", {
+        content: JSON.stringify({
+          name: "Hauptprofil",
+          settings: {
+            personal: userinfo.replace(/\s\s+/g, ""),
+            emotions: userEmotions, stil: userstyles 
+          } 
+        }),
+        salt: user.salt
+      } );
 
-      await updateData( "User", login.uid, { profiles: profileArr, setupDone: true } );
+      profileArr.push( encreq.data.message );
+    }catch{
+      profileArr = [];
     }
 
+    // Update the user with the new constructed profile
+    await updateData( "User", login.uid, { profiles: profileArr, setupDone: true } );
+
+    // Redirect to the home page
     router.push( "/" );
   }
 
   return(
     <div>
+      {contextHolder}
       <div className={styles.logincontainer}>
         <div className={styles.logorow}>
           <div className={styles.logobox}>
@@ -249,8 +559,14 @@ export default function Setup(){
 
             <div className={styles.continue}>
               {current < getFormSteps().length - 1 && (
-                <Button disabled={!bareMinimum} type="primary" onClick={() => setCurrent( current + 1 )}>
-                                Weiter
+                <Button
+                  disabled={( !position || !tasks || !knowledge || !communicationstyle )}
+                  type="primary"
+                  onClick={
+                    () => setCurrent( current + 1 )
+                  }
+                >
+                      Weiter
                 </Button>
               )}
               {current === getFormSteps().length - 1 && (

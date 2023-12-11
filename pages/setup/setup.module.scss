@@ -1,9 +1,23 @@
 
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 0px) {
+    .loginform {
+        width: 25%;
+    }
+
+    .quadform{
+        flex-wrap: wrap;
+    }
+}
 
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 768px) {
     .loginform {
         width: 25%;
+    }
+
+    .quadform{
+        flex-wrap: wrap;
     }
 }
 
@@ -12,12 +26,20 @@
     .loginform {
         width: 25%;
     }
+
+    .quadform{
+        flex-wrap: nowrap;
+    }
 }
 
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 @media only screen and (min-width: 1200px) {
     .loginform {
         width: 25%;
+    }
+
+    .quadform{
+        flex-wrap: nowrap;
     }
 }
 
@@ -58,8 +80,25 @@
             width: 70%;
             margin-top: 50px;
 
+            .quadform{
+                display: flex;
+                flex-direction: row;
+                gap: 32px;
+            }
+
+            .halfformcontainer{
+                width: 100%;
+            }
+
             .singlestep{
                 font-size: 16px;
+
+                .uploadcontainer{
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
+                    margin-bottom: 80px;
+                }
             }
 
             .stepformcontent{
@@ -94,6 +133,10 @@
             line-height: 20px;
             size: 14px;
             letter-spacing: 1%;
+
+            .formitemlabel{
+                margin-bottom: 16px;
+            }
   
             .forminput{
               background-color: white;

@@ -45,3 +45,5 @@ docker/staging/db/
 mailbuddy_priv_key.json
 
 *.log
+# Sentry Config File
+.sentryclirc

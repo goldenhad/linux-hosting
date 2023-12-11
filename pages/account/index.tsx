@@ -1,11 +1,8 @@
-import { Card, Button, Form, Input, Result, Alert, Spin, message, QRCode, Modal, Upload, UploadProps } from "antd";
-import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Card, Button, Form, Input, Result, Spin, message, QRCode, Modal } from "antd";
 import styles from "./account.module.scss"
 import { useEffect, useState } from "react";
-import { GetServerSideProps } from "next";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useAuthContext } from "../../components/context/AuthContext";
-import { usernameExistsAtDifferentUser } from "../../firebase/auth/userExists";
 import { LoadingOutlined } from "@ant-design/icons";
 import forgotpassword from "../../firebase/auth/forgot";
 import updateData from "../../firebase/data/updateData";
@@ -16,52 +13,34 @@ import deleteSitewareUser from "../../firebase/auth/delete";
 import { getDocWhere } from "../../firebase/data/getData";
 import reauthUser from "../../firebase/auth/reauth";
 import { useRouter } from "next/router";
-import { getBase64 } from "../../helper/upload";
-import { RcFile, UploadChangeParam, UploadFile } from "antd/es/upload/interface";
-import ImgCrop from "antd-img-crop";
 import { deleteProfilePicture } from "../../firebase/drive/delete";
+import FatButton from "../../components/FatButton";
+import EditUserForm from "../../components/Forms/EditUserForm/EditUserForm";
+import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
 
 
-export interface InitialProps {
-  Data: object;
-}
 
-export const getServerSideProps: GetServerSideProps = async () => {
-
-  return {
-    props: {
-      Data: {}
-    }
-  };
-};
-
-
-function onlyUpdateIfSet( val, ideal ){
-  if( val != "" ){
-    return val;
-  }else{
-    return ideal;
-  }
-}
-
-
+/**
+ * Account-Page
+ * 
+ * Page resolving around everything user account related
+ * 
+ */
 export default function Account() {
   const context = useAuthContext();
   const { login, user, company, role, profile } = context;
   const [ personalForm ] = Form.useForm();
   const [ wasReset, setWasReset ] = useState( false );
-  const [ isErrVisible, setIsErrVisible ] = useState( false );
-  const [ editSuccessfull, setEditSuccessfull ] = useState( false );
   const [messageApi, contextHolder] = message.useMessage();
   const [ deleteAccountModal, setDeleteAccountModal ] = useState( false );
   const [ reauthSuccessfull, setReauthSuccessfull] = useState( false );
-  const [ reauthErr, setReauthErr ] = useState( false );
   const [ recommendLink, setRecommendLink ] = useState( "" );
   const [imageUrl, setImageUrl] = useState<string>( profile.picture );
   const [loading, setLoading] = useState( false );
   const router = useRouter();
 
   useEffect( () => {
+    // Init the edit account form with the values of the user
     personalForm.setFieldValue( "username", user.username );
     personalForm.setFieldValue( "email", login.email );
     personalForm.setFieldValue( "firstname", user.firstname );
@@ -71,8 +50,11 @@ export default function Account() {
     personalForm.setFieldValue( "city", company.city );
 
 
-    const getRecommendLink = async () => {
-
+    /**
+     * Gets the recommend link from the api asynchronously
+     * and sets the corresponding state 
+     */
+    async function getRecommendLink() {
       const encryptedLink = await axios.post( "/api/recommend", { from: user.Company } );
       if( encryptedLink.data.message != "" ){
         setRecommendLink( encryptedLink.data.message );
@@ -83,44 +65,12 @@ export default function Account() {
     // eslint-disable-next-line
   }, [] );
 
-  const saveAccountInfo = async () => {
-    const username = personalForm.getFieldValue( "username" );
-    const firstname = personalForm.getFieldValue( "firstname" );
-    const lastname = personalForm.getFieldValue( "lastname" );
 
-    const street = personalForm.getFieldValue( "street" );
-    const postalcode = personalForm.getFieldValue( "postalcode" );
-    const city = personalForm.getFieldValue( "city" );
-
-    const { error } = await updateData( "User", login.uid, { 
-      username: onlyUpdateIfSet( username, user.username ),
-      firstname: onlyUpdateIfSet( firstname, user.firstname ),
-      lastname: onlyUpdateIfSet( lastname, user.lastname )
-    } );
-
-    if( !error ){
-      if( !role.isCompany ){
-        await updateData( "Company", user.Company, { 
-          street: onlyUpdateIfSet( street, company.street ),
-          postalcode: onlyUpdateIfSet( postalcode, company.postalcode ),
-          city: onlyUpdateIfSet( city, company.city )
-        } );
-      }
-
-      if( !error ){
-        setIsErrVisible( false );
-        setEditSuccessfull( true );
-      }else{
-        setIsErrVisible( true );
-        setEditSuccessfull( false );
-      }
-    }else{
-      setIsErrVisible( true );
-      setEditSuccessfull( false );
-    }
-  }
-
-  const getRecommendCard = () => {
+  /**
+   * Function to return information about recommendation if the user isn't a member of a company
+   * @returns JSX containing information about the recommendation feature
+   */
+  function RecommendCard() {
     if( company ){
       if( !company.recommended ){
         return(
@@ -142,7 +92,7 @@ export default function Account() {
                   <QRCode errorLevel="M" status={( recommendLink == "" )? "loading": undefined} value={recommendLink} bgColor="#fff" />
                 </div>
                 <div className={styles.downloadQRCode}>
-                  <Button type='primary' onClick={downloadQRCode} className={styles.download}>Download</Button>
+                  <FatButton onClick={downloadQRCode} text="Download"/>
                 </div>
               </div>
             </Card>
@@ -152,152 +102,12 @@ export default function Account() {
     }
   }
 
-  const getPersonalForm = () => {
-    if( role.isCompany ){
-      return(
-        <Form layout='vertical' form={personalForm} onFinish={() => {
-          saveAccountInfo()
-        }} onChange={() => {
-          setIsErrVisible( false ), setEditSuccessfull( false )
-        }}>
-          <div className={styles.formrow}>
-            <Form.Item
-              className={styles.formpart}
-              name={"username"}
-              label="Benutzername"
-              rules={[
-                () => ( {
-                  async validator( _, value ) {
-                    if( value != "" ){
-                      if ( await usernameExistsAtDifferentUser( value, login.uid ) ) {
-                        return Promise.reject( new Error( "Dieser Benutzername wird bereits verwendet!" ) );
-                                        
-                      }
-                    }
-                    return Promise.resolve();
-                  }
-                } )
-              ]}
-            >
-              <Input className={styles.forminput} />
-            </Form.Item>
-          </div>
 
-          <div className={styles.formrow}>
-            <Form.Item className={styles.formpart} name={"email"} label="E-Mail">
-              <Input className={styles.forminput} disabled/>
-            </Form.Item>
-          </div>
-
-          <div className={`${styles.formrow} ${styles.multiformrow}`}>
-            <Form.Item className={styles.formpart} name={"firstname"} label="Vorname">
-              <Input className={styles.forminput} />
-            </Form.Item>
-
-            <Form.Item className={styles.formpart} name={"lastname"} label="Nachname">
-              <Input className={styles.forminput} />
-            </Form.Item>
-          </div>
-
-          <div className={styles.errorrow} style={{ display: ( isErrVisible )? "block": "none" }}>
-            <Alert type='error' message={"Speichern fehlgeschlagen, bitte versuche es erneut!"} />
-          </div>
-
-          <div className={styles.successrow} style={{ display: ( editSuccessfull )? "block": "none" }}>
-            <Alert type='success' message="Speichern erfolgreich!" />
-          </div>
-
-          <div className={styles.savebuttonrow}>
-            <Button type='primary' className={styles.save} htmlType='submit'>Speichern</Button>
-          </div>
-        </Form>
-      );
-    }else{
-      return(
-        <Form layout='vertical' form={personalForm} onFinish={() => {
-          saveAccountInfo()
-        }} onChange={() => {
-          setIsErrVisible( false ), setEditSuccessfull( false )
-        }}>
-          <Form.Item
-            className={styles.formpart}
-            name={"username"}
-            label="Benutzername"
-            rules={[
-              () => ( {
-                async validator( _, value ) {
-                  if( value != "" ){
-                    if ( await usernameExistsAtDifferentUser( value, login.uid ) ) {
-                      return Promise.reject( new Error( "Dieser Benutzername wird bereits verwendet!" ) );
-                                        
-                    }
-                  }
-                  return Promise.resolve();
-                }
-              } )
-            ]}
-          >
-            <Input className={styles.forminput} />
-          </Form.Item>
-
-          <div className={styles.formrow}>
-            <Form.Item className={styles.formpart} name={"email"} label="E-Mail">
-              <Input className={styles.forminput} disabled/>
-            </Form.Item>
-          </div>
-
-          <div className={`${styles.formrow} ${styles.multiformrow}`}>
-            <Form.Item className={styles.formpart} name={"firstname"} label="Vorname">
-              <Input className={styles.forminput} />
-            </Form.Item>
-
-            <Form.Item className={styles.formpart} name={"lastname"} label="Nachname">
-              <Input className={styles.forminput} />
-            </Form.Item>
-          </div>
-
-          <div className={`${styles.formrow} ${styles.multiformrow}`}>
-            <Form.Item className={styles.formpart} name={"street"} label="Straße">
-              <Input className={styles.forminput} />
-            </Form.Item>
-
-            <Form.Item className={styles.formpart} name={"postalcode"} label="PLZ">
-              <Input className={styles.forminput} />
-            </Form.Item>
-
-            <Form.Item className={styles.formpart} name={"city"} label="Ort">
-              <Input className={styles.forminput} />
-            </Form.Item>
-          </div>
-
-          <div className={styles.errorrow} style={{ display: ( isErrVisible )? "block": "none" }}>
-            <Alert type='error' message={"Speichern fehlgeschlagen, bitte versuche es erneut!"} />
-          </div>
-
-          <div className={styles.successrow} style={{ display: ( editSuccessfull )? "block": "none" }}>
-            <Alert type='success' message="Speichern erfolgreich!" />
-          </div>
-
-          <div className={styles.savebuttonrow}>
-            <Button type='primary' className={styles.save} htmlType='submit'>Speichern</Button>
-          </div>
-        </Form>
-      );
-    }
-  }
-
-
-  const sendResetMail = async () => {
-    const { error } = await forgotpassword( login.email );
-
-    if ( error ) {
-      //console.log(error);
-    }else{
-      setWasReset( true );
-    }
-  };
-
-  const getResetButton = () => {
+  /**
+   * Local Component regarding the resetting of the users password
+   * @returns JSX regarding the password reset
+   */
+  function PasswordResetButton() {
     if( wasReset ){
       return(
         <Result
@@ -308,11 +118,13 @@ export default function Account() {
       );
     }else{
       return(
-        <div className={styles.savebuttonrow}>
-          <Button type='primary' onClick={() => {
-            sendResetMail()
-          }} className={styles.save}>Passwort zurücksetzen</Button>
-        </div>
+        <FatButton onClick={async () => {
+          const { error } = await forgotpassword( login.email );
+
+          if ( !error ) {
+            setWasReset( true );
+          }
+        }} text="Passwort zurücksetzen" />
       );
     }
   }
@@ -332,16 +144,6 @@ export default function Account() {
     }else{
       messageApi.success( "Tutorial zurückgesetzt!" );
     }
-  }
-
-  const getSettings = () => {
-    return(
-      <div className={styles.tutorialbuttonrow}>
-        <Button type='primary' onClick={() => {
-          resetTutorial()
-        }} className={styles.resettutorial}>Tutorial zurücksetzen</Button>
-      </div>
-    );
   }
 
   const copyLink = () => {
@@ -429,147 +231,44 @@ export default function Account() {
     router.push( "/login" );
   }
 
-  const handleChange: UploadProps["onChange"] = ( info: UploadChangeParam<UploadFile> ) => {
-    if ( info.file.status === "uploading" ) {
-      setLoading( true );
-      return;
-    }
-    if ( info.file.status === "done" ) {
-      // Get this url from response in real world.
-      getBase64( info.file.originFileObj as RcFile, ( url ) => {
-        setLoading( false );
-        profile.setProfilePicture( url );
-        setImageUrl( url )
-      } );
-    }
-  };
-
-
-  const uploadImage = ( options ) => {
-    console.log( Upload.LIST_IGNORE );
-    if( beforeUpload( options.file, undefined ) ){
-      const { onSuccess, onError, file, onProgress } = options;
-      const fmData = new FormData();
-      const config = {
-        headers: { "content-type": "multipart/form-data" },
-        onUploadProgress: ( event ) => {
-          console.log( ( event.loaded / event.total ) * 100 );
-          onProgress( { percent: ( event.loaded / event.total ) * 100 },file );
-        }
-      };
-      fmData.append( "image", file );
-      fmData.append( "user", login.uid );
-      axios
-        .post( "/api/account/upload", fmData, config )
-        .then( ( res ) => {
-          onSuccess( file );
-          console.log( res );
-        } )
-        .catch( ( )=>{
-          const error = new Error( "Some error" );
-          onError( { event:error } );
-        } );
-    }
-    
-    
-  }
-
-  const uploadButton = (
-    <div>
-      {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Profilbild hochladen</div>
-    </div>
-  );
-  
-  const beforeUpload = ( file: RcFile, message ) => {
-    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
-    if ( !isJpgOrPng ) {
-      messageApi.error( "Das Format muss .png oder jpg sein!" );
-    }
-    
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if ( !isLt2M ) {
-      messageApi.error( "Das Bild ist zu groß. Maximal sind 2MB erlaubt!" );
-    }
-
-    const uploadAllowed = ( Upload.LIST_IGNORE == "true" )? true: false;
-    if( uploadAllowed ){
-      setLoading( false );
-    }
-  
-    return ( isJpgOrPng && isLt2M ) && !uploadAllowed ;
-  }
-
-  const getDeleteButton = () => {
-    if( imageUrl ){
-      return <DeleteOutlined className={styles.deleteProfilePictureButton} onClick={async () => {
-        await deleteProfilePicture( login.uid );
-        console.log( "Deleted Picture successfully!" )
-        profile.setProfilePicture( undefined );
-        setImageUrl( undefined );
-      }}/>
-    }
-  }
 
   return (
     <>
       {contextHolder}
       <SidebarLayout context={context}>
         <div className={styles.main}>
-          <div className={styles.profilepicturerow}>
-            <ImgCrop
-              onModalCancel={() => {
-                Upload.LIST_IGNORE = "true";
-              }}
-              onModalOk={() => {
-                Upload.LIST_IGNORE = "false";
-              }}
-            >
-              <Upload
-                name="avatar"
-                listType="picture-circle"
-                className="avatar-uploader"
-                showUploadList={false}
-                customRequest={uploadImage}
-                onChange={handleChange}
-                style={{ overflow: "hidden" }}
-                rootClassName={styles.uploadavatar}
-              >
-
-                {imageUrl ?
-                // eslint-disable-next-line
-                <img src={imageUrl} alt="avatar" style={{ width: "100%" }} /> : uploadButton}
-              </Upload>
-            </ImgCrop>
-            
-            {/* <Avatar size={250} style={{ backgroundColor: "#f0f0f2", color: "#474747", fontSize: 100 }}>
-              {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
-            </Avatar> */}
-            {getDeleteButton()}
-          </div>
+          <UploadProfileImage 
+            login={login}
+            image={{ url: imageUrl, set: setImageUrl }}
+            loading={{ state: loading, set: setLoading }}
+            messageApi={messageApi}
+            profile={profile}
+          />
           <div className={styles.personal}>
             <Card className={styles.personalcard} title="Persönliche Informationen" headStyle={{ backgroundColor: "#F9FAFB" }} bordered={true}>
-              {getPersonalForm()}
+              <EditUserForm form={personalForm} singleUser={!role.isCompany} user={user} login={login} company={company} messageApi={messageApi} />
             </Card>
           </div>
           <div className={styles.password}>
             <Card className={styles.passwordcard} title="Passwort" headStyle={{ backgroundColor: "#F9FAFB" }} bordered={true}>
-              {getResetButton()}
+              <PasswordResetButton />
             </Card>
           </div>
 
           <div className={styles.password}>
             <Card className={styles.passwordcard} title="Einstellungen" headStyle={{ backgroundColor: "#F9FAFB" }} bordered={true}>
-              {getSettings()}
+              <FatButton onClick={() => {
+                resetTutorial()
+              }} text="Tutorial zurücksetzen" />
             </Card>
           </div>
 
-          {getRecommendCard()}
+          <RecommendCard />
 
           <div className={styles.deleteRow}>
-            <Button type='primary' danger onClick={() => {
+            <FatButton danger={true} onClick={() => {
               setDeleteAccountModal( true )
-            }} className={styles.deleteAccount}>Konto löschen</Button>
+            }} text="Konto löschen" />
 
             <Modal
               open={deleteAccountModal}
@@ -594,17 +293,13 @@ export default function Account() {
                   {( !reauthSuccessfull )? <Form name="reauth" className={styles.loginform} layout='vertical' onFinish={async ( values ) => {
                     const { error } = await reauthUser( values.email, values.password );
                     if( error ){
-                      setReauthErr( true );
                       setReauthSuccessfull( false );
+                      messageApi.error("Fehler bei der Authentifizierung")
+
                     }else{
-                      setReauthErr( false );
                       setReauthSuccessfull( true );
                     }
-                  }}
-                  onChange={() => {
-                    setReauthErr( false )
-                  }}
-                  >
+                  }}>
                     <Form.Item
                       label="E-Mail"
                       name="email"
@@ -621,25 +316,18 @@ export default function Account() {
                       <Input.Password className={styles.logininput} />
                     </Form.Item>
 
-                    {( reauthErr )?
-                      <Alert type='error' className={styles.reautherrormsg} message="Beim Login ist etwas schief gelaufen oder die Login-Daten sind falsch!" />
-                      : <></>
-                    }
 
-                    <div className={styles.reauthloginbuttonrow}>
-                      <Button type='primary' className={styles.reauthloginbutton} htmlType='submit'>Login</Button>
-                    </div>
+                    <FatButton isSubmitButton={true} text="Login" />
                   </Form>: <div className={styles.deletefinaly}><Button danger onClick={() => {
-                    
                     deleteUser();
                   }}>Konto entgültig löschen!</Button></div>}
                 </div>
               </div>
             </Modal>
           </div>
-
         </div>
       </SidebarLayout>
     </>
   )
 }
+

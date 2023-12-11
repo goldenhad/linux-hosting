@@ -10,24 +10,6 @@
         width: 200px;
         height: 200px;
     }
-
-    .profilepicturerow{
-        display: flex;
-        flex-direction: row;
-        align-items: flex-end;
-
-        .deleteProfilePictureButton{
-            font-size: 20px;
-            position: relative;
-            right: 20px;
-
-            &:hover{
-                color: #cf1322;
-                cursor: pointer;
-            }
-        }
-    }
-
     
 
     .personal { 
@@ -106,22 +88,6 @@
                     margin-top: 32px;
                     margin-bottom: 32px;
                 }
-
-                .downloadQRCode{
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: center;
-        
-                    button {
-                        width: 360px;
-                        height: 44px;
-                        font-weight: 700;
-                        font-size: 16px;
-                        line-height: 24px;
-                        padding: 10px 18px 10px 18px;
-                        font-weight: bold;
-                    }
-                }
             }
         }
     }
@@ -142,37 +108,6 @@
             font-weight: bold;
         }
     }
-}
-
-.formrow{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
-
-
-    .formpart{
-        font-weight: 700;
-        line-height: 20px;
-        size: 14px;
-        letter-spacing: 1%;
-        width: 100%;
-    }
-}
-
-.forminput{
-    background-color: white;
-    padding: 10px 14px 10px 14px;
-    border-radius: 8px;
-    box-shadow: 0px 1px 2px 0px #1018280D;
-    border-color: #D0D5DD;
-}
-
-.formselect{
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0px 1px 2px 0px #1018280D;
-    border-color: #D0D5DD;
 }
 
 .savebuttonrow {

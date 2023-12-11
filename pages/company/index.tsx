@@ -325,34 +325,49 @@ export default function Company( props: InitialProps ) {
         } );
       }
 
-      const usersWithPictures = [];
-      if( users ){
-        for( let i=0; i < users.length; i++ ){
-          const imageurl = await getImageUrl( users[i].id );
-          if( imageurl ){
-            users[i].profilepicture = imageurl;
-          }
-  
-          usersWithPictures.push( users[i] );
-        }
-      }
-      
-      
-
       if( !error ){
-        setUserTableData( usersWithPictures );
+        setUserTableData( users );
         setUserTableLoading( false );
       }else{
         setUserTableData( [] );
         setUserTableLoading( false );
-      }
+      }      
     }
 
     load();
-  }, [company, user.Company, deleteCounter] )
+  }, [company, user.Company, deleteCounter] );
 
 
-  const editCompany = async ( values ) => {
+  /**
+   * UseEffect for loading the profile pictures of the members in the table
+   * This function was seperated from the loading of the table entries to
+   * increase the loading speed of the data in the tables
+   */
+  useEffect( () => {
+    const loadImages = async () => {
+      const usersWithPictures = [];
+
+      for( let i=0; i < userTableData.length; i++ ){
+        const imageurl = await getImageUrl( userTableData[i].id );
+        if( imageurl ){
+          userTableData[i].profilepicture = imageurl;
+        }
+  
+        usersWithPictures.push( userTableData[i] );
+      }
+
+      setUserTableData( usersWithPictures );
+    }
+
+    loadImages();
+  }, [userTableLoading] )
+
+
+  /**
+   * Handles the updating of the company date with the given form values
+   * @param values Object containing the values needed for editing the company
+   */
+  async function editCompany ( values ) {
     const comp = company;
     comp.name = handleEmptyString( values.companyname );
     comp.street = handleEmptyString( values.companystreet );
@@ -373,11 +388,20 @@ export default function Company( props: InitialProps ) {
     }
   }
 
-  const checkRoleString = ( value: string ) => {
+  /**
+   * Checks the string to be one of the company roles
+   * @param value String of the role
+   * @returns Returns false if the given rolename is neither Mailagent, Company-Admin nor Company-Manager
+   */
+  function checkRoleString ( value: string ) {
     return value == "Mailagent" || value == "Company-Admin" || value == "Company-Manager";
   }
 
-  const getCompanyInput = () => {
+  /**
+   * Function to return the company input fields depending on the current user role
+   * @returns React-Component containing the form
+   */
+  function getCompanyInput() {
     if( role.canEditCompanyDetails ){
       return (
         <div ref={companyRef}>
@@ -533,13 +557,19 @@ export default function Company( props: InitialProps ) {
     }
   }
 
-  const displayUserName = ( username: string, wasInvited: boolean ) => {
+  /**
+   * Calculates if the the given username should be shown or a Tag value should be shown if the user was invited
+   * @param username Username to show
+   * @param wasInvited Value to test if the users invite is still pending
+   * @returns Either the given username prefixed with "@" or a <Tag>
+   */
+  function displayUserName( username: string, wasInvited: boolean ) {
     if( !wasInvited ){
       return `@${username}`;
     }else{
       return <Tag icon={<ClockCircleOutlined />} color="warning">eingeladen</Tag>;
     }
-  };
+  }
 
   const getRoleName = ( rolename: string ) => {
     switch( rolename ){

@@ -793,7 +793,7 @@ export default function Company( props: InitialProps ) {
     if( role.isCompany && role.canEditCompanyDetails ){
       return(
         <div>
-          <Card title={"Mitarbeiter"} bordered={true} headStyle={{ backgroundColor: "#F9FAFB" }}>
+          <Card title={"Mitarbeiter"} bordered={true}>
             <Table
               loading={userTableLoading}
               dataSource={[...userTableData]} columns={usercolumns}
@@ -858,7 +858,7 @@ export default function Company( props: InitialProps ) {
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.companyoverview}>
-          <Card className={styles.companysettings} title={"Ihre Firma"} headStyle={{ backgroundColor: "#F9FAFB" }} bordered={true}>
+          <Card className={styles.companysettings} title={"Ihre Firma"} bordered={true}>
             {getCompanyInput()}
           </Card>
         </div>

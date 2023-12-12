@@ -1,0 +1,66 @@
+
+.servicebox {
+    display: flex;
+    flex-direction: column;
+
+    .servicecard{
+        border-radius: 12px 12px 0px 0px;
+        border-bottom-color: #fff;
+    }
+
+    .serviceheadline{
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 32px;
+        margin-bottom: 20px;
+
+        .servicelogo{
+            width: 50px;
+            height: 50px;
+            overflow: hidden;
+            //border: #1478FD 2px solid;
+            border-radius: 12px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .servicetitle{
+            font-weight: 600;
+        }
+    }
+
+    .servicedescription{
+        color: #475467;
+    }
+
+    .servicefooter{
+        height: 55px;
+        width: 300px;
+        background-color: white;
+        border: 1px solid #f0f0f0;
+
+        border-radius: 0px 0px 12px 12px;
+
+        padding-left: 24px;
+        padding-right: 24px;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+
+        .fav {
+            font-size: 20px;
+        }
+
+        .assistantlink{
+            font-weight: 700;
+            color: #1478FD;
+        }
+    }
+}

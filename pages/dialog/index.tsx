@@ -447,7 +447,7 @@ export default function Dialogue( props: InitialProps ) {
         return(
           <>
             <div className={styles.userinputform}>
-              <Card title={"Verlauf"} headStyle={{ backgroundColor: "#F9FAFB" }} className={styles.userinputcardmain}>
+              <Card title={"Verlauf"} className={styles.userinputcardmain}>
                 <div ref={profileRef}>
                   <Form.Item className={styles.formpart} label={<b>Profil</b>} name="profile">
                     <Select
@@ -482,7 +482,7 @@ export default function Dialogue( props: InitialProps ) {
                   </Form.Item>
                 </div>
               </Card>
-              <Card title={"Einstellungen"} headStyle={{ backgroundColor: "#F9FAFB" }} className={styles.userinputcardsub}>
+              <Card title={"Einstellungen"} className={styles.userinputcardsub}>
                 <div ref={addressRef}>
                   <Form.Item className={styles.formpart} label={<b>Ansprache</b>} name="address">
                     <Select placeholder="Bitte wähle die Form der Ansprache aus..." options={listToOptions( parameters.address )}
@@ -577,7 +577,6 @@ export default function Dialogue( props: InitialProps ) {
               className={styles.answercard}
               title={"Antwort"}
               style={{ display: ( isAnswerCardVisible )? "block": "none" }}
-              headStyle={{ backgroundColor: "#F9FAFB" }}
               extra={<div className={styles.clipboardextra}
                 onClick={() => {
                   navigator.clipboard.writeText( answer ); messageApi.success( "Antwort in die Zwischenablage kopiert." );

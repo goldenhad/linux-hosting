@@ -284,7 +284,7 @@ export default function Usage( props: InitialProps ) {
     <SidebarLayout context={context}>
       <div className={styles.main}>
         <div className={styles.companyoverview}>
-          <Card ref={budgetRef} className={styles.tokeninformation} headStyle={{ backgroundColor: "#F9FAFB" }} title={"Credits"} bordered={true}>
+          <Card ref={budgetRef} className={styles.tokeninformation} title={"Credits"} bordered={true}>
             <div className={styles.tokeninfocard}>
               <h2>
                 Dein Credit-Budget
@@ -302,7 +302,7 @@ export default function Usage( props: InitialProps ) {
               </Link>
             </div>
           </Card>
-          <Card ref={statRef} className={styles.tokenusage} headStyle={{ backgroundColor: "#F9FAFB" }} title={"Credit-Verbrauch"} bordered={true}>
+          <Card ref={statRef} className={styles.tokenusage} title={"Credit-Verbrauch"} bordered={true}>
             <div className={styles.tokeninfocard}>
               <h2>Verbrauch</h2>
               <div className={styles.usageinfo}>
@@ -349,7 +349,7 @@ export default function Usage( props: InitialProps ) {
                         
           </Card>
         </div>
-        <Card ref={orderRef} title={"Einkäufe"} bordered={true} headStyle={{ backgroundColor: "#F9FAFB" }}>
+        <Card ref={orderRef} title={"Einkäufe"} bordered={true}>
           <Table dataSource={company.orders} columns={purchasecolumns} />
         </Card>
         <Tour open={open} onClose={async () => {

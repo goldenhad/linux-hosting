@@ -3,14 +3,11 @@
 .main {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    align-items: center;
-    height: 80vh;
+    height: 90vh;
 
     .greetingrow {
         .greeting {
-            font-size: 48px;
+            font-size: 32px;
             font-weight: 700;
         }
     
@@ -20,49 +17,86 @@
         }
     }
 
-    .optioncontainer {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        flex-wrap: wrap;
-        width: 100%;
+    .dividerrow{
+        >* {
+            border-width: 2px;
+        }
+    }
 
-        .optionrow {
-            margin-top: 32px;
+    .content{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 90vh;
+
+
+        .recommendourapp{
             display: flex;
             flex-direction: row;
-            
-            gap: 16px;
-
+            justify-content: center;
+            gap: 32px;
     
-            .option {
-                width: 300px;
-                height: 100px;
-                background-color: #EAECF0;
-                border-radius: 12px;
-                padding: 25px;
+            .recommendlove{
+                font-size: 64px;
+                color: #cc2f26;
+            }
+    
+            .recommendexplanation{
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                color: black;
-    
-                &:hover {
-                    cursor: pointer;
-                    border-width: 3px;
-                    border-style: solid;
-                    border-color: #1677ff;
-                    color: black;
-                }
-    
-                .option_title {
-                    font-size: 16px;
-                    font-weight: 700;
+                text-align: left;
+            
+                .openrecdrawerrow{
+                    margin-top: 20px;
+                    
+                    >button {
+                        width: 100%;
+                    }
                 }
             }
         }
     }
+}
 
+.recommendContent{
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
     
+    .recommendtext{
+        display: flex;
+        flex-direction: column;
+        width: 60%;
+    }
+
+    .recommendHeadline{
+        margin-bottom: 16px;
+    }
+
+    .recommendLink{
+        overflow-wrap: break-word;
+        text-align: center;
+        margin-top: 32px;
+        margin-bottom: 32px;
+        color: #1677ff;
+
+        &:hover {
+            cursor: pointer;
+            color: #0f4faa;
+        }
+    }
+
+    .recommendqrcode{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-top: 32px;
+        margin-bottom: 32px;
+        width: 40%;
+
+        .downloadbutton{
+            margin-top: 16px;
+        }
+    }
 }

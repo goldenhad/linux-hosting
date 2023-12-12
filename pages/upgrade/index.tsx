@@ -135,7 +135,7 @@ export default function Upgrade( props: InitialProps ) {
             <h1 className={styles.mainheadline}>Credits Kaufen</h1>
             <div className={styles.subheadline}>Bis zu 45% sparen!</div>
           </div>
-          <Card className={styles.quoatacard} headStyle={{ backgroundColor: "#F9FAFB" }} bordered={true}>
+          <Card className={styles.quoatacard} bordered={true}>
             <div className={styles.tokenrow}>
               <div className={styles.tokens}>{parseFloat( ( calculateTokens()/1000 ).toFixed( 0 ) )}</div>
               <div className={styles.tokeninfo}>Anzahl Credits</div>

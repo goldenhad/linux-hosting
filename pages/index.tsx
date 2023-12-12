@@ -1,13 +1,16 @@
-import { TourProps, Tour } from "antd";
+import { TourProps, Tour, Typography, Button, Divider, Space, Modal, QRCode, Spin, message } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
 import SidebarLayout from "../components/Sidebar/SidebarLayout";
 import { useAuthContext } from "../components/context/AuthContext";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import updateData from "../firebase/data/updateData";
 import { handleUndefinedTour } from "../helper/architecture";
+import { HeartFilled, LoadingOutlined } from "@ant-design/icons";
+import AssistantCard from "../components/AssistantCard";
+import axios from "axios";
+const Paragraph = Typography;
 
 
 export interface InitialProps {
@@ -38,12 +41,34 @@ export default function Home() {
   const dialogRef = useRef( null );
   const monologRef = useRef( null );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).home );
+  const [recommendModalOpen, setRecommendModalOpen] = useState(false);
+  const [ recommendLink, setRecommendLink ] = useState( "" );
+  const [messageApi, contextHolder] = message.useMessage();
+
 
   useEffect( () => {
     if( !user.setupDone ){
       router.push( "/setup" );
     }
   }, [router, user.setupDone] );
+
+  
+
+  useEffect( () => {
+    /**
+     * Gets the recommend link from the api asynchronously
+     * and sets the corresponding state 
+     */
+    async function getRecommendLink() {
+      const encryptedLink = await axios.post( "/api/recommend", { from: user.Company } );
+      if( encryptedLink.data.message != "" ){
+        setRecommendLink( encryptedLink.data.message );
+      }
+    }
+    
+    getRecommendLink();
+    // eslint-disable-next-line
+  }, [] );
 
 
   const steps: TourProps["steps"] = [
@@ -119,30 +144,109 @@ export default function Home() {
       }
     }
   ];
+  
+  const copyLink = () => {
+    if( recommendLink != "" ){
+      navigator.clipboard.writeText( recommendLink );
+      messageApi.success( "Link in die Zwischenablage kopiert." );
+    }
+  }
+
+  const downloadQRCode = () => {
+    const canvas = document.getElementById( "recommendqrcode" )?.querySelector<HTMLCanvasElement>( "canvas" );
+    if ( canvas ) {
+      const url = canvas.toDataURL( "image/png", 1.0 );
+      const a = document.createElement( "a" );
+      a.download = "siteware_mail_recommend.png";
+      a.href = url;
+      document.body.appendChild( a );
+      a.click();
+      document.body.removeChild( a );
+    }
+  };
+
+  const RecommendNotice = () => {
+    return (
+      <div className={styles.recommendourapp}>
+        <div className={styles.recommendlove}>
+          <HeartFilled />
+        </div>
+        <div className={styles.recommendexplanation}>
+          <h3>Du liebst Siteware.Business?</h3>
+          <Paragraph>
+                Empfehle uns weiter und sichere Dir 200 GRATIS E-Mails!
+          </Paragraph>
+          <div className={styles.openrecdrawerrow}>
+            <Button type="primary" onClick={() => {
+              setRecommendModalOpen(true);
+            }}>Jetzt empfehlen</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <SidebarLayout context={context}>
+      {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>
           <div className={styles.greeting}>Willkommen {user.firstname}</div>
-          <div className={styles.greeting_subtitle}>Wie kann ich dir heute helfen?</div>
         </div>
 
-        <div className={styles.optioncontainer}>
-          <div className={styles.optionrow}>
-            <Link href={"/dialog"}>
-              <div ref={dialogRef} className={styles.option}>
-                <div className={styles.option_title}>Mail-Dialog fortsetzen</div>
-              </div>
-            </Link>
+        <div className={styles.dividerrow}>
+          <Divider />
+        </div>
 
-            <Link href={"/monolog"}>
-              <div ref={monologRef} className={styles.option}>
-                <div className={styles.option_title}>E-Mail schreiben</div>
-              </div>
-            </Link>
+        <div className={styles.content}>
+          <div className={styles.services}>
+            <Space size={"large"} wrap>
+              <AssistantCard
+                image="/small_logo.png"
+                title="E-Mail Dialog"
+                description="Erzeugt kontextbezogene Antwortvorschläge und erleichtert so die schnelle und präzise E-Mail-Kommunikation."
+                link="/dialog"
+              />
+              <AssistantCard
+                image="/small_logo.png"
+                title="E-Mail erzeugen"
+                description="Erzeugt kontextbezogene Antwortvorschläge und erleichtert so die schnelle und präzise E-Mail-Kommunikation."
+                link="/monolog"
+              />
+            </Space>
           </div>
+
+          <RecommendNotice />
         </div>
+
+        <Modal title="Lade deine Freunde ein und sichere dir Gratis-Mails!" open={recommendModalOpen} width={800} footer={null} onCancel={() => {
+          setRecommendModalOpen(false);
+        }}>
+          <div className={styles.recommendContent}>
+            <div className={styles.recommendtext}>
+              <h3 className={styles.recommendHeadline}></h3>
+              <Paragraph>
+                Du hast jetzt die Gelegenheit, deine Freunde zu Siteware.Business einzuladen.
+                Für jeden Freund, der sich erfolgreich registriert, schenken wir dir 200 Gratis-Mails als Dankeschön.
+                Teile einfach diesen Link, um deine Freunde einzuladen:
+              </Paragraph>
+              <div className={styles.recommendLink}>
+                {( recommendLink == "" )? <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />: <div onClick={() => {
+                  copyLink()
+                }}>{recommendLink}</div>}
+              </div>
+              <p>Alternativ kannst du auch den QR-Code rechts benutzen und deinen Freunden schicken</p>
+            </div>
+            <div className={styles.recommendqrcode} id="recommendqrcode">
+              <QRCode errorLevel="M" status={( recommendLink == "" )? "loading": undefined} value={recommendLink} bgColor="#fff" />
+              <div className={styles.downloadQRCode}>
+                {/* <FatButton onClick={downloadQRCode} text="Download"/> */}
+                <Button type="link" className={styles.downloadbutton} onClick={downloadQRCode}>Download</Button>
+              </div>
+            </div>
+          </div>
+        </Modal>
+
         <Tour open={open} onClose={async () => {
           const currstate = user.tour;
           currstate.home = true;

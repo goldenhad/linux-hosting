@@ -3,6 +3,8 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import { CaptureConsole } from "@sentry/integrations";
+
 
 Sentry.init({
   dsn: "https://37c2be54828288e32ed836e606153655@o4506376831827968.ingest.sentry.io/4506376837005312",
@@ -25,6 +27,9 @@ Sentry.init({
       // Additional Replay configuration goes in here, for example:
       maskAllText: true,
       blockAllMedia: true
+    }),
+    new CaptureConsole({
+      levels: ["error"]
     })
   ]
 });

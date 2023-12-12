@@ -60,5 +60,5 @@ jobs:
           echo -e "${{ secrets.ENV_FILE }}" > .env
     - name: Build the Docker image
       run: |
-      docker build . --file docker/production/Dockerfile --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-      docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        docker build . --file docker/production/Dockerfile --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}

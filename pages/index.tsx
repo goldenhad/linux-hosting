@@ -204,13 +204,13 @@ export default function Home() {
               <AssistantCard
                 image="/small_logo.png"
                 title="E-Mail Dialog"
-                description="Erzeugt kontextbezogene Antwortvorschläge und erleichtert so die schnelle und präzise E-Mail-Kommunikation."
+                description="Mit einem Klick generiert unsere KI smarte Antworten zu Deinen bisher empfangenen E-Mail Verlauf."
                 link="/dialog"
               />
               <AssistantCard
                 image="/small_logo.png"
                 title="E-Mail erzeugen"
-                description="Erzeugt kontextbezogene Antwortvorschläge und erleichtert so die schnelle und präzise E-Mail-Kommunikation."
+                description="Gib den Inhalt an, und die KI zaubert Dir eine E-Mail in Deinem Stil – schnell, smart, persönlich!"
                 link="/monolog"
               />
             </Space>

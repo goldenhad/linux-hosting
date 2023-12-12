@@ -11,7 +11,7 @@ on:
 
 env:
   Registry: ghrc.io
-  IMAGE_NAME: ${{ github.actor }}/sitware-business-dev:$(date +%s)
+  IMAGE_NAME: ${{ github.actor }}/sitware_business_dev:$(date +%Y%m%d%H%M%S)
 
 jobs:
   build:

@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { auth } from "../../../firebase/admin"
 import getDocument from "../../../firebase/data/getData";
-import deleteData from "../../../firebase/data/deleteData";
 import { deleteAllUserData } from "../../../helper/userManagement";
 
 type ResponseData = {

@@ -154,7 +154,7 @@ export default function Profiles() {
     if( user.profiles ){
       decodeProfiles();
     }
-  }, [decodedProfiles, user.profiles, user.salt] );
+  }, [user.profiles, user.salt] );
     
 
   

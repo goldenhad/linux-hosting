@@ -29,7 +29,7 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 export default function Forgot_Password( props: restprops ){
   const [ resetFailed, setResetFailed ] = useState( false );
   const [ wasReset, setWasReset ] = useState( false );
-  const [ resetState, setResetState ] = useState( props as restprops );
+  const [ resetState ] = useState( props as restprops );
 
   useEffect( () => {
     //console.log(resetState);
@@ -163,6 +163,7 @@ export default function Forgot_Password( props: restprops ){
       <div className={styles.logincontainer}>
         <div className={styles.logorow}>
           <div className={styles.logobox}>
+            {/* eslint-disable-next-line */}
             <img src={"/logo.svg"} alt="Logo" width={100}/>
           </div>
         </div>

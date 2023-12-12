@@ -8,14 +8,11 @@ const { Paragraph } = Typography;
 
 const CookieBanner = (  ) => {
   const [ active, setActive ] = useState( false );
-  const [ accepted, setAccepted ] = useState( false );
 
   useEffect( () => {
     if( cookieCutter.get( "mailbuddy-opt-consent" ) ){
-      setAccepted( true );
       setActive( false );
     }else{
-      setAccepted( false );
       setActive( true );
     }
   }, [] )
@@ -25,7 +22,6 @@ const CookieBanner = (  ) => {
     aYearFromNow.setFullYear( aYearFromNow.getFullYear() + 1 );
         
     cookieCutter.set( "mailbuddy-opt-consent", "1", { expires: aYearFromNow } );
-    setAccepted( true );
     setActive( false );
   }
 

@@ -13,7 +13,9 @@ import { Company } from "../../../firebase/types/Company";
 const EditUserForm = (
   props: {
         singleUser: boolean,
+        // eslint-disable-next-line
         form: FormInstance<any>,
+        // eslint-disable-next-line
         login: any,
         user: User,
         company: Company,

@@ -360,6 +360,7 @@ export default function Company( props: InitialProps ) {
     }
 
     loadImages();
+    // eslint-disable-next-line
   }, [userTableLoading] )
 
 

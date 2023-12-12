@@ -14,11 +14,11 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
   const token = await auth.verifyIdToken( req.cookies.token );
 
   if( token ){
-    const data: { fields: any; files: any } = await new Promise(
+    const data: { fields; files } = await new Promise(
       ( resolve, reject ) => {
         const form = new Formidable();
 
-        form.parse( req, ( err: any, fields: any, files: any ) => {
+        form.parse( req, ( err, fields, files ) => {
           if ( err ) reject( { err } );
           resolve( { fields, files } );
         } );

@@ -11,7 +11,8 @@ import { getBase64 } from "../../helper/upload";
 
 
 
-const UploadProfileImage = ( props: { 
+const UploadProfileImage = ( props: {
+    // eslint-disable-next-line
     login: any,
     image: {
         url: string,
@@ -48,7 +49,7 @@ const UploadProfileImage = ( props: {
   const uploadImage = ( options ) => {
     console.log( Upload.LIST_IGNORE );
     if( beforeUpload( options.file ) ){
-      const { onSuccess, onError, file, onProgress } = options;
+      const { onSuccess, file, onProgress } = options;
       const fmData = new FormData();
       const config = {
         headers: { "content-type": "multipart/form-data" },
@@ -61,7 +62,7 @@ const UploadProfileImage = ( props: {
       fmData.append( "user", props.login.uid );
       axios
         .post( "/api/account/upload", fmData, config )
-        .then( ( res ) => {
+        .then( () => {
           onSuccess( file );
           props.messageApi.success("Hochladen erfolgreich!")
         } )

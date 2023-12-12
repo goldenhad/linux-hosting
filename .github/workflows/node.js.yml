@@ -11,7 +11,7 @@ on:
 
 env:
   Registry: ghrc.io
-  IMAGE_NAME: ${{ github.actor }}/sitware_business_dev:$(date +%Y%m%d%H%M%S)
+  IMAGE_NAME: ${{ env.REGISTRY }}/${{ github.actor }}/sitware_business_dev:$(date +%Y%m%d%H%M%S)
 
 jobs:
   build:
@@ -53,6 +53,11 @@ jobs:
     - name: Create .env File
       run: |
           echo -e "${{ secrets.ENV_FILE }}" > .env
+
+    - name: Login
+      run: |
+        echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+    
     - name: Build the Docker image
       run: |
         docker build . --file docker/production/Dockerfile --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}

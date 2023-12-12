@@ -11,8 +11,10 @@ const Invoice = ( props: { company, order: Order, user }, ref ) => {
             <table>
               <tr>
                 <td className="title" style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                  {/* eslint-disable-next-line */}
                   <img
                     src="/sp_logo.png"
+                    alt="logo"
                     style={{ width: "100%", maxWidth: "200px", marginBottom: 25 }}
                   />
                 </td>								

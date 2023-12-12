@@ -352,24 +352,12 @@ export default function Setup(){
             <div className={styles.quadform}>
               <div className={styles.halfformcontainer}>
                 <div className={styles.formpart}>
-                  <Form.Item name={"user.position"} label={"Wie lautet Deine Funktion im Unternehmen?"} className={styles.formitemlabel}>
+                  <Form.Item name={"user.position"} label={"Bitte beschreibe dich kurz in ein paar Sätzen"} className={styles.formitemlabel}>
                     <TextArea className={styles.forminput} onChange={( value ) => {
                       setPosition((value.currentTarget.value != ""));
-                    }} rows={2} maxLength={100} placeholder={"Beschreibe kurz deine Rolle und Hauptaufgaben in deinem Unternehmen"}></TextArea>
-                  </Form.Item>
-                </div>
-                <div className={styles.formpart}>
-                  <Form.Item name={"user.tasks"} label={"Was sind Deine Aufgaben im Unternehmen?"}>
-                    <Select
-                      mode="tags"
-                      style={{ width: "100%", fontWeight: "normal" }}
-                      tokenSeparators={[","]}
-                      placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
-                      notFoundContent={null}
-                      onChange={( values ) => {
-                        setTasks((values.length != 0));
-                      }}
-                    />
+                      setKnowledge(true);
+                      setTasks(true);
+                    }} rows={2} maxLength={100} placeholder={"Beschreibe kurz wer du bist und was dich antreibt"}></TextArea>
                   </Form.Item>
                 </div>
               </div>
@@ -379,21 +367,9 @@ export default function Setup(){
                   <Form.Item name={"user.communicationstyle"} label={"Was ist das wichtigste Element in deinem Kommunikationsstil?"}>
                     <TextArea className={styles.forminput} onChange={( value ) => {
                       setCommunicationstyle((value.currentTarget.value != ""));
+                      setKnowledge(true);
+                      setTasks(true);
                     }} rows={2} maxLength={100} placeholder={"Bitte beschreibe das Schlüsselelement deines Kommunikationsstils."}></TextArea>
-                  </Form.Item>
-                </div>
-                <div className={styles.formpart}>
-                  <Form.Item name={"user.knowledge"} label={"Was sind Deine Fachkenntnisse und Spezialisierungen?"}>
-                    <Select
-                      mode="tags"
-                      style={{ width: "100%", fontWeight: "normal" }}
-                      tokenSeparators={[","]}
-                      placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
-                      notFoundContent={null}
-                      onChange={( values ) => {
-                        setKnowledge((values.length != 0));
-                      }}
-                    />
                   </Form.Item>
                 </div>
               </div>
@@ -478,9 +454,15 @@ export default function Setup(){
     const communicationstyleinfo = setupForm.getFieldValue( "user.communicationstyle" );
 
     // Create a sample text containing the user information
-    const userinfo = `Mein Name ist ${user.firstname} ${user.lastname}. Ich arbeite bei ${company.name}. Meine Position im Unternehmen ist "${positioninfo}."
+    let userinfo = "";
+    if(!role.isCompany){
+      userinfo = `Mein Name ist ${user.firstname} ${user.lastname}. Ich würde mich beschreiben als: "${positioninfo}". 
+    Bei der Kommunikation lege ich besonders Wert auf ${communicationstyleinfo}.`;
+    }else{
+      userinfo = `Mein Name ist ${user.firstname} ${user.lastname}. Ich arbeite bei ${company.name}. Meine Position im Unternehmen ist "${positioninfo}."
     In der Firma beschäftige ich mich mit "${tasksinfo.join(", ")}". Mich zeichnet besonders aus: "${knowledgeinfo.join(", ")}".
     Bei der Kommunikation lege ich besonders Wert auf ${communicationstyleinfo}.`;
+    }
 
     // If the current user is Company Admin
     if( role.canSetupCompany ){

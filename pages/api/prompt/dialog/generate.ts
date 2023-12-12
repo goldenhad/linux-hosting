@@ -24,7 +24,17 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
       const data = req.body;
 
-      if( data.name && data.personal && data.dialog && data.continue && data.address && data.style && data.order && data.emotions && data.length && data.company ){
+      if( data.name != undefined &&
+         data.personal != undefined &&
+         data.dialog != undefined &&
+         data.continue != undefined &&
+         data.address != undefined &&
+         data.style != undefined &&
+         data.order != undefined &&
+         data.emotions != undefined &&
+         data.length != undefined &&
+         data.company != undefined
+      ){
                 
         const templatereq = await getDocument( "Settings", "Prompts" );
 

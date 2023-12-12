@@ -10,8 +10,7 @@ on:
     branches: [ "main" ]
 
 env:
-  Registry: ghrc.io
-  IMAGE_NAME: ${{ env.REGISTRY }}/${{ github.actor }}/sitware_business_dev:$(date +%Y%m%d%H%M%S)
+  IMAGE_NAME: ghrc.io/${{ github.actor }}/sitware_business_dev:$(date +%Y%m%d%H%M%S)
 
 jobs:
   build:

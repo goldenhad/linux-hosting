@@ -5,13 +5,13 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main", "production" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main", "production" ]
+    branches: [ "main" ]
 
 env:
   Registry: ghrc.io
-  IMAGE_NAME: ${{ github.actor }}/sitware-business-${{ steps.extract_branch.outputs.branch }}:$(date +%s)
+  IMAGE_NAME: ${{ github.actor }}/sitware-business-dev:$(date +%s)
 
 jobs:
   build:
@@ -40,11 +40,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Extract branch name
-      shell: bash
-      run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-      id: extract_branch
-      
     - name: Create sentry File
       run: |
           echo -e "${{ secrets.SENTRY_FILE }}" > .sentryclirc

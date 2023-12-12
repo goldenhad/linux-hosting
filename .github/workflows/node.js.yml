@@ -10,7 +10,7 @@ on:
     branches: [ "main" ]
 
 env:
-  IMAGE_NAME: ghrc.io/printerboi/sitware_business:dev
+  IMAGE_NAME: ghcr.io/printerboi/sitware_business:dev
 
 jobs:
   build:

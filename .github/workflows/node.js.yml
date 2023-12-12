@@ -10,7 +10,7 @@ on:
     branches: [ "main" ]
 
 env:
-  IMAGE_NAME: ghrc.io/printerboi/sitware_business_dev:$(date +%Y%m%d%H%M%S)
+  IMAGE_NAME: ghrc.io/printerboi/sitware_business:dev
 
 jobs:
   build:

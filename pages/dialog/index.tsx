@@ -449,7 +449,17 @@ export default function Dialogue( props: InitialProps ) {
             <div className={styles.userinputform}>
               <Card title={"Verlauf"} className={styles.userinputcardmain}>
                 <div ref={profileRef}>
-                  <Form.Item className={styles.formpart} label={<b>Profil</b>} name="profile">
+                  <Form.Item
+                    className={styles.formpart}
+                    label={<b>Profil</b>}
+                    name="profile"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Bitte wähle ein Profil aus!"
+                      }
+                    ]}
+                  >
                     <Select
                       showSearch
                       placeholder="Wähle ein Profil aus"
@@ -467,13 +477,33 @@ export default function Dialogue( props: InitialProps ) {
                 </div>
                   
                 <div ref={dialogRef}>
-                  <Form.Item className={styles.formpart} label={<b>Bisheriger Dialog</b>} name="dialog">
+                  <Form.Item
+                    className={styles.formpart}
+                    label={<b>Bisheriger Dialog</b>}
+                    name="dialog"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Bitte gib eine erhaltene E-Mail ein!"
+                      }
+                    ]}
+                  >
                     <TextArea className={styles.forminput} rows={10} placeholder="Bisheriger Dialog..." disabled={formDisabled || quotaOverused}/>
                   </Form.Item>
                 </div>
 
                 <div ref={continueRef}>
-                  <Form.Item className={styles.formpart} label={<b>Wie soll der Dialog fortgesetzt werden?</b>} name="continue">
+                  <Form.Item
+                    className={styles.formpart}
+                    label={<b>Wie soll der Dialog fortgesetzt werden?</b>}
+                    name="continue"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Bitte lege fest wie der Dialog fortgesetzt werden soll!"
+                      }
+                    ]}
+                  >
                     <TextArea
                       className={styles.forminput}
                       rows={2}
@@ -484,7 +514,17 @@ export default function Dialogue( props: InitialProps ) {
               </Card>
               <Card title={"Einstellungen"} className={styles.userinputcardsub}>
                 <div ref={addressRef}>
-                  <Form.Item className={styles.formpart} label={<b>Ansprache</b>} name="address">
+                  <Form.Item
+                    className={styles.formpart}
+                    label={<b>Ansprache</b>}
+                    name="address"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Bitte lege die Ansprache deiner Nachricht fest!"
+                      }
+                    ]}
+                  >
                     <Select placeholder="Bitte wähle die Form der Ansprache aus..." options={listToOptions( parameters.address )}
                       className={styles.formselect}
                       size='large'
@@ -498,12 +538,18 @@ export default function Dialogue( props: InitialProps ) {
                     rules={[
                       () => ( {
                         validator( _, value ) {
-                          if( value.length > 3 ){
-                            form.setFieldValue( "order", value.slice( 0, 3 ) )
+                          if(value){
+                            if( value.length > 3 ){
+                              form.setFieldValue( "order", value.slice( 0, 3 ) )
+                            }
                           }
                           return Promise.resolve();
                         }
-                      } )
+                      } ),
+                      {
+                        required: true,
+                        message: "Bitte schätze deinen Gesprächspartner ein!"
+                      }
                     ]}
                   >
                     <Select
@@ -519,7 +565,17 @@ export default function Dialogue( props: InitialProps ) {
                 </div>
 
                 <div ref={lengthRef}>
-                  <Form.Item className={styles.formpart} label={<b>Länge der Antwort</b>} name="length">
+                  <Form.Item
+                    className={styles.formpart}
+                    label={<b>Länge der Antwort</b>}
+                    name="length"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Bitte lege die Länge deiner Nachricht fest!"
+                      }
+                    ]}
+                  >
                     <Select
                       placeholder="Wie lang soll die erzeuge Antwort sein?"
                       options={listToOptions( parameters.lengths )}

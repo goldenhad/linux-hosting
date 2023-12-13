@@ -98,3 +98,49 @@
       }
     }
 }
+
+.quadform{
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+}
+
+.halfformcontainer{
+    width: 100%;
+}
+
+.singlestep{
+    font-size: 16px;
+
+    .uploadcontainer{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        margin-bottom: 80px;
+    }
+}
+
+.stepformcontent{
+    margin-top: 32px;
+    margin-bottom: 25px;
+}
+
+.hidden {
+    display: none;
+}
+
+.continue{
+    height: 44px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    
+    button {
+        width: 360px;
+        height: 44px;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 24px;
+        padding: 10px 18px 10px 18px;
+    }
+}

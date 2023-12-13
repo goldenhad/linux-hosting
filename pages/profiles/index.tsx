@@ -42,7 +42,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default function Profiles() {
   const context = useAuthContext();
-  const { login, user, parameters } = context;
+  const { login, user, parameters, role } = context;
   const [ isCreateModalOpen, setIsCreateModalOpen ]  = useState( false );
   const [ isEditModalOpen, setIsEditModalOpen ]  = useState( false );
   const [ isDeleteModalOpen, setIsDeleteModalOpen ]  = useState( false );
@@ -56,6 +56,10 @@ export default function Profiles() {
   const [ decodedProfiles, setDecodedProfiles ] = useState( [] );
   const [current, setCurrent] = useState( 0 );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).profiles );
+  const [ position, setPosition ] = useState(false);
+  const [ tasks, setTasks ] = useState(false);
+  const [ knowledge, setKnowledge ] = useState(false);
+  const [ communicationstyle, setCommunicationstyle ] = useState(false);
 
   const addRef = useRef( null );
   const profileRef = useRef( null );
@@ -357,105 +361,144 @@ export default function Profiles() {
   }
 
 
-  const steps = [
-    {
-      step: 1,
-      title: "Persönliche Informationen",
-      content: <div>
-        <Paragraph>
-            Beschreiben kurz wer du bist.
-        </Paragraph>
-        <Form.Item className={styles.formpart} name="personal">
-          <TextArea className={styles.forminput} placeholder="Wer bist du, beschreibe dich..."/>
-        </Form.Item>
-      </div>
-    },
-    {
-      step: 2,
-      title: "Allgemeine Stilistik",
-      content: <div>
-        <Paragraph>
-            Wie genau soll die allgemeine Stilistik der Antwort sein? (maximal 3)
-        </Paragraph>
-        <Form.Item className={styles.formpart} name="style"
-          rules={[
-            () => ( {
-              validator( _, value ) {
-                if( value.length > 3 ){
-                  form.setFieldValue( "style", value.slice( 0, 3 ) )
-                }
-                return Promise.resolve();
-              }
-            } )
-          ]}
-        >
-          <Select
-            className={styles.formselect}
-            placeholder="In welchem Stil soll geantwortet werden?"
-            options={listToOptions( parameters.style )}
-            mode="multiple"
-            allowClear
-          />
-        </Form.Item>
-      </div>
-    },
-    {
-      step: 3,
-      title: "Allgemeine Gemütslage",
-      content: <div>
-        <Paragraph>
-            Welche allgemeine Gemütslage soll in der Nachricht deutlich werden?
-        </Paragraph>
-        <Form.Item className={styles.formpart} name="emotions"
-          rules={[
-            () => ( {
-              validator( _, value ) {
-                if( value.length > 3 ){
-                  form.setFieldValue( "emotions", value.slice( 0, 3 ) )
-                }
-                return Promise.resolve();
-              }
-            } )
-          ]}
-        >
-          <Select
-            className={styles.formselect}
-            placeholder="Wie ist ihre allgemeine Gemütslage zum bisherigen Mail-Dialog?"
-            options={listToOptions( parameters.emotions )}
-            mode="multiple"
-            allowClear
-          />
-        </Form.Item>
-      </div>
-    },
-    {
-      step: 4,
-      title: "Abschließen",
-      content: <div>
-        <Paragraph>
-            In diesem Bereich kannst du deinem Profil einen Namen geben und es mit Tags kategorisieren.
-        </Paragraph>
-        <Form.Item className={styles.formpart} name="name" rules={[{ required: true, message: "Ein Name ist erforderlich!" }]}>
-          <Input className={styles.forminput} placeholder='Name des Profils'></Input>
-        </Form.Item>
-        <Paragraph>
-            Kategorisiere dein Profil über Tags
-        </Paragraph>
-        <Form.Item className={styles.formpart} name="tags">
-          <Select
-            className={styles.formselect}
-            mode="tags"
-            style={{ width: "100%" }}
-            tokenSeparators={[","]}
-            options={[]}
-            placeholder={"Tippe, um Tags hinzuzufügen, die das Profil kategorisieren"}
-          />
-        </Form.Item>
-      </div>
-    }
-  ];
+  function getSteps(){
+    if(role.isCompany){
+      return [
+        {
+          step: 0,
+          title: "Erzähl mir etwas über Dich!",
+          content: <div className={styles.singlestep}>
+            <Paragraph>Zusätzlich benötigen wir noch Informationen über dich. Wer bist du, was treibt dich an?</Paragraph>
+            <div className={styles.quadform}>
+              <div className={styles.halfformcontainer}>
+                <div className={styles.formpart}>
+                  <Form.Item name={"user.position"} label={"Wie lautet Deine Funktion im Unternehmen?"} className={styles.formitemlabel}>
+                    <TextArea className={styles.forminput} onChange={( value ) => {
+                      setPosition((value.currentTarget.value != ""));
+                    }} rows={2} maxLength={100} placeholder={"Beschreibe kurz deine Rolle und Hauptaufgaben in deinem Unternehmen"}></TextArea>
+                  </Form.Item>
+                </div>
+                <div className={styles.formpart}>
+                  <Form.Item name={"user.tasks"} label={"Was sind Deine Aufgaben im Unternehmen?"}>
+                    <Select
+                      mode="tags"
+                      style={{ width: "100%", fontWeight: "normal" }}
+                      tokenSeparators={[","]}
+                      placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                      notFoundContent={null}
+                      onChange={( values ) => {
+                        setTasks((values.length != 0));
+                      }}
+                    />
+                  </Form.Item>
+                </div>
+              </div>
 
-  const items = steps.map( ( item ) => ( { key: item.title, title: item.title } ) );
+              <div className={styles.halfformcontainer}>
+                <div className={styles.formpart}>
+                  <Form.Item name={"user.communicationstyle"} label={"Was ist das wichtigste Element in deinem Kommunikationsstil?"}>
+                    <TextArea className={styles.forminput} onChange={( value ) => {
+                      setCommunicationstyle((value.currentTarget.value != ""));
+                    }} rows={2} maxLength={100} placeholder={"Bitte beschreibe das Schlüsselelement deines Kommunikationsstils."}></TextArea>
+                  </Form.Item>
+                </div>
+                <div className={styles.formpart}>
+                  <Form.Item name={"user.knowledge"} label={"Was sind Deine Fachkenntnisse und Spezialisierungen?"}>
+                    <Select
+                      mode="tags"
+                      style={{ width: "100%", fontWeight: "normal" }}
+                      tokenSeparators={[","]}
+                      placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                      notFoundContent={null}
+                      onChange={( values ) => {
+                        setKnowledge((values.length != 0));
+                      }}
+                    />
+                  </Form.Item>
+                </div>
+              </div>
+            </div>
+          </div>
+        },
+        {
+          step: 1,
+          title: "Wie schreibst du deine Mails?",
+          content: <div className={styles.singlestep}>
+            <Paragraph>
+              Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
+              Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
+            </Paragraph>
+            <div className={styles.formpart}>
+              <Form.Item name={"mail.styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
+                rules={[
+                  () => ( {
+                    validator( _, value ) {
+                      if(value){
+                        if( value.length > 3 ){
+                          form.setFieldValue( "styles", value.slice( 0, 3 ) )
+                        }
+                      }
+                      return Promise.resolve();
+                    }
+                  } )
+                ]}
+              >
+                <Select options={listToOptions( parameters.style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
+              </Form.Item>
+            </div>
+            <div className={styles.formpart}>
+              <Form.Item name={"mail.emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
+                rules={[
+                  () => ( {
+                    validator( _, value ) {
+                      if(value){
+                        if( value.length > 3 ){
+                          form.setFieldValue( "emotions", value.slice( 0, 3 ) )
+                        }
+                      }
+                      return Promise.resolve();
+                    }
+                  } )
+                ]}
+              >
+                <Select options={listToOptions( parameters.emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
+              </Form.Item>
+            </div>
+          </div>
+        },
+        {
+          step: 3,
+          title: "Abschließen",
+          content: <div>
+            <Paragraph>
+                In diesem Bereich kannst du deinem Profil einen Namen geben und es mit Tags kategorisieren.
+            </Paragraph>
+            <Form.Item className={styles.formpart} name="name" rules={[{ required: true, message: "Ein Name ist erforderlich!" }]}>
+              <Input className={styles.forminput} placeholder='Name des Profils'></Input>
+            </Form.Item>
+            <Paragraph>
+                Kategorisiere dein Profil über Tags
+            </Paragraph>
+            <Form.Item className={styles.formpart} name="tags">
+              <Select
+                className={styles.formselect}
+                mode="tags"
+                style={{ width: "100%" }}
+                tokenSeparators={[","]}
+                options={[]}
+                placeholder={"Tippe, um Tags hinzuzufügen, die das Profil kategorisieren"}
+              />
+            </Form.Item>
+          </div>
+        }
+      ];
+    }else{
+      return [];
+   
+    }
+  }
+
+  //const items = steps.map( ( item ) => ( { key: item.title, title: item.title } ) );
 
   return (
     <SidebarLayout context={context}>
@@ -477,48 +520,51 @@ export default function Profiles() {
           }}
           footer = {[]}
         >
-          <Form
-            layout='vertical'
-            onFinish={createProfile}
-            form={form}
-          >
-            <Steps current={current} items={items} />
-                
-            {steps.map( ( item, idx ) => (
-              <div key={idx}
-                className={`${styles.stepformcontent} ${
-                  item.step !== current + 1 && styles.hidden
-                }`}
+          <div className={styles.stepcontainer}>
+            <Steps className={styles.stepbanner} current={current} items={getSteps()} />
+
+            <div className={styles.stepformcontent}>
+              <Form
+                layout='vertical'
+                onFinish={createProfile}
+                form={form}
               >
-                {item.content}
-              </div>
-            ) )}
+  
+      
+                {getSteps()[current].content}
 
 
-            <div style={{ marginTop: 24 }}>
-              {current < steps.length - 1 && (
-                <Button type="primary" onClick={() => setCurrent( current + 1 )}>
+                <div className={styles.continue}>
+                  {current < getSteps().length - 1 && (
+                    <Button
+                      type="primary"
+                      onClick={() => setCurrent( current + 1 )}
+                      disabled={( !position || !tasks || !knowledge || !communicationstyle )}
+                    >
                     Weiter
-                </Button>
-              )}
-              {current === steps.length - 1 && (
-                <Button type="primary" htmlType='submit'>
+                    </Button>
+                  )}
+                  {current === getSteps().length - 1 && (
+                    <Button type="primary" htmlType='submit'>
                     Speichern
-                </Button>
-              )}
-              {current > 0 && (
-                <Button style={{ margin: "0 8px" }} onClick={() => setCurrent( current - 1 )}>
+                    </Button>
+                  )}
+                  {current > 0 && (
+                    <Button style={{ margin: "0 8px" }} onClick={() => setCurrent( current - 1 )}>
                     Zurück
-                </Button>
-              )}
-            </div>                
-  
-                
-            <div className={styles.errorrow} style={{ display: ( isErrVisible )? "block": "none" }}>
-              <Alert type='error' message={errMsg} />
+                    </Button>
+                  )}
+                </div>                
+
+      
+                <div className={styles.errorrow} style={{ display: ( isErrVisible )? "block": "none" }}>
+                  <Alert type='error' message={errMsg} />
+                </div>
+
+              </Form>
             </div>
-  
-          </Form>
+          </div>
+          
         </Modal>
           
 

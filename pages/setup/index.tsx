@@ -170,8 +170,10 @@ export default function Setup(){
                   rules={[
                     () => ( {
                       validator( _, value ) {
-                        if( value.length > 3 ){
-                          setupForm.setFieldValue( "styles", value.slice( 0, 3 ) )
+                        if(value){
+                          if( value.length > 3 ){
+                            setupForm.setFieldValue( "styles", value.slice( 0, 3 ) )
+                          }
                         }
                         return Promise.resolve();
                       }
@@ -186,8 +188,10 @@ export default function Setup(){
                   rules={[
                     () => ( {
                       validator( _, value ) {
-                        if( value.length > 3 ){
-                          setupForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
+                        if(value){
+                          if( value.length > 3 ){
+                            setupForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
+                          }
                         }
                         return Promise.resolve();
                       }
@@ -291,8 +295,10 @@ export default function Setup(){
                   rules={[
                     () => ( {
                       validator( _, value ) {
-                        if( value.length > 3 ){
-                          setupForm.setFieldValue( "styles", value.slice( 0, 3 ) )
+                        if(value){
+                          if( value.length > 3 ){
+                            setupForm.setFieldValue( "styles", value.slice( 0, 3 ) )
+                          }
                         }
                         return Promise.resolve();
                       }
@@ -307,8 +313,10 @@ export default function Setup(){
                   rules={[
                     () => ( {
                       validator( _, value ) {
-                        if( value.length > 3 ){
-                          setupForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
+                        if(value){
+                          if( value.length > 3 ){
+                            setupForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
+                          }
                         }
                         return Promise.resolve();
                       }
@@ -389,8 +397,10 @@ export default function Setup(){
                 rules={[
                   () => ( {
                     validator( _, value ) {
-                      if( value.length > 3 ){
-                        setupForm.setFieldValue( "styles", value.slice( 0, 3 ) )
+                      if(value){
+                        if( value.length > 3 ){
+                          setupForm.setFieldValue( "styles", value.slice( 0, 3 ) )
+                        }
                       }
                       return Promise.resolve();
                     }
@@ -405,8 +415,10 @@ export default function Setup(){
                 rules={[
                   () => ( {
                     validator( _, value ) {
-                      if( value.length > 3 ){
-                        setupForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
+                      if(value){
+                        if( value.length > 3 ){
+                          setupForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
+                        }
                       }
                       return Promise.resolve();
                     }

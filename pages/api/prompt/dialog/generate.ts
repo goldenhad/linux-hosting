@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { auth } from "../../../../firebase/admin"
 import { parseDialogPrompt } from "../../../../helper/prompt";
 import getDocument from "../../../../firebase/data/getData";
+import { logger } from "../../../../logger";
 
 const openai = new OpenAI( {
   apiKey: process.env.OPENAIAPIKEY
@@ -23,6 +24,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     if( token ){
 
       const data = req.body;
+      logger.info(data);
 
       if( data.name != undefined &&
          data.personal != undefined &&
@@ -95,7 +97,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
         
 
       }else{
-        return res.status( 400 ).send( { errorcode: 3, message: "Missing Input!", tokens: -1 } );
+        return res.status( 500 ).send( { errorcode: 3, message: "Missing Input!", tokens: -1 } );
       }
 
     }else{

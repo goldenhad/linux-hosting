@@ -441,7 +441,17 @@ export default function Monologue( props: InitialProps ) {
             <div className={styles.userinputform}>
               <Card title={"Eine neue E-Mail"} className={styles.userinputcardmain}>
                 <div ref={profileRef}>
-                  <Form.Item className={styles.formpart} label={<b>Profil</b>} name="profile">
+                  <Form.Item
+                    className={styles.formpart}
+                    label={<b>Profil</b>}
+                    name="profile"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Bitte wähle ein Profil aus!"
+                      }
+                    ]}
+                  >
                     <Select
                       showSearch
                       placeholder="Wähle ein Profil aus"
@@ -459,14 +469,34 @@ export default function Monologue( props: InitialProps ) {
                 </div>
 
                 <div ref={continueRef}>
-                  <Form.Item className={styles.formpart} label={<b>Worum soll es in der E-Mail gehen?</b>} name="content">
+                  <Form.Item
+                    className={styles.formpart}
+                    label={<b>Worum soll es in der E-Mail gehen?</b>}
+                    name="content"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Bitte lege den Inhalt deiner Nachricht fest!"
+                      }
+                    ]}
+                  >
                     <TextArea className={styles.forminput} rows={10} placeholder="Formuliere kurz den Inhalt der E-Mail?" disabled={formDisabled || quotaOverused}/>
                   </Form.Item>
                 </div>
               </Card>
               <Card title={"Einstellungen"} className={styles.userinputcardsub}>
                 <div ref={addressRef}>
-                  <Form.Item className={styles.formpart} label={<b>Ansprache</b>} name="address">
+                  <Form.Item
+                    className={styles.formpart}
+                    label={<b>Ansprache</b>}
+                    name="address"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Bitte lege die Anrede deiner Nachricht fest!"
+                      }
+                    ]}
+                  >
                     <Select placeholder="Bitte wähle die Form der Ansprache aus..." options={listToOptions( parameters.address )}
                       className={styles.formselect}
                       disabled={formDisabled || quotaOverused}
@@ -480,12 +510,18 @@ export default function Monologue( props: InitialProps ) {
                     rules={[
                       () => ( {
                         validator( _, value ) {
-                          if( value.length > 3 ){
-                            form.setFieldValue( "order", value.slice( 0, 3 ) )
+                          if(value){
+                            if( value.length > 3 ){
+                              form.setFieldValue( "order", value.slice( 0, 3 ) )
+                            }
                           }
                           return Promise.resolve();
                         }
-                      } )
+                      } ),
+                      {
+                        required: true,
+                        message: "Bitte schätze deinen Gesprächspartner ein!"
+                      }
                     ]}
                   >
                     <Select
@@ -501,7 +537,17 @@ export default function Monologue( props: InitialProps ) {
                 </div>
 
                 <div ref={lengthRef}>
-                  <Form.Item className={styles.formpart} label={<b>Länge der Antwort</b>} name="length">
+                  <Form.Item
+                    className={styles.formpart}
+                    label={<b>Länge der Antwort</b>}
+                    name="length"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Bitte lege die Länge deiner Nachricht fest!"
+                      }
+                    ]}
+                  >
                     <Select
                       placeholder="Wie lang soll die erzeuge Antwort sein?"
                       options={listToOptions( parameters.lengths )}

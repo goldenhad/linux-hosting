@@ -399,7 +399,7 @@ export default function Setup(){
                     validator( _, value ) {
                       if(value){
                         if( value.length > 3 ){
-                          setupForm.setFieldValue( "styles", value.slice( 0, 3 ) )
+                          setupForm.setFieldValue( "mail.styles", value.slice( 0, 3 ) )
                         }
                       }
                       return Promise.resolve();
@@ -417,7 +417,7 @@ export default function Setup(){
                     validator( _, value ) {
                       if(value){
                         if( value.length > 3 ){
-                          setupForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
+                          setupForm.setFieldValue( "mail.emotions", value.slice( 0, 3 ) )
                         }
                       }
                       return Promise.resolve();
@@ -508,7 +508,8 @@ export default function Setup(){
           name: "Hauptprofil",
           settings: {
             personal: userinfo.replace(/\s\s+/g, ""),
-            emotions: userEmotions, stil: userstyles 
+            emotions: userEmotions,
+            stil: userstyles 
           } 
         }),
         salt: user.salt

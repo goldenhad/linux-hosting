@@ -890,12 +890,12 @@ export default function Profiles() {
             <div className={styles.formpart}>
               <Form.Item
                 name={"user.position.edit"}
-                label={"Wie lautet Deine Funktion im Unternehmen?"}
+                label={"Bitte beschreibe dich kurz in ein paar Sätzen"}
                 className={styles.formitemlabel}
                 rules={[
                   {
                     required: true,
-                    message: "Bitte gib deine Funktion im Unternehmen ein!"
+                    message: "Bitte beschreibe dich kurz!"
                   }
                 ]}
               >

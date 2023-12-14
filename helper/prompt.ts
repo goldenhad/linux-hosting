@@ -41,3 +41,18 @@ export function parseDialogPrompt(
       
   return parsed
 }
+
+export function parseProfilePrompt(
+  prompt: string, name: string, company: string, position: string, tasks: string, knowledge: string, communicationstyle: string
+){
+  const parsed = prompt
+    .replace( "<name>", name )
+    .replace( "<company>", company )
+    .replace( "<position>", position )
+    .replace( "<tasks>", tasks )
+    .replace( "<knowledge>", knowledge )
+    .replace( "<communicationstyle>", communicationstyle )    
+      
+  return parsed
+
+}

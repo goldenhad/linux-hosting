@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Form, Input, Modal, Select, Space, Steps, Tag, Tour, TourProps, Typography } from "antd";
+import { Alert, Button, Card, Form, Input, Modal, Select, Space, Steps, Tag, Tour, TourProps, Typography, message } from "antd";
 import { SettingOutlined, DeleteOutlined } from "@ant-design/icons";
 import styles from "./list.profiles.module.scss"
 import { useEffect, useRef, useState } from "react";
@@ -11,7 +11,7 @@ import { useAuthContext } from "../../components/context/AuthContext";
 import { Profile, ProfileSettings } from "../../firebase/types/Profile";
 import updateData from "../../firebase/data/updateData";
 import { arrayUnion } from "firebase/firestore";
-import { handleEmptyArray, handleEmptyString, handleUndefinedTour, listToOptions } from "../../helper/architecture";
+import { handleEmptyArray, handleUndefinedTour, listToOptions } from "../../helper/architecture";
 import axios from "axios";
 import environment from "dotenv";
 environment.config();
@@ -62,6 +62,7 @@ export default function Profiles() {
   const [ communicationstyle, setCommunicationstyle ] = useState(false);
   const [ emotionBarrier, setEmotionBarrier ] = useState(false);
   const [ styleBarrier, setStyleBarrier ] = useState(false);
+  const [ promptProcesing, setPromptProcessing ] = useState(false);
 
   const addRef = useRef( null );
   const profileRef = useRef( null );
@@ -165,12 +166,16 @@ export default function Profiles() {
 
   
   const setEditFields = ( obj: {name: string, settings: ProfileSettings} ) => {
-    //console.log(obj.settings)
     editForm.setFieldValue( "name", obj.name );
     editForm.setFieldValue( "personal", obj.settings.personal );
     editForm.setFieldValue( "style", obj.settings.stil );
     editForm.setFieldValue( "emotions", obj.settings.emotions );
     editForm.setFieldValue( "tags", obj.settings.tags );
+    editForm.setFieldValue( "user.position.edit", obj.settings.parameters?.position );
+    editForm.setFieldValue( "user.tasks.edit", obj.settings.parameters?.tasks );
+    editForm.setFieldValue( "user.knowledge.edit", obj.settings.parameters?.knowledge );
+    editForm.setFieldValue( "user.communicationstyle.edit", obj.settings.parameters?.communicationstyle );
+
     if( obj.settings.tags ){
       setTokenCount( obj.settings.tags.length );
     }
@@ -202,19 +207,42 @@ export default function Profiles() {
   } 
   
   const editProfile = async ( values ) => {
+    const positioninfo = editForm.getFieldValue( "user.position.edit");
+    const tasksinfo = editForm.getFieldValue( "user.tasks.edit");
+    const knowledgeinfo = editForm.getFieldValue( "user.knowledge.edit");
+    const communicationstyleinfo = editForm.getFieldValue( "user.communicationstyle.edit");
+
     if ( values.name ){
-      try {
-        if ( profileToEdit != -1 ){
-          const profiles = user.profiles;
-          let encdata = "";
+      if ( profileToEdit != -1 ){
+        const profiles = user.profiles;
+        let encdata = "";
+
+        setPromptProcessing(true);
+        try{
+          const aiinfo = await axios.post("/api/profile/create", {
+            name: `${user.firstname} ${user.lastname}`,
+            company: company.name,
+            position: positioninfo,
+            tasks: tasksinfo?.join(", "),
+            knowledge: knowledgeinfo?.join(", "),
+            communicationstyle: communicationstyleinfo,
+            isSingleUser: !role.isCompany
+          });
+
           const profiletoupload = JSON.stringify(
             {
               name: values.name,
               settings: {
-                personal: handleEmptyString( values.personal ),
+                personal: aiinfo,
                 stil: handleEmptyArray( values.style ),
                 emotions: handleEmptyArray( values.emotions ),
-                tags: handleEmptyArray( values.tags )
+                tags: handleEmptyArray( values.tags ),
+                parameters: {
+                  position: positioninfo,
+                  tasks: tasksinfo,
+                  knowledge: knowledgeinfo,
+                  communicationstyle: communicationstyleinfo
+                }
               } 
             } );
 
@@ -233,19 +261,21 @@ export default function Profiles() {
             
           await updateData( "User", login.uid, { profiles: profiles } )
           form.resetFields( [] );
-        }else{
-          throw( "Profile not defined" );
+        }catch(e){
+          setPromptProcessing(false);
+          message.error("Deine Anfrage konnte nicht verarbeitet werden. Bitte versuche es erneut!");
         }
-      }catch( e ){
-        setErrMsg( "Beim Bearbeiten ist etwas fehlgeschlagen bitte versuche es später erneut." );
-        setIsErrVisible( true );
+
+        refreshData();
+        setErrMsg( "" );
+        setIsErrVisible( false );
+        setIsEditModalOpen( false );
+        form.resetFields( [] );
+      }else{
+        message.error("Beim Speichern ist etwas fehlgeschlagen. Bitte versuche es erneut!");
       }
 
-      refreshData();
-      setErrMsg( "" );
-      setIsErrVisible( false );
-      setIsEditModalOpen( false );
-      form.resetFields( [] );
+      
     }
   }
   
@@ -255,9 +285,11 @@ export default function Profiles() {
     const tasksinfo = form.getFieldValue( "user.tasks" );
     const knowledgeinfo = form.getFieldValue( "user.knowledge" );
     const communicationstyleinfo = form.getFieldValue( "user.communicationstyle" );
+    const styles = form.getFieldValue( "styles" );
+    const emotions = form.getFieldValue( "emotions" );
 
     // Create a sample text containing the user information
-    let userinfo = "";
+    /* let userinfo = "";
     if(!role.isCompany){
       userinfo = `Mein Name ist ${user.firstname} ${user.lastname}. Ich würde mich beschreiben als: "${positioninfo}". 
     Bei der Kommunikation lege ich besonders Wert auf ${communicationstyleinfo}.`;
@@ -265,55 +297,80 @@ export default function Profiles() {
       userinfo = `Mein Name ist ${user.firstname} ${user.lastname}. Ich arbeite bei ${company.name}. Meine Position im Unternehmen ist "${positioninfo}."
     In der Firma beschäftige ich mich mit "${tasksinfo.join(", ")}". Mich zeichnet besonders aus: "${knowledgeinfo.join(", ")}".
     Bei der Kommunikation lege ich besonders Wert auf ${communicationstyleinfo}.`;
-    }
+    } */
 
-    if( values.name ){
-      try{
-        const profileObj = {
-          name: values.name,
-          settings: {
-            personal: userinfo.replace(/\s\s+/g, ""),
-            stil: handleEmptyArray( values.style ),
-            emotions: handleEmptyArray( values.emotions ),
-            tags: handleEmptyArray( values.tags )
-          }
-        }
+    setPromptProcessing(true);
 
-        const stringified = JSON.stringify( profileObj );
-        let encdata = "";
-
+    try{
+      const aiinfo = await axios.post("/api/profile/create", {
+        name: `${user.firstname} ${user.lastname}`,
+        company: company.name,
+        position: positioninfo,
+        tasks: tasksinfo?.join(", "),
+        knowledge: knowledgeinfo?.join(", "),
+        communicationstyle: communicationstyleinfo,
+        isSingleUser: !role.isCompany
+      });
+  
+      setPromptProcessing(false);
+  
+      if( values.name ){
         try{
-          const encreq = await axios.post( "/api/prompt/encrypt", { 
-            content: stringified,
-            salt: user.salt
-          } )
-          encdata = encreq.data.message;
+          const profileObj = {
+            name: values.name,
+            settings: {
+              personal: aiinfo.data.message,
+              stil: handleEmptyArray( styles ),
+              emotions: handleEmptyArray( emotions ),
+              tags: handleEmptyArray( values.tags ),
+              parameters: {
+                position: positioninfo,
+                tasks: tasksinfo,
+                knowledge: knowledgeinfo,
+                communicationstyle: communicationstyleinfo
+              }
+            }
+          }
+  
+          const stringified = JSON.stringify( profileObj );
+          let encdata = "";
+  
+          try{
+            const encreq = await axios.post( "/api/prompt/encrypt", { 
+              content: stringified,
+              salt: user.salt
+            } )
+            encdata = encreq.data.message;
+          }catch( e ){
+            //console.log(e);
+            encdata = "";
+          }
+  
+          await updateData( "User", login.uid, { profiles: arrayUnion( encdata ) } )
+          
+          setIsCreateModalOpen( false );
         }catch( e ){
-          //console.log(e);
-          encdata = "";
+          setErrMsg( "Beim Speichern ist etwas fehlgeschlagen bitte versuche es später erneut." );
+          setIsErrVisible( true );
+          setIsCreateModalOpen( true );
         }
-
-        await updateData( "User", login.uid, { profiles: arrayUnion( encdata ) } )
-        
-        setIsCreateModalOpen( false );
-      }catch( e ){
-        setErrMsg( "Beim Speichern ist etwas fehlgeschlagen bitte versuche es später erneut." );
-        setIsErrVisible( true );
-        setIsCreateModalOpen( true );
-      }
-    
-      setErrMsg( "" );
-      setIsErrVisible( false );
       
-      form.resetFields();
-
-      setCurrent(0);
-      setPosition(false);
-      setTasks(false);
-      setKnowledge(false);
-      setCommunicationstyle(false);
-      setEmotionBarrier(false);
-      setStyleBarrier(false);
+        setErrMsg( "" );
+        setIsErrVisible( false );
+        
+        form.resetFields();
+  
+        setCurrent(0);
+        setPosition(false);
+        setTasks(false);
+        setKnowledge(false);
+        setCommunicationstyle(false);
+        setEmotionBarrier(false);
+        setStyleBarrier(false);
+      }
+    }catch(e){
+      message.error("Bei der Erstellung des Profils ist etwas schiefgelaufen bitte versuche es erneut!");
+      setPromptProcessing(false);
     }
   }
 
@@ -471,7 +528,7 @@ export default function Profiles() {
                       mode="tags"
                       style={{ width: "100%", fontWeight: "normal" }}
                       tokenSeparators={[","]}
-                      placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                      placeholder={"Bitte nenne deine Fachkenntnisse und Spezialisierungen."}
                       notFoundContent={null}
                       onChange={( values ) => {
                         setKnowledge((values.length != 0));
@@ -492,13 +549,13 @@ export default function Profiles() {
               Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
             </Paragraph>
             <div className={styles.formpart}>
-              <Form.Item name={"mail.styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
+              <Form.Item name={"styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
                 rules={[
                   () => ( {
                     validator( _, value ) {
                       if(value){
                         if( value.length > 3 ){
-                          form.setFieldValue( "mail.styles", value.slice( 0, 3 ) )
+                          form.setFieldValue( "styles", value.slice( 0, 3 ) )
                         }
 
                         if(value.length > 0){
@@ -522,13 +579,13 @@ export default function Profiles() {
               </Form.Item>
             </div>
             <div className={styles.formpart}>
-              <Form.Item name={"mail.emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
+              <Form.Item name={"emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
                 rules={[
                   () => ( {
                     validator( _, value ) {
                       if(value){
                         if( value.length > 3 ){
-                          form.setFieldValue( "mail.emotions", value.slice( 0, 3 ) )
+                          form.setFieldValue( "emotions", value.slice( 0, 3 ) )
                         }
 
                         if(value.length > 0){
@@ -642,13 +699,13 @@ export default function Profiles() {
               Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
             </Paragraph>
             <div className={styles.formpart}>
-              <Form.Item name={"mail.styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
+              <Form.Item name={"styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
                 rules={[
                   () => ( {
                     validator( _, value ) {
                       if(value){
                         if( value.length > 3 ){
-                          form.setFieldValue( "mail.styles", value.slice( 0, 3 ) )
+                          form.setFieldValue( "styles", value.slice( 0, 3 ) )
                         }
 
                         if(value.length > 0){
@@ -672,13 +729,13 @@ export default function Profiles() {
               </Form.Item>
             </div>
             <div className={styles.formpart}>
-              <Form.Item name={"mail.emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
+              <Form.Item name={"emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
                 rules={[
                   () => ( {
                     validator( _, value ) {
                       if(value){
                         if( value.length > 3 ){
-                          form.setFieldValue( "mail.emotions", value.slice( 0, 3 ) )
+                          form.setFieldValue( "emotions", value.slice( 0, 3 ) )
                         }
 
                         if(value.length > 0){
@@ -730,6 +787,151 @@ export default function Profiles() {
           </div>
         }
       ];
+    }
+  }
+
+  const EditForm = () => {
+    if(role.isCompany){
+      return(
+        <div className={styles.quadform}>
+          <div className={styles.halfformcontainer}>
+            <div className={styles.formpart}>
+              <Form.Item
+                name={"user.position.edit"}
+                label={"Wie lautet Deine Funktion im Unternehmen?"}
+                className={styles.formitemlabel}
+                rules={[
+                  {
+                    required: true,
+                    message: "Bitte gib deine Funktion im Unternehmen ein!"
+                  }
+                ]}
+              >
+                <TextArea
+                  className={styles.forminput}
+                  rows={2}
+                  maxLength={100}
+                  placeholder={"Beschreibe kurz deine Rolle und Hauptaufgaben in deinem Unternehmen"}
+                ></TextArea>
+              </Form.Item>
+            </div>
+            <div className={styles.formpart}>
+              <Form.Item
+                name={"user.tasks.edit"}
+                label={"Was sind Deine Aufgaben im Unternehmen?"}
+                rules={[
+                  {
+                    required: true,
+                    message: "Bitte gib deine Aufgaben im Unternehmen ein!"
+                  }
+                ]}
+              >
+                <Select
+                  mode="tags"
+                  style={{ width: "100%", fontWeight: "normal" }}
+                  tokenSeparators={[","]}
+                  placeholder={"Bitte gib deine Aufgaben im Unternehmen ein."}
+                  notFoundContent={null}
+                />
+              </Form.Item>
+            </div>
+          </div>
+
+          <div className={styles.halfformcontainer}>
+            <div className={styles.formpart}>
+              <Form.Item
+                name={"user.communicationstyle.edit"}
+                label={"Was ist das wichtigste Element in deinem Kommunikationsstil?"}
+                rules={[
+                  {
+                    required: true,
+                    message: "Bitte gib das wichtigste Element deines Kommunikationsstils an!"
+                  }
+                ]}
+              >
+                <TextArea
+                  className={styles.forminput}
+                  rows={2}
+                  maxLength={100}
+                  placeholder={"Bitte beschreibe das Schlüsselelement deines Kommunikationsstils."}
+                ></TextArea>
+              </Form.Item>
+            </div>
+            <div className={styles.formpart}>
+              <Form.Item
+                name={"user.knowledge.edit"}
+                label={"Was sind Deine Fachkenntnisse und Spezialisierungen?"}
+                rules={[
+                  {
+                    required: true,
+                    message: "Bitte gib deine Fachkenntnisse und Spezialisierungen an!"
+                  }
+                ]}
+              >
+                <Select
+                  mode="tags"
+                  style={{ width: "100%", fontWeight: "normal" }}
+                  tokenSeparators={[","]}
+                  placeholder={"Bitte nenne deine Fachkenntnisse und Spezialisierungen."}
+                  notFoundContent={null}
+                  onChange={( values ) => {
+                    setKnowledge((values.length != 0));
+                  }}
+                />
+              </Form.Item>
+            </div>
+          </div>
+        </div>
+      );
+    }else{
+      return(
+        <div className={styles.quadform}>
+          <div className={styles.halfformcontainer}>
+            <div className={styles.formpart}>
+              <Form.Item
+                name={"user.position.edit"}
+                label={"Wie lautet Deine Funktion im Unternehmen?"}
+                className={styles.formitemlabel}
+                rules={[
+                  {
+                    required: true,
+                    message: "Bitte gib deine Funktion im Unternehmen ein!"
+                  }
+                ]}
+              >
+                <TextArea
+                  className={styles.forminput}
+                  rows={2}
+                  maxLength={100}
+                  placeholder={"Beschreibe kurz deine Rolle und Hauptaufgaben in deinem Unternehmen"}
+                ></TextArea>
+              </Form.Item>
+            </div>
+          </div>
+
+          <div className={styles.halfformcontainer}>
+            <div className={styles.formpart}>
+              <Form.Item
+                name={"user.communicationstyle.edit"}
+                label={"Was ist das wichtigste Element in deinem Kommunikationsstil?"}
+                rules={[
+                  {
+                    required: true,
+                    message: "Bitte gib das wichtigste Element deines Kommunikationsstils an!"
+                  }
+                ]}
+              >
+                <TextArea
+                  className={styles.forminput}
+                  rows={2}
+                  maxLength={100}
+                  placeholder={"Bitte beschreibe das Schlüsselelement deines Kommunikationsstils."}
+                ></TextArea>
+              </Form.Item>
+            </div>
+          </div>
+        </div>
+      );
     }
   }
 
@@ -791,7 +993,7 @@ export default function Profiles() {
                   )}
 
                   {current === getSteps().length - 1 && (
-                    <Button type="primary" htmlType='submit'>
+                    <Button loading={promptProcesing} type="primary" htmlType='submit'>
                     Speichern
                     </Button>
                   )}
@@ -829,12 +1031,10 @@ export default function Profiles() {
             form={editForm}
           >
             <Form.Item className={styles.formpart} label={<b>Profilname</b>} name="name" rules={[{ required: true, message: "Ein Name ist erforderlich!" }]}>
-              <Input className={styles.forminput}  placeholder="Names des Profils..."/>
+              <Input className={styles.forminput} placeholder="Names des Profils..."/>
             </Form.Item>
   
-            <Form.Item className={styles.formpart} label={<b>Persönliche Informationen</b>} name="personal">
-              <TextArea className={styles.forminput} placeholder="Wer bist du, beschreibe dich..."/>
-            </Form.Item>
+            <EditForm />
 
             <Form.Item className={styles.formpart} label={<b>Allgemeine Stilistik (maximal 3)</b>} name="style"
               rules={[
@@ -845,7 +1045,11 @@ export default function Profiles() {
                     }
                     return Promise.resolve();
                   }
-                } )
+                } ),
+                {
+                  required: true,
+                  message: "Bitte gib deine Stilistik an!"
+                }
               ]}
             >
               <Select
@@ -866,7 +1070,11 @@ export default function Profiles() {
                     }
                     return Promise.resolve();
                   }
-                } )
+                } ),
+                {
+                  required: true,
+                  message: "Bitte lege deine Gemütslage fest!"
+                }
               ]}
             >
               <Select
@@ -885,7 +1093,7 @@ export default function Profiles() {
                 style={{ width: "100%" }}
                 tokenSeparators={[","]}
                 onChange={( value ) => {
-                  setTokenCount( value.length ); console.log( value )
+                  setTokenCount( value.length );
                 }}
                 options={[]}
                 maxTagCount={5}
@@ -899,7 +1107,7 @@ export default function Profiles() {
             </div>
   
             <div className={styles.finishformrow}>
-              <Button type='primary' htmlType='submit'>Speichern</Button>
+              <Button type='primary' loading={promptProcesing} htmlType='submit'>Speichern</Button>
             </div>
   
           </Form>

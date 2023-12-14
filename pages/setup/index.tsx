@@ -28,13 +28,15 @@ export default function Setup(){
   const [ profileImage, setProfileimage ] = useState("");
   const [ loading, setLoading ] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const [ promptProcesing, setPromptProcessing ] = useState(false);
 
   useEffect( () => {
     // Check if the user already has gone trough setup
     if( user.setupDone ){
       router.push( "/" );
     }
-  }, [user.setupDone] )
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [] )
 
 
   /**
@@ -66,7 +68,7 @@ export default function Setup(){
                         mode="tags"
                         style={{ width: "100%", fontWeight: "normal" }}
                         tokenSeparators={[","]}
-                        placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                        placeholder={"Was sind deine Aufgaben im Unternehmen"}
                         notFoundContent={null}
                         onChange={( values ) => {
                           setTasks((values.length != 0));
@@ -90,7 +92,7 @@ export default function Setup(){
                         mode="tags"
                         style={{ width: "100%", fontWeight: "normal" }}
                         tokenSeparators={[","]}
-                        placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                        placeholder={"Was sind deine Fachkenntnisse und Spezialisierungen"}
                         notFoundContent={null}
                         onChange={( values ) => {
                           setKnowledge((values.length != 0));
@@ -246,7 +248,7 @@ export default function Setup(){
                         mode="tags"
                         style={{ width: "100%", fontWeight: "normal" }}
                         tokenSeparators={[","]}
-                        placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                        placeholder={"Was sind deine Aufgaben im Unternehmen"}
                         notFoundContent={null}
                         onChange={( values ) => {
                           setTasks((values.length != 0));
@@ -270,7 +272,7 @@ export default function Setup(){
                         mode="tags"
                         style={{ width: "100%", fontWeight: "normal" }}
                         tokenSeparators={[","]}
-                        placeholder={"Bitte nenne die Hauptprodukte und Dienstleistungen deines Unternehmens."}
+                        placeholder={"Was sind deine Fachkenntnisse und Spezialisierungen"}
                         notFoundContent={null}
                         onChange={( values ) => {
                           setKnowledge((values.length != 0));
@@ -465,17 +467,6 @@ export default function Setup(){
     const knowledgeinfo = setupForm.getFieldValue( "user.knowledge" );
     const communicationstyleinfo = setupForm.getFieldValue( "user.communicationstyle" );
 
-    // Create a sample text containing the user information
-    let userinfo = "";
-    if(!role.isCompany){
-      userinfo = `Mein Name ist ${user.firstname} ${user.lastname}. Ich würde mich beschreiben als: "${positioninfo}". 
-    Bei der Kommunikation lege ich besonders Wert auf ${communicationstyleinfo}.`;
-    }else{
-      userinfo = `Mein Name ist ${user.firstname} ${user.lastname}. Ich arbeite bei ${company.name}. Meine Position im Unternehmen ist "${positioninfo}."
-    In der Firma beschäftige ich mich mit "${tasksinfo.join(", ")}". Mich zeichnet besonders aus: "${knowledgeinfo.join(", ")}".
-    Bei der Kommunikation lege ich besonders Wert auf ${communicationstyleinfo}.`;
-    }
-
     // If the current user is Company Admin
     if( role.canSetupCompany ){
       // Get the company info from the form
@@ -501,30 +492,56 @@ export default function Setup(){
     const userstyles = setupForm.getFieldValue( "mail.styles" );
     const userEmotions = setupForm.getFieldValue( "mail.emotions" );
 
+    setPromptProcessing(true);
     try{
-      // Construct the main profile and request encryption of it
-      const encreq = await axios.post( "/api/prompt/encrypt", {
-        content: JSON.stringify({
-          name: "Hauptprofil",
-          settings: {
-            personal: userinfo.replace(/\s\s+/g, ""),
-            emotions: userEmotions,
-            stil: userstyles 
-          } 
-        }),
-        salt: user.salt
-      } );
+      const aiinfo = await axios.post("/api/profile/create", {
+        name: `${user.firstname} ${user.lastname}`,
+        company: company.name,
+        position: positioninfo,
+        tasks: tasksinfo?.join(", "),
+        knowledge: knowledgeinfo?.join(", "),
+        communicationstyle: communicationstyleinfo,
+        isSingleUser: !role.isCompany
+      });
+      
 
-      profileArr.push( encreq.data.message );
-    }catch{
-      profileArr = [];
+      setPromptProcessing(false);
+  
+      try{
+        // Construct the main profile and request encryption of it
+        const encreq = await axios.post( "/api/prompt/encrypt", {
+          content: JSON.stringify({
+            name: "Hauptprofil",
+            settings: {
+              personal: aiinfo,
+              emotions: userEmotions,
+              stil: userstyles,
+              parameters: {
+                position: positioninfo,
+                tasks: tasksinfo,
+                knowledge: knowledgeinfo,
+                communicationstyle: communicationstyleinfo
+              }
+            } 
+          }),
+          salt: user.salt
+        } );
+  
+        profileArr.push( encreq.data.message );
+      }catch(e){
+        console.log(e);
+        profileArr = [];
+      }
+  
+      // Update the user with the new constructed profile
+      await updateData( "User", login.uid, { profiles: profileArr, setupDone: true } );
+  
+      // Redirect to the home page
+      router.push( "/" );
+    }catch(e){
+      setPromptProcessing(false);
+      messageApi.error("Bei der Einrichtung deines Kontos ist etwas schiefgelaufen. Bitte versuche es später erneut.")
     }
-
-    // Update the user with the new constructed profile
-    await updateData( "User", login.uid, { profiles: profileArr, setupDone: true } );
-
-    // Redirect to the home page
-    router.push( "/" );
   }
 
   return(
@@ -565,13 +582,13 @@ export default function Setup(){
                 </Button>
               )}
               {current === getFormSteps().length - 1 && (
-                <Button type="primary" onClick={() => setupUser()}>
-                                Zu Siteware.Mail
+                <Button type="primary" onClick={() => setupUser()} loading={promptProcesing}>
+                  Zu Siteware.Mail
                 </Button>
               )}
               {current > 0 && (
                 <Button style={{ margin: "0 8px" }} onClick={() => setCurrent( current - 1 )}>
-                                Zurück
+                  Zurück
                 </Button>
               )}
             </div>

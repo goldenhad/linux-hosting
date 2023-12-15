@@ -15,6 +15,8 @@ import Clipboard from "../../public/icons/clipboard.svg";
 import updateData from "../../firebase/data/updateData";
 import axiosTime from "axios-time";
 import { useRouter } from "next/router";
+import { encode } from "gpt-tokenizer";
+
 const { TextArea } = Input;
 axiosTime( axios );
 
@@ -69,6 +71,7 @@ export default function Monologue( props: InitialProps ) {
   const [ renderAllowed, setRenderAllowed ] = useState( false );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).monolog );
   const router = useRouter();
+  const [ cancleControner, setCancleController ] = useState(new AbortController());
 
   const profileRef = useRef( null );
   const continueRef = useRef( null );
@@ -76,6 +79,8 @@ export default function Monologue( props: InitialProps ) {
   const classificationRef = useRef( null );
   const lengthRef = useRef( null );
   const generateRef = useRef( null );
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
 
 
   const steps: TourProps["steps"] = [
@@ -351,7 +356,8 @@ export default function Monologue( props: InitialProps ) {
         // Remove any resemblance of our token parse chars from the user input
         const cleanedContet = values.content.replace(/(<~).+?(~>)/gm, "");
 
-        await axios.post( "/api/prompt/monolog/generate", {
+        // Create an object containing the promptdata
+        const promptdata = {
           name: user.firstname + " " + user.lastname,
           personal: profile.settings.personal,
           company: companyinfo,
@@ -361,110 +367,91 @@ export default function Monologue( props: InitialProps ) {
           order: values.order,
           emotions: profile.settings.emotions,
           length: values.length
-        },
-        { onDownloadProgress: (progressEvent) => {
-          if(!isFreed){
-            setIsLoaderVisible( false );
-            setIsAnswerVisible( true );
-            isFreed = true;
-          }
-          let dataChunk: string = progressEvent.event?.currentTarget.response;
-
-          const parseRegEx = /(?<=<~).+?(?=~>)/g;
-          const parsedval = dataChunk.match(parseRegEx);
-          if(parsedval && parsedval.length == 1){
-            dataChunk = dataChunk.replace(`<~${parsedval[0]}~>`, "");
-            try{
-              usedTokens = parseInt(parsedval[0]);
-            }catch{
-              usedTokens = 0;
-            }
-            setTokens(parsedval[0]);
-            setTokenCountVisible(true);
-          }
-
-          setAnswer(dataChunk + "█");
-        } }
-        );
-
-        try{
-          await axios.post( "/api/stats", { tokens: usedTokens, time: usedTokens, type: "MONOLOG" } );
-        }catch( e ){
-          //console.log(e);
-          //console.log("Timing logging failed!");
         }
 
-        if( company.tokens - usedTokens <= 0 ){
-          company.tokens = 0;
-        }else{
-          company.tokens -= usedTokens
-        }
-
-        await updateDoc( doc( db, "Company", user.Company ), { tokens: company.tokens } );
-
-        const userusageidx = user.usedCredits.findIndex( ( val ) => {
-          return val.month == props.Data.currentMonth && val.year == props.Data.currentYear
-        } );
-
-        if( userusageidx != -1 ){
-          const usageupdates = user.usedCredits;
-          usageupdates[userusageidx].amount += usedTokens;
-          await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
-        }else{
-          const usageupdates = user.usedCredits;
-          usageupdates.push( { month: props.Data.currentMonth, year: props.Data.currentYear, amount: usedTokens } );
-          await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
-        }
+        //Calculate the cost of the input
+        const costbeforereq = await axios.post("/api/prompt/monolog/count", promptdata);
         
-        /* let answerBefore = answer;
+        if(costbeforereq){
+          const costbefore = costbeforereq.data.tokens;
 
-        for await (const chunk of answerresponse.data) { 
-          answerBefore += chunk;
-          console.log(chunk);
-          setAnswer(answerBefore);
+          if(costbefore){
+            let localtext = "";
+
+            try{
+              await axios.post( "/api/prompt/monolog/generate", promptdata,
+                { onDownloadProgress: (progressEvent) => {
+                  if(!isFreed){
+                    setIsLoaderVisible( false );
+                    setIsAnswerVisible( true );
+                    isFreed = true;
+                  }
+                  let dataChunk: string = progressEvent.event?.currentTarget.response;
+                  localtext = dataChunk;
+
+                  const parseRegEx = /(?<=<~).+?(?=~>)/g;
+                  const parsedval = dataChunk.match(parseRegEx);
+                  if(parsedval && parsedval.length == 1){
+                    dataChunk = dataChunk.replace(`<~${parsedval[0]}~>`, "");
+                  
+                    setTokens(usedTokens.toString());
+                    setTokenCountVisible(true);
+                  
+                    setAnswer(dataChunk);
+                  }else{
+                    const tokensused = encode(localtext).length;
+                    usedTokens = costbefore + tokensused;
+                    setAnswer(dataChunk + "█");
+                  }
+                  console.log(usedTokens);
+                }, signal: cancleControner.signal
+                });
+            }catch(e){
+              if(axios.isCancel(e)){
+                setTokens(usedTokens.toString());
+                setCancleController(new AbortController);
+              }
+            }
+
+            try{
+              await axios.post( "/api/stats", { tokens: usedTokens, time: usedTokens, type: "MONOLOG" } );
+            }catch( e ){
+              //console.log(e);
+              //console.log("Timing logging failed!");
+            }
+
+            if( company.tokens - usedTokens <= 0 ){
+              company.tokens = 0;
+            }else{
+              company.tokens -= usedTokens
+            }
+
+            await updateDoc( doc( db, "Company", user.Company ), { tokens: company.tokens } );
+
+            const userusageidx = user.usedCredits.findIndex( ( val ) => {
+              return val.month == props.Data.currentMonth && val.year == props.Data.currentYear
+            } );
+
+            if( userusageidx != -1 ){
+              const usageupdates = user.usedCredits;
+              usageupdates[userusageidx].amount += usedTokens;
+              await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
+            }else{
+              const usageupdates = user.usedCredits;
+              usageupdates.push( { month: props.Data.currentMonth, year: props.Data.currentYear, amount: usedTokens } );
+              await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
+            }
+          }else{
+            throw("Costbefore undefined");
+          }
+        }else{
+          throw("Costbreforereq undefined");
         }
 
-        //console.log(answer);
-        //console.log("done");
-
-        if( answerresponse.data ){
-          
-          //setAnswer( answer.data.message );
-          //setTokens( answer.data.tokens );
-
-
-          try{
-            await axios.post( "/api/stats", { tokens: answerresponse.data.tokens, time: answerresponse.timings.elapsedTime, type: "MONOLOG" } );
-          }catch( e ){
-            //console.log(e);
-            //console.log("Timing logging failed!");
-          }
-  
-          if( company.tokens - answerresponse.data.tokens <= 0 ){
-            company.tokens = 0;
-          }else{
-            company.tokens -= answerresponse.data.tokens
-          }
-
-          //await updateDoc( doc( db, "Company", user.Company ), { tokens: company.tokens } );
-
-          const userusageidx = user.usedCredits.findIndex( ( val ) => {
-            return val.month == props.Data.currentMonth && val.year == props.Data.currentYear
-          } );
-
-          if( userusageidx != -1 ){
-            const usageupdates = user.usedCredits;
-            usageupdates[userusageidx].amount += answerresponse.data.tokens;
-            await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
-          }else{
-            const usageupdates = user.usedCredits;
-            usageupdates.push( { month: props.Data.currentMonth, year: props.Data.currentYear, amount: answerresponse.data.tokens } );
-            await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
-          }
-        } */
+        
   
       }catch( e ){
-        //console.log(e);
+        console.log(e);
         setTokens( "" );
         setIsLoaderVisible( false );
         setPromptError( true );
@@ -658,7 +645,7 @@ export default function Monologue( props: InitialProps ) {
     if(isAnswerVisible){
       return (
         <>
-          <div className={styles.answer}>{answer}</div>
+          <div className={styles.answer} style={{ transition: "all 0.5s ease" }} >{answer}</div>
           <TokenInfo />
         </>
       );
@@ -716,6 +703,7 @@ export default function Monologue( props: InitialProps ) {
             <div className={styles.formfootercontainer}>
               <div className={styles.generatebuttonrow}>
                 <Button className={styles.backbutton} onClick={() => {
+                  cancleControner.abort();
                   setShowAnswer( false );
                   setTokenCountVisible(false);
                 }} type='primary'>Zurück</Button>

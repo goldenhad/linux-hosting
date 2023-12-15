@@ -401,7 +401,6 @@ export default function Monologue( props: InitialProps ) {
                     usedTokens = costbefore + tokensused;
                     setAnswer(dataChunk + "█");
                   }
-                  console.log(usedTokens);
                 }, signal: cancleController.signal
                 });
             }catch(e){
@@ -505,9 +504,6 @@ export default function Monologue( props: InitialProps ) {
                       showSearch
                       placeholder="Wähle ein Profil aus"
                       optionFilterProp="children"
-                      onChange={( values ) => {
-                        console.log( values )
-                      }}
                       onSearch={undefined}
                       options={getProfiles()}
                       disabled={formDisabled || quotaOverused}

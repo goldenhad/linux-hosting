@@ -381,12 +381,10 @@ export default function Dialogue( props: InitialProps ) {
         const costbeforereq = await axios.post( "/api/prompt/dialog/count", promptdata );
 
         if(costbeforereq){
-          console.log(costbeforereq)
           const costbefore = costbeforereq.data.tokens;
 
           if(costbefore){
             let localtext = "";
-            console.log("Contacting server...");
 
             try{
               await axios.post( "/api/prompt/dialog/generate", promptdata,
@@ -413,7 +411,6 @@ export default function Dialogue( props: InitialProps ) {
                     usedTokens = costbefore + tokensused;
                     setAnswer(dataChunk + "█");
                   }
-                  console.log(usedTokens);
                 }, signal: cancleController.signal
                 });
             }catch(e){
@@ -515,9 +512,6 @@ export default function Dialogue( props: InitialProps ) {
                       showSearch
                       placeholder="Wähle ein Profil aus"
                       optionFilterProp="children"
-                      onChange={( values ) => {
-                        console.log( values )
-                      }}
                       onSearch={undefined}
                       options={getProfiles()}
                       disabled={formDisabled || quotaOverused}

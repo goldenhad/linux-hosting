@@ -2,7 +2,7 @@ import { Card, Button, Form, Input, Select, Result, Skeleton, Alert, Divider, me
 import Icon, { ArrowLeftOutlined } from "@ant-design/icons";
 import styles from "./index.module.scss"
 import { db } from "../../db";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
@@ -15,6 +15,8 @@ import Clipboard from "../../public/icons/clipboard.svg";
 import updateData from "../../firebase/data/updateData";
 import axiosTime from "axios-time";
 import { useRouter } from "next/router";
+import { encode } from "gpt-tokenizer";
+
 const { TextArea } = Input;
 axiosTime( axios );
 
@@ -64,10 +66,12 @@ export default function Monologue( props: InitialProps ) {
   const [ tokens, setTokens ] = useState( "" );
   const [ promptError, setPromptError ] = useState( false );
   const [ decryptedProfiles, setDecryptedProfiles ] = useState( [] );
+  const [ tokenCountVisible, setTokenCountVisible ] = useState( false );
   // eslint-disable-next-line
   const [ renderAllowed, setRenderAllowed ] = useState( false );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).monolog );
   const router = useRouter();
+  const [ cancleController, setCancleController ] = useState(new AbortController());
 
   const profileRef = useRef( null );
   const continueRef = useRef( null );
@@ -343,64 +347,109 @@ export default function Monologue( props: InitialProps ) {
         if( role.isCompany ){
           companyinfo = `Ich arbeite für ${company.name}. Wir beschäftigen uns mit: ${company.settings.background}`;
         }
-        
-  
-        const answer: AxiosResponse & {
-          timings: {
-            elapsedTime: number,
-            timingEnd: number,
-            timingStart: number
-          }
-        } = await axios.post( "/api/prompt/monolog/generate", {
+
+        let isFreed = false;
+        let usedTokens = 0;
+
+        // Remove any resemblance of our token parse chars from the user input
+        const cleanedContet = values.content.replace(/(<~).+?(~>)/gm, "");
+
+        // Create an object containing the promptdata
+        const promptdata = {
           name: user.firstname + " " + user.lastname,
           personal: profile.settings.personal,
           company: companyinfo,
-          content: values.content,
+          content: cleanedContet,
           address: values.address,
           style: profile.settings.stil,
           order: values.order,
           emotions: profile.settings.emotions,
           length: values.length
-        } );
-
-        if( answer.data ){
-          setIsLoaderVisible( false );
-          setIsAnswerVisible( true );
-          setAnswer( answer.data.message );
-          setTokens( answer.data.tokens );
-
-          try{
-            await axios.post( "/api/stats", { tokens: answer.data.tokens, time: answer.timings.elapsedTime, type: "MONOLOG" } );
-          }catch( e ){
-            //console.log(e);
-            //console.log("Timing logging failed!");
-          }
-  
-          if( company.tokens - answer.data.tokens <= 0 ){
-            company.tokens = 0;
-          }else{
-            company.tokens -= answer.data.tokens
-          }
-
-          await updateDoc( doc( db, "Company", user.Company ), { tokens: company.tokens } );
-
-          const userusageidx = user.usedCredits.findIndex( ( val ) => {
-            return val.month == props.Data.currentMonth && val.year == props.Data.currentYear
-          } );
-
-          if( userusageidx != -1 ){
-            const usageupdates = user.usedCredits;
-            usageupdates[userusageidx].amount += answer.data.tokens;
-            await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
-          }else{
-            const usageupdates = user.usedCredits;
-            usageupdates.push( { month: props.Data.currentMonth, year: props.Data.currentYear, amount: answer.data.tokens } );
-            await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
-          }
         }
+
+        //Calculate the cost of the input
+        const costbeforereq = await axios.post("/api/prompt/monolog/count", promptdata);
+        
+        if(costbeforereq){
+          const costbefore = costbeforereq.data.tokens;
+
+          if(costbefore){
+            let localtext = "";
+
+            try{
+              await axios.post( "/api/prompt/monolog/generate", promptdata,
+                { onDownloadProgress: (progressEvent) => {
+                  if(!isFreed){
+                    setIsLoaderVisible( false );
+                    setIsAnswerVisible( true );
+                    isFreed = true;
+                  }
+                  let dataChunk: string = progressEvent.event?.currentTarget.response;
+                  localtext = dataChunk;
+
+                  const parseRegEx = /(?<=<~).+?(?=~>)/g;
+                  const parsedval = dataChunk.match(parseRegEx);
+                  if(parsedval && parsedval.length == 1){
+                    dataChunk = dataChunk.replace(`<~${parsedval[0]}~>`, "");
+                  
+                    setTokens(usedTokens.toString());
+                    setTokenCountVisible(true);
+                  
+                    setAnswer(dataChunk);
+                  }else{
+                    const tokensused = encode(localtext).length;
+                    usedTokens = costbefore + tokensused;
+                    setAnswer(dataChunk + "█");
+                  }
+                  console.log(usedTokens);
+                }, signal: cancleController.signal
+                });
+            }catch(e){
+              if(axios.isCancel(e)){
+                setTokens(usedTokens.toString());
+                setCancleController(new AbortController);
+              }
+            }
+
+            try{
+              await axios.post( "/api/stats", { tokens: usedTokens, time: usedTokens, type: "MONOLOG" } );
+            }catch( e ){
+              //console.log(e);
+              //console.log("Timing logging failed!");
+            }
+
+            if( company.tokens - usedTokens <= 0 ){
+              company.tokens = 0;
+            }else{
+              company.tokens -= usedTokens
+            }
+
+            await updateDoc( doc( db, "Company", user.Company ), { tokens: company.tokens } );
+
+            const userusageidx = user.usedCredits.findIndex( ( val ) => {
+              return val.month == props.Data.currentMonth && val.year == props.Data.currentYear
+            } );
+
+            if( userusageidx != -1 ){
+              const usageupdates = user.usedCredits;
+              usageupdates[userusageidx].amount += usedTokens;
+              await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
+            }else{
+              const usageupdates = user.usedCredits;
+              usageupdates.push( { month: props.Data.currentMonth, year: props.Data.currentYear, amount: usedTokens } );
+              await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
+            }
+          }else{
+            throw("Costbefore undefined");
+          }
+        }else{
+          throw("Costbreforereq undefined");
+        }
+
+        
   
       }catch( e ){
-        //console.log(e);
+        console.log(e);
         setTokens( "" );
         setIsLoaderVisible( false );
         setPromptError( true );
@@ -578,6 +627,37 @@ export default function Monologue( props: InitialProps ) {
     }
   }
 
+  const Answer = () => {
+
+    const TokenInfo = () => {
+      if(tokenCountVisible){
+        return(
+          <div className={styles.tokeninfo}>
+            <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' />
+            Die Anfrage hat {parseFloat( tokens )/1000} Credits verbraucht
+          </div>
+        );
+      }
+    }
+
+    if(isAnswerVisible){
+      return (
+        <>
+          <div className={styles.answer} style={{ transition: "all 0.5s ease" }} >{answer}</div>
+          <TokenInfo />
+        </>
+      );
+    }else if(isLoaderVisible){
+      return(<Skeleton active/>);
+    }else if(promptError){
+      return(
+        <Alert type='error' message="Bei der Generierung der Anfrage ist etwas schiefgelaufen. Bitte versuche es später erneut!" />
+      );
+    }else{
+      return (<></>);
+    }
+
+  }
 
   return (
     <>
@@ -616,20 +696,15 @@ export default function Monologue( props: InitialProps ) {
                 </div>
               }
             >
-              {( isAnswerVisible )?
-                <>
-                  <div className={styles.answer}>{answer}</div>
-                  <div className={styles.tokeninfo}>
-                    <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' />
-                  Die Anfrage hat {parseFloat( tokens )/1000} Credits verbraucht</div></>
-                : <></>}
-              {( isLoaderVisible )? <Skeleton active/>: <></>}
-              {( promptError )? <Alert type='error' message="Bei der Generierung der Anfrage ist etwas schiefgelaufen. Bitte versuche es später erneut!" />: <></>}
+              <Answer />
             </Card>
             <div className={styles.formfootercontainer}>
               <div className={styles.generatebuttonrow}>
                 <Button className={styles.backbutton} onClick={() => {
+                  cancleController.abort();
                   setShowAnswer( false );
+                  setTokenCountVisible(false);
+                  setCancleController(new AbortController);
                 }} type='primary'>Zurück</Button>
               </div>
             </div>

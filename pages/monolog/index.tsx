@@ -2,7 +2,7 @@ import { Card, Button, Form, Input, Select, Result, Skeleton, Alert, Divider, me
 import Icon, { ArrowLeftOutlined } from "@ant-design/icons";
 import styles from "./index.module.scss"
 import { db } from "../../db";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
@@ -71,7 +71,7 @@ export default function Monologue( props: InitialProps ) {
   const [ renderAllowed, setRenderAllowed ] = useState( false );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).monolog );
   const router = useRouter();
-  const [ cancleControner, setCancleController ] = useState(new AbortController());
+  const [ cancleController, setCancleController ] = useState(new AbortController());
 
   const profileRef = useRef( null );
   const continueRef = useRef( null );
@@ -79,8 +79,6 @@ export default function Monologue( props: InitialProps ) {
   const classificationRef = useRef( null );
   const lengthRef = useRef( null );
   const generateRef = useRef( null );
-  const CancelToken = axios.CancelToken;
-  const source = CancelToken.source();
 
 
   const steps: TourProps["steps"] = [
@@ -404,7 +402,7 @@ export default function Monologue( props: InitialProps ) {
                     setAnswer(dataChunk + "█");
                   }
                   console.log(usedTokens);
-                }, signal: cancleControner.signal
+                }, signal: cancleController.signal
                 });
             }catch(e){
               if(axios.isCancel(e)){
@@ -703,9 +701,10 @@ export default function Monologue( props: InitialProps ) {
             <div className={styles.formfootercontainer}>
               <div className={styles.generatebuttonrow}>
                 <Button className={styles.backbutton} onClick={() => {
-                  cancleControner.abort();
+                  cancleController.abort();
                   setShowAnswer( false );
                   setTokenCountVisible(false);
+                  setCancleController(new AbortController);
                 }} type='primary'>Zurück</Button>
               </div>
             </div>

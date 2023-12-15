@@ -94,9 +94,6 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
   
             const tokenCountRequest = encode(prompt).length;
             const tokenCountResult = encode(text).length;
-
-            console.log(tokenCountRequest);
-            console.log(tokenCountResult);
             
             return res.status(200).send(`<~${tokenCountResult + tokenCountRequest}~>`);
                       

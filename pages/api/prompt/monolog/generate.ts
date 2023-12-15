@@ -3,6 +3,9 @@ import OpenAI from "openai";
 import { auth } from "../../../../firebase/admin"
 import getDocument from "../../../../firebase/data/getData";
 import { parseMonologPrompt } from "../../../../helper/prompt";
+import {
+  encode
+} from "gpt-tokenizer"
 
 const openai = new OpenAI( {
   apiKey: process.env.OPENAIAPIKEY
@@ -15,7 +18,7 @@ type ResponseData = {
 }
 
 
-export default async function handler( req: NextApiRequest, res: NextApiResponse<ResponseData> ) {
+export default async function handler( req: NextApiRequest, res: NextApiResponse<ResponseData | string> ) {
   const token = await auth.verifyIdToken( req.cookies.token );
 
   if( req.method == "POST" ){
@@ -53,48 +56,54 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             data.length
           )
 
+          res.writeHead(200, {
+            Connection: "keep-alive",
+            "Content-Encoding": "none",
+            "Cache-Control": "no-cache",
+            "Content-Type": "text/event-stream"
+          });
+
           try{
-            const { data: completions } = await openai.chat.completions.create( {
+            
+            const response = await openai.chat.completions.create( {
               model: "gpt-4-1106-preview",
               messages: [
                 {
                   role: "system",
                   content: "Du bist ein Assistent zum Erstellen von Mails. Nutzer geben dir Informationen zu sich und ihrem Schreibstil, du erzeugst daraus eine E-Mail."+
-                  "Der Stil sollte sich am Nutzer orientieren"
+                  "Der Stil sollte sich am Nutzer orientieren."
                 },
                 { 
                   role: "user",
                   content: prompt
-                }]
-            } ).withResponse();
-      
-            if( completions ){
-              if( completions.choices.length >= 1 ){
-                if( completions.choices[0].message ){
-                  if( completions.choices[0].message.content ){
-              
-                    return res.status( 200 ).send( {
-                      errorcode: 0,
-                      message: completions.choices[0].message.content,
-                      tokens: ( completions.usage?.total_tokens )? completions.usage?.total_tokens: -1
-                    } );
-                  }
-                }
+                }],
+              stream: true
+            } );
+            
+            let text = "";
+            for await (const chunk of response) {
+              //console.log(chunk.choices[0].delta.content || "");
+              const singletoken = chunk.choices[0].delta.content || "";
+              res.write(singletoken);
+              res.flushHeaders();
+              if (chunk.choices[0].finish_reason === "stop") {
+                console.log("stop!!")
               }
+              text += singletoken;
             }
+  
+            const tokenCountRequest = encode(prompt).length;
+            const tokenCountResult = encode(text).length;
+            
+            return res.status(200).send(`<~${tokenCountResult + tokenCountRequest}~>`);
                       
-            return res.status( 400 ).send( { errorcode: -1, message: "Error generating answer", tokens: -1 } );
           }catch( E ){
-            //console.log(E);
+            console.log(E);
             return res.status( 400 ).send( { errorcode: -2, message: "Error generating answer", tokens: -1 } );
           }
         }else{
           return res.status( 400 ).send( { errorcode: -3, message: "Error generating answer", tokens: -1 } );
         }
-      
-            
-        
-
       }else{
         return res.status( 400 ).send( { errorcode: 3, message: "Missing Input!", tokens: -1 } );
       }

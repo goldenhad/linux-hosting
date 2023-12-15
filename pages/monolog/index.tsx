@@ -64,6 +64,7 @@ export default function Monologue( props: InitialProps ) {
   const [ tokens, setTokens ] = useState( "" );
   const [ promptError, setPromptError ] = useState( false );
   const [ decryptedProfiles, setDecryptedProfiles ] = useState( [] );
+  const [ tokenCountVisible, setTokenCountVisible ] = useState( false );
   // eslint-disable-next-line
   const [ renderAllowed, setRenderAllowed ] = useState( false );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).monolog );
@@ -343,46 +344,109 @@ export default function Monologue( props: InitialProps ) {
         if( role.isCompany ){
           companyinfo = `Ich arbeite für ${company.name}. Wir beschäftigen uns mit: ${company.settings.background}`;
         }
-        
-  
-        const answer: AxiosResponse & {
-          timings: {
-            elapsedTime: number,
-            timingEnd: number,
-            timingStart: number
-          }
-        } = await axios.post( "/api/prompt/monolog/generate", {
+
+        let isFreed = false;
+        let usedTokens = 0;
+
+        // Remove any resemblance of our token parse chars from the user input
+        const cleanedContet = values.content.replace(/(<~).+?(~>)/gm, "");
+
+        await axios.post( "/api/prompt/monolog/generate", {
           name: user.firstname + " " + user.lastname,
           personal: profile.settings.personal,
           company: companyinfo,
-          content: values.content,
+          content: cleanedContet,
           address: values.address,
           style: profile.settings.stil,
           order: values.order,
           emotions: profile.settings.emotions,
           length: values.length
+        },
+        { onDownloadProgress: (progressEvent) => {
+          if(!isFreed){
+            setIsLoaderVisible( false );
+            setIsAnswerVisible( true );
+            isFreed = true;
+          }
+          let dataChunk: string = progressEvent.event?.currentTarget.response;
+
+          const parseRegEx = /(?<=<~).+?(?=~>)/g;
+          const parsedval = dataChunk.match(parseRegEx);
+          if(parsedval && parsedval.length == 1){
+            dataChunk = dataChunk.replace(`<~${parsedval[0]}~>`, "");
+            try{
+              usedTokens = parseInt(parsedval[0]);
+            }catch{
+              usedTokens = 0;
+            }
+            setTokens(parsedval[0]);
+            setTokenCountVisible(true);
+          }
+
+          setAnswer(dataChunk + "█");
+        } }
+        );
+
+        try{
+          await axios.post( "/api/stats", { tokens: usedTokens, time: usedTokens, type: "MONOLOG" } );
+        }catch( e ){
+          //console.log(e);
+          //console.log("Timing logging failed!");
+        }
+
+        if( company.tokens - usedTokens <= 0 ){
+          company.tokens = 0;
+        }else{
+          company.tokens -= usedTokens
+        }
+
+        await updateDoc( doc( db, "Company", user.Company ), { tokens: company.tokens } );
+
+        const userusageidx = user.usedCredits.findIndex( ( val ) => {
+          return val.month == props.Data.currentMonth && val.year == props.Data.currentYear
         } );
 
-        if( answer.data ){
-          setIsLoaderVisible( false );
-          setIsAnswerVisible( true );
-          setAnswer( answer.data.message );
-          setTokens( answer.data.tokens );
+        if( userusageidx != -1 ){
+          const usageupdates = user.usedCredits;
+          usageupdates[userusageidx].amount += usedTokens;
+          await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
+        }else{
+          const usageupdates = user.usedCredits;
+          usageupdates.push( { month: props.Data.currentMonth, year: props.Data.currentYear, amount: usedTokens } );
+          await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
+        }
+        
+        /* let answerBefore = answer;
+
+        for await (const chunk of answerresponse.data) { 
+          answerBefore += chunk;
+          console.log(chunk);
+          setAnswer(answerBefore);
+        }
+
+        //console.log(answer);
+        //console.log("done");
+
+        if( answerresponse.data ){
+          
+          //setAnswer( answer.data.message );
+          //setTokens( answer.data.tokens );
+
 
           try{
-            await axios.post( "/api/stats", { tokens: answer.data.tokens, time: answer.timings.elapsedTime, type: "MONOLOG" } );
+            await axios.post( "/api/stats", { tokens: answerresponse.data.tokens, time: answerresponse.timings.elapsedTime, type: "MONOLOG" } );
           }catch( e ){
             //console.log(e);
             //console.log("Timing logging failed!");
           }
   
-          if( company.tokens - answer.data.tokens <= 0 ){
+          if( company.tokens - answerresponse.data.tokens <= 0 ){
             company.tokens = 0;
           }else{
-            company.tokens -= answer.data.tokens
+            company.tokens -= answerresponse.data.tokens
           }
 
-          await updateDoc( doc( db, "Company", user.Company ), { tokens: company.tokens } );
+          //await updateDoc( doc( db, "Company", user.Company ), { tokens: company.tokens } );
 
           const userusageidx = user.usedCredits.findIndex( ( val ) => {
             return val.month == props.Data.currentMonth && val.year == props.Data.currentYear
@@ -390,14 +454,14 @@ export default function Monologue( props: InitialProps ) {
 
           if( userusageidx != -1 ){
             const usageupdates = user.usedCredits;
-            usageupdates[userusageidx].amount += answer.data.tokens;
+            usageupdates[userusageidx].amount += answerresponse.data.tokens;
             await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
           }else{
             const usageupdates = user.usedCredits;
-            usageupdates.push( { month: props.Data.currentMonth, year: props.Data.currentYear, amount: answer.data.tokens } );
+            usageupdates.push( { month: props.Data.currentMonth, year: props.Data.currentYear, amount: answerresponse.data.tokens } );
             await updateDoc( doc( db, "User", login.uid ), { usedCredits: usageupdates } );
           }
-        }
+        } */
   
       }catch( e ){
         //console.log(e);
@@ -578,6 +642,37 @@ export default function Monologue( props: InitialProps ) {
     }
   }
 
+  const Answer = () => {
+
+    const TokenInfo = () => {
+      if(tokenCountVisible){
+        return(
+          <div className={styles.tokeninfo}>
+            <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' />
+            Die Anfrage hat {parseFloat( tokens )/1000} Credits verbraucht
+          </div>
+        );
+      }
+    }
+
+    if(isAnswerVisible){
+      return (
+        <>
+          <div className={styles.answer}>{answer}</div>
+          <TokenInfo />
+        </>
+      );
+    }else if(isLoaderVisible){
+      return(<Skeleton active/>);
+    }else if(promptError){
+      return(
+        <Alert type='error' message="Bei der Generierung der Anfrage ist etwas schiefgelaufen. Bitte versuche es später erneut!" />
+      );
+    }else{
+      return (<></>);
+    }
+
+  }
 
   return (
     <>
@@ -616,20 +711,13 @@ export default function Monologue( props: InitialProps ) {
                 </div>
               }
             >
-              {( isAnswerVisible )?
-                <>
-                  <div className={styles.answer}>{answer}</div>
-                  <div className={styles.tokeninfo}>
-                    <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' />
-                  Die Anfrage hat {parseFloat( tokens )/1000} Credits verbraucht</div></>
-                : <></>}
-              {( isLoaderVisible )? <Skeleton active/>: <></>}
-              {( promptError )? <Alert type='error' message="Bei der Generierung der Anfrage ist etwas schiefgelaufen. Bitte versuche es später erneut!" />: <></>}
+              <Answer />
             </Card>
             <div className={styles.formfootercontainer}>
               <div className={styles.generatebuttonrow}>
                 <Button className={styles.backbutton} onClick={() => {
                   setShowAnswer( false );
+                  setTokenCountVisible(false);
                 }} type='primary'>Zurück</Button>
               </div>
             </div>

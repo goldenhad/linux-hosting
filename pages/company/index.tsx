@@ -652,11 +652,15 @@ export default function Company( props: InitialProps ) {
             colorToDisplay = "#00000";
           }
 
+          let creditusage = 0;
+          if(obj.usedCredits[usageidx]){
+            creditusage = parseFloat((obj.usedCredits[usageidx].amount / 1000).toFixed(2));
+          }
 
           return (
             <Statistic
-              value={( usageidx != -1 )? obj.usedCredits[usageidx].amount: 0}
-              precision={0}
+              value={creditusage}
+              precision={2}
               valueStyle={{ color: colorToDisplay, fontSize: 14 }}
               prefix={iconToDisplay}
               suffix="Credits"

@@ -120,7 +120,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
           >
             {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
           </Avatar>
-          <div className={styles.profileinfo}>{handleEmptyString( getUser().firstname )} {handleEmptyString( getUser().lastname )}</div>
+          <div className={styles.profileinfo}>Mein Account</div>
         </div>
       </Link>
       <Divider className={styles.menudivider} />

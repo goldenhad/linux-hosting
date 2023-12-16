@@ -3,7 +3,7 @@ import { GetServerSideProps } from "next";
 import { useState } from "react";
 import { Alert, Button, Checkbox, Form, Input } from "antd";
 import styles from "./login.module.scss"
-import signIn, { signInWithGoogle } from "../../firebase/auth/signin";
+import signIn from "../../firebase/auth/signin";
 import Head from "next/head";
 import Link from "next/link";
 import CookieBanner from "../../components/CookieBanner";
@@ -41,7 +41,7 @@ export default function Login(){
     }
   };
 
-  const googleOnline = async () => {
+  /* const googleOnline = async () => {
     const { error } = await signInWithGoogle();
 
     if ( error ) {
@@ -52,7 +52,7 @@ export default function Login(){
       //console.log(result)
       return router.push( "/" )
     }
-  };
+  }; */
 
   const onFinishFailed = () => {
     //console.log('Failed:', errorInfo);
@@ -120,12 +120,7 @@ export default function Login(){
             </Form.Item>
           </Form>
 
-          <div className={styles.googleloginbutton}>
-            {/*eslint-disable-next-line */}
-            <Button onClick={googleOnline} icon={<img src={"/Social icon.svg"} alt="google" width={12}></img>}>
-                            Mit Google anmelden
-            </Button>
-          </div>
+          
                     
           <div className={styles.signupnotice}>
             <div>Noch keinen Account?</div><Link className={styles.signuplink} href={"/register"}>Jetzt registrieren</Link>

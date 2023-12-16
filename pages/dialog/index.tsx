@@ -579,7 +579,7 @@ export default function Dialogue( props: InitialProps ) {
                 </div>
 
                 <div ref={classificationRef}>
-                  <Form.Item className={styles.formpart} label={<b>Einordnung des Gesprächpartners (maximal 3)</b>} name="order"
+                  <Form.Item className={styles.formpart} label={<b>Einordnung des Gesprächspartners (maximal 3)</b>} name="order"
                     rules={[
                       () => ( {
                         validator( _, value ) {
@@ -622,7 +622,7 @@ export default function Dialogue( props: InitialProps ) {
                     ]}
                   >
                     <Select
-                      placeholder="Wie lang soll die erzeuge Antwort sein?"
+                      placeholder="Wie lang soll die erzeugte Antwort sein?"
                       options={listToOptions( parameters.lengths )}
                       disabled={formDisabled || quotaOverused}
                       className={styles.formselect}

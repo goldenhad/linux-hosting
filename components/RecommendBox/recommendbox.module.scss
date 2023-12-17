@@ -1,0 +1,109 @@
+.recommendourapp{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+
+    background-color: white;
+    width: 80%;
+    border: 1px #EAECF0 solid;
+    border-radius: 12px;
+    height: 72px;
+    padding: 12px;
+    
+    box-shadow: 0px 4px 6px -2px #10182808;
+    box-shadow: 0px 12px 16px -4px #10182829;
+
+
+    .recommendlove{
+        background-color: #EAECF0;
+        height: 48px;
+        width: 48px;
+        border-radius: 10px;
+        
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        font-size: 24px;
+        color: #F24E1E;
+    }
+
+    .recommendexplanation{
+        display: flex;
+        flex-direction: row;
+        text-align: left;
+        font-size: 16px;
+        gap: 8px;
+    }
+
+    .openrecdrawerrow{
+        margin-left: auto;
+
+        >button {
+            width: 153px;
+            height: 44px;
+            background-color: #1478FD;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    }
+
+    .xpopup{
+        width: 40px;
+        height: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;  
+        
+        &:hover{
+            cursor: pointer;
+        }
+    }
+}
+
+.recommendContent{
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    
+    .recommendtext{
+        display: flex;
+        flex-direction: column;
+        width: 60%;
+    }
+
+    .recommendHeadline{
+        margin-bottom: 16px;
+    }
+
+    .recommendLink{
+        overflow-wrap: break-word;
+        text-align: center;
+        margin-top: 32px;
+        margin-bottom: 32px;
+        color: #1677ff;
+
+        &:hover {
+            cursor: pointer;
+            color: #0f4faa;
+        }
+    }
+
+    .recommendqrcode{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-top: 32px;
+        margin-bottom: 32px;
+        width: 40%;
+
+        .downloadbutton{
+            margin-top: 16px;
+        }
+    }
+}

@@ -3,7 +3,7 @@ import {
   getAuth
 } from "firebase/auth";
 import { db, firebase_app } from "../../db";
-import getDocument from "../../firebase/data/getData";
+import getDocument, { getAllDocs } from "../../firebase/data/getData";
 import { User } from "../../firebase/types/User";
 import { Company } from "../../firebase/types/Company";
 import { Role } from "../../firebase/types/Role";
@@ -14,6 +14,7 @@ import { Spin } from "antd";
 import { useRouter } from "next/navigation";
 import { Calculations, InvoiceSettings, Parameters } from "../../firebase/types/Settings";
 import { getImageUrl } from "../../firebase/drive/upload_file";
+import { Service } from "../../firebase/types/Service";
 
 
 interface ctx {
@@ -23,6 +24,7 @@ interface ctx {
     company: Company,
     role: Role,
     parameters: Parameters,
+    services: Array<Service>
     loading: boolean,
     invoice_data: InvoiceSettings,
     calculations: Calculations,
@@ -52,6 +54,7 @@ export const AuthContextProvider = ( {
   const [calculations, setCalculations] = React.useState( null );
   const [loading, setLoading] = React.useState( true );
   const [profilePicture, setProfilePicture] = React.useState( null );
+  const [services, setServices] = React.useState( [] );
   const router = useRouter();
 
   useEffect( () => {
@@ -90,6 +93,7 @@ export const AuthContextProvider = ( {
                 const parameters = await getDocument( "Settings", "Parameter" );
                 const invoice_data = await getDocument( "Settings", "Invoices" );
                 const calculations = await getDocument( "Settings", "Calculation" );
+                const services = await getAllDocs( "Services" );
                 const url = await getImageUrl( user.uid );
 
                 if( parameters.result && invoice_data.result ){
@@ -101,6 +105,7 @@ export const AuthContextProvider = ( {
                   setRole( roledoc.result.data() as Role );
                   setCompany( companydoc.result.data() as Company );
                   setParameters( parameters.result.data() as Parameters );
+                  setServices( services.result as Array<Service> )
                   setInvoiceData( invoice_data.result.data() as InvoiceSettings );
                   setCalculations( calculations.result.data() as Calculations );
                   setLoading( false );
@@ -188,6 +193,7 @@ export const AuthContextProvider = ( {
           company: company,
           role: role,
           parameters: parameters,
+          services: services,
           loading: loading,
           invoice_data: invoiceData,
           calculations: calculations,

@@ -1,14 +1,14 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
 import { LogoutOutlined } from "@ant-design/icons";
 import Icon, { ApartmentOutlined, BarChartOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Avatar, ConfigProvider, Divider, FloatButton, Layout, Menu, Popover } from "antd";
+import { Avatar, ConfigProvider, Divider, FloatButton, Layout, List, Menu, Popover } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
-const { Content, Footer, Sider } = Layout;
+const { Content, Sider } = Layout;
 import { User, basicUser } from "../../firebase/types/User";
 import { handleEmptyString } from "../../helper/architecture";
-import styles from "./sidebar.module.scss";
+import styles from "./homesidebar.module.scss";
 import Home from "../../public/icons/home.svg";
 import Profiles from "../../public/icons/profiles.svg";
 import Help from "../../public/icons/help.svg";
@@ -19,7 +19,11 @@ type MenuItem = Required<MenuProps>["items"][number];
 
 
 
-const SidebarLayout = ( props: { children: ReactNode, context: {user: User, login, role, profile}} ) => {
+const HomeSidebarLayout = ( props: { 
+  children: ReactNode,
+  context: {user: User, login, role, profile}
+  category: { value: string, setter: Dispatch<SetStateAction<string>>}
+}) => {
   const [collapsed, setCollapsed] = useState( true );
   // eslint-disable-next-line
   const [ collapseWidth, setCollapseWidth ] = useState( undefined );
@@ -30,7 +34,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
   const router = useRouter();
   // eslint-disable-next-line
   const [ version, setVersion ] = useState( "" );
-
 
   useEffect( () => {
     const setProfileImage = async () => {
@@ -120,7 +123,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
           >
             {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
           </Avatar>
-          <div className={styles.profileinfo}>Mein Account</div>
+          <div className={styles.profileinfo}>{handleEmptyString( getUser().firstname )} {handleEmptyString( getUser().lastname )}</div>
         </div>
       </Link>
       <Divider className={styles.menudivider} />
@@ -133,6 +136,12 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     </div>
   );
   
+  const isselected = (name: string) => {
+    if(name == props.category.value){
+      return styles.selectedcat;
+    }
+  }
+
   return (
     <ConfigProvider theme={{
       components: {
@@ -180,6 +189,31 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
         
         <Layout>
           <Content className={styles.layoutcontent}>
+            <aside className={styles.homesidebarcontainer}>
+              <div className={styles.homesidebar}>
+                <div className={styles.title}>Assistenten</div>
+                <List className={styles.assistantlist} split={false}>
+                  <List.Item className={`${styles.assistantlink} ${isselected("all")}`} onClick={() => {
+                    props.category.setter("all"); 
+                  }}>
+                    <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Alle</div>
+                  </List.Item>
+                  <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} onClick={() => {
+                    props.category.setter("favourites"); 
+                  }}>
+                    <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Favoriten</div>
+                  </List.Item>
+                  <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
+                    props.category.setter("content"); 
+                  }}>
+                    <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Content-Erstellung</div>  
+                  </List.Item>
+                </List>
+              </div>
+            </aside>
             <div className={styles.childrencontainer}>
               {props.children}
             </div>
@@ -190,11 +224,10 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
             shape='square'
             description={"Hilfe"}
           />
-          <Footer style={{ textAlign: "center", color: "lightgrey" }}>{version}</Footer>
         </Layout>
         <CookieBanner />
       </Layout>
     </ConfigProvider>
   );
 };
-export default SidebarLayout;
+export default HomeSidebarLayout;

@@ -3,9 +3,12 @@
     display: flex;
     flex-direction: column;
 
+
     .servicecard{
         border-radius: 12px 12px 0px 0px;
         border-bottom-color: #fff;
+        box-shadow: 0px -1px 2px 0px #1018280F;
+        box-shadow: 0px -1px 3px 0px #1018281A;
     }
 
     .serviceheadline{
@@ -53,10 +56,47 @@
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+        box-shadow: 0px 1px 2px 0px #1018280F;
+        box-shadow: 0px 1px 3px 0px #1018281A;
 
-        .fav {
-            font-size: 20px;
+        .actions{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+
+            .iconsvg > svg{
+                size: 3px;
+                height: 21px;
+                width: 20px;
+                transform: translate(-2px, 3px);
+                fill: transparent;
+                color: #667085;
+                stroke: #667085;
+
+                >path {
+                    stroke: #667085;
+                }
+            }
+
+            .fav {
+                font-size: 20px;
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+    
+            .active > svg {
+                color: #F24E1E !important;
+                stroke: #F24E1E !important;
+
+                >path {
+                    stroke: #F24E1E;
+                }
+            }
         }
+
+        
 
         .assistantlink{
             font-weight: 700;

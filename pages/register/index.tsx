@@ -6,7 +6,7 @@ import styles from "./register.module.scss"
 import signUp, { signUpUser } from "../../firebase/auth/signup";
 import Head from "next/head";
 import userExists, { usernameExists } from "../../firebase/auth/userExists";
-import CookieBanner from "../../components/CookieBanner";
+import CookieBanner from "../../components/CookieBanner/CookieBanner";
 import { getDocWhere } from "../../firebase/data/getData";
 import Link from "next/link";
 import CryptoJS from "crypto-js";

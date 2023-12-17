@@ -1,0 +1,213 @@
+.layout{
+    min-height: 100vh;
+    background-color: #F2F4F7;
+    color: black;
+
+    .sidebar {
+        background-color: #101828;
+        z-index: 1;
+
+        .logobox {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            margin-top: 25px;
+        }
+
+        .navigation {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 87vh;
+            background-color: #101828;
+
+            .primarymenu {
+                background-color: #101828;
+            }
+
+            .secondarymenu {
+                background-color: #101828;
+            }
+
+            .changelogrow{
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                color: #F2F4F7;
+
+                &:hover {
+                    cursor: pointer;
+                }
+
+                .changelog{
+                    color: #D0D5DD;
+                    font-size: 20px;
+                }
+            }
+
+            .avatarcontainer {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                margin-top: 20px;
+
+                &:hover{
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+
+    .layoutcontent{
+        display: flex;
+        flex-direction: row;
+
+        .homesidebarcontainer{
+            display: flex;
+            flex-direction: column;
+            padding-top: 25px;
+            width: 281px;
+            background-color: white;
+            color: #344054;
+            padding: 36px 16px 0px 16px;
+            height: 100%;
+
+            font-size: 16px;
+            font-weight: 500;
+
+            .homesidebar {
+                .assistantlist {
+                    margin-top: 16px;
+
+                    .assistantlink {
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: flex-start;
+                        align-items: center;
+                        padding: 8px 12px 8px 12px;
+                        gap: 12px;
+
+                        &:hover {
+                            cursor: pointer;
+                        }
+
+                        .assistanticon > svg{
+                            size: 3px;
+                            height: 21px;
+                            width: 20px;
+                            transform: translate(-2px, 3px);
+                            fill: transparent;
+                            color: #344054;
+                            stroke: #344054;
+
+                            >path {
+                                stroke: #344054;
+                            }
+                        }
+                    }
+
+                    .selectedcat{
+                        background-color: #F9FAFB;
+                        border-radius: 6px;
+                    }
+                }
+            }
+        }
+
+        .childrencontainer{
+            padding-top: 30px;
+            padding-left: 30px;
+            padding-right: 30px;
+            background: #F2F4F7;
+            width: 100%;
+        }
+    }
+    
+}
+
+.avatarmenu{
+
+    .accountlink{
+        display: flex;
+    }
+    
+    .profile {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    
+        .profileinfo {
+            margin-left: 10px;
+        }
+    }
+
+    .menudivider {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .iconlink{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        border-radius: 8px;
+        padding-left: 16px;
+        padding-right: 6px;
+        width: 100%;
+        margin-top: 10px;
+
+        .linkwrapper{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .iconlinktext{
+            margin-left: 25px;
+        }
+    }
+
+    >*{
+        border-radius: 8px;
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+
+    >:hover {
+        cursor: pointer;
+    }
+}
+
+.sidebariconsvg > svg{
+    size: 3px;
+    height: 21px;
+    width: 20px;
+    transform: translate(-2px, 3px);
+    fill: transparent;
+    color: inherit;
+    stroke: inherit;
+}
+
+.floaticon > svg{
+    size: 3px;
+    height: 21px;
+    width: 20px;
+    transform: translate(-1px, 1px);
+    fill: transparent;
+
+    > path {
+        stroke: black;
+    }
+}
+
+.newscontainer {
+    max-height: 500px;
+    overflow-y: scroll;
+
+    .newsitem{
+        width: 100%;
+    }
+}

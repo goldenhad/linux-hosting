@@ -153,10 +153,10 @@ export default function Home() {
             title={singleService.title}
             description={singleService.description}
             link={singleService.link}
-            fav={user.services.favourites.includes(singleService.uid)}
+            fav={user.services?.favourites.includes(singleService.uid)}
             video={singleService.video}
             onFav={async () => {
-              const currentfavs = user.services.favourites;
+              const currentfavs = (user.services?.favourites)? user.services.favourites: [];
               currentfavs.push(singleService.uid);
               await updateData("User", login.uid, { services: { favourites: currentfavs } });
             }}
@@ -188,7 +188,6 @@ export default function Home() {
         <div className={styles.content}>
           <div className={styles.services}>
             <AssistantCardList />
-            
           </div>
 
           <div className={styles.bannersection}>

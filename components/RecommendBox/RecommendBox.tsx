@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { User } from "../../firebase/types/User";
 import HeartFull from "../../public/icons/heartFull.svg";
+import cookie from "cookie-cutter";
 
 
 const Paragraph = Typography;
@@ -12,6 +13,7 @@ const Paragraph = Typography;
 const RecommendBox = (props: { user: User, messageApi }) => {
   const [recommendModalOpen, setRecommendModalOpen] = useState(false);
   const [ recommendLink, setRecommendLink ] = useState( "" );
+  const [ bannerVisible, setBannerVisible ] = useState(false);
 
   useEffect( () => {
     /**
@@ -23,6 +25,12 @@ const RecommendBox = (props: { user: User, messageApi }) => {
       if( encryptedLink.data.message != "" ){
         setRecommendLink( encryptedLink.data.message );
       }
+    }
+
+    const swrec = cookie.get("siteware-recommend");
+    console.log(swrec);
+    if(!swrec){
+      setBannerVisible(true);
     }
     
     getRecommendLink();
@@ -49,28 +57,41 @@ const RecommendBox = (props: { user: User, messageApi }) => {
     }
   };
 
+  const Banner = () => {
+    if(bannerVisible){
+      return(
+        <div className={styles.recommendourapp}>
+          <div className={styles.recommendlove}>
+            <Icon component={HeartFull} className={`${styles.iconsvg}`} viewBox='0 -2 20 22'/>
+          </div>
+          <div className={styles.recommendexplanation}>
+            <h3>Du liebst Siteware.Business?</h3>
+            <Paragraph>
+                  Empfehle uns weiter und sichere Dir 200 GRATIS E-Mails!
+            </Paragraph>
+          </div>
+          <div className={styles.openrecdrawerrow}>
+            <Button type="primary" onClick={() => {
+              setRecommendModalOpen(true);
+            }}>Jetzt empfehlen</Button>
+          </div>
+          <div className={styles.xpopup} onClick={() => {
+            cookie.set("siteware-recommend", 1);
+            setBannerVisible(false);
+          }}>
+            <CloseOutlined />
+          </div>
+        </div>
+      );
+    }else{
+      return(<></>);
+    }
+  }
+
 
   return (
     <>
-      <div className={styles.recommendourapp}>
-        <div className={styles.recommendlove}>
-          <Icon component={HeartFull} className={`${styles.iconsvg}`} viewBox='0 -2 20 22'/>
-        </div>
-        <div className={styles.recommendexplanation}>
-          <h3>Du liebst Siteware.Business?</h3>
-          <Paragraph>
-                  Empfehle uns weiter und sichere Dir 200 GRATIS E-Mails!
-          </Paragraph>
-        </div>
-        <div className={styles.openrecdrawerrow}>
-          <Button type="primary" onClick={() => {
-            setRecommendModalOpen(true);
-          }}>Jetzt empfehlen</Button>
-        </div>
-        <div className={styles.xpopup}>
-          <CloseOutlined />
-        </div>
-      </div>
+      <Banner />
 
       <Modal title="Lade deine Freunde ein und sichere dir Gratis-Mails!" open={recommendModalOpen} width={800} footer={null} onCancel={() => {
         setRecommendModalOpen(false);

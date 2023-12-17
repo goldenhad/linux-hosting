@@ -12,7 +12,7 @@ import styles from "./sidebar.module.scss";
 import Home from "../../public/icons/home.svg";
 import Profiles from "../../public/icons/profiles.svg";
 import Help from "../../public/icons/help.svg";
-import CookieBanner from "../CookieBanner";
+import CookieBanner from "../CookieBanner/CookieBanner";
 import { getImageUrl } from "../../firebase/drive/upload_file";
 
 type MenuItem = Required<MenuProps>["items"][number];

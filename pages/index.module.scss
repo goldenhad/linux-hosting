@@ -29,74 +29,10 @@
         justify-content: space-between;
         height: 90vh;
 
-
-        .recommendourapp{
+        .bannersection{
             display: flex;
             flex-direction: row;
             justify-content: center;
-            gap: 32px;
-    
-            .recommendlove{
-                font-size: 64px;
-                color: #cc2f26;
-            }
-    
-            .recommendexplanation{
-                display: flex;
-                flex-direction: column;
-                text-align: left;
-            
-                .openrecdrawerrow{
-                    margin-top: 20px;
-                    
-                    >button {
-                        width: 100%;
-                    }
-                }
-            }
-        }
-    }
-}
-
-.recommendContent{
-    display: flex;
-    flex-direction: row;
-    gap: 32px;
-    
-    .recommendtext{
-        display: flex;
-        flex-direction: column;
-        width: 60%;
-    }
-
-    .recommendHeadline{
-        margin-bottom: 16px;
-    }
-
-    .recommendLink{
-        overflow-wrap: break-word;
-        text-align: center;
-        margin-top: 32px;
-        margin-bottom: 32px;
-        color: #1677ff;
-
-        &:hover {
-            cursor: pointer;
-            color: #0f4faa;
-        }
-    }
-
-    .recommendqrcode{
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        margin-top: 32px;
-        margin-bottom: 32px;
-        width: 40%;
-
-        .downloadbutton{
-            margin-top: 16px;
         }
     }
 }

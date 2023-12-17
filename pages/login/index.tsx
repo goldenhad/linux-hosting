@@ -6,7 +6,7 @@ import styles from "./login.module.scss"
 import signIn, { signInWithGoogle } from "../../firebase/auth/signin";
 import Head from "next/head";
 import Link from "next/link";
-import CookieBanner from "../../components/CookieBanner";
+import CookieBanner from "../../components/CookieBanner/CookieBanner";
 
 
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {

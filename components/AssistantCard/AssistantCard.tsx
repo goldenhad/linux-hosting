@@ -1,16 +1,22 @@
 import { Card } from "antd";
 import styles from "./assistantcard.module.scss";
-import { HeartOutlined } from "@ant-design/icons";
+import Icon from "@ant-design/icons";
 import Link from "next/link";
-
+import Play from "../../public/icons/play.svg";
+import Heart from "../../public/icons/heart.svg";
+import HeartFull from "../../public/icons/heartFull.svg";
 
 
 const AssistantCard = ( props: {
     image: string,
     title: string,
     description: string,
-    link: string 
-    } ) => {
+    link: string,
+    fav?: boolean
+    onFav?: () => void,
+    onDeFav?: () => void,
+    video: string
+  } ) => {
 
 
   return (
@@ -28,7 +34,14 @@ const AssistantCard = ( props: {
         </div>
       </Card>
       <div className={styles.servicefooter}>
-        <HeartOutlined className={styles.fav}/>
+        <div className={styles.actions}>
+          {(props.fav)?
+            <Icon component={HeartFull} onClick={props.onDeFav} className={`${styles.iconsvg} ${styles.active}`} viewBox='0 0 22 22'/>:
+            <Icon component={Heart} onClick={props.onFav} className={styles.iconsvg} viewBox='0 0 22 22'/>}
+          <Link href={props.video} rel="noopener noreferrer" target="_blank">
+            <Icon component={Play} className={styles.iconsvg} viewBox='0 0 22 22'/>
+          </Link>
+        </div>
         <Link href={props.link}>
           <span className={styles.assistantlink}>Zum Assistenten</span>
         </Link>

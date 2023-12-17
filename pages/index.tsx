@@ -1,17 +1,15 @@
-import { TourProps, Tour, Typography, Button, Divider, Space, Modal, QRCode, Spin, message } from "antd";
+import { TourProps, Tour, Divider, Space, message } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
-import SidebarLayout from "../components/Sidebar/SidebarLayout";
 import { useAuthContext } from "../components/context/AuthContext";
 import { useRouter } from "next/navigation";
 import updateData from "../firebase/data/updateData";
 import { handleUndefinedTour } from "../helper/architecture";
-import { HeartFilled, LoadingOutlined } from "@ant-design/icons";
 import AssistantCard from "../components/AssistantCard/AssistantCard";
-import axios from "axios";
 import RecommendBox from "../components/RecommendBox/RecommendBox";
-const Paragraph = Typography;
+import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
+import { Service } from "../firebase/types/Service";
 
 
 export interface InitialProps {
@@ -37,13 +35,14 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default function Home() {
   const context = useAuthContext();
-  const { login, user } = context;
+  const { login, user, services } = context;
   const router = useRouter();
   const dialogRef = useRef( null );
   const monologRef = useRef( null );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).home );
-  const [recommendModalOpen, setRecommendModalOpen] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const [ selectedCat, setSelectedCat ] = useState("all");
+
 
 
   useEffect( () => {
@@ -127,9 +126,55 @@ export default function Home() {
     }
   ];
 
+  const AssistantCardList = () => {
+    console.log(services);
+    let servicearr = services;
+
+    if(selectedCat != "all"){
+      if(selectedCat != "favourites"){
+        servicearr = services.filter((singleService: Service) => {
+          return singleService.category == selectedCat;
+        });
+      }else{
+        servicearr = services.filter((singleService: Service) => {
+          if(user.services){
+            return user.services.favourites.includes(singleService.uid);
+          }
+        });
+      }
+    }
+
+    return (
+      <Space size={"large"} wrap>
+        {servicearr.map((singleService: Service, idx: number) => {
+          return <AssistantCard
+            key={idx}
+            image={singleService.image}
+            title={singleService.title}
+            description={singleService.description}
+            link={singleService.link}
+            fav={user.services.favourites.includes(singleService.uid)}
+            video={singleService.video}
+            onFav={async () => {
+              const currentfavs = user.services.favourites;
+              currentfavs.push(singleService.uid);
+              await updateData("User", login.uid, { services: { favourites: currentfavs } });
+            }}
+            onDeFav={async () => {
+              const currentfavs =  user.services.favourites.filter((fservice: string) => {
+                return fservice != singleService.uid
+              })
+              await updateData("User", login.uid, { services: { favourites: currentfavs } });
+            }}
+          />
+        })}
+      </Space>
+    );
+  }
+
 
   return (
-    <SidebarLayout context={context}>
+    <HomeSidebarLayout context={context} category={{ value: selectedCat, setter: setSelectedCat }}>
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>
@@ -142,20 +187,8 @@ export default function Home() {
 
         <div className={styles.content}>
           <div className={styles.services}>
-            <Space size={"large"} wrap>
-              <AssistantCard
-                image="/small_logo.png"
-                title="E-Mail Dialog"
-                description="Mit einem Klick generiert unsere KI smarte Antworten zu Deinen bisher empfangenen E-Mail Verlauf."
-                link="/dialog"
-              />
-              <AssistantCard
-                image="/small_logo.png"
-                title="E-Mail erzeugen"
-                description="Gib den Inhalt an, und die KI zaubert Dir eine E-Mail in Deinem Stil – schnell, smart, persönlich!"
-                link="/monolog"
-              />
-            </Space>
+            <AssistantCardList />
+            
           </div>
 
           <div className={styles.bannersection}>
@@ -172,6 +205,6 @@ export default function Home() {
           setOpen( false );
         }} steps={steps} />
       </div>
-    </SidebarLayout>
+    </HomeSidebarLayout>
   )
 }

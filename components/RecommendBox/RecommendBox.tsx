@@ -1,9 +1,11 @@
 import { Button, Modal, QRCode, Spin, Typography } from "antd";
-import { HeartFilled, LoadingOutlined, CloseOutlined } from "@ant-design/icons";
+import Icon, { LoadingOutlined, CloseOutlined } from "@ant-design/icons";
 import styles from "./recommendbox.module.scss"
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { User } from "../../firebase/types/User";
+import HeartFull from "../../public/icons/heartFull.svg";
+
 
 const Paragraph = Typography;
 
@@ -52,7 +54,7 @@ const RecommendBox = (props: { user: User, messageApi }) => {
     <>
       <div className={styles.recommendourapp}>
         <div className={styles.recommendlove}>
-          <HeartFilled />
+          <Icon component={HeartFull} className={`${styles.iconsvg}`} viewBox='0 -2 20 22'/>
         </div>
         <div className={styles.recommendexplanation}>
           <h3>Du liebst Siteware.Business?</h3>

@@ -7,10 +7,18 @@
 }
 
 
+.deletecontainer{
+    display: flex;
+    flex-direction: column;
+    
+    
+}
+
 .finishformrow{
     display: flex;
     flex-direction: row;
     justify-content: center;
+    flex-wrap: wrap;
 
     button {
         width: 360px;

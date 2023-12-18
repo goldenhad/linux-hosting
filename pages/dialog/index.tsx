@@ -219,40 +219,48 @@ export default function Dialogue( props: InitialProps ) {
     }
   ];
 
-
-  useEffect( () => {
-    const updateField = ( field: string, value: string ) => {
-      if( value && value != "" ){
-        form.setFieldValue( field, value );
-      }
+  const updateField = ( field: string, value: string ) => {
+    if( value && value != "" ){
+      form.setFieldValue( field, value );
     }
+  }
 
-    const decryptAndParse = async () => {
-      let parsed = dialogBasicState;
-      try{
-        const decRequest = await axios.post( "/api/prompt/decrypt", {
-          ciphertext: user.lastState.dialog,
-          salt: user.salt
-        } )
+  const decryptAndParse = async (profiles) => {
+    let parsed = dialogBasicState;
+    try{
+      const decRequest = await axios.post( "/api/prompt/decrypt", {
+        ciphertext: user.lastState.dialog,
+        salt: user.salt
+      } )
 
-        const decryptedText = decRequest.data.message;
-        parsed = JSON.parse( decryptedText );
-        //console.log(parsed);
-      }catch( e ){
-        //console.log(e);
+      const decryptedText = decRequest.data.message;
+      parsed = JSON.parse( decryptedText );
+      //console.log(parsed);
+
+      // Check if the last profile was deleted
+      const profile = profiles.find( ( singleProfile: Profile ) => {
+        return singleProfile.name == parsed.profile;
+      });
+
+      console.log(profile);
+      let profilename = "Hauptprofil";
+
+      // If the last used profile is gone just use the first profile ("Hauptprofil")
+      if(profile){
+        profilename = profile.name;
       }
 
-      updateField( "profile", parsed.profile );
+      updateField( "profile", profilename );
       updateField( "dialog", parsed.dialog );
       updateField( "continue", parsed.continue );
       updateField( "address", parsed.address );
       updateField( "order", parsed.order );
       updateField( "length", parsed.length );
-    }
 
-    decryptAndParse();
-    // eslint-disable-next-line
-  }, [] );
+    }catch( e ){
+      console.log(e);
+    }
+  }
 
 
   useEffect( () => {
@@ -276,12 +284,15 @@ export default function Dialogue( props: InitialProps ) {
       }
 
       setDecryptedProfiles( profilearr );
+
+      await decryptAndParse(profilearr);
     }
 
     if( user.profiles ){
       decryptProfiles();
     }
-  }, [user.profiles, user.salt] );
+    // eslint-disable-next-line
+  }, [] );
 
 
   useEffect( () => {

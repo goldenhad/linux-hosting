@@ -180,7 +180,7 @@ export default function Upgrade( props: InitialProps ) {
 
               <div className={styles.buybutton}>
                 <Button onClick={() => {
-                  router.push( ( role.isCompany )? "/company" : "/usage" )
+                  router.push( "usage" )
                 }} className={styles.buynow}>Zurück zur Übersicht</Button>
               </div>
             </div>

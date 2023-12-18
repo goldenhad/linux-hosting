@@ -9,11 +9,15 @@
 
 .finishformrow{
     display: flex;
+    width: 100%;
     flex-direction: row;
     justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
 
     button {
-        width: 360px;
+        width: 200px;
         height: 44px;
         font-weight: 700;
         font-size: 16px;
@@ -90,6 +94,10 @@
     }
 }
 
+.profilerow{
+    justify-content: center;
+}
+
 
 .addProfileRow{
     display: flex;
@@ -118,6 +126,7 @@
 .quadform{
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 32px;
 }
 

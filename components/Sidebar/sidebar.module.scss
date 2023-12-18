@@ -3,9 +3,34 @@
     background-color: #F2F4F7;
     color: black;
 
+    .header{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 15px;
+
+        .headerlink{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .headericon> svg{
+            font-size: 36px;
+            fill: transparent;
+            color: inherit;
+            stroke: inherit;
+        }
+    }
+
     .sidebar {
         background-color: #101828;
         z-index: 1;
+        overflow: hidden;
+        height: 100vh;
+        position: fixed;
+        
 
         .logobox {
             display: flex;
@@ -19,17 +44,24 @@
         .navigation {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            min-height: 87vh;
+            justify-content: flex-start;
             background-color: #101828;
+            height: 85%;
 
             .primarymenu {
                 background-color: #101828;
             }
 
-            .secondarymenu {
-                background-color: #101828;
+            .sidebarbottomcontainer{
+                margin-top: auto;
+
+                .secondarymenu {
+                    background-color: #101828;
+                    margin-top: auto;
+                }
             }
+
+            
 
             .changelogrow{
                 display: flex;
@@ -61,13 +93,22 @@
         }
     }
 
-    .layoutcontent{
+    .mobilesidebar{
+        position: fixed;
+    }
 
+    .layoutcontent{
         .childrencontainer{
             padding-top: 30px;
             padding-left: 30px;
             padding-right: 30px;
             background: #F2F4F7;
+        }
+    }
+
+    @media (min-width: 992px) {
+        .layoutcontent{
+            margin-left: 80px;
         }
     }
     

@@ -2,18 +2,21 @@ import React, { ReactNode, useEffect, useState } from "react";
 import { LogoutOutlined } from "@ant-design/icons";
 import Icon, { ApartmentOutlined, BarChartOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Avatar, ConfigProvider, Divider, FloatButton, Layout, Menu, Popover } from "antd";
+import { Avatar, Button, ConfigProvider, Divider, FloatButton, Layout, Menu, Popover } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
-const { Content, Footer, Sider } = Layout;
+const { Header, Content, Footer, Sider } = Layout;
 import { User, basicUser } from "../../firebase/types/User";
 import { handleEmptyString } from "../../helper/architecture";
 import styles from "./sidebar.module.scss";
 import Home from "../../public/icons/home.svg";
+import Nav from "../../public/icons/nav.svg";
 import Profiles from "../../public/icons/profiles.svg";
 import Help from "../../public/icons/help.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
 import { getImageUrl } from "../../firebase/drive/upload_file";
+import { isMobile } from "react-device-detect";
+
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -22,7 +25,7 @@ type MenuItem = Required<MenuProps>["items"][number];
 const SidebarLayout = ( props: { children: ReactNode, context: {user: User, login, role, profile}} ) => {
   const [collapsed, setCollapsed] = useState( true );
   // eslint-disable-next-line
-  const [ collapseWidth, setCollapseWidth ] = useState( undefined );
+  const [ collapseWidth, setCollapseWidth ] = useState( 80 );
   // eslint-disable-next-line
   const [ breakpoint, setBreakpoint ] = useState( undefined );
   // eslint-disable-next-line
@@ -31,7 +34,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
   // eslint-disable-next-line
   const [ version, setVersion ] = useState( "" );
 
-
   useEffect( () => {
     const setProfileImage = async () => {
       const url = await getImageUrl( props.context.login.uid );
@@ -39,7 +41,23 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     }
 
     setProfileImage();
-  }, [props.context.login] )
+  }, [props.context.login] );
+
+
+  useEffect(() => {
+    if(isMobile){
+      setBreakpoint("lg");
+      setCollapseWidth(0);
+      setCollapsed(true);
+      console.log("mobile")
+    }else{
+      setCollapsed(true);
+      setBreakpoint(undefined);
+      setCollapseWidth(80);
+      console.log("desktop")
+    }
+  }, [])
+
 
   function getItem( label: React.ReactNode, key: React.Key, check: () => boolean, icon?: React.ReactNode, children?: MenuItem[] ): MenuItem {
     if( check() ){
@@ -132,6 +150,31 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
       </div>
     </div>
   );
+
+  const MobileHeader = () => {
+    if(isMobile){
+      return(
+        <Header className={styles.header}>
+          <Link href={"/"} className={styles.headerlink}>
+            {/*eslint-disable-next-line */}
+            <img src="/small_logo.png" width={32} height={32} alt="Logo"/>
+          </Link>
+          <Icon
+            component={Nav}
+            className={styles.headericon}
+            viewBox='0 0 40 40'
+            onClick={() => {
+              if(collapseWidth){
+                setCollapseWidth(0)
+              }else{
+                setCollapseWidth(80)
+              } 
+            }}
+          />
+        </Header>
+      );
+    }
+  }
   
   return (
     <ConfigProvider theme={{
@@ -146,10 +189,18 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
         }
       }
     }}>
-      <Layout className={styles.layout} hasSider={true}>
-        <Sider className={styles.sidebar} breakpoint={breakpoint} collapsedWidth={collapseWidth} collapsed={collapsed} onCollapse={( value ) => {
-          setCollapsed( value )
-        }}>
+      <Layout className={styles.layout} hasSider={!isMobile}>
+        <MobileHeader />
+        <Sider
+          width={80}
+          className={`${styles.sidebar} ${(isMobile)? styles.mobilesidebar: ""}`}
+          breakpoint={breakpoint}
+          collapsedWidth={collapseWidth}
+          collapsed={collapsed}
+          onCollapse={( value ) => {
+            setCollapsed( value )
+          }}
+        >
           <Link href={"/"}>
             <div className={styles.logobox}>
               {/*eslint-disable-next-line */}
@@ -161,7 +212,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
             
             <Menu className={styles.primarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
 
-            <div>
+            <div className={styles.sidebarbottomcontainer}>
               <Menu className={styles.secondarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={footeritems} />
               <div className={styles.avatarcontainer}>
                 <Popover placement="rightBottom" content={profilemenu} trigger="click">

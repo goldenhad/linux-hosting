@@ -14,6 +14,7 @@ import { arrayUnion } from "firebase/firestore";
 import { handleEmptyArray, handleUndefinedTour, listToOptions } from "../../helper/architecture";
 import axios from "axios";
 import environment from "dotenv";
+import { isMobile } from "react-device-detect";
 environment.config();
 
 const MAXPROFILES = 12;
@@ -389,7 +390,7 @@ export default function Profiles() {
 
       return (
         <>
-          <Space ref={profileRef} wrap={true}>
+          <Space ref={profileRef} wrap={true} className={styles.profilerow}>
             { decodedProfiles.map( ( singleProfile: Profile, idx ) => {
               const settings: ProfileSettings = singleProfile.settings;
 
@@ -951,7 +952,7 @@ export default function Profiles() {
         <Modal
           title={"Ein neues Profil anlegen"}
           open={isCreateModalOpen}
-          width={"70%"}
+          width={(isMobile)? "90%": "70%"}
           onCancel={() => {
             setIsCreateModalOpen( false )
           }}
@@ -1124,14 +1125,12 @@ export default function Profiles() {
           <Paragraph>Willst du das Profil wirklich löschen?</Paragraph>
   
           <div className={styles.finishformrow}>
-            <Space direction='horizontal'>
-              <Button type='default' onClick={() => {
-                setIsDeleteModalOpen( false )
-              }}>Abbrechen</Button>
-              <Button type='primary' onClick={() => {
-                deleteProfile()
-              }}>Löschen</Button>
-            </Space>
+            <Button type='default' onClick={() => {
+              setIsDeleteModalOpen( false )
+            }}>Abbrechen</Button>
+            <Button type='primary' onClick={() => {
+              deleteProfile()
+            }}>Löschen</Button>
           </div>
         </Modal>
         <Tour open={open} onClose={async () => {

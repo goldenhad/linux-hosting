@@ -20,7 +20,8 @@
         margin-top: 32px;
 
         .personalcard {
-            width: 50%;
+            width: 100%;
+            max-width: 800px;
 
             .multiformrow{
                 >*:nth-child(1) {
@@ -46,7 +47,8 @@
         margin-top: 32px;
 
         .passwordcard {
-            width: 50%;
+            width: 100%;
+            max-width: 800px;
         }
     }
 
@@ -58,7 +60,8 @@
         margin-top: 32px;
 
         .recommendcard {
-            width: 50%;
+            width: 100%;
+            max-width: 800px;
 
             .recommendContent{
                 display: flex;

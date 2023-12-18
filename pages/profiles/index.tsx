@@ -1120,18 +1120,22 @@ export default function Profiles() {
             setIsDeleteModalOpen( false )
           }}
           footer = {[]}
+          width={800}
+
         >
-          <Paragraph>Willst du das Profil wirklich löschen?</Paragraph>
+          <div className={styles.deletecontainer}>
+            <Paragraph>Willst du das Profil wirklich löschen?</Paragraph>
   
-          <div className={styles.finishformrow}>
-            <Space direction='horizontal'>
-              <Button type='default' onClick={() => {
-                setIsDeleteModalOpen( false )
-              }}>Abbrechen</Button>
-              <Button type='primary' onClick={() => {
-                deleteProfile()
-              }}>Löschen</Button>
-            </Space>
+            <div className={styles.finishformrow}>
+              <Space direction='horizontal'>
+                <Button type='default' onClick={() => {
+                  setIsDeleteModalOpen( false )
+                }}>Abbrechen</Button>
+                <Button type='primary' onClick={() => {
+                  deleteProfile()
+                }}>Löschen</Button>
+              </Space>
+            </div>
           </div>
         </Modal>
         <Tour open={open} onClose={async () => {

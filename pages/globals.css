@@ -116,9 +116,7 @@
   background-color: #F2F4F7;
 }
 
-.ant-layout-sider {
-  transition: all 0.2s, background, 0s !important;
-}
+
 
 .ant-select-selection-item-content{
   font-size: 14px;
@@ -165,6 +163,11 @@
 }
 
 
+@media (max-width: 992px){
+  .sosbutton {
+    margin-bottom: 30px;
+  }
+}
 
 
 @media print {

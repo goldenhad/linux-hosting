@@ -145,7 +145,7 @@ export default function Home() {
     }
 
     return (
-      <Space size={"large"} wrap>
+      <div className={styles.servicelist}>
         {servicearr.map((singleService: Service, idx: number) => {
           return <AssistantCard
             key={idx}
@@ -168,7 +168,7 @@ export default function Home() {
             }}
           />
         })}
-      </Space>
+      </div>
     );
   }
 

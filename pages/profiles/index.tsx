@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Form, Input, Modal, Select, Space, Steps, Tag, Tour, TourProps, Typography, message } from "antd";
+import { Alert, Button, Card, Form, Input, Modal, Select, Steps, Tag, Tour, TourProps, Typography, message } from "antd";
 import { SettingOutlined, DeleteOutlined } from "@ant-design/icons";
 import styles from "./list.profiles.module.scss"
 import { useEffect, useRef, useState } from "react";
@@ -390,7 +390,7 @@ export default function Profiles() {
 
       return (
         <>
-          <Space ref={profileRef} wrap={true} className={styles.profilerow}>
+          <div ref={profileRef} className={styles.profilerow}>
             { decodedProfiles.map( ( singleProfile: Profile, idx ) => {
               const settings: ProfileSettings = singleProfile.settings;
 
@@ -430,7 +430,7 @@ export default function Profiles() {
                 </Card>
               );
             } ) }
-          </Space>
+          </div>
           <div className={styles.addProfileRow}>
             <Button ref={addRef} type='primary' onClick={() => {
               setIsCreateModalOpen( true )

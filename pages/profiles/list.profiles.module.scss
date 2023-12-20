@@ -94,8 +94,24 @@
     }
 }
 
-.profilerow{
-    justify-content: center;
+
+
+@media (max-width: 992px){
+    .profilerow{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+@media (min-width: 993px){
+    .profilerow{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
 }
 
 

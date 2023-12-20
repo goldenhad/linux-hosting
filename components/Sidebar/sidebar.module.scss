@@ -29,6 +29,7 @@
         z-index: 1;
         overflow: hidden;
         height: 100vh;
+        position: fixed;
         
         .logobox {
             display: flex;
@@ -44,7 +45,7 @@
             flex-direction: column;
             justify-content: flex-start;
             background-color: #101828;
-            height: 80%;
+            height: 88%;
 
             .primarymenu {
                 background-color: #101828;

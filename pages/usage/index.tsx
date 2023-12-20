@@ -29,6 +29,8 @@ import {
 import { Bar } from "react-chartjs-2";
 import { User } from "../../firebase/types/User";
 import updateData from "../../firebase/data/updateData";
+import Invoice from "../../components/invoice/invoice";
+import { useReactToPrint } from "react-to-print";
 
 ChartJS.register(
   CategoryScale,
@@ -70,6 +72,7 @@ export default function Usage( props: InitialProps ) {
   const buyRef = useRef( null );
   const orderRef = useRef( null );
 
+  const componentRef = useRef( null );
 
   const steps: TourProps["steps"] = [
     {
@@ -175,6 +178,10 @@ export default function Usage( props: InitialProps ) {
     return Math.floor( company.tokens/calculations.tokensPerMail );
   }
 
+  const handlePrint = useReactToPrint( {
+    content: () => componentRef.current
+  } );
+
   const purchasecolumns = [
     {
       title: "Bestellung",
@@ -243,11 +250,12 @@ export default function Usage( props: InitialProps ) {
           return (
             <div className={styles.actionrow}>
               <div className={styles.singleaction}>
-                <Link href={`/order/invoice/${obj.id}`}>
-                  <Tooltip title={"Rechnung herunterladen"}>
-                    <FileTextOutlined style={{ fontSize: 20 }}/>
-                  </Tooltip>
-                </Link>
+                <Tooltip title={"Rechnung herunterladen"}>
+                  <FileTextOutlined style={{ fontSize: 20 }} onClick={handlePrint}/>
+                  <div style={{ display: "none" }}>
+                    <Invoice company={company} user={user} order={obj} ref={componentRef}></Invoice>
+                  </div>
+                </Tooltip>
               </div>
             </div>
           );

@@ -71,7 +71,7 @@ export default function Forgot_Password( props: restprops ){
             extra={[
               <div key={0} className={styles.backlink}>
                 <Button type="primary" key="console" href={"/login"}>
-                                    Zurück zum Login
+                  Zurück zum Login
                 </Button>
               </div>
             ]}
@@ -149,7 +149,7 @@ export default function Forgot_Password( props: restprops ){
 
             <Form.Item className={styles.loginbutton}>
               <Button type="primary" htmlType="submit">
-                                Passwort zurücksetzen
+                Passwort zurücksetzen
               </Button>
             </Form.Item>
           </Form>

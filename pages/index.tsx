@@ -1,4 +1,4 @@
-import { TourProps, Tour, Divider, Space, message } from "antd";
+import { TourProps, Tour, Divider, message } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";

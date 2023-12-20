@@ -5,8 +5,10 @@ import SidebarLayout from "../../../components/Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
 import { useAuthContext } from "../../../components/context/AuthContext";
 import { Order } from "../../../firebase/types/Company";
+import { FileOutlined } from "@ant-design/icons"
 import Invoice from "../../../components/invoice/invoice";
 import { useReactToPrint } from "react-to-print";
+import { isMobile } from "react-device-detect";
 
 export interface InitialProps {
   Data: { orderid: string };
@@ -63,13 +65,16 @@ export default function InvoiceDownload( props: InitialProps ) {
   
   return (
     <SidebarLayout context={context}>
-      <div style={{ display: "flex", flexDirection: "column", width: "100%", justifyContent: "center", alignItems: "center" }}>
-        <div style={{ display: "block", width: 800 }}>
+      <div style={{ display: "flex", flexDirection: "column", width: "100%", alignItems: "center", height: "100vh" }}>
+        <div style={{ fontSize: 96, color: "#D0D5DD" }}>
+          {(isMobile)? <FileOutlined />: <></>}
+        </div>
+        <div style={(isMobile)? { display: "none", width: 800 }: { display: "block", width: 800 }}>
           <Invoice company={company} user={user} order={order} ref={componentRef}></Invoice>
         </div>
-        <div style={{ width: "360px" }}>
+        <div style={{ width: "360px", display: "flex", flexDirection: "row", justifyContent: "center" }}>
           <Button
-            style={{ width: 360, marginBottom: 50, marginTop: 50, height: 44, fontWeight: 700, fontSize: 16, padding: "10px 18px 10px 18px" }}
+            style={{ maxWidth: 360, width: "80%", marginBottom: 50, marginTop: 50, height: 44, fontWeight: 700, fontSize: 16, padding: "10px 18px 10px 18px" }}
             type='primary'
             onClick={handlePrint}
           >

@@ -181,36 +181,6 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
-  const AdditionalSidebar = () => {
-    return(
-      <aside className={styles.homesidebarcontainer}>
-        <div className={styles.homesidebar}>
-          <div className={styles.title}>Assistenten</div>
-          <List className={styles.assistantlist} split={false}>
-            <List.Item className={`${styles.assistantlink} ${isselected("all")}`} onClick={() => {
-              props.category.setter("all"); 
-            }}>
-              <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
-              <div className={styles.assistantcatname}>Alle</div>
-            </List.Item>
-            <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} onClick={() => {
-              props.category.setter("favourites"); 
-            }}>
-              <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
-              <div className={styles.assistantcatname}>Favoriten</div>
-            </List.Item>
-            <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
-              props.category.setter("content"); 
-            }}>
-              <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
-              <div className={styles.assistantcatname}>Content-Erstellung</div>  
-            </List.Item>
-          </List>
-        </div>
-      </aside>
-    );
-  }
-
   if(isMobile){
     return (
       <ConfigProvider theme={{

@@ -38,7 +38,8 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 
 export default function Upgrade( props: InitialProps ) {
   const context = useAuthContext();
-  const { user, company, role } = context;
+  const { user, company } = context;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [seed, setSeed] = useState( 1 );
   const router = useRouter();
 
@@ -87,6 +88,7 @@ export default function Upgrade( props: InitialProps ) {
       }
 
     }
+    // eslint-disable-next-line
   }, [] );
 
 

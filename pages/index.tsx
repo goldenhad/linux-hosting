@@ -1,4 +1,4 @@
-import { TourProps, Tour, Divider, Space, message } from "antd";
+import { TourProps, Tour, Divider, message } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -145,7 +145,7 @@ export default function Home() {
     }
 
     return (
-      <Space size={"large"} wrap>
+      <div className={styles.servicelist}>
         {servicearr.map((singleService: Service, idx: number) => {
           return <AssistantCard
             key={idx}
@@ -168,7 +168,7 @@ export default function Home() {
             }}
           />
         })}
-      </Space>
+      </div>
     );
   }
 

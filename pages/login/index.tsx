@@ -71,7 +71,7 @@ export default function Login(){
 
         <div className={styles.formContainer}>
           <div className={styles.formtitle}>Log in</div>
-          <div className={styles.formexplanation}>Willkommen zurück. Bitte geben Sie unten Ihre Logindaten ein.</div>
+          <div className={styles.formexplanation}>Willkommen zurück. Bitte gebe unten deine Logindaten ein.</div>
           <Form
             name="basic"
             className={styles.loginform}

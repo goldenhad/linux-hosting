@@ -595,7 +595,6 @@ export default function Setup(){
           </div>
         </div>
       </div>
-      <div className={styles.copyrightfooter}>© Siteware.Mail 2023</div>
     </div>
   );
 }

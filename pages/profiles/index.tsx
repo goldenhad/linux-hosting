@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Form, Input, Modal, Select, Space, Steps, Tag, Tour, TourProps, Typography, message } from "antd";
+import { Alert, Button, Card, Form, Input, Modal, Select, Steps, Tag, Tour, TourProps, Typography, message } from "antd";
 import { SettingOutlined, DeleteOutlined } from "@ant-design/icons";
 import styles from "./list.profiles.module.scss"
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +14,7 @@ import { arrayUnion } from "firebase/firestore";
 import { handleEmptyArray, handleUndefinedTour, listToOptions } from "../../helper/architecture";
 import axios from "axios";
 import environment from "dotenv";
+import { isMobile } from "react-device-detect";
 environment.config();
 
 const MAXPROFILES = 12;
@@ -389,7 +390,7 @@ export default function Profiles() {
 
       return (
         <>
-          <Space ref={profileRef} wrap={true}>
+          <div ref={profileRef} className={styles.profilerow}>
             { decodedProfiles.map( ( singleProfile: Profile, idx ) => {
               const settings: ProfileSettings = singleProfile.settings;
 
@@ -429,7 +430,7 @@ export default function Profiles() {
                 </Card>
               );
             } ) }
-          </Space>
+          </div>
           <div className={styles.addProfileRow}>
             <Button ref={addRef} type='primary' onClick={() => {
               setIsCreateModalOpen( true )
@@ -951,7 +952,7 @@ export default function Profiles() {
         <Modal
           title={"Ein neues Profil anlegen"}
           open={isCreateModalOpen}
-          width={"70%"}
+          width={(isMobile)? "90%": "70%"}
           onCancel={() => {
             setIsCreateModalOpen( false )
           }}
@@ -1126,16 +1127,13 @@ export default function Profiles() {
           <div className={styles.deletecontainer}>
             <Paragraph>Willst du das Profil wirklich löschen?</Paragraph>
   
-            <div className={styles.finishformrow}>
-              <Space direction='horizontal'>
-                <Button type='default' onClick={() => {
-                  setIsDeleteModalOpen( false )
-                }}>Abbrechen</Button>
-                <Button type='primary' onClick={() => {
-                  deleteProfile()
-                }}>Löschen</Button>
-              </Space>
-            </div>
+          <div className={styles.finishformrow}>
+            <Button type='default' onClick={() => {
+              setIsDeleteModalOpen( false )
+            }}>Abbrechen</Button>
+            <Button type='primary' onClick={() => {
+              deleteProfile()
+            }}>Löschen</Button>
           </div>
         </Modal>
         <Tour open={open} onClose={async () => {

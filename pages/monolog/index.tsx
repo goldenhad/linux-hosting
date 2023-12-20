@@ -16,6 +16,7 @@ import updateData from "../../firebase/data/updateData";
 import axiosTime from "axios-time";
 import { useRouter } from "next/router";
 import { encode } from "gpt-tokenizer";
+import { isMobile } from "react-device-detect";
 
 const { TextArea } = Input;
 axiosTime( axios );
@@ -538,7 +539,12 @@ export default function Monologue( props: InitialProps ) {
                       }
                     ]}
                   >
-                    <TextArea className={styles.forminput} rows={10} placeholder="Formuliere kurz den Inhalt der E-Mail?" disabled={formDisabled || quotaOverused}/>
+                    <TextArea
+                      className={styles.forminput}
+                      rows={(isMobile)? 5: 10}
+                      placeholder="Formuliere kurz den Inhalt der E-Mail?"
+                      disabled={formDisabled || quotaOverused}
+                    />
                   </Form.Item>
                 </div>
               </Card>

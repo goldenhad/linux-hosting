@@ -29,6 +29,8 @@ import {
 import { Bar } from "react-chartjs-2";
 import { User } from "../../firebase/types/User";
 import updateData from "../../firebase/data/updateData";
+import Invoice from "../../components/invoice/invoice";
+import { useReactToPrint } from "react-to-print";
 
 ChartJS.register(
   CategoryScale,
@@ -70,6 +72,7 @@ export default function Usage( props: InitialProps ) {
   const buyRef = useRef( null );
   const orderRef = useRef( null );
 
+  const componentRef = useRef( null );
 
   const steps: TourProps["steps"] = [
     {
@@ -175,63 +178,55 @@ export default function Usage( props: InitialProps ) {
     return Math.floor( company.tokens/calculations.tokensPerMail );
   }
 
+  const handlePrint = useReactToPrint( {
+    content: () => componentRef.current
+  } );
+
   const purchasecolumns = [
     {
-      title: "Status",
-      dataIndex: "state",
-      key: "state",
+      title: "Bestellung",
+      dataIndex: "order",
+      key: "order",
       render: ( _, obj ) => {
-        switch( obj.state ){
-        case "completed":
-          return(
-            <Tag icon={<CheckCircleOutlined />} color="success">
-                                abgeschlossen
-            </Tag>
-          );
-                    
-        case "awaiting_payment":
-          return(
-            <Tag icon={<ClockCircleOutlined />} color="warning">
-                                Wartestellung
-            </Tag>
-          );
-        default:
-          return(
-            <Tag icon={<CloseCircleOutlined />} color="error">
-                                abgebrochen
-            </Tag>
-          );
+        const orderState = () => {
+          switch( obj.state ){
+          case "completed":
+            return(
+              <Tag icon={<CheckCircleOutlined />} color="success">
+                  abgeschlossen
+              </Tag>
+            );
+                        
+          case "awaiting_payment":
+            return(
+              <Tag icon={<ClockCircleOutlined />} color="warning">
+                  Wartestellung
+              </Tag>
+            );
+          default:
+            return(
+              <Tag icon={<CloseCircleOutlined />} color="error">
+                  abgebrochen
+              </Tag>
+            );
+          }
         }
+
+        return(
+          <div className={styles.singleorderrow}>
+            <div className={styles.orderid}>#{obj.id}</div>
+            <div className={styles.orderdate}>{new Date( obj.timestamp * 1000 ).toLocaleString( "de",{ timeZone:"Europe/Berlin", timeZoneName: "short" } )}</div>
+            <div className={styles.orderstate}>{orderState()}</div>
+          </div>
+        );
       }
     },
     {
-      title: "Transaktion",
-      dataIndex: "id",
-      key: "id"
-    },
-    {
-      title: "Datum",
-      dataIndex: "timestamp",
-      key: "timestamp",
+      title: "Details",
+      dataIndex: "details",
+      key: "details",
       render: ( _, obj ) => {
-        //console.log(obj)
-        return new Date( obj.timestamp * 1000 ).toLocaleString( "de",{ timeZone:"Europe/Berlin", timeZoneName: "short" } );
-      }
-    },
-    {
-      title: "Erworbene Credits",
-      dataIndex: "tokens",
-      key: "tokens",
-      render: ( _, obj ) => {
-        return Math.floor( obj.tokens/1000 )
-      }
-    },
-    {
-      title: "Betrag",
-      dataIndex: "amount",
-      key: "amount",
-      render: ( _, obj ) => {
-        return convertToCurrency( obj.amount );
+        return <span className={styles.detailsinfo}>{convertToCurrency(obj.amount)} ({Math.floor( obj.tokens/1000 )} Credits)</span>
       }
     },
     {
@@ -255,11 +250,12 @@ export default function Usage( props: InitialProps ) {
           return (
             <div className={styles.actionrow}>
               <div className={styles.singleaction}>
-                <Link href={`/order/invoice/${obj.id}`}>
-                  <Tooltip title={"Rechnung herunterladen"}>
-                    <FileTextOutlined style={{ fontSize: 20 }}/>
-                  </Tooltip>
-                </Link>
+                <Tooltip title={"Rechnung herunterladen"}>
+                  <FileTextOutlined style={{ fontSize: 20 }} onClick={handlePrint}/>
+                  <div style={{ display: "none" }}>
+                    <Invoice company={company} user={user} order={obj} ref={componentRef}></Invoice>
+                  </div>
+                </Tooltip>
               </div>
             </div>
           );
@@ -350,7 +346,7 @@ export default function Usage( props: InitialProps ) {
           </Card>
         </div>
         <Card ref={orderRef} title={"Einkäufe"} bordered={true}>
-          <Table dataSource={company.orders} columns={purchasecolumns} />
+          <Table rowKey="id" scroll={{ x: true }} dataSource={company.orders} columns={purchasecolumns} />
         </Card>
         <Tour open={open} onClose={async () => {
           const currstate = user.tour;

@@ -65,10 +65,10 @@ const RecommendBox = (props: { user: User, messageApi }) => {
             <Icon component={HeartFull} className={`${styles.iconsvg}`} viewBox='0 -2 20 22'/>
           </div>
           <div className={styles.recommendexplanation}>
-            <h3>Du liebst Siteware.Business?</h3>
-            <Paragraph>
-                  Empfehle uns weiter und sichere Dir 200 GRATIS E-Mails!
-            </Paragraph>
+            <div className={styles.catchphrase}>Du liebst Siteware.Business?</div>
+            <div className={styles.text}>
+              Empfehle uns weiter und sichere Dir 200 GRATIS E-Mails!
+            </div>
           </div>
           <div className={styles.openrecdrawerrow}>
             <Button type="primary" onClick={() => {

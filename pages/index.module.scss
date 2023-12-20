@@ -29,6 +29,25 @@
         justify-content: space-between;
         height: 90vh;
 
+        @media (max-width: 992px) {
+            .servicelist{
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 32px;
+            }
+        }
+
+        @media (min-width: 993px) {
+            .servicelist{
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 32px;
+            }
+        }
+
         .bannersection{
             display: flex;
             flex-direction: row;

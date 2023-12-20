@@ -20,9 +20,8 @@ export interface InitialProps {
 }
 
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
-  if( ctx.query.token && ctx.query.PayerID ){
+  if( ctx.query.token != undefined && ctx.query.PayerID != undefined ){
     //console.log(ctx.query.token);
-
     return {
       props: {
         Data: {
@@ -32,14 +31,15 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
       }
     };
   }else{
-    return{ redirect: "/", props: {} };
+    return{ redirect: "/", props: { Data: {} } };
   }
 };
 
 
 export default function Upgrade( props: InitialProps ) {
   const context = useAuthContext();
-  const { user, company, role } = context;
+  const { user, company } = context;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [seed, setSeed] = useState( 1 );
   const router = useRouter();
 
@@ -88,58 +88,76 @@ export default function Upgrade( props: InitialProps ) {
       }
 
     }
-  }, [company.orders, company.tokens, props.Data.orderId, props.Data.payerId, router, seed, user.Company] );
+    // eslint-disable-next-line
+  }, [] );
 
 
   const getResult = () => {
-    const order = company.orders.find( ( order: Order ) => {
-      return order.id == props.Data.orderId
-    } );
-
-    if( order.state == "payment_received" || order.state == "completed" ){
-      return(
-        <Result
-          status="success"
-          title="Kauf erfolgreich abgeschlossen!"
-          subTitle={`Transaktion #${props.Data.orderId} abgeschlossen. Die erworbenen Credits sollten umgehend in dein Konto gebucht werden.`}
-        />
-      );
+    if(props.Data.orderId){
+      const order = company.orders.find( ( order: Order ) => {
+        return order.id == props.Data.orderId
+      } );
+  
+      if( order.state == "payment_received" || order.state == "completed" ){
+        return(
+          <Result
+            status="success"
+            title="Kauf erfolgreich abgeschlossen!"
+            subTitle={`Transaktion #${props.Data.orderId} abgeschlossen. Die erworbenen Credits sollten umgehend in dein Konto gebucht werden.`}
+          />
+        );
+      }else{
+        return(
+          <Result
+            status="warning"
+            title="Kauf noch nicht autorisiert!"
+            subTitle={
+              `Transaktion #${props.Data.orderId} ist noch nicht autorisiert. 
+              Sobald der Kaufvorgang abgeschlossen ist verbuchen wir deine Credits. Lade diese Seite in den kommenden Minuten nochmal neu!
+              `
+            }
+          />
+        );
+      }
     }else{
       return(
         <Result
-          status="warning"
-          title="Kauf noch nicht autorisiert!"
-          subTitle={
-            `Transaktion #${props.Data.orderId} ist noch nicht autorisiert. 
-            Sobald der Kaufvorgang abgeschlossen ist verbuchen wir deine Credits. Lade diese Seite in den kommenden Minuten nochmal neu!
-            `
-          }
+          status="error"
+          title="Es ist ein Fehler aufgetreten"
         />
       );
     }
   }
 
   const getButton = () => {
-    const order = company.orders.find( ( order: Order ) => {
-      return order.id == props.Data.orderId
-    } );
-
-    if( order.state == "completed" ) {
-      return (
-        <div className={styles.buttongroup}>
-          <Link href={`/order/invoice/${order.id}`}>
-            <Button className={styles.backnow}>Rechnung herunterladen</Button>
-          </Link>
-
-          <Link href={( role.isCompany )? "/company": "/usage"}>
-            <Button type="primary" className={styles.backnow}>Zurück zu meinem Konto</Button>
-          </Link>
-        </div>
-      );
+    if(props.Data.orderId){
+      const order = company.orders.find( ( order: Order ) => {
+        return order.id == props.Data.orderId
+      } );
+  
+      if( order.state == "completed" ) {
+        return (
+          <div className={styles.buttongroup}>
+            <Link href={`/order/invoice/${order.id}`}>
+              <Button className={styles.backnow}>Rechnung herunterladen</Button>
+            </Link>
+  
+            <Link href={"/usage"}>
+              <Button type="primary" className={styles.backnow}>Zurück zu meinem Konto</Button>
+            </Link>
+          </div>
+        );
+      }else{
+        return( <Button onClick={() => {
+          setSeed( Math.random() );
+        }} className={styles.backnow}>Aktualisieren</Button> );
+      }
     }else{
-      return( <Button onClick={() => {
-        setSeed( Math.random() );
-      }} className={styles.backnow}>Aktualisieren</Button> );
+      return(
+        <Link href={"/usage"}>
+          <Button type="primary" className={styles.backnow}>Zurück zu meinem Konto</Button>
+        </Link>
+      );
     }
   }
   return (

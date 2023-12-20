@@ -3,9 +3,32 @@
     background-color: #F2F4F7;
     color: black;
 
+    .header{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 15px;
+
+        .headerlink{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .headericon> svg{
+            font-size: 36px;
+            fill: transparent;
+            color: inherit;
+            stroke: inherit;
+        }
+    }
+
     .sidebar {
         background-color: #101828;
         z-index: 1;
+        overflow: hidden;
+        height: 100vh;
 
         .logobox {
             display: flex;
@@ -125,6 +148,12 @@
             width: 100%;
         }
     }
+
+    @media (min-width: 992px) {
+        /* .layoutcontent{
+            margin-left: 80px;
+        } */
+    }
     
 }
 
@@ -178,6 +207,107 @@
 
     >:hover {
         cursor: pointer;
+    }
+}
+
+@media (max-width: 992px) {
+    .sidebar{
+        display: none;
+    }
+
+    .mobilesidebarcontainer{
+        display: flex;
+        flex-direction: column;
+        width: 80px;
+        height: 100%;
+    }
+    .logobox {
+        padding-left: 20px;
+        padding-top: 16px;
+        padding-bottom: 16px;
+    }
+    .sidebariconsvg {
+        margin-right: 80px;
+        padding-left: 4px;
+    }
+
+    .sidebarbottomcontainer{
+        margin-top: auto;
+        margin-bottom: 16px;
+
+        .avatarcontainer{
+            padding-left: 20px;
+        }
+    }
+
+    .homesidebarcontainer_mobile{
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        height: 100%;
+        width: 100%;
+        background-color: #1D2939;
+        color: white;
+        padding-left: 20px;
+        padding-top: 32px;
+
+        .title {
+            margin-bottom: 10px;
+        }
+
+        .assistantlist {
+
+            .assistantlink{
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-start;
+                padding: 8px 12px 8px 12px;
+                gap: 16px;
+                font-size: 16px;
+
+                .assistantcatname {
+                    color: white;
+                }
+
+                .assistanticon > svg{
+                    size: 3px;
+                    height: 21px;
+                    width: 20px;
+                    transform: translate(-2px, 3px);
+                    fill: transparent;
+                    color: white;
+                    stroke: white;
+
+                    >path {
+                        stroke: white;
+                    }
+                }
+            }
+
+            .selectedcat{
+                background-color: #344054;
+                border-radius: 6px;
+            }
+        }
+
+        
+    }
+
+    .canclebar{
+        width: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        height: 100%;
+        padding-top: 32px;
+        background-color: #1D2939;
+        
+
+        .closesidebar{
+            color: white;
+            font-size: 18px;
+        }
     }
 }
 

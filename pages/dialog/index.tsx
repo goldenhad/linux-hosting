@@ -16,6 +16,7 @@ import updateData from "../../firebase/data/updateData";
 import axiosTime from "axios-time";
 import { useRouter } from "next/router";
 import { encode } from "gpt-tokenizer";
+import { isMobile } from "react-device-detect";
 
 const { TextArea } = Input;
 axiosTime( axios );
@@ -544,7 +545,7 @@ export default function Dialogue( props: InitialProps ) {
                       }
                     ]}
                   >
-                    <TextArea className={styles.forminput} rows={10} placeholder="Bisheriger Dialog..." disabled={formDisabled || quotaOverused}/>
+                    <TextArea className={styles.forminput} rows={(isMobile)? 5: 10} placeholder="Bisheriger Dialog..." disabled={formDisabled || quotaOverused}/>
                   </Form.Item>
                 </div>
 
@@ -562,7 +563,7 @@ export default function Dialogue( props: InitialProps ) {
                   >
                     <TextArea
                       className={styles.forminput}
-                      rows={2}
+                      rows={(isMobile)? 5: 2}
                       placeholder="Formuliere kurz, wie der Dialog fortgesetzt werden soll und was du damit erreichen willst?"
                       disabled={formDisabled || quotaOverused}/>
                   </Form.Item>

@@ -1,6 +1,6 @@
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
 import { LogoutOutlined } from "@ant-design/icons";
-import Icon, { ApartmentOutlined, BarChartOutlined, CloseOutlined } from "@ant-design/icons";
+import Icon, { CloseOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Avatar, ConfigProvider, Divider, Drawer, FloatButton, Layout, List, Menu, Popover } from "antd";
 import Link from "next/link";
@@ -13,6 +13,8 @@ import Home from "../../public/icons/home.svg";
 import Profiles from "../../public/icons/profiles.svg";
 import Help from "../../public/icons/help.svg";
 import Nav from "../../public/icons/nav.svg";
+import Stats from "../../public/icons/stat.svg";
+import Settings from "../../public/icons/settings.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
 import { getImageUrl } from "../../firebase/drive/upload_file";
 import { isMobile } from "react-device-detect";
@@ -85,13 +87,13 @@ const HomeSidebarLayout = ( props: {
     }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
     getItem( <Link href={"/usage"}>Nutzung</Link>, "3", () => {
       return true
-    }, <Icon component={BarChartOutlined} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
+    }, <Icon component={Stats} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
   ];
 
   const footeritems = [
     getItem( <Link href={"/company"}>Firma</Link>, "5", () => {
       return props.context.role.isCompany 
-    }, <Icon component={ApartmentOutlined} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
+    }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
   ];
 
   const getDefaultSelected = () => {

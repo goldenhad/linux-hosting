@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./cookiebanner.module.scss";
 import cookieCutter from "cookie-cutter"
 import Link from "next/link";
+import { isMobile } from "react-device-detect";
 
 const { Paragraph } = Typography;
 
@@ -26,13 +27,12 @@ const CookieBanner = (  ) => {
   }
 
   return (
-    <Modal className={styles.cookiebanner} width={"50%"} title={"Dein Datenschutz, unsere Priorität!"} open={active} footer={null}>
+    <Modal className={styles.cookiebanner} width={isMobile? "100%": "50%"} title={"Dein Datenschutz, unsere Priorität!"} open={active} footer={null}>
       <Paragraph className={styles.infotext}>
                 Damit Siteware.Mail reibungslos für dich funktioniert, setzen wir technisch notwendige Cookies ein.
                 Diese sind unerlässlich für die grundlegenden Funktionen unserer Website und ermöglichen es dir, unsere Dienste sicher und effizient zu nutzen.
                 Ohne diese Cookies könnte Siteware.Mail nicht funktionieren. Indem du Siteware.Mail weiterhin nutzt, 
-                stimmst du der Verwendung dieser essenziellen Cookies zu. Weitere Details findest du in unserer 
-        <Link href={"/datenschutz"}>Datenschutzrichtlinie</Link>.
+                stimmst du der Verwendung dieser essenziellen Cookies zu. Weitere Details findest du in unserer <Link href={"/datenschutz"}>Datenschutzrichtlinie</Link>.
       </Paragraph>
       <div className={styles.acceptbuttonrow}>
         <Button onClick={() => {

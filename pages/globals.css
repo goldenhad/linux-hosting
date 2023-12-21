@@ -90,6 +90,13 @@
     overflow-x: hidden;
     background-color: #F2F4F7;
   }
+
+  @media (max-width: 992px){
+    body{
+      max-height: 100dvh;
+      overflow-y: scroll;
+    }
+  }
   
   /*body {
     color: rgb(var(--foreground-rgb));
@@ -166,7 +173,7 @@
 
 @media (max-width: 992px){
   .sosbutton {
-    margin-bottom: 30px;
+    margin-bottom: 0px;
   }
 }
 

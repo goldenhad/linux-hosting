@@ -53,6 +53,7 @@
 
             .sidebarbottomcontainer{
                 margin-top: auto;
+                margin-bottom: 16px;
 
                 .secondarymenu {
                     background-color: #101828;
@@ -83,7 +84,7 @@
                 flex-direction: row;
                 justify-content: center;
                 align-items: center;
-                margin-top: 20px;
+                margin-top: 5px;
 
                 &:hover{
                     cursor: pointer;
@@ -203,6 +204,7 @@
 
         .avatarcontainer{
             padding-left: 20px;
+            margin-top: 5px;
         }
     }
 }

@@ -104,3 +104,8 @@ export const onlyUpdateIfSet = ( val, ideal ) => {
     return ideal;
   }
 }
+
+export const normalizeTokens = (token: number) => {
+  console.log(token);
+  return parseFloat((token/500).toFixed(2));
+}

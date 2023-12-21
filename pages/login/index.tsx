@@ -1,12 +1,13 @@
 import router from "next/router";
 import { GetServerSideProps } from "next";
 import { useState } from "react";
-import { Alert, Button, Checkbox, Form, Input } from "antd";
+import { Alert, Checkbox, Form, Input } from "antd";
 import styles from "./login.module.scss"
 import signIn from "../../firebase/auth/signin";
 import Head from "next/head";
 import Link from "next/link";
 import CookieBanner from "../../components/CookieBanner/CookieBanner";
+import FatButton from "../../components/FatButton";
 
 
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
@@ -60,7 +61,7 @@ export default function Login(){
   };
 
   return(
-    <div>
+    <div className={styles.logincontent}>
       <div className={styles.logincontainer}>
         <div className={styles.logorow}>
           <div className={styles.logobox}>
@@ -114,9 +115,7 @@ export default function Login(){
             />
 
             <Form.Item className={styles.loginbutton}>
-              <Button type="primary" htmlType="submit">
-                                Anmelden
-              </Button>
+              <FatButton isSubmitButton={true} text="Anmelden" />
             </Form.Item>
           </Form>
 

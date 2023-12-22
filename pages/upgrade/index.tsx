@@ -6,7 +6,7 @@ import { GetServerSideProps } from "next";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Order } from "../../firebase/types/Company";
-import { convertToCurrency } from "../../helper/architecture";
+import { convertToCurrency, normalizeTokens } from "../../helper/architecture";
 import updateData from "../../firebase/data/updateData";
 import { mailAmountMapping, mailSavingMapping, mailPriceMapping } from "../../helper/price";
 
@@ -72,7 +72,7 @@ export default function Upgrade( props: InitialProps ) {
       const newOrder: Order = {
         id: userlink.data.message.id,
         timestamp: Math.floor( Date.now() / 1000 ),
-        tokens: calculateTokens()/100,
+        tokens: calculateTokens(),
         amount: mailPriceMapping[tokenstobuy],
         method: "Paypal",
         state: "awaiting_payment",
@@ -139,7 +139,7 @@ export default function Upgrade( props: InitialProps ) {
           </div>
           <Card className={styles.quoatacard} bordered={true}>
             <div className={styles.tokenrow}>
-              <div className={styles.tokens}>{parseFloat( ( calculateTokens()/100000 ).toFixed( 2 ) )}</div>
+              <div className={styles.tokens}>{normalizeTokens(calculateTokens())}</div>
               <div className={styles.tokeninfo}>Anzahl Credits</div>
             </div>
             <Form>

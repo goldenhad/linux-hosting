@@ -6,6 +6,7 @@ import axios from "axios";
 import { User } from "../../firebase/types/User";
 import HeartFull from "../../public/icons/heartFull.svg";
 import cookie from "cookie-cutter";
+import { isMobile } from "react-device-detect";
 
 
 const Paragraph = Typography;
@@ -28,7 +29,6 @@ const RecommendBox = (props: { user: User, messageApi }) => {
     }
 
     const swrec = cookie.get("siteware-recommend");
-    console.log(swrec);
     if(!swrec){
       setBannerVisible(true);
     }
@@ -64,7 +64,12 @@ const RecommendBox = (props: { user: User, messageApi }) => {
           <div className={styles.recommendlove}>
             <Icon component={HeartFull} className={`${styles.iconsvg}`} viewBox='0 -2 20 22'/>
           </div>
-          <div className={styles.recommendexplanation}>
+          <div className={styles.recommendexplanation} onClick={() => {
+            if(isMobile){
+              setRecommendModalOpen(true);
+            }
+          }}
+          >
             <div className={styles.catchphrase}>Du liebst Siteware.Business?</div>
             <div className={styles.text}>
               Empfehle uns weiter und sichere Dir 200 GRATIS E-Mails!

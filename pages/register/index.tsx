@@ -1,7 +1,7 @@
 import router from "next/router";
 import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
-import { Alert, Button, Checkbox, Form, Input, Select, Space } from "antd";
+import { Alert, Button, Checkbox, Form, Input, MenuProps, Select, Space, Menu } from "antd";
 import styles from "./register.module.scss"
 import signUp, { signUpUser } from "../../firebase/auth/signup";
 import Head from "next/head";
@@ -10,7 +10,23 @@ import CookieBanner from "../../components/CookieBanner/CookieBanner";
 import { getDocWhere } from "../../firebase/data/getData";
 import Link from "next/link";
 import CryptoJS from "crypto-js";
+import Nav from "../../public/icons/nav.svg";
+import Icon from "@ant-design/icons";
 
+const frontendnav: MenuProps["items"] = [
+  {
+    label: <Link href={"privacy"}>Datenschutz</Link>,
+    key: "privacy"
+  },
+  {
+    label: <Link href={"legal"}>Impressum</Link>,
+    key: "legal"
+  },
+  {
+    label: <Link href={"login"}>Siteware Business</Link>,
+    key: "login"
+  }
+]
 
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
   //Get the context of the request
@@ -432,7 +448,7 @@ export default function Register( props ){
               }
             ]}>
             <Checkbox className={styles.agbCheckbox}>
-                Ich habe die <Link className={styles.agbLink} href="/datenschutz">Datenschutzvereinbarung</Link> gelesen und verstanden.
+                Ich habe die <Link className={styles.agbLink} target="_blank" href="/privacy">Datenschutzvereinbarung</Link> gelesen und verstanden.
                  Mit dem Ankreuzen dieser Box stimme ich diesen Bedingungen zu und erkläre mich damit einverstanden.
             </Checkbox>
           </Form.Item>
@@ -610,7 +626,7 @@ export default function Register( props ){
               }
             ]}>
             <Checkbox className={styles.agbCheckbox}>
-                Ich habe die <Link className={styles.agbLink} href="/datenschutz">Datenschutzvereinbarung</Link> gelesen und verstanden. 
+                Ich habe die <Link className={styles.agbLink} target="_blank" href="/privacy">Datenschutzvereinbarung</Link> gelesen und verstanden. 
                 Mit dem Ankreuzen dieser Box stimme ich diesen Bedingungen zu und erkläre mich damit einverstanden.</Checkbox>
           </Form.Item>
     
@@ -632,8 +648,18 @@ export default function Register( props ){
       <div className={styles.logincontainer}>
         <div className={styles.logorow}>
           <div className={styles.logobox}>
-            {/*eslint-disable-next-line */}
-            <img src={"/logo.svg"} alt="Logo" width={100}/>
+            <Link href={"/login"}>
+              {/*eslint-disable-next-line */}
+              <img src={"/logo.svg"} alt="Logo" width={100}/>
+            </Link>
+          </div>
+          <div className={styles.nav}>
+            <Menu className={styles.navmenu} overflowedIndicator={
+              <Icon
+                component={Nav}
+                className={styles.headericon}
+                viewBox='0 0 40 40'
+              />} selectedKeys={["login"]} mode="horizontal" items={frontendnav} />
           </div>
         </div>
 
@@ -645,7 +671,6 @@ export default function Register( props ){
           {getForm()}
         </div>
       </div>
-      <div className={`${styles.copyrightfooter} ${( registeringCompany )? styles.lowerfooter : ""}`}>© Siteware.Mail 2023</div>
     </div>
   );
 }

@@ -1,9 +1,9 @@
-import { Button, Card, Tooltip, Table, Tag, TourProps, Tour, Popover, List } from "antd";
+import { Button, Card, Tag, TourProps, Tour, Popover, List, Collapse, Pagination } from "antd";
 import styles from "./usage.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
-import { convertToCurrency, handleUndefinedTour } from "../../helper/architecture";
+import { convertToCurrency, handleUndefinedTour, normalizeTokens } from "../../helper/architecture";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { getDocWhere } from "../../firebase/data/getData";
 import {
@@ -16,7 +16,7 @@ import {
   MailOutlined
 } from "@ant-design/icons";
 import Link from "next/link";
-import { Usage } from "../../firebase/types/Company";
+import { Order, Usage } from "../../firebase/types/Company";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -31,6 +31,8 @@ import { User } from "../../firebase/types/User";
 import updateData from "../../firebase/data/updateData";
 import Invoice from "../../components/invoice/invoice";
 import { useReactToPrint } from "react-to-print";
+import moment from "moment";
+import { isMobile } from "react-device-detect";
 
 ChartJS.register(
   CategoryScale,
@@ -42,7 +44,7 @@ ChartJS.register(
 );
 
 const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
-
+const ordersperpage = 10;
 
 export interface InitialProps {
   Data: { paypalURL: string; };
@@ -66,6 +68,7 @@ export default function Usage( props: InitialProps ) {
   const { login, user, company, calculations } = context
   const [ users, setUsers ] = useState( [] );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).usage );
+  const [orderpage, setOrderPage] = useState(1);
 
   const budgetRef = useRef( null );
   const statRef = useRef( null );
@@ -182,87 +185,29 @@ export default function Usage( props: InitialProps ) {
     content: () => componentRef.current
   } );
 
-  const purchasecolumns = [
-    {
-      title: "Bestellung",
-      dataIndex: "order",
-      key: "order",
-      render: ( _, obj ) => {
-        const orderState = () => {
-          switch( obj.state ){
-          case "completed":
-            return(
-              <Tag icon={<CheckCircleOutlined />} color="success">
-                  abgeschlossen
-              </Tag>
-            );
-                        
-          case "awaiting_payment":
-            return(
-              <Tag icon={<ClockCircleOutlined />} color="warning">
-                  Wartestellung
-              </Tag>
-            );
-          default:
-            return(
-              <Tag icon={<CloseCircleOutlined />} color="error">
-                  abgebrochen
-              </Tag>
-            );
-          }
-        }
-
-        return(
-          <div className={styles.singleorderrow}>
-            <div className={styles.orderid}>#{obj.id}</div>
-            <div className={styles.orderdate}>{new Date( obj.timestamp * 1000 ).toLocaleString( "de",{ timeZone:"Europe/Berlin", timeZoneName: "short" } )}</div>
-            <div className={styles.orderstate}>{orderState()}</div>
-          </div>
-        );
-      }
-    },
-    {
-      title: "Details",
-      dataIndex: "details",
-      key: "details",
-      render: ( _, obj ) => {
-        return <span className={styles.detailsinfo}>{convertToCurrency(obj.amount)} ({Math.floor( obj.tokens/1000 )} Credits)</span>
-      }
-    },
-    {
-      title: "Aktionen",
-      dataIndex: "actions",
-      key: "actions",
-      render: ( _, obj ) => {
-        if( obj.state == "awaiting_payment" ){
-          return (
-            <div className={styles.actionrow}>
-              <div className={styles.singleaction}>
-                <Link href={`${props.Data.paypalURL}/checkoutnow?token=${obj.id}`}>
-                  <Tooltip title={"Einkauf fortsetzen"}>
-                    <ShoppingCartOutlined style={{ fontSize: 20 }}/>
-                  </Tooltip>
-                </Link>
-              </div>
-            </div>
-          );
-        }else{
-          return (
-            <div className={styles.actionrow}>
-              <div className={styles.singleaction}>
-                <Tooltip title={"Rechnung herunterladen"}>
-                  <FileTextOutlined style={{ fontSize: 20 }} onClick={handlePrint}/>
-                  <div style={{ display: "none" }}>
-                    <Invoice company={company} user={user} order={obj} ref={componentRef}></Invoice>
-                  </div>
-                </Tooltip>
-              </div>
-            </div>
-          );
-        }
-      }
+  const orderState = (obj) => {
+    switch( obj.state ){
+    case "completed":
+      return(
+        <Tag className={styles.statustag} icon={<CheckCircleOutlined />} color="success">
+            abgeschlossen
+        </Tag>
+      );
+                  
+    case "awaiting_payment":
+      return(
+        <Tag className={styles.statustag} icon={<ClockCircleOutlined />} color="warning">
+            Wartestellung
+        </Tag>
+      );
+    default:
+      return(
+        <Tag className={styles.statustag} icon={<CloseCircleOutlined />} color="error">
+            abgebrochen
+        </Tag>
+      );
     }
-  ];
+  }
 
   const getTokenDetailInformation = () => {
     return(
@@ -273,6 +218,80 @@ export default function Usage( props: InitialProps ) {
         </List>
       </div>
     );
+  }
+
+
+  const getOrderItems = () => {
+    const items = [];
+    const orderedorders = company.orders.toSorted((a: Order, b: Order) => {
+      if(a.timestamp < b.timestamp){
+        return 1;
+      }else if(a.timestamp > b.timestamp){
+        return -1;
+      }else{
+        return 0
+      }
+    });
+    
+    for(let i=(orderpage - 1); i  < ordersperpage; i++){
+      if(i < company.orders.length){
+        const order = orderedorders[i];
+        const orderdate = new Date( order.timestamp * 1000 );
+        const datestring = moment(orderdate).format("DD.MM.YYYY");
+
+        const getContinuePayment = () => {
+          if(order.state == "awaiting_payment"){
+            return (
+              <List.Item className={styles.singledetail}>
+                <div className={styles.description}>Einkauf fortsetzen:</div>
+                <div><Link href={`${props.Data.paypalURL}/checkoutnow?token=${order.id}`}><ShoppingCartOutlined style={{ fontSize: 20 }}/></Link></div>  
+              </List.Item>
+            );
+          }else{
+            return <></>;
+          }
+        }
+
+        items.push({
+          key: i,
+          label: <div className={styles.singleorder}>
+            <div className={styles.ordertitle}>
+              <span className={styles.orderdate}>{datestring}</span>
+              {isMobile? <br/>: <></>}<span>{`Bestellung #${order.id}`}</span>
+            </div>
+            <div className={styles.orderstate}>{orderState(order)}</div>
+          </div>,
+          children: <div className={styles.orderoverview}>
+            <div className={styles.orderdetails}>
+              <h3>Details</h3>
+              <List>
+                <List.Item className={styles.singledetail}><div className={styles.description}>Bestellnummer:</div> <div>{order.id}</div></List.Item>
+                <List.Item className={styles.singledetail}><div className={styles.description}>Bezahlmethode:</div> <div>{order.method}</div></List.Item>
+                <List.Item className={styles.singledetail}><div className={styles.description}>Betrag:</div> <div>{convertToCurrency(order.amount)}</div></List.Item>
+                <List.Item className={styles.singledetail}><div className={styles.description}>Credits:</div> <div>{normalizeTokens(order.tokens)}</div></List.Item>
+              </List>
+            </div>
+
+            <div className={styles.orderactions}>
+              <h3>Aktionen</h3>
+              <List>
+                <List.Item className={styles.actiondetail}>
+                  <div className={styles.description}>Rechnung herunterladen:</div>
+                  <div><FileTextOutlined style={{ fontSize: 20 }} onClick={handlePrint}/>
+                    <div style={{ display: "none" }}>
+                      <Invoice company={company} user={user} order={order} ref={componentRef}></Invoice>
+                    </div>
+                  </div>
+                </List.Item>
+                {getContinuePayment()}
+              </List>
+            </div>
+          </div>
+        });
+      }
+    }
+     
+    return items;
   }
 
   
@@ -289,7 +308,7 @@ export default function Usage( props: InitialProps ) {
                 </Popover>
               </h2>
               <div className={styles.quotarow}>
-                <div className={styles.tokenbudget}>{( company.unlimited )? "∞" : `${Math.floor( company.tokens/1000 )}`} Credits</div>
+                <div className={styles.tokenbudget}>{( company.unlimited )? "∞" : `${Math.floor(normalizeTokens(company.tokens))}`} Credits</div>
               </div>
             </div>
             <div className={styles.generatebuttonrow}>
@@ -346,7 +365,13 @@ export default function Usage( props: InitialProps ) {
           </Card>
         </div>
         <Card ref={orderRef} title={"Einkäufe"} bordered={true}>
-          <Table rowKey="id" scroll={{ x: true }} dataSource={company.orders} columns={purchasecolumns} />
+          {/*           <Table rowKey="id" scroll={{ x: true }} dataSource={company.orders} columns={purchasecolumns} />
+ */}          <Collapse items={getOrderItems()} />
+          <div className={styles.orderpagination}>
+            <Pagination onChange={(page: number) => {
+              setOrderPage(page);
+            }} defaultCurrent={1} pageSize={ordersperpage} total={company.orders.length} />
+          </div>
         </Card>
         <Tour open={open} onClose={async () => {
           const currstate = user.tour;

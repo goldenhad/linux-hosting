@@ -46,7 +46,7 @@ export default function Home() {
 
 
   useEffect( () => {
-    if( !user.setupDone ){
+    if( !user.setupDone && user.setupDone != undefined ){
       router.push( "/setup" );
     }
   }, [router, user.setupDone] );
@@ -190,9 +190,7 @@ export default function Home() {
             <AssistantCardList />
           </div>
 
-          <div className={styles.bannersection}>
-            <RecommendBox user={user} messageApi={messageApi} />
-          </div>
+          <div className={styles.bannersection}><RecommendBox user={user} messageApi={messageApi} /></div>
         </div>
 
         

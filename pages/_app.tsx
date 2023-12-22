@@ -42,6 +42,7 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
           <meta property="og:title" content="Siteware.Mail dein intelligenter Mail-Assistent" />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/ogimage.jpg" />
+          <meta name="viewport" content="initial-scale=1, maximum-scale=1" />
           <meta property="og:url" content={`${process.env.BASEURL}`} />
           <link rel="icon" type="image/x-icon" href="small_logo.ico" />
           <title>Siteware.Mail | mail assistant</title>

@@ -288,3 +288,142 @@
     font-size: 10px;
     margin-right: 10px;
 }
+
+
+@media (max-width: 992px){
+    .singleorder{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 16px;
+    
+        .orderdate{
+            color: #8e8e93;
+            margin-right: 10px;
+        }
+        
+        .orderstate{
+
+
+            .statustag{
+                width: 120px;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+    }
+
+    .orderoverview {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    
+        .orderdetails{
+            width: 100%;
+            padding-bottom: 30px;
+    
+            .singledetail{
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: flex-start;
+    
+                .description{
+                    font-weight: 700;
+                }
+            }
+    
+            .orderdetail {
+                display: flex;
+                flex-direction: row;
+        
+                .description{
+                    width: 10%;
+                }
+            }
+        }
+    
+        .orderactions{
+            width: 100%;
+        }
+    }
+}
+
+@media (min-width: 993px){
+    .singleorder{
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        gap: 16px;
+    
+        .orderdate{
+            color: #8e8e93;
+            margin-right: 10px;
+        }
+    
+        .ordertitle{
+            width: 30%;
+        }
+    
+        .orderstate{
+            margin-left: auto;
+    
+            .statustag{
+                width: 120px;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+    }
+    
+    .orderoverview {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+    
+        .orderdetails{
+            width: 50%;
+            border-right-width: 1px;
+            border-right-color: rgb(217, 217, 217);
+            border-right-style: solid;
+            padding-left: 10px;
+            padding-right: 30px;
+    
+            .singledetail{
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: flex-start;
+    
+                .description{
+                    font-weight: 700;
+                }
+            }
+    
+            .orderdetail {
+                display: flex;
+                flex-direction: row;
+        
+                .description{
+                    width: 10%;
+                }
+            }
+        }
+    
+        .orderactions{
+            width: 50%;
+            padding-left: 30px;
+            padding-right: 10px;
+        }
+    }
+}
+
+.orderpagination{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}

@@ -1,13 +1,15 @@
 import router from "next/router";
 import { GetServerSideProps } from "next";
 import { useState } from "react";
-import { Alert, Checkbox, Form, Input } from "antd";
+import { Alert, Checkbox, Form, Input, Menu, MenuProps } from "antd";
 import styles from "./login.module.scss"
 import signIn from "../../firebase/auth/signin";
 import Head from "next/head";
 import Link from "next/link";
 import CookieBanner from "../../components/CookieBanner/CookieBanner";
 import FatButton from "../../components/FatButton";
+import Nav from "../../public/icons/nav.svg";
+import Icon from "@ant-design/icons";
 
 
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
@@ -26,6 +28,21 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
   return { props: { InitialState: {} } }
 }
 
+const frontendnav: MenuProps["items"] = [
+  {
+    label: <Link href={"privacy"}>Datenschutz</Link>,
+    key: "privacy"
+  },
+  {
+    label: <Link href={"legal"}>Impressum</Link>,
+    key: "legal"
+  },
+  {
+    label: <Link href={"login"}>Siteware Business</Link>,
+    key: "login"
+  }
+]
+
 export default function Login(){
   const [ loginFailed, setLoginFailed ] = useState( false );
 
@@ -42,19 +59,6 @@ export default function Login(){
     }
   };
 
-  /* const googleOnline = async () => {
-    const { error } = await signInWithGoogle();
-
-    if ( error ) {
-      //console.log(error);
-      setLoginFailed( true );
-    }else{
-      setLoginFailed( false );
-      //console.log(result)
-      return router.push( "/" )
-    }
-  }; */
-
   const onFinishFailed = () => {
     //console.log('Failed:', errorInfo);
     setLoginFailed( true );
@@ -65,8 +69,18 @@ export default function Login(){
       <div className={styles.logincontainer}>
         <div className={styles.logorow}>
           <div className={styles.logobox}>
-            {/*eslint-disable-next-line */}
-            <img src={"/logo.svg"} alt="Logo" width={100}/>
+            <Link href={"/login"}>
+              {/*eslint-disable-next-line */}
+              <img src={"/logo.svg"} alt="Logo" width={100}/>
+            </Link>
+          </div>
+          <div className={styles.nav}>
+            <Menu className={styles.navmenu} overflowedIndicator={
+              <Icon
+                component={Nav}
+                className={styles.headericon}
+                viewBox='0 0 40 40'
+              />} selectedKeys={["login"]} mode="horizontal" items={frontendnav} />
           </div>
         </div>
 

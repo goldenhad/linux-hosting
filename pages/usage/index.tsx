@@ -308,7 +308,7 @@ export default function Usage( props: InitialProps ) {
                 </Popover>
               </h2>
               <div className={styles.quotarow}>
-                <div className={styles.tokenbudget}>{( company.unlimited )? "∞" : `${Math.floor( company.tokens/1000 )}`} Credits</div>
+                <div className={styles.tokenbudget}>{( company.unlimited )? "∞" : `${Math.floor(normalizeTokens(company.tokens))}`} Credits</div>
               </div>
             </div>
             <div className={styles.generatebuttonrow}>

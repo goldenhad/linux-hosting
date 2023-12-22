@@ -86,14 +86,13 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
     getItem( <Link href={"/usage"}>Nutzung</Link>, "3", () => {
       return true
-    }, <Icon component={Stats} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
-  ];
-
-  const footeritems = [
+    }, <Icon component={Stats} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
     getItem( <Link href={"/company"}>Firma</Link>, "5", () => {
       return props.context.role.isCompany 
     }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
   ];
+
+  const footeritems = [];
 
   const getDefaultSelected = () => {
     switch( router.pathname ){
@@ -326,7 +325,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ backgroundColor: "#f0f0f2", color: "#474747" }}
+                      style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
                       <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>

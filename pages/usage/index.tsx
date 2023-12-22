@@ -33,6 +33,8 @@ import Invoice from "../../components/invoice/invoice";
 import { useReactToPrint } from "react-to-print";
 import moment from "moment";
 import { isMobile } from "react-device-detect";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "../../db";
 
 ChartJS.register(
   CategoryScale,
@@ -313,7 +315,12 @@ export default function Usage( props: InitialProps ) {
             </div>
             <div className={styles.generatebuttonrow}>
               <Link href={"/upgrade"}>
-                {( !company.unlimited )? <Button ref={buyRef} className={styles.backbutton} type='primary'>Weitere Credits kaufen</Button> : <></>}
+                {( !company.unlimited )? <Button ref={buyRef} className={styles.backbutton} onClick={() => {
+                  console.log(analytics);
+                  logEvent(analytics, "buy_tokens", {
+                    currentCredits: company.tokens
+                  });
+                }} type='primary'>Weitere Credits kaufen</Button> : <></>}
               </Link>
             </div>
           </Card>

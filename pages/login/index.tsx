@@ -10,6 +10,8 @@ import CookieBanner from "../../components/CookieBanner/CookieBanner";
 import FatButton from "../../components/FatButton";
 import Nav from "../../public/icons/nav.svg";
 import Icon from "@ant-design/icons";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "../../db";
 
 
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
@@ -46,6 +48,7 @@ const frontendnav: MenuProps["items"] = [
 export default function Login(){
   const [ loginFailed, setLoginFailed ] = useState( false );
 
+
   const onFinish = async ( values ) => {
     const { error } = await signIn( values.email, values.password );
 
@@ -55,6 +58,9 @@ export default function Login(){
     }else{
       setLoginFailed( false );
       //console.log(result)
+      logEvent(analytics, "login", {
+        email: values.email
+      });
       return router.push( "/" )
     }
   };

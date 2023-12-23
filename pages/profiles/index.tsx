@@ -15,6 +15,7 @@ import { handleEmptyArray, handleUndefinedTour, listToOptions } from "../../help
 import axios from "axios";
 import environment from "dotenv";
 import { isMobile } from "react-device-detect";
+import FatButton from "../../components/FatButton";
 environment.config();
 
 const MAXPROFILES = 12;
@@ -431,10 +432,10 @@ export default function Profiles() {
               );
             } ) }
           </div>
-          <div className={styles.addProfileRow}>
-            <Button ref={addRef} type='primary' onClick={() => {
+          <div ref={addRef} className={styles.addProfileRow}>
+            <FatButton onClick={() => {
               setIsCreateModalOpen( true )
-            }} disabled={( user.profiles && user.profiles.length >= MAXPROFILES )}>+ Hinzufügen</Button>
+            }} disabled={( user.profiles && user.profiles.length >= MAXPROFILES )} text="+ Hinzufügen" />
           </div>
           <div className={styles.profilecounter}>{user.profiles? user.profiles.length : 0} von 12 erstellt</div>
         </>

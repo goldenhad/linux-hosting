@@ -307,6 +307,10 @@
         .closesidebar{
             color: white;
             font-size: 18px;
+
+            &:hover {
+                cursor: pointer;
+            }
         }
     }
 }

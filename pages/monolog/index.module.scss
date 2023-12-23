@@ -9,7 +9,22 @@
       .messagcnt{
         display: flex;
         flex-direction: row;
+        align-items: center;
         gap: 16px;
+
+        @media (max-width: 992px){
+          .msg {
+            font-size: large;
+            font-weight: bold;
+          }
+        }
+
+        @media (min-width: 993px){
+          .msg {
+            font-size: 32px;
+            font-weight: bold;
+          }
+        }
       }
 
       .welcomeseperator{
@@ -52,14 +67,10 @@
   
         .generatebuttonrow{
           margin-bottom: 44px;
+          margin-top: 44px;
           
           button {
-              width: 360px;
-              height: 44px;
-              font-weight: 700;
-              font-size: 16px;
-              line-height: 24px;
-              padding: 10px 18px 10px 18px;
+              
   
               .buttonicon > svg{
                 transform: translate(-1px, 4px);
@@ -111,6 +122,7 @@
   
         .generatebuttonrow{
           margin-bottom: 44px;
+          margin-top: 44px;
           
         }
       }
@@ -176,7 +188,8 @@
       .tokeninfo{
         background-color: #F2F4F7;
         padding: 12px;
-        width: 330px;
+        max-width: 330px;
+        width: 100%;
         border-radius: 8px;
         margin-top: 30px;
         font-weight: 700;

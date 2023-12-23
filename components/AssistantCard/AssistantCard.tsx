@@ -1,4 +1,4 @@
-import { Card } from "antd";
+import { Card, Typography } from "antd";
 import styles from "./assistantcard.module.scss";
 import Icon from "@ant-design/icons";
 import Link from "next/link";
@@ -6,6 +6,7 @@ import Play from "../../public/icons/play.svg";
 import Heart from "../../public/icons/heart.svg";
 import HeartFull from "../../public/icons/heartFull.svg";
 
+const { Paragraph } = Typography;
 
 const AssistantCard = ( props: {
     image: string,
@@ -29,9 +30,9 @@ const AssistantCard = ( props: {
           </div>
           <div className={styles.servicetitle}>{props.title}</div>
         </div>
-        <div className={styles.servicedescription}>
+        <Paragraph className={styles.servicedescription} ellipsis={ { rows: 4, expandable: true, symbol: 'more' }}>
           {props.description}
-        </div>
+        </Paragraph>
       </Card>
       <div className={styles.servicefooter}>
         <div className={styles.actions}>

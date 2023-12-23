@@ -136,7 +136,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
         <div className={styles.profile}>
           <Avatar
             size={40}
-            style={{ backgroundColor: "#f0f0f2", color: "#474747" }}
+            style={{ color: "#474747" }}
             src={props.context.profile.picture}
           >
             {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
@@ -217,7 +217,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ backgroundColor: "#f0f0f2", color: "#474747" }}
+                      style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
                       <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
@@ -254,7 +254,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ backgroundColor: "#f0f0f2", color: "#474747" }}
+                      style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
                       <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>

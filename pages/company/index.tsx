@@ -661,6 +661,27 @@ export default function Company( props: InitialProps ) {
               )
             }
           }
+
+          const UserActions = () => {
+            if( obj.Role != "Company-Admin" && obj.id != login.uid ){
+              return ( <div className={styles.useractions}>
+                <Tooltip title={"Mitarbeiter bearbeiten"}>
+                  <EditOutlined onClick={() => {
+                    setMemberToEdit( idx );
+                    setEditMemberModal( true )
+                  }}
+                  />
+                </Tooltip>
+                <Tooltip title={"Mitarbeiter löschen"}>
+                  <DeleteOutlined onClick={() => {
+                    setMemberToDelete( idx );
+                    setDeleteMemberModal( true )
+                  }}/>
+                </Tooltip>
+                
+              </div> );
+            }
+          }
           
           return(
             <div className={styles.memberprofile}>
@@ -678,34 +699,10 @@ export default function Company( props: InitialProps ) {
                 <div className={styles.rolecontainer}>{getRoleName( obj.Role )}</div>
                 <div className={styles.usernamecontainer}>{displayUserName( obj.username, obj.wasInvited )}</div>
                 <Stats />
+                <UserActions />
               </div>
             </div>
           );
-        }
-      },
-      {
-        title: "Aktionen",
-        dataIndex: "actions",
-        key: "actions",
-        render: ( _, obj: User & { id: string }, indx: number ) => { 
-          if( obj.Role != "Company-Admin" && obj.id != login.uid ){
-            return ( <div className={styles.useractions}>
-              <Tooltip title={"Mitarbeiter bearbeiten"}>
-                <EditOutlined onClick={() => {
-                  setMemberToEdit( indx );
-                  setEditMemberModal( true )
-                }}
-                />
-              </Tooltip>
-              <Tooltip title={"Mitarbeiter löschen"}>
-                <DeleteOutlined onClick={() => {
-                  setMemberToDelete( indx );
-                  setDeleteMemberModal( true )
-                }}/>
-              </Tooltip>
-              
-            </div> );
-          }
         }
       }
     ];

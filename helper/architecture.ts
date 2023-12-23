@@ -89,6 +89,7 @@ export const handleUndefinedTour = ( tour: TourState ) => {
       home: true,
       dialog: true,
       monolog: true,
+      blog: true,
       usage: true,
       profiles: true,
       company: true

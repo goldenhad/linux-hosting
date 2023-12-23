@@ -44,7 +44,8 @@ export default async function signUp( firstname, lastname, email, username, pass
               usedCredits: [],
               lastState: {
                 dialog: "",
-                monolog: ""
+                monolog: "",
+                blog: ""
               },
               salt: crypto.randomBytes( 8 ).toString( "hex" ),
               setupDone: false,
@@ -55,6 +56,7 @@ export default async function signUp( firstname, lastname, email, username, pass
                 home: false,
                 dialog: false,
                 monolog: false,
+                blog: false,
                 usage: false,
                 profiles: false,
                 company: false
@@ -141,6 +143,7 @@ export async function signUpUser( firstname, lastname, email, username, password
                     home: false,
                     dialog: false,
                     monolog: false,
+                    blog: false,
                     usage: false,
                     profiles: false,
                     company: false

@@ -13,10 +13,6 @@ import { Service } from "../firebase/types/Service";
 
 
 export interface InitialProps {
-  Data: {
-    currentMonth: number,
-    currentYear: number,
-  };
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -39,6 +35,7 @@ export default function Home() {
   const router = useRouter();
   const dialogRef = useRef( null );
   const monologRef = useRef( null );
+  const blogRef = useRef(null);
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).home );
   const [messageApi, contextHolder] = message.useMessage();
   const [ selectedCat, setSelectedCat ] = useState("all");
@@ -107,6 +104,23 @@ export default function Home() {
       "Als Nutzer spezifizierst du einfach den gewünschten Inhalt oder den Hauptzweck deiner E-Mail, zum Beispiel eine Terminanfrage, ein Update für "+
       "ein Projekt oder eine Rückmeldung zu einer Anfrage. Basierend auf deinen Angaben generiert Siteware.Mail dann einen professionellen und "+
       "kohärenten E-Mail-Text, der genau auf deine Bedürfnisse zugeschnitten ist.",
+      target: () => monologRef.current,
+      nextButtonProps: {
+        children: (
+          "Weiter"
+        )
+      },
+      prevButtonProps: {
+        children: (
+          "Zurück"
+        )
+      }
+    },
+    {
+      title: "Blogbeitrag erzeugen",
+      description: "Die Funktion \"Blogbeitrag erzeugen\" dient dazu, voll automatisch fesselnde Blogbeiträge zu verfassen. "+
+      "Nachdem du das Thema des Blogtexts sowie individuelle Parameter festgelegt hast, generiert Siteware.Mail automatisch einen professionellen und "+
+      "ansprechenden Blogtext, ganz nach Deinen Vorstellungen.",
       target: () => monologRef.current,
       nextButtonProps: {
         children: (

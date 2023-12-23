@@ -34,7 +34,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           data.style != undefined &&
           data.length != undefined &&
           data.company != undefined
-        ){
+      ){
 
         // Retrieve the template for prompts from the database
         const templatereq = await getDocument( "Settings", "Prompts" );

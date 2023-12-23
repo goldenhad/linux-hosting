@@ -16,6 +16,7 @@ import updateData from "../../firebase/data/updateData";
 import axiosTime from "axios-time";
 import { useRouter } from "next/router";
 import { encode } from "gpt-tokenizer";
+import FatButton from "../../components/FatButton";
 
 const { TextArea } = Input;
 axiosTime( axios );
@@ -274,9 +275,9 @@ export default function Blog( props: InitialProps ) {
         let blogObj = "";
         
         try{
-            blogObj = JSON.stringify( cookieobject );
+          blogObj = JSON.stringify( cookieobject );
         }catch( e ){
-            blogObj = JSON.stringify( blogBasicState );
+          blogObj = JSON.stringify( blogBasicState );
         }
 
         let encContent = "";
@@ -544,7 +545,10 @@ export default function Blog( props: InitialProps ) {
                 }
               </div>
               <div ref={generateRef} className={styles.generatebuttonrow}>
-                <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>Blogbeitrag generieren</Button>
+                <FatButton
+                  isSubmitButton={true}
+                  disabled={formDisabled || quotaOverused}
+                  text="Blogbeitrag generieren" />
               </div>
             
             </div>
@@ -596,7 +600,7 @@ export default function Blog( props: InitialProps ) {
               <Button onClick={() => {
                 router.push( "/" ) 
               }} icon={<ArrowLeftOutlined />}></Button>
-              <h1>Willkommen zurück, {handleEmptyString( user.firstname )}</h1>
+              <div className={styles.msg}>Willkommen zurück, {handleEmptyString( user.firstname )}</div>
             </div>
             <Divider className={styles.welcomeseperator} />
           </div>
@@ -627,12 +631,12 @@ export default function Blog( props: InitialProps ) {
             </Card>
             <div className={styles.formfootercontainer}>
               <div className={styles.generatebuttonrow}>
-                <Button className={styles.backbutton} onClick={() => {
+                <FatButton onClick={() => {
                   cancleController.abort();
                   setShowAnswer( false );
                   setTokenCountVisible(false);
                   setCancleController(new AbortController);
-                }} type='primary'>Zurück</Button>
+                }} text="Zurück" />
               </div>
             </div>
           </div>

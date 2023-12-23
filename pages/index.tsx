@@ -12,9 +12,6 @@ import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
 import { Service } from "../firebase/types/Service";
 
 
-export interface InitialProps {
-}
-
 export const getServerSideProps: GetServerSideProps = async () => {
   const datum = new Date();
 
@@ -35,7 +32,6 @@ export default function Home() {
   const router = useRouter();
   const dialogRef = useRef( null );
   const monologRef = useRef( null );
-  const blogRef = useRef(null);
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).home );
   const [messageApi, contextHolder] = message.useMessage();
   const [ selectedCat, setSelectedCat ] = useState("all");

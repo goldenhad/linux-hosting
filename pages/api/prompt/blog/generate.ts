@@ -71,7 +71,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
               messages: [
                 {
                   role: "system",
-                  content: "Du bist ein Assistent zum Erstellen von Blog Beiträgen. Nutzer geben dir Informationen zu sich und ihrem Schreibstil, du erzeugst daraus einen Blockbeitrag."
+                  content: "Du bist ein Assistent zum Erstellen von Blog Beiträgen. Nutzer geben dir Informationen zu sich und ihrem Schreibstil,"+
+                  "du erzeugst daraus einen Blockbeitrag."
                 },
                 {
                   role: "user",

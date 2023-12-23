@@ -29,12 +29,9 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       const data = req.body;
 
       // Check if required data fields are present in the request
-      if( data.name != undefined &&
-          data.personal != undefined &&
-          data.content != undefined &&
+      if( data.content != undefined &&
           data.order != undefined &&
           data.style != undefined &&
-          data.emotions != undefined &&
           data.length != undefined &&
           data.company != undefined
         ){
@@ -50,13 +47,10 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           // Generate a blog prompt using the provided data
           const prompt = parseBlogPrompt(
             template.blog,
-            data.name,
             data.company,
-            data.personal,
             data.content,
             data.style,
             data.order,
-            data.emotions,
             data.length
           );
 

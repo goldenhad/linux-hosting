@@ -205,7 +205,7 @@ export default function Home() {
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>
-          <div className={styles.greeting}>Willkommen {user.firstname}test</div>
+          <div className={styles.greeting}>Willkommen {user.firstname}</div>
         </div>
 
         <div className={styles.dividerrow}>

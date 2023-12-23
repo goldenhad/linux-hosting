@@ -438,7 +438,7 @@ export default function Blog( props: InitialProps ) {
         return(
           <>
             <div className={styles.userinputform}>
-              <Card title={"Eine neuer Blogbeitrag"} className={styles.userinputcardmain}>
+              <Card title={"Ein neuer Blogbeitrag"} className={styles.userinputcardmain}>
                 <div ref={profileRef}>
                   <Form.Item
                     className={styles.formpart}
@@ -476,7 +476,7 @@ export default function Blog( props: InitialProps ) {
                       }
                     ]}
                   >
-                    <TextArea className={styles.forminput} rows={10} placeholder="Formuliere kurz den Inhalt der E-Mail?" disabled={formDisabled || quotaOverused}/>
+                    <TextArea className={styles.forminput} rows={10} placeholder="Formuliere kurz den Inhalt des Blogbeitrags!" disabled={formDisabled || quotaOverused}/>
                   </Form.Item>
                 </div>
               </Card>
@@ -544,7 +544,7 @@ export default function Blog( props: InitialProps ) {
                 }
               </div>
               <div ref={generateRef} className={styles.generatebuttonrow}>
-                <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>E-Mail generieren</Button>
+                <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>Blogbeitrag generieren</Button>
               </div>
             
             </div>
@@ -619,7 +619,7 @@ export default function Blog( props: InitialProps ) {
                 }}
                 >
                   <Icon component={Clipboard} className={styles.clipboardicon} viewBox='0 0 22 22' />
-                  In die Zwischenlage
+                  In die Zwischenablage
                 </div>
               }
             >

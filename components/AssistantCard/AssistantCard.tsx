@@ -30,7 +30,7 @@ const AssistantCard = ( props: {
           </div>
           <div className={styles.servicetitle}>{props.title}</div>
         </div>
-        <Paragraph className={styles.servicedescription} ellipsis={ { rows: 4, expandable: true, symbol: 'more' }}>
+        <Paragraph className={styles.servicedescription} ellipsis={ { rows: 4, expandable: true, symbol: "..." }}>
           {props.description}
         </Paragraph>
       </Card>

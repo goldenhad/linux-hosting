@@ -1,3 +1,4 @@
+import { getAnalytics } from "firebase/analytics";
 import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -17,3 +18,10 @@ const firebaseConfig = {
 export const firebase_app = getApps().length === 0 ? initializeApp( firebaseConfig ) : getApps()[0];
 export const db = getFirestore( firebase_app );
 export const drive = getStorage( firebase_app );
+
+let windowtest = null;
+if(typeof window !== "undefined"){
+  windowtest = getAnalytics(firebase_app);
+}
+
+export const analytics = windowtest;

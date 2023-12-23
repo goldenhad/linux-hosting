@@ -6,7 +6,7 @@ import { GetServerSideProps } from "next";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Order } from "../../firebase/types/Company";
-import { convertToCurrency } from "../../helper/architecture";
+import { convertToCurrency, normalizeTokens } from "../../helper/architecture";
 import updateData from "../../firebase/data/updateData";
 import { mailAmountMapping, mailSavingMapping, mailPriceMapping } from "../../helper/price";
 
@@ -32,7 +32,7 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 
 export default function Upgrade( props: InitialProps ) {
   const context = useAuthContext();
-  const { user, company, role, invoice_data } = context;
+  const { user, company, invoice_data } = context;
   const [ tokenstobuy, setTokenstobuy ] = useState( 0 );
   const { push } = useRouter();
   const router = useRouter();
@@ -79,6 +79,8 @@ export default function Upgrade( props: InitialProps ) {
         invoiceId: `SM${invoice_data.number_offset + nextInvoiceNumber}`
       }
 
+      console.log(newOrder);
+
       currentOrders.push( newOrder );
 
       await updateData( "Company", user.Company, { orders: currentOrders } );
@@ -89,7 +91,7 @@ export default function Upgrade( props: InitialProps ) {
   }
 
   const calculateTokens = () => {
-    return Math.round( ( mailPriceMapping[tokenstobuy]/( 0.03 * 6 ) )*3000 );
+    return parseFloat((mailPriceMapping[tokenstobuy]/( 0.03 * 6 ) *3000).toFixed(2));
   }
 
   const calculatePricePerMail = () => {
@@ -137,7 +139,7 @@ export default function Upgrade( props: InitialProps ) {
           </div>
           <Card className={styles.quoatacard} bordered={true}>
             <div className={styles.tokenrow}>
-              <div className={styles.tokens}>{parseFloat( ( calculateTokens()/1000 ).toFixed( 0 ) )}</div>
+              <div className={styles.tokens}>{normalizeTokens(calculateTokens())}</div>
               <div className={styles.tokeninfo}>Anzahl Credits</div>
             </div>
             <Form>
@@ -180,7 +182,7 @@ export default function Upgrade( props: InitialProps ) {
 
               <div className={styles.buybutton}>
                 <Button onClick={() => {
-                  router.push( ( role.isCompany )? "/company" : "/usage" )
+                  router.push( "usage" )
                 }} className={styles.buynow}>Zurück zur Übersicht</Button>
               </div>
             </div>

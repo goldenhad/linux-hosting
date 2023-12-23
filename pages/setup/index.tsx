@@ -38,6 +38,13 @@ export default function Setup(){
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [] )
 
+  /*   useEffect(() => {
+    const timer = setTimeout(() => {
+      router.reload();
+      console.log("reloaded")
+    }, 30000);
+    return () => clearTimeout(timer);
+  }, []); */
 
   /**
    * Returns the steps used for the setup depentend on the role of the current user
@@ -595,7 +602,6 @@ export default function Setup(){
           </div>
         </div>
       </div>
-      <div className={styles.copyrightfooter}>© Siteware.Mail 2023</div>
     </div>
   );
 }

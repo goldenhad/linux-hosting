@@ -45,6 +45,7 @@ import {
 import { User } from "../../firebase/types/User";
 import { InvitedUser } from "../../firebase/types/Company";
 import { getImageUrl } from "../../firebase/drive/upload_file";
+import { isMobile } from "react-device-detect";
 const { TextArea } = Input;
 
 ChartJS.register(
@@ -420,10 +421,10 @@ export default function Company( props: InitialProps ) {
               name="companyname"
               className={styles.formpart}
             >
-              <Input className={styles.forminput} style={{ width: "50%" }} placeholder="Name der Firma..." />
+              <Input className={styles.forminput} placeholder="Name der Firma..." />
             </Form.Item>
 
-            <Space direction='horizontal' wrap>
+            <div className={styles.addressrow}>
               <Form.Item
                 label="Straße"
                 name="companystreet"
@@ -464,7 +465,7 @@ export default function Company( props: InitialProps ) {
                   style={{ width: 150 }}
                 />
               </Form.Item>
-            </Space>
+            </div>
 
             <div ref={backgroundRef}>
               <Form.Item
@@ -585,130 +586,251 @@ export default function Company( props: InitialProps ) {
     }
   }
 
+  let usercolumns = [];
 
-  const usercolumns = [
-    {
-      title: "Mitarbeiter",
-      dataIndex: "member",
-      key: "member",
-      render: ( _, obj, idx ) => {
-        return(
-          <div className={styles.memberprofile}>
-            <div className={styles.avatarcontainer}>
-              <Avatar
-                size={40}
-                style={{ backgroundColor: "#f0f0f2", color: "#474747" }}
-                src={userTableData[idx].profilepicture}
-              >
-                <>{handleEmptyString( obj.firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( obj.lastname ).toUpperCase().charAt( 0 )}</>
-              </Avatar>
-            </div>
-            <div className={styles.namecontainer}>
-              <div>{obj.firstname + " " + obj.lastname}</div>
-              <div className={styles.rolecontainer}>{getRoleName( obj.Role )}</div>
-              <div className={styles.usernamecontainer}>{displayUserName( obj.username, obj.wasInvited )}</div>
-            </div>
-          </div>
-        );
-      }
-    },
-    {
-      title: "Credits diesen Monat",
-      dataIndex: "usedCredits",
-      key: "usedCredits",
-      render: ( _, obj ) => {
-        let iconToDisplay = <></>;
-        let colorToDisplay = "#00000";
-
-        if( obj.username ){
-          const usageidx = obj.usedCredits.findIndex( ( val ) => {
-            return val.month == props.Data.currentMonth && val.year == props.Data.currentYear;
-          } );
-
-          const lastUsageIdx = obj.usedCredits.findIndex( ( val ) => {
-            let yearToSearch = props.Data.currentYear;
-            let monthToSearch = props.Data.currentMonth - 1;
-            if( val.month == 1 ){
-              yearToSearch = yearToSearch - 1;
-              monthToSearch = 1;
+  if(isMobile){
+    usercolumns = [
+      {
+        title: "Mitarbeiter",
+        dataIndex: "member",
+        key: "member",
+        render: ( _, obj, idx ) => {
+          let iconToDisplay = <></>;
+          let colorToDisplay = "#00000";
+  
+          const Stats = () => {
+            if( obj.username ){
+              const usageidx = obj.usedCredits.findIndex( ( val ) => {
+                return val.month == props.Data.currentMonth && val.year == props.Data.currentYear;
+              } );
+    
+              const lastUsageIdx = obj.usedCredits.findIndex( ( val ) => {
+                let yearToSearch = props.Data.currentYear;
+                let monthToSearch = props.Data.currentMonth - 1;
+                if( val.month == 1 ){
+                  yearToSearch = yearToSearch - 1;
+                  monthToSearch = 1;
+                }
+    
+                return val.month == monthToSearch && val.year == yearToSearch;
+              } );
+    
+              if( usageidx != -1 && lastUsageIdx != -1 ) {
+                const currentvalue = obj.usedCredits[usageidx].amount;
+                const valueBefore = obj.usedCredits[lastUsageIdx].amount;
+    
+                if( valueBefore < currentvalue ){
+                  iconToDisplay = <ArrowUpOutlined />;
+                  colorToDisplay = "#3f8600";
+                }else if( valueBefore > currentvalue ){
+                  iconToDisplay = <ArrowDownOutlined />;
+                  colorToDisplay = "#cf1322";
+                }
+              }else{
+                iconToDisplay = <></>;
+                colorToDisplay = "#00000";
+              }
+    
+              let creditusage = 0;
+              if(obj.usedCredits[usageidx]){
+                creditusage = parseFloat((obj.usedCredits[usageidx].amount / 1000).toFixed(2));
+              }
+    
+              return (
+                <Statistic
+                  value={creditusage}
+                  precision={2}
+                  valueStyle={{ color: colorToDisplay, fontSize: 14 }}
+                  prefix={iconToDisplay}
+                  suffix="Credits"
+                  groupSeparator="."
+                  decimalSeparator=","
+                />
+              )
+            }else{          
+              return (
+                <Statistic
+                  value={0.00}
+                  precision={2}
+                  valueStyle={{ color: colorToDisplay, fontSize: 14 }}
+                  prefix={iconToDisplay}
+                  suffix="Credits"
+                  groupSeparator="."
+                  decimalSeparator=","
+                />
+              )
             }
-
-            return val.month == monthToSearch && val.year == yearToSearch;
-          } );
-
-          if( usageidx != -1 && lastUsageIdx != -1 ) {
-            const currentvalue = obj.usedCredits[usageidx].amount;
-            const valueBefore = obj.usedCredits[lastUsageIdx].amount;
-
-            if( valueBefore < currentvalue ){
-              iconToDisplay = <ArrowUpOutlined />;
-              colorToDisplay = "#3f8600";
-            }else if( valueBefore > currentvalue ){
-              iconToDisplay = <ArrowDownOutlined />;
-              colorToDisplay = "#cf1322";
-            }
-          }else{
-            iconToDisplay = <></>;
-            colorToDisplay = "#00000";
           }
 
-          let creditusage = 0;
-          if(obj.usedCredits[usageidx]){
-            creditusage = parseFloat((obj.usedCredits[usageidx].amount / 1000).toFixed(2));
+          const UserActions = () => {
+            if( obj.Role != "Company-Admin" && obj.id != login.uid ){
+              return ( <div className={styles.useractions}>
+                <Tooltip title={"Mitarbeiter bearbeiten"}>
+                  <EditOutlined onClick={() => {
+                    setMemberToEdit( idx );
+                    setEditMemberModal( true )
+                  }}
+                  />
+                </Tooltip>
+                <Tooltip title={"Mitarbeiter löschen"}>
+                  <DeleteOutlined onClick={() => {
+                    setMemberToDelete( idx );
+                    setDeleteMemberModal( true )
+                  }}/>
+                </Tooltip>
+                
+              </div> );
+            }
           }
-
-          return (
-            <Statistic
-              value={creditusage}
-              precision={2}
-              valueStyle={{ color: colorToDisplay, fontSize: 14 }}
-              prefix={iconToDisplay}
-              suffix="Credits"
-              groupSeparator="."
-              decimalSeparator=","
-            />
-          )
-        }else{          
-          return (
-            <Statistic
-              value={0}
-              precision={0}
-              valueStyle={{ color: colorToDisplay, fontSize: 14 }}
-              prefix={iconToDisplay}
-              suffix="Credits"
-              groupSeparator="."
-              decimalSeparator=","
-            />
-          )
+          
+          return(
+            <div className={styles.memberprofile}>
+              <div className={styles.avatarcontainer}>
+                <Avatar
+                  size={40}
+                  style={{ backgroundColor: "#f0f0f2", color: "#474747" }}
+                  src={userTableData[idx].profilepicture}
+                >
+                  <>{handleEmptyString( obj.firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( obj.lastname ).toUpperCase().charAt( 0 )}</>
+                </Avatar>
+              </div>
+              <div className={styles.namecontainer}>
+                <div>{obj.firstname + " " + obj.lastname}</div>
+                <div className={styles.rolecontainer}>{getRoleName( obj.Role )}</div>
+                <div className={styles.usernamecontainer}>{displayUserName( obj.username, obj.wasInvited )}</div>
+                <Stats />
+                <UserActions />
+              </div>
+            </div>
+          );
         }
       }
-    },
-    {
-      title: "Aktionen",
-      dataIndex: "actions",
-      key: "actions",
-      render: ( _, obj: User & { id: string }, indx: number ) => { 
-        if( obj.Role != "Company-Admin" && obj.id != login.uid ){
-          return ( <div className={styles.useractions}>
-            <Tooltip title={"Mitarbeiter bearbeiten"}>
-              <EditOutlined onClick={() => {
-                setMemberToEdit( indx );
-                setEditMemberModal( true )
-              }}
+    ];
+  }else{
+    usercolumns = [
+      {
+        title: "Mitarbeiter",
+        dataIndex: "member",
+        key: "member",
+        render: ( _, obj, idx ) => {
+          return(
+            <div className={styles.memberprofile}>
+              <div className={styles.avatarcontainer}>
+                <Avatar
+                  size={40}
+                  style={{ backgroundColor: "#f0f0f2", color: "#474747" }}
+                  src={userTableData[idx].profilepicture}
+                >
+                  <>{handleEmptyString( obj.firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( obj.lastname ).toUpperCase().charAt( 0 )}</>
+                </Avatar>
+              </div>
+              <div className={styles.namecontainer}>
+                <div>{obj.firstname + " " + obj.lastname}</div>
+                <div className={styles.rolecontainer}>{getRoleName( obj.Role )}</div>
+                <div className={styles.usernamecontainer}>{displayUserName( obj.username, obj.wasInvited )}</div>
+              </div>
+            </div>
+          );
+        }
+      },
+      {
+        title: "Credits diesen Monat",
+        dataIndex: "usedCredits",
+        key: "usedCredits",
+        render: ( _, obj ) => {
+          let iconToDisplay = <></>;
+          let colorToDisplay = "#00000";
+  
+          if( obj.username ){
+            const usageidx = obj.usedCredits.findIndex( ( val ) => {
+              return val.month == props.Data.currentMonth && val.year == props.Data.currentYear;
+            } );
+  
+            const lastUsageIdx = obj.usedCredits.findIndex( ( val ) => {
+              let yearToSearch = props.Data.currentYear;
+              let monthToSearch = props.Data.currentMonth - 1;
+              if( val.month == 1 ){
+                yearToSearch = yearToSearch - 1;
+                monthToSearch = 1;
+              }
+  
+              return val.month == monthToSearch && val.year == yearToSearch;
+            } );
+  
+            if( usageidx != -1 && lastUsageIdx != -1 ) {
+              const currentvalue = obj.usedCredits[usageidx].amount;
+              const valueBefore = obj.usedCredits[lastUsageIdx].amount;
+  
+              if( valueBefore < currentvalue ){
+                iconToDisplay = <ArrowUpOutlined />;
+                colorToDisplay = "#3f8600";
+              }else if( valueBefore > currentvalue ){
+                iconToDisplay = <ArrowDownOutlined />;
+                colorToDisplay = "#cf1322";
+              }
+            }else{
+              iconToDisplay = <></>;
+              colorToDisplay = "#00000";
+            }
+  
+            let creditusage = 0;
+            if(obj.usedCredits[usageidx]){
+              creditusage = parseFloat((obj.usedCredits[usageidx].amount / 1000).toFixed(2));
+            }
+  
+            return (
+              <Statistic
+                value={creditusage}
+                precision={2}
+                valueStyle={{ color: colorToDisplay, fontSize: 14 }}
+                prefix={iconToDisplay}
+                suffix="Credits"
+                groupSeparator="."
+                decimalSeparator=","
               />
-            </Tooltip>
-            <Tooltip title={"Mitarbeiter löschen"}>
-              <DeleteOutlined onClick={() => {
-                setMemberToDelete( indx );
-                setDeleteMemberModal( true )
-              }}/>
-            </Tooltip>
-            
-          </div> );
+            )
+          }else{          
+            return (
+              <Statistic
+                value={0}
+                precision={2}
+                valueStyle={{ color: colorToDisplay, fontSize: 14 }}
+                prefix={iconToDisplay}
+                suffix="Credits"
+                groupSeparator="."
+                decimalSeparator=","
+              />
+            )
+          }
+        }
+      },
+      {
+        title: "Aktionen",
+        dataIndex: "actions",
+        key: "actions",
+        render: ( _, obj: User & { id: string }, indx: number ) => { 
+          if( obj.Role != "Company-Admin" && obj.id != login.uid ){
+            return ( <div className={styles.useractions}>
+              <Tooltip title={"Mitarbeiter bearbeiten"}>
+                <EditOutlined onClick={() => {
+                  setMemberToEdit( indx );
+                  setEditMemberModal( true )
+                }}
+                />
+              </Tooltip>
+              <Tooltip title={"Mitarbeiter löschen"}>
+                <DeleteOutlined onClick={() => {
+                  setMemberToDelete( indx );
+                  setDeleteMemberModal( true )
+                }}/>
+              </Tooltip>
+              
+            </div> );
+          }
         }
       }
-    }
-  ];
+    ];
+  }
 
   const inviteUser = async ( values ) => {
     try{
@@ -743,8 +865,7 @@ export default function Company( props: InitialProps ) {
 
 
   const getRoleSelect = () => {
-
-    if( memberToEdit ){
+    if( memberToEdit != undefined ){
       const obj = userTableData[memberToEdit];
 
       let rolename = "Mailagent";
@@ -800,10 +921,13 @@ export default function Company( props: InitialProps ) {
           <Card title={"Mitarbeiter"} bordered={true}>
             <Table
               loading={userTableLoading}
-              dataSource={[...userTableData]} columns={usercolumns}
+              dataSource={[...userTableData]}
+              columns={usercolumns}
               rowKey={( record: User & { id: string } ) => {
                 return record.id
-              }}/>
+              }}
+              scroll={{ x: true }}
+            />
             <div className={styles.inviteuserrow}>
               <Button ref={inviteRef} type='primary' onClick={() => {
                 setInviteUserModalOpen( true )

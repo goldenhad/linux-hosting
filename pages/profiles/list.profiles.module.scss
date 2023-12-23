@@ -7,13 +7,24 @@
 }
 
 
+.deletecontainer{
+    display: flex;
+    flex-direction: column;
+    
+    
+}
+
 .finishformrow{
     display: flex;
+    width: 100%;
     flex-direction: row;
     justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
 
     button {
-        width: 360px;
+        width: 200px;
         height: 44px;
         font-weight: 700;
         font-size: 16px;
@@ -91,6 +102,28 @@
 }
 
 
+
+@media (max-width: 992px){
+    .profilerow{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 16px;
+    }
+}
+
+@media (min-width: 993px){
+    .profilerow{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 16px;
+    }
+}
+
+
 .addProfileRow{
     display: flex;
     flex-direction: row;
@@ -118,6 +151,7 @@
 .quadform{
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 32px;
 }
 

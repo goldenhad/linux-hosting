@@ -9,13 +9,15 @@ import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { Profile } from "../../firebase/types/Profile";
 import { doc, updateDoc } from "firebase/firestore";
-import { handleEmptyString, handleUndefinedTour, listToOptions } from "../../helper/architecture";
+import { handleEmptyString, handleUndefinedTour, listToOptions, normalizeTokens } from "../../helper/architecture";
 import Info from "../../public/icons/info.svg";
 import Clipboard from "../../public/icons/clipboard.svg";
 import updateData from "../../firebase/data/updateData";
 import axiosTime from "axios-time";
 import { useRouter } from "next/router";
 import { encode } from "gpt-tokenizer";
+import { isMobile } from "react-device-detect";
+import FatButton from "../../components/FatButton";
 
 const { TextArea } = Input;
 axiosTime( axios );
@@ -219,40 +221,48 @@ export default function Dialogue( props: InitialProps ) {
     }
   ];
 
-
-  useEffect( () => {
-    const updateField = ( field: string, value: string ) => {
-      if( value && value != "" ){
-        form.setFieldValue( field, value );
-      }
+  const updateField = ( field: string, value: string ) => {
+    if( value && value != "" ){
+      form.setFieldValue( field, value );
     }
+  }
 
-    const decryptAndParse = async () => {
-      let parsed = dialogBasicState;
-      try{
-        const decRequest = await axios.post( "/api/prompt/decrypt", {
-          ciphertext: user.lastState.dialog,
-          salt: user.salt
-        } )
+  const decryptAndParse = async (profiles) => {
+    let parsed = dialogBasicState;
+    try{
+      const decRequest = await axios.post( "/api/prompt/decrypt", {
+        ciphertext: user.lastState.dialog,
+        salt: user.salt
+      } )
 
-        const decryptedText = decRequest.data.message;
-        parsed = JSON.parse( decryptedText );
-        //console.log(parsed);
-      }catch( e ){
-        //console.log(e);
+      const decryptedText = decRequest.data.message;
+      parsed = JSON.parse( decryptedText );
+      //console.log(parsed);
+
+      // Check if the last profile was deleted
+      const profile = profiles.find( ( singleProfile: Profile ) => {
+        return singleProfile.name == parsed.profile;
+      });
+
+      console.log(profile);
+      let profilename = "Hauptprofil";
+
+      // If the last used profile is gone just use the first profile ("Hauptprofil")
+      if(profile){
+        profilename = profile.name;
       }
 
-      updateField( "profile", parsed.profile );
+      updateField( "profile", profilename );
       updateField( "dialog", parsed.dialog );
       updateField( "continue", parsed.continue );
       updateField( "address", parsed.address );
       updateField( "order", parsed.order );
       updateField( "length", parsed.length );
-    }
 
-    decryptAndParse();
-    // eslint-disable-next-line
-  }, [] );
+    }catch( e ){
+      console.log(e);
+    }
+  }
 
 
   useEffect( () => {
@@ -276,12 +286,15 @@ export default function Dialogue( props: InitialProps ) {
       }
 
       setDecryptedProfiles( profilearr );
+
+      await decryptAndParse(profilearr);
     }
 
     if( user.profiles ){
       decryptProfiles();
     }
-  }, [user.profiles, user.salt] );
+    // eslint-disable-next-line
+  }, [] );
 
 
   useEffect( () => {
@@ -533,7 +546,7 @@ export default function Dialogue( props: InitialProps ) {
                       }
                     ]}
                   >
-                    <TextArea className={styles.forminput} rows={10} placeholder="Bisheriger Dialog..." disabled={formDisabled || quotaOverused}/>
+                    <TextArea className={styles.forminput} rows={(isMobile)? 5: 10} placeholder="Bisheriger Dialog..." disabled={formDisabled || quotaOverused}/>
                   </Form.Item>
                 </div>
 
@@ -551,7 +564,7 @@ export default function Dialogue( props: InitialProps ) {
                   >
                     <TextArea
                       className={styles.forminput}
-                      rows={2}
+                      rows={(isMobile)? 5: 2}
                       placeholder="Formuliere kurz, wie der Dialog fortgesetzt werden soll und was du damit erreichen willst?"
                       disabled={formDisabled || quotaOverused}/>
                   </Form.Item>
@@ -641,7 +654,10 @@ export default function Dialogue( props: InitialProps ) {
                 }
               </div>
               <div ref={generateRef} className={styles.generatebuttonrow}>
-                <Button className={styles.submitbutton} htmlType='submit' type='primary' disabled={formDisabled || quotaOverused}>Antwort generieren</Button>
+                <FatButton
+                  isSubmitButton={true}
+                  disabled={formDisabled || quotaOverused}
+                  text="Antwort generieren" />
               </div>
             </div>
           </>
@@ -657,7 +673,7 @@ export default function Dialogue( props: InitialProps ) {
         return(
           <div className={styles.tokeninfo}>
             <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' />
-            Die Anfrage hat {parseFloat( tokens )/1000} Credits verbraucht
+            Die Anfrage hat {normalizeTokens(parseFloat( tokens ))} Credits verbraucht
           </div>
         );
       }
@@ -692,7 +708,7 @@ export default function Dialogue( props: InitialProps ) {
               <Button onClick={() => {
                 router.push( "/" ) 
               }} icon={<ArrowLeftOutlined />}></Button>
-              <h1>Willkommen zurück, {handleEmptyString( user.firstname )}</h1>
+              <div className={styles.msg}>Willkommen zurück, {handleEmptyString( user.firstname )}</div>
             </div>
             <Divider className={styles.welcomeseperator} />
           </div>
@@ -714,18 +730,18 @@ export default function Dialogue( props: InitialProps ) {
                   navigator.clipboard.writeText( answer ); messageApi.success( "Antwort in die Zwischenablage kopiert." );
                 }}
               >
-                <Icon component={Clipboard} className={styles.clipboardicon} viewBox='0 0 22 22' />In die Zwischenlage</div>}>
+                <Icon component={Clipboard} className={styles.clipboardicon} viewBox='0 0 22 22' />In die Zwischenablage</div>}>
               
               <Answer />
             </Card>
             <div className={styles.formfootercontainer}>
               <div className={styles.generatebuttonrow}>
-                <Button className={styles.backbutton} onClick={() => {
+                <FatButton onClick={() => {
                   cancleController.abort();
                   setShowAnswer( false );
                   setTokenCountVisible(false);
                   setCancleController(new AbortController);
-                }} type='primary'>Zurück</Button>
+                }} text="Zurück" />
               </div>
             </div>
           </div>

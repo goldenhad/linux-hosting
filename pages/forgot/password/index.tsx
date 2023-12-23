@@ -53,7 +53,7 @@ export default function Forgot_Password(){
           <Result
             status="success"
             title={<div className={styles.passwordresetnotice}>Neues Passwort, Neues Glück – Dein Reset-Link ist Unterwegs!</div>}
-            subTitle={<div className={styles.passwordresetsubtitle}>Checke deine E-Mails – wir haben dir den Link zum Zurücksetzen deines Passworts geschickt! 🚀</div>}
+            subTitle={<div className={styles.passwordresetsubtitle}>Checke deine E-Mails – wir haben dir einen Link zum Zurücksetzen deines Passworts geschickt! 🚀</div>}
             extra={[
               <div key={0} className={styles.backlink}>
                 <Button type="primary" key="console" href={"/login"}>
@@ -99,7 +99,7 @@ export default function Forgot_Password(){
 
             <Form.Item className={styles.loginbutton}>
               <Button type="primary" htmlType="submit">
-                                Passwort zurücksetzen
+                Passwort zurücksetzen
               </Button>
             </Form.Item>
           </Form>

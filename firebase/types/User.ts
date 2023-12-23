@@ -59,6 +59,9 @@ export type User =  {
     inviteCode: string,
     recommend: RecommendState,
     tour: TourState,
+    services:{
+      favourites: Array<string>
+    }
 }
 
 export const basicUser: User = {
@@ -89,5 +92,8 @@ export const basicUser: User = {
     usage: false,
     profiles: false,
     company: false
+  },
+  services: {
+    favourites: []
   }
 }

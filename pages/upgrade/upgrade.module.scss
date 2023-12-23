@@ -12,8 +12,9 @@
     .cardrow{
         display: flex;
         flex-direction: column;
+        justify-content: center;
         align-items: center;
-        display: 100%;
+        width: 100%;
 
         .headline{
             display: flex;
@@ -29,8 +30,8 @@
         }
 
         .quoatacard{
-            width: 446px;
-            min-width: 400px;
+            width: 80%;
+            max-width: 400px;
             border-radius: 12px;
             flex-direction: column;
             border: 1px  solid rgb(217, 217, 217);
@@ -130,8 +131,10 @@
         }
 
         .buyrow{
-            width: 446px;
+            width: 80%;
+            max-width: 400px;
             margin-top: 32px;
+
             .buybuttonrow{
                 display: flex;
                 flex-direction: column;
@@ -141,14 +144,29 @@
 
                 .buybutton{
                     margin-bottom: 20px;
-                    button {
-                        width: 446px;
-                        height: 44px;
-                        font-weight: 700;
-                        font-size: 16px;
-                        line-height: 24px;
-                        padding: 10px 18px 10px 18px;
-                        font-weight: bold;
+
+                    @media(max-width: 992px){
+                        button {
+                            width: 200px;
+                            height: 44px;
+                            font-weight: 700;
+                            font-size: 16px;
+                            line-height: 24px;
+                            padding: 10px 18px 10px 18px;
+                            font-weight: bold;
+                        }
+                    }
+                    
+                    @media(min-width: 993px){
+                        button {
+                            width: 446px;
+                            height: 44px;
+                            font-weight: 700;
+                            font-size: 16px;
+                            line-height: 24px;
+                            padding: 10px 18px 10px 18px;
+                            font-weight: bold;
+                        }
                     }
                 }
             }

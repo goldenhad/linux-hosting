@@ -1,21 +1,52 @@
+@media (max-width: 992px) {
+    .main{
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding-bottom: 200px;
+        margin-bottom: 200px;
 
-
-.main {
-    display: flex;
-    flex-direction: column;
-    height: 90vh;
-
-    .greetingrow {
-        .greeting {
-            font-size: 32px;
-            font-weight: 700;
-        }
-    
-        .greeting_subtitle{
-            font-size: 24px;
-            font-weight: 700;
+        .greetingrow {
+            width: 100%;
+            
+            .greeting {
+                font-size: large;
+                font-weight: 700;
+                
+            }
+        
+            .greeting_subtitle{
+                font-size: 24px;
+                font-weight: 700;
+            }
         }
     }
+}
+
+@media (min-width: 993px) {
+    .main{
+        display: flex;
+        flex-direction: column;
+        height: 90vh;
+
+        .greetingrow {
+            width: 100%;
+            
+            .greeting {
+                font-size: 32px;
+                font-weight: 700;
+                
+            }
+        
+            .greeting_subtitle{
+                font-size: 24px;
+                font-weight: 700;
+            }
+        }
+    }
+}
+
+.main {
 
     .dividerrow{
         >* {
@@ -27,76 +58,31 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        height: 90vh;
+        height: 100vh;
 
+        @media (max-width: 992px) {
+            .servicelist{
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 32px;
+            }
+        }
 
-        .recommendourapp{
+        @media (min-width: 993px) {
+            .servicelist{
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 32px;
+            }
+        }
+
+        .bannersection{
             display: flex;
             flex-direction: row;
             justify-content: center;
-            gap: 32px;
-    
-            .recommendlove{
-                font-size: 64px;
-                color: #cc2f26;
-            }
-    
-            .recommendexplanation{
-                display: flex;
-                flex-direction: column;
-                text-align: left;
-            
-                .openrecdrawerrow{
-                    margin-top: 20px;
-                    
-                    >button {
-                        width: 100%;
-                    }
-                }
-            }
-        }
-    }
-}
-
-.recommendContent{
-    display: flex;
-    flex-direction: row;
-    gap: 32px;
-    
-    .recommendtext{
-        display: flex;
-        flex-direction: column;
-        width: 60%;
-    }
-
-    .recommendHeadline{
-        margin-bottom: 16px;
-    }
-
-    .recommendLink{
-        overflow-wrap: break-word;
-        text-align: center;
-        margin-top: 32px;
-        margin-bottom: 32px;
-        color: #1677ff;
-
-        &:hover {
-            cursor: pointer;
-            color: #0f4faa;
-        }
-    }
-
-    .recommendqrcode{
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        margin-top: 32px;
-        margin-bottom: 32px;
-        width: 40%;
-
-        .downloadbutton{
-            margin-top: 16px;
         }
     }
 }

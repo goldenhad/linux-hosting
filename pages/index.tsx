@@ -1,16 +1,15 @@
-import { TourProps, Tour, Typography, Button, Divider, Space, Modal, QRCode, Spin, message } from "antd";
+import { TourProps, Tour, Divider, message } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
-import SidebarLayout from "../components/Sidebar/SidebarLayout";
 import { useAuthContext } from "../components/context/AuthContext";
 import { useRouter } from "next/navigation";
 import updateData from "../firebase/data/updateData";
 import { handleUndefinedTour } from "../helper/architecture";
-import { HeartFilled, LoadingOutlined } from "@ant-design/icons";
-import AssistantCard from "../components/AssistantCard";
-import axios from "axios";
-const Paragraph = Typography;
+import AssistantCard from "../components/AssistantCard/AssistantCard";
+import RecommendBox from "../components/RecommendBox/RecommendBox";
+import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
+import { Service } from "../firebase/types/Service";
 
 
 export interface InitialProps {
@@ -32,40 +31,22 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default function Home() {
   const context = useAuthContext();
-  const { login, user } = context;
+  const { login, user, services } = context;
   const router = useRouter();
   const dialogRef = useRef( null );
   const monologRef = useRef( null );
   const blogRef = useRef(null);
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).home );
-  const [recommendModalOpen, setRecommendModalOpen] = useState(false);
-  const [ recommendLink, setRecommendLink ] = useState( "" );
   const [messageApi, contextHolder] = message.useMessage();
+  const [ selectedCat, setSelectedCat ] = useState("all");
+
 
 
   useEffect( () => {
-    if( !user.setupDone ){
+    if( !user.setupDone && user.setupDone != undefined ){
       router.push( "/setup" );
     }
   }, [router, user.setupDone] );
-
-  
-
-  useEffect( () => {
-    /**
-     * Gets the recommend link from the api asynchronously
-     * and sets the corresponding state 
-     */
-    async function getRecommendLink() {
-      const encryptedLink = await axios.post( "/api/recommend", { from: user.Company } );
-      if( encryptedLink.data.message != "" ){
-        setRecommendLink( encryptedLink.data.message );
-      }
-    }
-    
-    getRecommendLink();
-    // eslint-disable-next-line
-  }, [] );
 
 
   const steps: TourProps["steps"] = [
@@ -158,50 +139,56 @@ export default function Home() {
       }
     }
   ];
-  
-  const copyLink = () => {
-    if( recommendLink != "" ){
-      navigator.clipboard.writeText( recommendLink );
-      messageApi.success( "Link in die Zwischenablage kopiert." );
-    }
-  }
 
-  const downloadQRCode = () => {
-    const canvas = document.getElementById( "recommendqrcode" )?.querySelector<HTMLCanvasElement>( "canvas" );
-    if ( canvas ) {
-      const url = canvas.toDataURL( "image/png", 1.0 );
-      const a = document.createElement( "a" );
-      a.download = "siteware_mail_recommend.png";
-      a.href = url;
-      document.body.appendChild( a );
-      a.click();
-      document.body.removeChild( a );
-    }
-  };
+  const AssistantCardList = () => {
+    console.log(services);
+    let servicearr = services;
 
-  const RecommendNotice = () => {
+    if(selectedCat != "all"){
+      if(selectedCat != "favourites"){
+        servicearr = services.filter((singleService: Service) => {
+          return singleService.category == selectedCat;
+        });
+      }else{
+        servicearr = services.filter((singleService: Service) => {
+          if(user.services){
+            return user.services.favourites.includes(singleService.uid);
+          }
+        });
+      }
+    }
+
     return (
-      <div className={styles.recommendourapp}>
-        <div className={styles.recommendlove}>
-          <HeartFilled />
-        </div>
-        <div className={styles.recommendexplanation}>
-          <h3>Du liebst Siteware.Business?</h3>
-          <Paragraph>
-                Empfehle uns weiter und sichere Dir 200 GRATIS E-Mails!
-          </Paragraph>
-          <div className={styles.openrecdrawerrow}>
-            <Button type="primary" onClick={() => {
-              setRecommendModalOpen(true);
-            }}>Jetzt empfehlen</Button>
-          </div>
-        </div>
+      <div className={styles.servicelist}>
+        {servicearr.map((singleService: Service, idx: number) => {
+          return <AssistantCard
+            key={idx}
+            image={singleService.image}
+            title={singleService.title}
+            description={singleService.description}
+            link={singleService.link}
+            fav={user.services?.favourites.includes(singleService.uid)}
+            video={singleService.video}
+            onFav={async () => {
+              const currentfavs = (user.services?.favourites)? user.services.favourites: [];
+              currentfavs.push(singleService.uid);
+              await updateData("User", login.uid, { services: { favourites: currentfavs } });
+            }}
+            onDeFav={async () => {
+              const currentfavs =  user.services.favourites.filter((fservice: string) => {
+                return fservice != singleService.uid
+              })
+              await updateData("User", login.uid, { services: { favourites: currentfavs } });
+            }}
+          />
+        })}
       </div>
     );
   }
 
+
   return (
-    <SidebarLayout context={context}>
+    <HomeSidebarLayout context={context} category={{ value: selectedCat, setter: setSelectedCat }}>
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>
@@ -214,64 +201,13 @@ export default function Home() {
 
         <div className={styles.content}>
           <div className={styles.services}>
-            <Space size={"large"} wrap>
-              <AssistantCard
-                image="/small_logo.png"
-                title="E-Mail Dialog"
-                description="Mit einem Klick generiert unsere KI smarte Antworten zu Deinen bisher empfangenen E-Mail Verlauf."
-                link="/dialog"
-              />
-              <AssistantCard
-                image="/small_logo.png"
-                title="E-Mail erzeugen"
-                description="Gib den Inhalt an, und die KI zaubert Dir eine E-Mail in Deinem Stil – schnell, smart, persönlich!"
-                link="/monolog"
-              />
-              <AssistantCard
-                image="/small_logo.png"
-                title="Blogbeitrag erzeugen"
-                description="Erstelle ansprechende Artikel für Deine Website - mit von Dir bestimmtem Inhalt und Schreibstil."
-                link="/blog"
-              />
-               <AssistantCard
-                image="/small_logo.png"
-                title="Webinhalte generieren"
-                description='Erstelle maßgeschneiderte Inhalte für Deine Internetpräsenz - "Über Uns"-, Leistungsübersichts- und Leistungstexte.'
-                link="/webcontent"
-              />
-            </Space>
+            <AssistantCardList />
           </div>
 
-          <RecommendNotice />
+          <div className={styles.bannersection}><RecommendBox user={user} messageApi={messageApi} /></div>
         </div>
 
-        <Modal title="Lade deine Freunde ein und sichere dir Gratis-Mails!" open={recommendModalOpen} width={800} footer={null} onCancel={() => {
-          setRecommendModalOpen(false);
-        }}>
-          <div className={styles.recommendContent}>
-            <div className={styles.recommendtext}>
-              <h3 className={styles.recommendHeadline}></h3>
-              <Paragraph>
-                Du hast jetzt die Gelegenheit, deine Freunde zu Siteware.Business einzuladen.
-                Für jeden Freund, der sich erfolgreich registriert, schenken wir dir 200 Gratis-Mails als Dankeschön.
-                Teile einfach diesen Link, um deine Freunde einzuladen:
-              </Paragraph>
-              <div className={styles.recommendLink}>
-                {( recommendLink == "" )? <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />: <div onClick={() => {
-                  copyLink()
-                }}>{recommendLink}</div>}
-              </div>
-              <p>Alternativ kannst du auch den QR-Code rechts benutzen und deinen Freunden schicken</p>
-            </div>
-            <div className={styles.recommendqrcode} id="recommendqrcode">
-              <QRCode errorLevel="M" status={( recommendLink == "" )? "loading": undefined} value={recommendLink} bgColor="#fff" />
-              <div className={styles.downloadQRCode}>
-                {/* <FatButton onClick={downloadQRCode} text="Download"/> */}
-                <Button type="link" className={styles.downloadbutton} onClick={downloadQRCode}>Download</Button>
-              </div>
-            </div>
-          </div>
-        </Modal>
+        
 
         <Tour open={open} onClose={async () => {
           const currstate = user.tour;
@@ -280,6 +216,6 @@ export default function Home() {
           setOpen( false );
         }} steps={steps} />
       </div>
-    </SidebarLayout>
+    </HomeSidebarLayout>
   )
 }

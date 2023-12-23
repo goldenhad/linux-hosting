@@ -1,30 +1,33 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
 import { LogoutOutlined } from "@ant-design/icons";
-import Icon from "@ant-design/icons";
+import Icon, { CloseOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Avatar, ConfigProvider, Divider, Drawer, FloatButton, Layout, Menu, Popover } from "antd";
+import { Avatar, ConfigProvider, Divider, Drawer, FloatButton, Layout, List, Menu, Popover } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content, Sider } = Layout;
 import { User, basicUser } from "../../firebase/types/User";
 import { handleEmptyString } from "../../helper/architecture";
-import styles from "./sidebar.module.scss";
+import styles from "./homesidebar.module.scss";
 import Home from "../../public/icons/home.svg";
-import Nav from "../../public/icons/nav.svg";
 import Profiles from "../../public/icons/profiles.svg";
 import Help from "../../public/icons/help.svg";
-import CookieBanner from "../CookieBanner/CookieBanner";
+import Nav from "../../public/icons/nav.svg";
 import Stats from "../../public/icons/stat.svg";
 import Settings from "../../public/icons/settings.svg";
+import CookieBanner from "../CookieBanner/CookieBanner";
 import { getImageUrl } from "../../firebase/drive/upload_file";
 import { isMobile } from "react-device-detect";
-
 
 type MenuItem = Required<MenuProps>["items"][number];
 
 
 
-const SidebarLayout = ( props: { children: ReactNode, context: {user: User, login, role, profile}} ) => {
+const HomeSidebarLayout = ( props: { 
+  children: ReactNode,
+  context: {user: User, login, role, profile}
+  category: { value: string, setter: Dispatch<SetStateAction<string>>}
+}) => {
   const [collapsed, setCollapsed] = useState( true );
   // eslint-disable-next-line
   const [ collapseWidth, setCollapseWidth ] = useState( 80 );
@@ -35,7 +38,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
   const router = useRouter();
   // eslint-disable-next-line
   const [ version, setVersion ] = useState( "" );
-
   const [ sidebaropen, setSidebarOpen ] = useState(false);
 
   useEffect( () => {
@@ -47,7 +49,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     setProfileImage();
   }, [props.context.login] );
 
-
+  
   useEffect(() => {
     if(isMobile){
       setBreakpoint("lg");
@@ -61,7 +63,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
       console.log("desktop")
     }
   }, []);
-
 
   function getItem( label: React.ReactNode, key: React.Key, check: () => boolean, icon?: React.ReactNode, children?: MenuItem[] ): MenuItem {
     if( check() ){
@@ -104,10 +105,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
       return "1";
     case "/monolog":
       return "1";
-    case "/blog":
-        return "1";
-    case "/webcontent":
-      return "1";
     case "/company":
       return "5";
     case "/usage":
@@ -145,7 +142,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
           >
             {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
           </Avatar>
-          <div className={styles.profileinfo}>Mein Account</div>
+          <div className={styles.profileinfo}>{handleEmptyString( getUser().firstname )} {handleEmptyString( getUser().lastname )}</div>
         </div>
       </Link>
       <Divider className={styles.menudivider} />
@@ -157,6 +154,12 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
       </div>
     </div>
   );
+  
+  const isselected = (name: string) => {
+    if(name == props.category.value){
+      return styles.selectedcat;
+    }
+  }
 
   const MobileHeader = () => {
     if(isMobile){
@@ -178,7 +181,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
       );
     }
   }
-  
+
   if(isMobile){
     return (
       <ConfigProvider theme={{
@@ -197,10 +200,9 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
         <Layout className={styles.layout} hasSider={!isMobile}>
           <MobileHeader />
           <Drawer
-            style={{ backgroundColor: "#101828" }}
-            bodyStyle={{ backgroundColor: "#101828", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", width: 80, borderColor: "#101828" }}
+            bodyStyle={{ backgroundColor: "#101828", padding: 0, display: "flex", flexDirection: "row", alignItems: "center" }}
             placement="left"
-            width={80}
+            width={"100%"}
             onClose={() => {
               setSidebarOpen(false)
             }}
@@ -230,10 +232,42 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                 </div>
               </div>
             </div>
+            <div className={styles.homesidebarcontainer_mobile}>
+              <div className={styles.homesidebar}>
+                <div className={styles.title}>Assistenten</div>
+                <List className={styles.assistantlist} split={false}>
+                  <List.Item className={`${styles.assistantlink} ${isselected("all")}`} onClick={() => {
+                    props.category.setter("all");
+                    setSidebarOpen(false);
+                  }}>
+                    <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Alle</div>
+                  </List.Item>
+                  <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} onClick={() => {
+                    props.category.setter("favourites");
+                    setSidebarOpen(false);
+                  }}>
+                    <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Favoriten</div>
+                  </List.Item>
+                  <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
+                    props.category.setter("content");
+                    setSidebarOpen(false);
+                  }}>
+                    <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Content-Erstellung</div>  
+                  </List.Item>
+                </List>
+              </div>
+            </div>
+            <div className={styles.canclebar}>
+              <div className={styles.closesidebar} onClick={() => {
+                setSidebarOpen(false)
+              }}><CloseOutlined /></div>
+            </div>
           </Drawer>
           <Sider
-            width={80}
-            className={`${styles.sidebar}`}
+            className={styles.sidebar}
             breakpoint={breakpoint}
             collapsedWidth={collapseWidth}
             collapsed={collapsed}
@@ -252,7 +286,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
               
               <Menu className={styles.primarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
   
-              <div className={styles.sidebarbottomcontainer}>
+              <div>
                 <Menu className={styles.secondarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={footeritems} />
                 <div className={styles.avatarcontainer}>
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
@@ -271,9 +305,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
           
           <Layout>
             <Content className={styles.layoutcontent}>
-              <div className={styles.childrencontainer}>
-                {props.children}
-              </div>
+              <div className={styles.childrencontainer}>{props.children}</div>
             </Content>
             <FloatButton
               className='sosbutton'
@@ -281,7 +313,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
               shape='square'
               description={"Hilfe"}
             />
-            <Footer style={{ textAlign: "center", color: "lightgrey" }}>{version}</Footer>
           </Layout>
           <CookieBanner />
         </Layout>
@@ -293,7 +324,8 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
         components: {
           Menu: {
             darkItemSelectedBg: "#344054",
-            darkDangerItemSelectedColor: "#ffffff"
+            darkDangerItemSelectedColor: "#ffffff",
+            darkItemBg: ""
           },
           Slider: {
             trackBg: "#1478FD",
@@ -302,9 +334,9 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
         }
       }}>
         <Layout className={styles.layout} hasSider={!isMobile}>
+          <MobileHeader />
           <Sider
-            width={80}
-            className={`${styles.sidebar}`}
+            className={styles.sidebar}
             breakpoint={breakpoint}
             collapsedWidth={collapseWidth}
             collapsed={collapsed}
@@ -323,7 +355,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
               
               <Menu className={styles.primarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
   
-              <div className={styles.sidebarbottomcontainer}>
+              <div>
                 <Menu className={styles.secondarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={footeritems} />
                 <div className={styles.avatarcontainer}>
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
@@ -342,9 +374,32 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
           
           <Layout>
             <Content className={styles.layoutcontent}>
-              <div className={styles.childrencontainer}>
-                {props.children}
-              </div>
+              <aside className={styles.homesidebarcontainer}>
+                <div className={styles.homesidebar}>
+                  <div className={styles.title}>Assistenten</div>
+                  <List className={styles.assistantlist} split={false}>
+                    <List.Item className={`${styles.assistantlink} ${isselected("all")}`} onClick={() => {
+                      props.category.setter("all"); 
+                    }}>
+                      <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Alle</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} onClick={() => {
+                      props.category.setter("favourites"); 
+                    }}>
+                      <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Favoriten</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
+                      props.category.setter("content"); 
+                    }}>
+                      <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Content-Erstellung</div>  
+                    </List.Item>
+                  </List>
+                </div>
+              </aside>
+              <div className={styles.childrencontainer}>{props.children}</div>
             </Content>
             <FloatButton
               className='sosbutton'
@@ -352,7 +407,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
               shape='square'
               description={"Hilfe"}
             />
-            <Footer style={{ textAlign: "center", color: "lightgrey" }}>{version}</Footer>
           </Layout>
           <CookieBanner />
         </Layout>
@@ -360,4 +414,4 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     );
   }
 };
-export default SidebarLayout;
+export default HomeSidebarLayout;

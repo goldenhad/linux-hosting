@@ -137,7 +137,7 @@ const HomeSidebarLayout = ( props: {
         <div className={styles.profile}>
           <Avatar
             size={40}
-            style={{ backgroundColor: "#f0f0f2", color: "#474747" }}
+            style={{ color: "#474747" }}
             src={props.context.profile.picture}
           >
             {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
@@ -188,7 +188,8 @@ const HomeSidebarLayout = ( props: {
         components: {
           Menu: {
             darkItemSelectedBg: "#344054",
-            darkDangerItemSelectedColor: "#ffffff"
+            darkDangerItemSelectedColor: "#ffffff",
+            darkItemBg: ""
           },
           Slider: {
             trackBg: "#1478FD",
@@ -222,7 +223,7 @@ const HomeSidebarLayout = ( props: {
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ backgroundColor: "#f0f0f2", color: "#474747" }}
+                      style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
                       <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
@@ -323,7 +324,8 @@ const HomeSidebarLayout = ( props: {
         components: {
           Menu: {
             darkItemSelectedBg: "#344054",
-            darkDangerItemSelectedColor: "#ffffff"
+            darkDangerItemSelectedColor: "#ffffff",
+            darkItemBg: ""
           },
           Slider: {
             trackBg: "#1478FD",

@@ -685,7 +685,7 @@ export default function Monologue( props: InitialProps ) {
               <Button onClick={() => {
                 router.push( "/" ) 
               }} icon={<ArrowLeftOutlined />}></Button>
-              <h1>Willkommen zurück, {handleEmptyString( user.firstname )}</h1>
+              <div className={styles.msg}>Willkommen zurück, {handleEmptyString( user.firstname )}</div>
             </div>
             <Divider className={styles.welcomeseperator} />
           </div>
@@ -708,7 +708,7 @@ export default function Monologue( props: InitialProps ) {
                 }}
                 >
                   <Icon component={Clipboard} className={styles.clipboardicon} viewBox='0 0 22 22' />
-                  In die Zwischenlage
+                  In die Zwischenablage
                 </div>
               }
             >

@@ -47,10 +47,6 @@
                 font-weight: 700;
                 font-size: 12px;
             }
-
-            /* .text{
-                display: none;
-            } */
         }
     
         .openrecdrawerrow{
@@ -171,6 +167,12 @@
             .catchphrase{
                 font-weight: 700;
                 font-size: 20px;
+            }
+
+            .text{
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
         }
     

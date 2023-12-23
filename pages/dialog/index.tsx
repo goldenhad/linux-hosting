@@ -708,7 +708,7 @@ export default function Dialogue( props: InitialProps ) {
               <Button onClick={() => {
                 router.push( "/" ) 
               }} icon={<ArrowLeftOutlined />}></Button>
-              <h1>Willkommen zurück, {handleEmptyString( user.firstname )}</h1>
+              <div className={styles.msg}>Willkommen zurück, {handleEmptyString( user.firstname )}</div>
             </div>
             <Divider className={styles.welcomeseperator} />
           </div>
@@ -730,7 +730,7 @@ export default function Dialogue( props: InitialProps ) {
                   navigator.clipboard.writeText( answer ); messageApi.success( "Antwort in die Zwischenablage kopiert." );
                 }}
               >
-                <Icon component={Clipboard} className={styles.clipboardicon} viewBox='0 0 22 22' />In die Zwischenlage</div>}>
+                <Icon component={Clipboard} className={styles.clipboardicon} viewBox='0 0 22 22' />In die Zwischenablage</div>}>
               
               <Answer />
             </Card>

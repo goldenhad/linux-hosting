@@ -83,6 +83,10 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
       return "1";
     case "/monolog":
       return "1";
+    case "/blog":
+        return "1";
+    case "/webcontent":
+      return "1";
     case "/company":
       return "5";
     case "/usage":

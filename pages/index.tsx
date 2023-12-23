@@ -14,10 +14,6 @@ const Paragraph = Typography;
 
 
 export interface InitialProps {
-  Data: {
-    currentMonth: number,
-    currentYear: number,
-  };
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -40,6 +36,7 @@ export default function Home() {
   const router = useRouter();
   const dialogRef = useRef( null );
   const monologRef = useRef( null );
+  const blogRef = useRef(null);
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).home );
   const [recommendModalOpen, setRecommendModalOpen] = useState(false);
   const [ recommendLink, setRecommendLink ] = useState( "" );
@@ -129,6 +126,23 @@ export default function Home() {
       target: () => monologRef.current,
       nextButtonProps: {
         children: (
+          "Weiter"
+        )
+      },
+      prevButtonProps: {
+        children: (
+          "Zurück"
+        )
+      }
+    },
+    {
+      title: "Blogbeitrag erzeugen",
+      description: "Die Funktion \"Blogbeitrag erzeugen\" dient dazu, voll automatisch fesselnde Blogbeiträge zu verfassen. "+
+      "Nachdem du das Thema des Blogtexts sowie individuelle Parameter festgelegt hast, generiert Siteware.Mail automatisch einen professionellen und "+
+      "ansprechenden Blogtext, ganz nach Deinen Vorstellungen.",
+      target: () => monologRef.current,
+      nextButtonProps: {
+        children: (
           "Alles klar"
         ),
         onClick: async () => {
@@ -191,7 +205,7 @@ export default function Home() {
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>
-          <div className={styles.greeting}>Willkommen {user.firstname}</div>
+          <div className={styles.greeting}>Willkommen {user.firstname}test</div>
         </div>
 
         <div className={styles.dividerrow}>
@@ -212,6 +226,18 @@ export default function Home() {
                 title="E-Mail erzeugen"
                 description="Gib den Inhalt an, und die KI zaubert Dir eine E-Mail in Deinem Stil – schnell, smart, persönlich!"
                 link="/monolog"
+              />
+              <AssistantCard
+                image="/small_logo.png"
+                title="Blogbeitrag erzeugen"
+                description="Erstelle ansprechende Artikel für Deine Website - mit von Dir bestimmtem Inhalt und Schreibstil."
+                link="/blog"
+              />
+               <AssistantCard
+                image="/small_logo.png"
+                title="Webinhalte generieren"
+                description='Erstelle maßgeschneiderte Inhalte für Deine Internetpräsenz - "Über Uns"-, Leistungsübersichts- und Leistungstexte.'
+                link="/webcontent"
               />
             </Space>
           </div>

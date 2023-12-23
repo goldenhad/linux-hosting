@@ -17,9 +17,17 @@ export type DialogState = {
     length: string,
 }
 
+export type BlogState = {
+  profile: string,
+  content: string,
+  order: string,
+  length: string,
+}
+
 type State = {
     dialog: string
     monolog: string
+    blog: string
 }
 
 type RecommendState = {
@@ -30,6 +38,7 @@ export type TourState = {
     home: boolean,
     dialog: boolean,
     monolog: boolean,
+    blog: boolean,
     usage: boolean,
     profiles: boolean,
     company: boolean
@@ -64,7 +73,8 @@ export const basicUser: User = {
   salt: "",
   lastState: {
     dialog: "",
-    monolog: ""
+    monolog: "",
+    blog: ""
   },
   setupDone: false,
   inviteCode: "",
@@ -75,6 +85,7 @@ export const basicUser: User = {
     home: false,
     dialog: false,
     monolog: false,
+    blog: false,
     usage: false,
     profiles: false,
     company: false

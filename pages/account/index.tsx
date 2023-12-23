@@ -83,6 +83,7 @@ export default function Account() {
       home: false,
       dialog: false,
       monolog: false,
+      blog: false,
       usage: false,
       profiles: false,
       company: false

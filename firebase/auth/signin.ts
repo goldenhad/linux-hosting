@@ -68,6 +68,12 @@ export async function signInWithGoogle() {
                   address: "",
                   order: "",
                   length: ""
+                },
+                blog: {
+                  profile: "",
+                  content: "",
+                  order: "",
+                  length: ""
                 }
               }
             } );

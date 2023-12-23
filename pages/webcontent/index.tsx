@@ -1,4 +1,4 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties } from "react";
 
 const divStyle: CSSProperties = {
   textAlign: "center",

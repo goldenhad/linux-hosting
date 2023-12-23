@@ -1,17 +1,16 @@
-import { Button, Modal, Typography } from "antd";
+import { Button, List, Modal, Switch } from "antd";
 import React, { useEffect, useState } from "react";
 import styles from "./cookiebanner.module.scss";
 import cookieCutter from "cookie-cutter"
-import Link from "next/link";
 import { isMobile } from "react-device-detect";
 
-const { Paragraph } = Typography;
 
 const CookieBanner = (  ) => {
   const [ active, setActive ] = useState( false );
+  const [ activateAnalytics, SetActivateAnalyctics ] = useState(true);
 
   useEffect( () => {
-    if( cookieCutter.get( "mailbuddy-opt-consent" ) ){
+    if( cookieCutter.get( "mailbuddy-opt-consent" ) && cookieCutter.get( "mailbuddy-opt-analytics-consent" ) ){
       setActive( false );
     }else{
       setActive( true );
@@ -23,21 +22,44 @@ const CookieBanner = (  ) => {
     aYearFromNow.setFullYear( aYearFromNow.getFullYear() + 1 );
         
     cookieCutter.set( "mailbuddy-opt-consent", "1", { expires: aYearFromNow } );
+    console.log(activateAnalytics)
+    if(activateAnalytics){
+      cookieCutter.set( "mailbuddy-opt-analytics-consent", "1", { expires: aYearFromNow } );
+    }else{
+      cookieCutter.set( "mailbuddy-opt-analytics-consent", "0", { expires: aYearFromNow } );
+    }
     setActive( false );
   }
 
   return (
     <Modal className={styles.cookiebanner} width={isMobile? "100%": "50%"} title={"Dein Datenschutz, unsere Priorität!"} open={active} footer={null}>
-      <Paragraph className={styles.infotext}>
-                Damit Siteware.Mail reibungslos für dich funktioniert, setzen wir technisch notwendige Cookies ein.
-                Diese sind unerlässlich für die grundlegenden Funktionen unserer Website und ermöglichen es dir, unsere Dienste sicher und effizient zu nutzen.
-                Ohne diese Cookies könnte Siteware.Mail nicht funktionieren. Indem du Siteware.Mail weiterhin nutzt, 
-                stimmst du der Verwendung dieser essenziellen Cookies zu. Weitere Details findest du in unserer <Link href={"/datenschutz"}>Datenschutzrichtlinie</Link>.
-      </Paragraph>
+      <div className={styles.infotext}>
+        Willkommen! Wir möchten dich informieren, dass unsere Webseite Cookies verwendet, um dir eine bessere Nutzererfahrung zu bieten.
+        Unsere Cookies umfassen:<br /><br />
+        <b>Technisch notwendige Cookies:</b> Diese sind essenziell für das reibungslose Funktionieren der Webseite,
+         z.B. für Navigation und Zugriff auf sichere Bereiche.<br /><br />
+        <b>Marketing-Cookies:</b> Diese werden verwendet, um Werbeinhalte zu personalisieren und die Effektivität unserer Werbung zu messen. Sie ermöglichen uns,
+        Angebote besser auf deine Interessen abzustimmen.<br /><br />
+        Deine Privatsphäre ist uns wichtig. Du hast unten die Möglichkeit,
+        deine Cookie-Einstellungen zu verwalten und anzupassen. Bitte beachte, dass die Deaktivierung bestimmter Cookies deine Nutzungserfahrung beeinträchtigen kann.
+      </div>
+      <List className={styles.cookieoptions}>
+        <List.Item>
+          <span className={styles.cookiedescription}>Technisch notwendige Cookies:</span>
+          <Switch defaultChecked disabled />
+        </List.Item>
+        <List.Item>
+          <span className={styles.cookiedescription}>Marketing Cookies:</span>
+          <Switch defaultChecked onChange={(checked: boolean) => {
+            console.log(checked);
+            SetActivateAnalyctics(checked) 
+          }} />
+        </List.Item>
+      </List>
       <div className={styles.acceptbuttonrow}>
         <Button onClick={() => {
           setOptIn()
-        }} type='primary'>Akzeptieren</Button>
+        }} type='primary'>Speichern</Button>
       </div>
     </Modal>
   );

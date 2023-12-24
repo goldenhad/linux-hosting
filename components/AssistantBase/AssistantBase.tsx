@@ -49,6 +49,7 @@ const AssistantBase = (props: {
     children,
     context: {user: User, company: Company,  login, role, profile}
     name,
+    laststate,
     basicState: Record<string, string>,
     Tour: TourProps["steps"],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -262,7 +263,7 @@ const AssistantBase = (props: {
         }
 
         const newUser = props.context.user;
-        newUser.lastState.blog = encContent;
+        newUser.lastState[props.laststate] = encContent;
         await updateData( "User", props.context.login.uid, newUser );
 
         let isFreed = false;

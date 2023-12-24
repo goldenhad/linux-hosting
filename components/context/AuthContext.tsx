@@ -149,7 +149,7 @@ export const AuthContextProvider = ( {
       setLoading( false );
       // The Refresh-rate still needs tweaking
       // The Refresh of the token will cause a rerender!
-    }, 1 * 60 * 1000 );
+    }, 100 * 60 * 1000 );
     return () => clearInterval( handle );
   }, [] );
 

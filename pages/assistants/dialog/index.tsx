@@ -199,6 +199,7 @@ export default function Dialogue( ) {
     <AssistantBase
       context={context}
       name={"Dialog"}
+      laststate={"dialog"}
       basicState={dialogBasicState}
       Tour={steps}
       form={form}

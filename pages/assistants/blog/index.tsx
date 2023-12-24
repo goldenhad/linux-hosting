@@ -135,7 +135,8 @@ export default function Blog( ) {
   return (
     <AssistantBase
       context={context}
-      name={"Blog Neu"}
+      name={"Blog"}
+      laststate={"blog"}
       basicState={blogBasicState}
       Tour={steps}
       form={form}

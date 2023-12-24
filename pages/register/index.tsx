@@ -1,7 +1,7 @@
 import router from "next/router";
 import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
-import { Alert, Button, Checkbox, Form, Input, MenuProps, Select, Space, Menu } from "antd";
+import { Alert, Checkbox, Form, Input, MenuProps, Select, Space, Menu } from "antd";
 import styles from "./register.module.scss"
 import signUp, { signUpUser } from "../../firebase/auth/signup";
 import Head from "next/head";
@@ -12,6 +12,7 @@ import Link from "next/link";
 import CryptoJS from "crypto-js";
 import Nav from "../../public/icons/nav.svg";
 import Icon from "@ant-design/icons";
+import FatButton from "../../components/FatButton";
 
 const frontendnav: MenuProps["items"] = [
   {
@@ -414,7 +415,7 @@ export default function Register( props ){
           </Form.Item>
     
           <Form.Item
-            label="Password wiederholen"
+            label="Password wdhl."
             name="passwordwdhl"
             rules={[
               {
@@ -457,9 +458,7 @@ export default function Register( props ){
             message="Beim Registrieren ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
     
           <Form.Item className={styles.loginbutton}>
-            <Button type="primary" htmlType="submit">
-                                Registrieren
-            </Button>
+            <FatButton isSubmitButton={true} text="Registrieren" />
           </Form.Item>
         </Form> );
       }else{
@@ -573,7 +572,7 @@ export default function Register( props ){
             </Form.Item>
     
             <Form.Item
-              label="Password wiederholen"
+              label="Password wdhl."
               name="passwordwdhl"
               rules={[
                 {
@@ -606,7 +605,7 @@ export default function Register( props ){
           <Form.Item label="Nutzung" name={"usecase"} className={styles.loginpart}>
             <Select onChange={( value ) => {
               ( value == "Für mein Unternehmen" )? setRegisteringCompany( true ): setRegisteringCompany( false ) 
-            }} placeholder={"Wie planst du Siteware.Mail zu nutzen?"}
+            }} placeholder={"Wie planst du Siteware.Business zu nutzen?"}
             options={[{ key: 0, value: "Nur für mich persönlich" }, { key: 1, value: "Für mein Unternehmen" }]}/>
           </Form.Item>
     
@@ -634,9 +633,7 @@ export default function Register( props ){
             message="Beim Registrieren ist etwas schief gelaufen bitte versuche es noch einmal!" type="error" />
     
           <Form.Item className={styles.loginbutton}>
-            <Button type="primary" htmlType="submit">
-                                Registrieren
-            </Button>
+            <FatButton isSubmitButton={true} text="Registrieren" />
           </Form.Item>
         </Form> );
       }
@@ -666,7 +663,8 @@ export default function Register( props ){
         <div className={styles.formContainer}>
           <div className={styles.formtitle}>Registrieren</div>
           <div className={styles.formexplanation}>
-            Willkommen an Bord! Perfektioniere deine E-Mail-Kunst – starte mit dem Registrierungsformular direkt unter diesem Text.
+            Sparen Sie Zeit und steigern Sie Ihre Produktivität mit Siteware.Business – 
+            melden Sie sich jetzt über das untenstehende Formular an und entdecken Sie die Kraft unserer KI-Lösungen!
           </div>
           {getForm()}
         </div>

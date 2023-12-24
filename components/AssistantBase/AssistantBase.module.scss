@@ -9,6 +9,7 @@
     .messagcnt{
       display: flex;
       flex-direction: row;
+      align-items: center;
       gap: 16px;
 
       @media (max-width: 992px){
@@ -31,6 +32,7 @@
       margin-bottom: 0px;
       border-color: #D0D5DD;
       color: #D0D5DD;
+      background-color: #D0D5DD;
     }
   }
 
@@ -68,6 +70,8 @@
         margin-top: 44px;
         
         button {
+            
+
             .buttonicon > svg{
               transform: translate(-1px, 4px);
               fill: transparent;
@@ -120,15 +124,6 @@
         margin-bottom: 44px;
         margin-top: 44px;
         
-        button {
-
-            .buttonicon > svg{
-              transform: translate(-1px, 4px);
-              fill: transparent;
-              color: inherit;
-              stroke: inherit;
-          }
-        }
       }
     }
 
@@ -138,6 +133,7 @@
   }
 
   .userinputformcontainer{
+
     .userinputform{
       .formpart{
         font-weight: 700;
@@ -212,30 +208,10 @@
         stroke: inherit;
       }
     }
-
-    
   }
 
   .hiddencontainer{
     display: none;
-  }
-
-  .formfootercontainer{
-
-    .generatebuttonrow{
-      margin-bottom: 44px;
-      margin-top: 44px;
-      
-      button {
-
-          .buttonicon > svg{
-            transform: translate(-1px, 4px);
-            fill: transparent;
-            color: inherit;
-            stroke: inherit;
-        }
-      }
-    }
   }
 }
 

@@ -5,8 +5,8 @@
 
     .deleteProfilePictureButton{
         font-size: 20px;
-        position: absolute;
-        margin-left: 200px;
+        display: flex;
+        position: sticky;
 
         &:hover{
             color: #cf1322;

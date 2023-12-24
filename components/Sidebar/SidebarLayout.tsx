@@ -49,7 +49,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
 
 
   useEffect(() => {
-    if(isMobile){
+    if(isMobile || window.innerWidth < 992){
       setBreakpoint("lg");
       setCollapseWidth(0);
       setCollapsed(true);
@@ -157,7 +157,8 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
   );
 
   const MobileHeader = () => {
-    if(isMobile){
+    console.log(window.innerWidth)
+    if(isMobile || window.innerWidth < 992){
       return(
         <Header className={styles.header}>
           <Link href={"/"} className={styles.headerlink}>
@@ -177,7 +178,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     }
   }
   
-  if(isMobile){
+  if(isMobile || window.innerWidth < 992){
     return (
       <ConfigProvider theme={{
         components: {
@@ -192,7 +193,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!isMobile}>
+        <Layout className={styles.layout} hasSider={!(isMobile || window.innerWidth < 992)}>
           <MobileHeader />
           <Drawer
             style={{ backgroundColor: "#101828" }}
@@ -299,7 +300,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!isMobile}>
+        <Layout className={styles.layout} hasSider={!(isMobile || window.innerWidth < 992)}>
           <Sider
             width={80}
             className={`${styles.sidebar}`}

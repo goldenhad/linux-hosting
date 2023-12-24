@@ -6,8 +6,7 @@ import { Avatar, Badge, ConfigProvider, Divider, Drawer, FloatButton, Layout, Li
 import Link from "next/link";
 import { useRouter } from "next/router";
 const { Header, Content, Sider } = Layout;
-import { User, basicUser } from "../../firebase/types/User";
-import { handleEmptyString } from "../../helper/architecture";
+import { User } from "../../firebase/types/User";
 import styles from "./homesidebar.module.scss";
 import Home from "../../public/icons/home.svg";
 import Profiles from "../../public/icons/profiles.svg";
@@ -52,7 +51,7 @@ const HomeSidebarLayout = ( props: {
 
   
   useEffect(() => {
-    if(isMobile){
+    if(isMobile || window.innerWidth < 992){
       setBreakpoint("lg");
       setCollapseWidth(0);
       setCollapsed(true);
@@ -123,15 +122,6 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
-  const getUser = () =>{
-    if( props.context.user != null ){
-      return props.context.user;
-    }else{
-      return basicUser;
-    }
-  }
-
-
   const profilemenu = (
     <div className={styles.avatarmenu}>
       <Link href={"/account"} className={styles.accountlink}>
@@ -141,9 +131,9 @@ const HomeSidebarLayout = ( props: {
             style={{ color: "#474747" }}
             src={props.context.profile.picture}
           >
-            {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
+            Mein Account
           </Avatar>
-          <div className={styles.profileinfo}>{handleEmptyString( getUser().firstname )} {handleEmptyString( getUser().lastname )}</div>
+          <div className={styles.profileinfo}>Mein Account</div>
         </div>
       </Link>
       <Divider className={styles.menudivider} />
@@ -163,7 +153,7 @@ const HomeSidebarLayout = ( props: {
   }
 
   const MobileHeader = () => {
-    if(isMobile){
+    if(isMobile || window.innerWidth < 992){
       return(
         <Header className={styles.header}>
           <Link href={"/"} className={styles.headerlink}>
@@ -183,7 +173,7 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
-  if(isMobile){
+  if(isMobile || window.innerWidth < 992){
     return (
       <ConfigProvider theme={{
         components: {
@@ -198,7 +188,7 @@ const HomeSidebarLayout = ( props: {
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!isMobile}>
+        <Layout className={styles.layout} hasSider={!(isMobile || window.innerWidth < 992)}>
           <MobileHeader />
           <Drawer
             bodyStyle={{ backgroundColor: "#101828", padding: 0, display: "flex", flexDirection: "row", alignItems: "center" }}
@@ -227,7 +217,7 @@ const HomeSidebarLayout = ( props: {
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
+                      <>Mein Account</>
                     </Avatar>
                   </Popover>
                 </div>
@@ -299,7 +289,7 @@ const HomeSidebarLayout = ( props: {
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
+                      <>Mein Account</>
                     </Avatar>
                   </Popover>
                 </div>
@@ -337,7 +327,7 @@ const HomeSidebarLayout = ( props: {
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!isMobile}>
+        <Layout className={styles.layout} hasSider={!(isMobile || window.innerWidth < 992)}>
           <MobileHeader />
           <Sider
             className={styles.sidebar}
@@ -368,7 +358,7 @@ const HomeSidebarLayout = ( props: {
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
+                      <>Maximilian Krebs</>
                     </Avatar>
                   </Popover>
                 </div>

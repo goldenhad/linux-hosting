@@ -182,6 +182,7 @@ export default function Monologue( ) {
     <AssistantBase
       context={context}
       name={"Monolog"}
+      laststate={"monolog"}
       basicState={monologBasicState}
       Tour={steps}
       form={form}

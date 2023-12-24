@@ -264,6 +264,7 @@
                 padding: 8px 12px 8px 12px;
                 gap: 16px;
                 font-size: 16px;
+                width: 100%;
 
                 .assistantcatname {
                     color: white;
@@ -343,5 +344,13 @@
 
     .newsitem{
         width: 100%;
+    }
+}
+
+.assistantcount {
+    margin-left: auto;
+
+    .badge {
+        color: #344054;
     }
 }

@@ -2,7 +2,7 @@ import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 
 import { LogoutOutlined } from "@ant-design/icons";
 import Icon, { CloseOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Avatar, ConfigProvider, Divider, Drawer, FloatButton, Layout, List, Menu, Popover } from "antd";
+import { Avatar, Badge, ConfigProvider, Divider, Drawer, FloatButton, Layout, List, Menu, Popover } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 const { Header, Content, Sider } = Layout;
@@ -12,6 +12,7 @@ import styles from "./homesidebar.module.scss";
 import Home from "../../public/icons/home.svg";
 import Profiles from "../../public/icons/profiles.svg";
 import Help from "../../public/icons/help.svg";
+import Heart from "../../public/icons/heart.svg";
 import Nav from "../../public/icons/nav.svg";
 import Stats from "../../public/icons/stat.svg";
 import Settings from "../../public/icons/settings.svg";
@@ -247,8 +248,11 @@ const HomeSidebarLayout = ( props: {
                     props.category.setter("favourites");
                     setSidebarOpen(false);
                   }}>
-                    <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <Icon component={Heart} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Favoriten</div>
+                    <div className={styles.assistantcount}>
+                      <Badge className={styles.badge} status="default" color="#f2f4f7" count={props.context.user.services.favourites.length} />
+                    </div>
                   </List.Item>
                   <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
                     props.category.setter("content");
@@ -387,8 +391,11 @@ const HomeSidebarLayout = ( props: {
                     <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} onClick={() => {
                       props.category.setter("favourites"); 
                     }}>
-                      <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <Icon component={Heart} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Favoriten</div>
+                      <div className={styles.assistantcount}>
+                        <Badge className={styles.badge} status="default" color="#f2f4f7" count={props.context.user.services.favourites.length} />
+                      </div>
                     </List.Item>
                     <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
                       props.category.setter("content"); 

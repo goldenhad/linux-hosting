@@ -2,16 +2,16 @@ import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 
 import { LogoutOutlined } from "@ant-design/icons";
 import Icon, { CloseOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Avatar, ConfigProvider, Divider, Drawer, FloatButton, Layout, List, Menu, Popover } from "antd";
+import { Avatar, Badge, ConfigProvider, Divider, Drawer, FloatButton, Layout, List, Menu, Popover } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 const { Header, Content, Sider } = Layout;
-import { User, basicUser } from "../../firebase/types/User";
-import { handleEmptyString } from "../../helper/architecture";
+import { User } from "../../firebase/types/User";
 import styles from "./homesidebar.module.scss";
 import Home from "../../public/icons/home.svg";
 import Profiles from "../../public/icons/profiles.svg";
 import Help from "../../public/icons/help.svg";
+import Heart from "../../public/icons/heart.svg";
 import Nav from "../../public/icons/nav.svg";
 import Stats from "../../public/icons/stat.svg";
 import Settings from "../../public/icons/settings.svg";
@@ -51,7 +51,7 @@ const HomeSidebarLayout = ( props: {
 
   
   useEffect(() => {
-    if(isMobile){
+    if(isMobile || window.innerWidth < 992){
       setBreakpoint("lg");
       setCollapseWidth(0);
       setCollapsed(true);
@@ -122,15 +122,6 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
-  const getUser = () =>{
-    if( props.context.user != null ){
-      return props.context.user;
-    }else{
-      return basicUser;
-    }
-  }
-
-
   const profilemenu = (
     <div className={styles.avatarmenu}>
       <Link href={"/account"} className={styles.accountlink}>
@@ -140,9 +131,9 @@ const HomeSidebarLayout = ( props: {
             style={{ color: "#474747" }}
             src={props.context.profile.picture}
           >
-            {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
+            Mein Account
           </Avatar>
-          <div className={styles.profileinfo}>{handleEmptyString( getUser().firstname )} {handleEmptyString( getUser().lastname )}</div>
+          <div className={styles.profileinfo}>Mein Account</div>
         </div>
       </Link>
       <Divider className={styles.menudivider} />
@@ -162,7 +153,7 @@ const HomeSidebarLayout = ( props: {
   }
 
   const MobileHeader = () => {
-    if(isMobile){
+    if(isMobile || window.innerWidth < 992){
       return(
         <Header className={styles.header}>
           <Link href={"/"} className={styles.headerlink}>
@@ -182,7 +173,7 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
-  if(isMobile){
+  if(isMobile || window.innerWidth < 992){
     return (
       <ConfigProvider theme={{
         components: {
@@ -197,7 +188,7 @@ const HomeSidebarLayout = ( props: {
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!isMobile}>
+        <Layout className={styles.layout} hasSider={!(isMobile || window.innerWidth < 992)}>
           <MobileHeader />
           <Drawer
             bodyStyle={{ backgroundColor: "#101828", padding: 0, display: "flex", flexDirection: "row", alignItems: "center" }}
@@ -226,7 +217,7 @@ const HomeSidebarLayout = ( props: {
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
+                      <>Mein Account</>
                     </Avatar>
                   </Popover>
                 </div>
@@ -247,8 +238,11 @@ const HomeSidebarLayout = ( props: {
                     props.category.setter("favourites");
                     setSidebarOpen(false);
                   }}>
-                    <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <Icon component={Heart} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Favoriten</div>
+                    <div className={styles.assistantcount}>
+                      <Badge className={styles.badge} status="default" color="#f2f4f7" count={props.context.user.services.favourites.length} />
+                    </div>
                   </List.Item>
                   <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
                     props.category.setter("content");
@@ -295,7 +289,7 @@ const HomeSidebarLayout = ( props: {
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
+                      <>Mein Account</>
                     </Avatar>
                   </Popover>
                 </div>
@@ -333,7 +327,7 @@ const HomeSidebarLayout = ( props: {
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!isMobile}>
+        <Layout className={styles.layout} hasSider={!(isMobile || window.innerWidth < 992)}>
           <MobileHeader />
           <Sider
             className={styles.sidebar}
@@ -364,7 +358,7 @@ const HomeSidebarLayout = ( props: {
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
+                      <>Maximilian Krebs</>
                     </Avatar>
                   </Popover>
                 </div>
@@ -387,8 +381,11 @@ const HomeSidebarLayout = ( props: {
                     <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} onClick={() => {
                       props.category.setter("favourites"); 
                     }}>
-                      <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <Icon component={Heart} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Favoriten</div>
+                      <div className={styles.assistantcount}>
+                        <Badge className={styles.badge} status="default" color="#f2f4f7" count={props.context.user.services.favourites.length} />
+                      </div>
                     </List.Item>
                     <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
                       props.category.setter("content"); 

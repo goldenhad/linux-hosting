@@ -85,13 +85,12 @@ const AssistantBase = (props: {
       let parsed = props.basicState;
       try{
         const decRequest = await axios.post( "/api/prompt/decrypt", {
-          ciphertext: props.context.user.lastState.blog,
+          ciphertext: props.context.user.lastState[props.laststate],
           salt: props.context.user.salt
         } )
     
         const decryptedText = decRequest.data.message;
         parsed = JSON.parse( decryptedText );
-        //console.log(parsed);
       }catch( e ){
         //console.log(e);
       }
@@ -121,8 +120,12 @@ const AssistantBase = (props: {
           profilejson = "";
         }
             
-        const singleProfile: Profile = JSON.parse( profilejson );
-        profilearr.push( singleProfile );
+        try{
+          const singleProfile: Profile = JSON.parse( profilejson );
+          profilearr.push( singleProfile );
+        }catch(e){
+          console.log("Could not decode profile...");
+        }
       }
     
       setDecryptedProfiles( profilearr );

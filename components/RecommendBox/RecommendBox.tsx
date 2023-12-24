@@ -98,7 +98,7 @@ const RecommendBox = (props: { user: User, messageApi }) => {
     <>
       <Banner />
 
-      <Modal title="Lade deine Freunde ein und sichere dir Gratis-Mails!" open={recommendModalOpen} width={800} footer={null} onCancel={() => {
+      <Modal title="Lade deine Freunde ein!" open={recommendModalOpen} width={800} footer={null} onCancel={() => {
         setRecommendModalOpen(false);
       }}>
         <div className={styles.recommendContent}>
@@ -114,7 +114,7 @@ const RecommendBox = (props: { user: User, messageApi }) => {
                 copyLink()
               }}>{recommendLink}</div>}
             </div>
-            <p>Alternativ kannst du auch den QR-Code rechts benutzen und deinen Freunden schicken</p>
+            <p>Alternativ kannst du auch den QR-Code benutzen und deinen Freunden schicken</p>
           </div>
           <div className={styles.recommendqrcode} id="recommendqrcode">
             <QRCode errorLevel="M" status={( recommendLink == "" )? "loading": undefined} value={recommendLink} bgColor="#fff" />

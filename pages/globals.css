@@ -361,3 +361,7 @@
   color: lightgray;
   position: relative;
 }
+
+.ant-badge-count{
+  color: inherit !important;
+}

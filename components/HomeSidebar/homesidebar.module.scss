@@ -27,8 +27,8 @@
         background-color: #101828;
         z-index: 1;
         overflow: hidden;
-        height: 100vh;
-
+/*         height: 100vh;
+ */
         .logobox {
             display: flex;
             flex-direction: row;
@@ -166,6 +166,10 @@
         display: flex;
         flex-direction: row;
         align-items: center;
+
+        &:hover {
+            cursor: pointer;
+        }
     
         .profileinfo {
             margin-left: 10px;
@@ -237,6 +241,10 @@
         .avatarcontainer {
             padding-left: 20px;
             margin-top: 5px;
+
+            &:hover {
+                cursor: pointer;
+            }
         }
     }
 
@@ -264,6 +272,7 @@
                 padding: 8px 12px 8px 12px;
                 gap: 16px;
                 font-size: 16px;
+                width: 100%;
 
                 .assistantcatname {
                     color: white;
@@ -343,5 +352,13 @@
 
     .newsitem{
         width: 100%;
+    }
+}
+
+.assistantcount {
+    margin-left: auto;
+
+    .badge {
+        color: #344054;
     }
 }

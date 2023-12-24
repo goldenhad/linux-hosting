@@ -133,7 +133,6 @@ const AssistantBase = (props: {
   }, [props.context.user.profiles, props.context.user.salt] );
 
   useEffect( () => {
-    console.log("I RAN")
 
     const createData = async () => {
       setQuotaOverused( false );
@@ -150,8 +149,6 @@ const AssistantBase = (props: {
     }else{
       createData();
     }
-
-    console.log(quotaOverused);
       
   }, [props.context.company, props.context.user.Company, quotaOverused] );
 

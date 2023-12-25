@@ -12,6 +12,10 @@
       align-items: center;
       gap: 16px;
 
+      .histbutton{
+        margin-left: auto;
+      }
+
       @media (max-width: 992px){
         .msg {
           font-size: large;
@@ -160,24 +164,6 @@
 
     .historycard{
       margin-top: 32px;
-
-      .singlehistitem{
-        display: flex;
-        flex-direction: column;
-        
-        .histitem{
-          width: 75%;
-        }
-
-        .subcontent{
-          display: flex;
-          flex-direction: row;
-          gap: 16px;
-          color: #667085;
-        }
-      }
-
-      
     }
 
     .answer{
@@ -542,4 +528,21 @@ font-size: 14px;
 .tokenalert{
 margin-top: 20px;
 margin-bottom: 20px;
+}
+
+.singlehistitem{
+  display: flex;
+  flex-direction: column;
+  
+  .histitem{
+    width: 100%;
+  }
+
+  .subcontent{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    color: #667085;
+  }
 }

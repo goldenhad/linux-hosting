@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Divider, Form, List, Result, Skeleton, Tour, TourProps, message, Typography } from "antd";
+import { Alert, Button, Card, Divider, Form, List, Result, Skeleton, Tour, TourProps, message, Typography, Drawer } from "antd";
 import axios from "axios";
 import styles from "./AssistantBase.module.scss";
 import { createContext, useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import { Profile } from "../../firebase/types/Profile";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../db";
 import Info from "../../public/icons/info.svg";
-import Icon, { ArrowLeftOutlined, EyeOutlined } from "@ant-design/icons";
+import Icon, { ArrowLeftOutlined, EyeOutlined, HistoryOutlined } from "@ant-design/icons";
 import SidebarLayout from "../Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
 import { handleEmptyString, handleUndefinedTour, normalizeTokens } from "../../helper/architecture";
@@ -17,6 +17,7 @@ import Clipboard from "../../public/icons/clipboard.svg";
 import updateData from "../../firebase/data/updateData";
 import { encode } from "gpt-tokenizer";
 import moment from "moment";
+import { isMobile } from "react-device-detect";
 
 const { Paragraph } = Typography;
 
@@ -73,6 +74,7 @@ const AssistantBase = (props: {
   const [ showAnswer, setShowAnswer ] = useState( false );
   const [ historyState, setHistoryState ] = useState([]);
   const [ cancleController, setCancleController ] = useState(new AbortController());
+  const [ histOpen, setHistOpen ] = useState(false);
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( props.context.user.tour ).blog );
   const router = useRouter();
 
@@ -122,7 +124,6 @@ const AssistantBase = (props: {
       //console.log(e);
       }
 
-      console.log(parsed);
       setHistoryState(parsed);
     }
   
@@ -336,7 +337,9 @@ const AssistantBase = (props: {
                     const tokensused = encode(localtext).length;
                     usedTokens = costbefore + tokensused;
                     setAnswer(dataChunk + "█");
+                    localAnswer = dataChunk;
                   }
+                  
                 }, signal: cancleController.signal
                 });
 
@@ -349,35 +352,35 @@ const AssistantBase = (props: {
             }
 
 
-            if(historyState.length >= 10){
+            if(localAnswer != ""){
+              if(historyState.length >= 10){
               // Remove last Element from array
-              historyState.pop();
-            }
+                historyState.pop();
+              }
   
-            historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: usedTokens });
-            console.log(localAnswer);
-            console.log(historyState)
+              historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: usedTokens });
   
-            const encHistObj = await axios.post( "/api/prompt/encrypt", {
-              content: JSON.stringify(historyState),
-              salt: props.context.user.salt
-            } );
+              const encHistObj = await axios.post( "/api/prompt/encrypt", {
+                content: JSON.stringify(historyState),
+                salt: props.context.user.salt
+              } );
     
-            const encHist = encHistObj.data.message;
-    
-            if(props.context.user.history){
-              const userhist = props.context.user.history;
-              userhist[props.laststate] = encHist;
-              await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
-            }else{
-              const hist: History = {
-                monolog: "",
-                dialog: "",
-                blog: ""
-              };
               const encHist = encHistObj.data.message;
-              hist[props.laststate] = encHist;
-              await updateDoc( doc( db, "User", props.context.login.uid ), { history: hist } );
+    
+              if(props.context.user.history){
+                const userhist = props.context.user.history;
+                userhist[props.laststate] = encHist;
+                await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
+              }else{
+                const hist: History = {
+                  monolog: "",
+                  dialog: "",
+                  blog: ""
+                };
+                const encHist = encHistObj.data.message;
+                hist[props.laststate] = encHist;
+                await updateDoc( doc( db, "User", props.context.login.uid ), { history: hist } );
+              }
             }
 
 
@@ -432,37 +435,46 @@ const AssistantBase = (props: {
   const HistoryCard = () => {
     if(historyState.length > 0){
       return(
-        <Card className={styles.historycard} title={"Bisherige Anfragen"} headStyle={{ backgroundClip: "white" }}>
-          <List
-            bordered
-            dataSource={historyState}
-            locale={{ emptyText: "xxx" }}
-            renderItem={(item: { content: string, time: string, tokens: string }) => (
-              <List.Item>
-                <div className={styles.singlehistitem}>
-                  <Paragraph className={styles.histitem}>{item.content.slice(0, 200)}...</Paragraph>
-                  <div className={styles.subcontent}>
-                    <span>{item.time}</span>
-                    <span>Credits: {normalizeTokens(parseFloat(item.tokens))}</span>
-                  </div>
+        <List
+          bordered
+          dataSource={historyState}
+          locale={{ emptyText: "Noch keine Anfragen" }}
+          renderItem={(item: { content: string, time: string, tokens: string }) => (
+            <List.Item>
+              <div className={styles.singlehistitem}>
+                <Paragraph className={styles.histitem}>{item.content.slice(0, 100)}...</Paragraph>
+                <div className={styles.subcontent}>
+                  <span>{item.time}</span>
+                  <span>Credits: {normalizeTokens(parseFloat(item.tokens))}</span>
+                  <Button icon={<EyeOutlined />} onClick={() => {
+                    setHistOpen(false);
+                    setIsAnswerCardvisible( true );
+                    setShowAnswer( true );
+                    setIsAnswerVisible( true );
+                    setPromptError( false );
+                    setTokens( "" );
+                    setAnswer(item.content);
+                  }}></Button>
                 </div>
-                <Button icon={<EyeOutlined />} onClick={() => {
-                  setIsAnswerCardvisible( true );
-                  setShowAnswer( true );
-                  setIsAnswerVisible( true );
-                  setPromptError( false );
-                  setTokens( "" );
-                  console.log(item);
-                  setAnswer(item.content);
-                }}></Button>
-              </List.Item>
-            )}
-          />
-        </Card>
+              </div>
+            </List.Item>
+          )}
+        />
       );
     }else{
       return <></>;
     }
+  }
+
+
+  const histButton = () => {
+    return (
+      <div className={styles.histbutton}>
+        <Icon component={HistoryOutlined} onClick={() => {
+          setHistOpen(true)
+        }} />
+      </div>
+    );
   }
 
   return (
@@ -475,7 +487,7 @@ const AssistantBase = (props: {
     }}
     >
       {contextHolder}
-      <SidebarLayout context={props.context}>
+      <SidebarLayout context={props.context} hist={setHistOpen}>
         <div className={styles.main}>
           <div className={styles.welcomemessage}>
             <div className={styles.messagcnt}>
@@ -483,6 +495,11 @@ const AssistantBase = (props: {
                 router.push( "/" ) 
               }} icon={<ArrowLeftOutlined />}></Button>
               <div className={styles.msg}>Willkommen zurück, {handleEmptyString( props.context.user.firstname )}</div>
+              {(!isMobile && window.innerWidth >= 992)? 
+                <Button className={styles.histbutton} onClick={() => {
+                  setHistOpen(true)
+                }} icon={<HistoryOutlined />}>Bisherige Anfragen</Button>: <></>  
+              }
             </div>
             <Divider className={styles.welcomeseperator} />
           </div>
@@ -493,8 +510,6 @@ const AssistantBase = (props: {
             }} form={props.form}>
               {getPrompt()}
             </Form>
-
-            <HistoryCard />
           </div>
           <div className={( showAnswer )? styles.userinputformcontainer: styles.hiddencontainer} >
             <Card
@@ -534,6 +549,17 @@ const AssistantBase = (props: {
             {"span.ant-select-selection-placeholder{font-size: 14px !important; font-weight: normal !important}"}
           </style>
         </div>
+        <Drawer
+          title="Bisherige Anfragen"
+          placement={"right"}
+          closable={true}
+          onClose={() => {
+            setHistOpen(false)
+          }}
+          open={histOpen}
+        >
+          <HistoryCard />
+        </Drawer>
       </SidebarLayout>
     </AssistantContext.Provider>
   )

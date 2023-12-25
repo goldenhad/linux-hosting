@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { LogoutOutlined } from "@ant-design/icons";
-import Icon from "@ant-design/icons";
+import Icon, { HistoryOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Avatar, ConfigProvider, Divider, Drawer, FloatButton, Layout, Menu, Popover } from "antd";
 import Link from "next/link";
@@ -24,7 +24,7 @@ type MenuItem = Required<MenuProps>["items"][number];
 
 
 
-const SidebarLayout = ( props: { children: ReactNode, context: {user: User, login, role, profile}} ) => {
+const SidebarLayout = ( props: { children: ReactNode, context: {user: User, login, role, profile}, hist?: any} ) => {
   const [collapsed, setCollapsed] = useState( true );
   // eslint-disable-next-line
   const [ collapseWidth, setCollapseWidth ] = useState( 80 );
@@ -157,7 +157,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
   );
 
   const MobileHeader = () => {
-    console.log(window.innerWidth)
     if(isMobile || window.innerWidth < 992){
       return(
         <Header className={styles.header}>
@@ -165,14 +164,24 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
             {/*eslint-disable-next-line */}
             <img src="/small_logo.png" width={32} height={32} alt="Logo"/>
           </Link>
-          <Icon
-            component={Nav}
-            className={styles.headericon}
-            viewBox='0 0 40 40'
-            onClick={() => {
-              setSidebarOpen(!sidebaropen); 
-            }}
-          />
+          <div className={styles.headerinteraction}>
+            {(props.hist)? 
+              <HistoryOutlined
+                className={styles.histicon}
+                onClick={() => {
+                  props.hist(true); 
+                }}
+              />
+              : <></>}
+            <Icon
+              component={Nav}
+              className={styles.headericon}
+              viewBox='0 0 40 40'
+              onClick={() => {
+                setSidebarOpen(!sidebaropen); 
+              }}
+            />
+          </div>
         </Header>
       );
     }

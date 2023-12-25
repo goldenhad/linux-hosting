@@ -223,6 +223,13 @@
   }
 }
 
+.emptyhistory{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 .ant-select-selection-item{
 font-size: 14px;
 }

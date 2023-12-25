@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
 import { LogoutOutlined } from "@ant-design/icons";
 import Icon, { HistoryOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
@@ -24,7 +24,7 @@ type MenuItem = Required<MenuProps>["items"][number];
 
 
 
-const SidebarLayout = ( props: { children: ReactNode, context: {user: User, login, role, profile}, hist?: any} ) => {
+const SidebarLayout = ( props: { children: ReactNode, context: {user: User, login, role, profile}, hist?: Dispatch<SetStateAction<boolean>>} ) => {
   const [collapsed, setCollapsed] = useState( true );
   // eslint-disable-next-line
   const [ collapseWidth, setCollapseWidth ] = useState( 80 );

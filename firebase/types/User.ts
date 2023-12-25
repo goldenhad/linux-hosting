@@ -44,6 +44,12 @@ export type TourState = {
     company: boolean
 }
 
+export type History = {
+  dialog: string
+  monolog: string
+  blog: string
+}
+
 export type User =  {
     username: string,
     firstname: string,
@@ -62,6 +68,7 @@ export type User =  {
     services:{
       favourites: Array<string>
     }
+    history: History
 }
 
 export const basicUser: User = {
@@ -95,5 +102,10 @@ export const basicUser: User = {
   },
   services: {
     favourites: []
+  },
+  history: {
+    dialog: "",
+    monolog: "",
+    blog: ""
   }
 }

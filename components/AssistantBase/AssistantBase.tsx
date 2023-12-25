@@ -1,23 +1,24 @@
-import { Alert, Button, Card, Divider, Form, Result, Skeleton, Tour, TourProps, message } from "antd";
+import { Alert, Button, Card, Divider, Form, List, Result, Skeleton, Tour, TourProps, message, Typography } from "antd";
 import axios from "axios";
 import styles from "./AssistantBase.module.scss";
 import { createContext, useEffect, useState } from "react";
-import { User } from "../../firebase/types/User";
+import { History, User } from "../../firebase/types/User";
 import { Company } from "../../firebase/types/Company";
 import { Profile } from "../../firebase/types/Profile";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../db";
 import Info from "../../public/icons/info.svg";
-import Icon, { ArrowLeftOutlined } from "@ant-design/icons";
+import Icon, { ArrowLeftOutlined, EyeOutlined } from "@ant-design/icons";
 import SidebarLayout from "../Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
-import { handleEmptyString, handleUndefinedTour } from "../../helper/architecture";
+import { handleEmptyString, handleUndefinedTour, normalizeTokens } from "../../helper/architecture";
 import FatButton from "../FatButton";
 import Clipboard from "../../public/icons/clipboard.svg";
 import updateData from "../../firebase/data/updateData";
 import { encode } from "gpt-tokenizer";
+import moment from "moment";
 
-
+const { Paragraph } = Typography;
 
 
 function updateField( form, field: string, value: string ){
@@ -70,6 +71,7 @@ const AssistantBase = (props: {
   const [messageApi, contextHolder] = message.useMessage();
   const [ promptError, setPromptError ] = useState( false );
   const [ showAnswer, setShowAnswer ] = useState( false );
+  const [ historyState, setHistoryState ] = useState([]);
   const [ cancleController, setCancleController ] = useState(new AbortController());
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( props.context.user.tour ).blog );
   const router = useRouter();
@@ -102,6 +104,30 @@ const AssistantBase = (props: {
     
     decryptAndParse();
     // eslint-disable-next-line
+}, [] );
+
+  useEffect( () => {
+        
+    const decryptHistoy = async () => {
+      let parsed = [];
+      try{
+        const decRequest = await axios.post( "/api/prompt/decrypt", {
+          ciphertext: props.context.user.history[props.laststate],
+          salt: props.context.user.salt
+        } )
+  
+        const decryptedText = decRequest.data.message;
+        parsed = JSON.parse( decryptedText ) as Array<string>;
+      }catch( e ){
+      //console.log(e);
+      }
+
+      console.log(parsed);
+      setHistoryState(parsed);
+    }
+  
+    decryptHistoy();
+  // eslint-disable-next-line
 }, [] );
 
   useEffect( () => {
@@ -200,7 +226,7 @@ const AssistantBase = (props: {
         return(
           <div className={styles.tokeninfo}>
             <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' />
-            Die Anfrage hat {parseFloat( tokens )/1000} Credits verbraucht
+            Die Anfrage hat {normalizeTokens(parseFloat(tokens))} Credits verbraucht
           </div>
         );
       }
@@ -282,6 +308,7 @@ const AssistantBase = (props: {
 
           if(costbefore){
             let localtext = "";
+            let localAnswer = "";
 
             try{
               await axios.post( props.routes.generate, promptdata,
@@ -296,8 +323,10 @@ const AssistantBase = (props: {
 
                   const parseRegEx = /(?<=<~).+?(?=~>)/g;
                   const parsedval = dataChunk.match(parseRegEx);
+                  
                   if(parsedval && parsedval.length == 1){
                     dataChunk = dataChunk.replace(`<~${parsedval[0]}~>`, "");
+                    localAnswer = dataChunk;
                   
                     setTokens(usedTokens.toString());
                     setTokenCountVisible(true);
@@ -310,12 +339,47 @@ const AssistantBase = (props: {
                   }
                 }, signal: cancleController.signal
                 });
+
+              
             }catch(e){
               if(axios.isCancel(e)){
                 setTokens(usedTokens.toString());
                 setCancleController(new AbortController);
               }
             }
+
+
+            if(historyState.length >= 10){
+              // Remove last Element from array
+              historyState.pop();
+            }
+  
+            historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: usedTokens });
+            console.log(localAnswer);
+            console.log(historyState)
+  
+            const encHistObj = await axios.post( "/api/prompt/encrypt", {
+              content: JSON.stringify(historyState),
+              salt: props.context.user.salt
+            } );
+    
+            const encHist = encHistObj.data.message;
+    
+            if(props.context.user.history){
+              const userhist = props.context.user.history;
+              userhist[props.laststate] = encHist;
+              await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
+            }else{
+              const hist: History = {
+                monolog: "",
+                dialog: "",
+                blog: ""
+              };
+              const encHist = encHistObj.data.message;
+              hist[props.laststate] = encHist;
+              await updateDoc( doc( db, "User", props.context.login.uid ), { history: hist } );
+            }
+
 
             try{
               await axios.post( "/api/stats", { tokens: usedTokens, time: usedTokens, type: props.name } );
@@ -363,7 +427,42 @@ const AssistantBase = (props: {
   
       setFormDisabled( false );
     }
-    
+  }
+
+  const HistoryCard = () => {
+    if(historyState.length > 0){
+      return(
+        <Card className={styles.historycard} title={"Bisherige Anfragen"} headStyle={{ backgroundClip: "white" }}>
+          <List
+            bordered
+            dataSource={historyState}
+            locale={{ emptyText: "xxx" }}
+            renderItem={(item: { content: string, time: string, tokens: string }) => (
+              <List.Item>
+                <div className={styles.singlehistitem}>
+                  <Paragraph className={styles.histitem}>{item.content.slice(0, 200)}...</Paragraph>
+                  <div className={styles.subcontent}>
+                    <span>{item.time}</span>
+                    <span>Credits: {normalizeTokens(parseFloat(item.tokens))}</span>
+                  </div>
+                </div>
+                <Button icon={<EyeOutlined />} onClick={() => {
+                  setIsAnswerCardvisible( true );
+                  setShowAnswer( true );
+                  setIsAnswerVisible( true );
+                  setPromptError( false );
+                  setTokens( "" );
+                  console.log(item);
+                  setAnswer(item.content);
+                }}></Button>
+              </List.Item>
+            )}
+          />
+        </Card>
+      );
+    }else{
+      return <></>;
+    }
   }
 
   return (
@@ -394,6 +493,8 @@ const AssistantBase = (props: {
             }} form={props.form}>
               {getPrompt()}
             </Form>
+
+            <HistoryCard />
           </div>
           <div className={( showAnswer )? styles.userinputformcontainer: styles.hiddencontainer} >
             <Card

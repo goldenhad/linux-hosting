@@ -2,6 +2,9 @@
     .main{
         display: flex;
         flex-direction: column;
+        height: 100%;
+        padding-bottom: 200px;
+        margin-bottom: 200px;
 
         .greetingrow {
             width: 100%;
@@ -54,6 +57,7 @@
     .content{
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
         height: 100vh;
 
         @media (max-width: 992px) {

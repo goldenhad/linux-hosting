@@ -158,6 +158,28 @@
       }
     }
 
+    .historycard{
+      margin-top: 32px;
+
+      .singlehistitem{
+        display: flex;
+        flex-direction: column;
+        
+        .histitem{
+          width: 75%;
+        }
+
+        .subcontent{
+          display: flex;
+          flex-direction: row;
+          gap: 16px;
+          color: #667085;
+        }
+      }
+
+      
+    }
+
     .answer{
       white-space: pre-line;
     }

@@ -6,9 +6,28 @@
     .header{
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
         align-items: center;
         padding: 0 15px;
+
+        .headerinteraction{
+            margin-left: auto;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+
+            .histicon{
+                font-size: 20px;
+                color: white;
+            }
+    
+            .headericon> svg{
+                font-size: 36px;
+                fill: transparent;
+                color: inherit;
+                stroke: inherit;
+            }
+        }
 
         .headerlink{
             display: flex;
@@ -16,12 +35,6 @@
             justify-content: center;
         }
 
-        .headericon> svg{
-            font-size: 36px;
-            fill: transparent;
-            color: inherit;
-            stroke: inherit;
-        }
     }
 
     .sidebar {

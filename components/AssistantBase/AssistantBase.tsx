@@ -453,6 +453,48 @@ const AssistantBase = (props: {
                   
                 }, signal: cancleController.signal
                 });
+
+              // Add the generated answer to the history state
+              // Validate that the answer is not empty
+              if(localAnswer != ""){
+              // We need to check if the user already has 10 saved states
+                if(historyState.length >= 10){
+                  // If so remove last Element from array
+                  historyState.pop();
+                }
+  
+                // Add the answer with the current time and the used tokens to the front of the history array
+                historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: usedTokens });
+  
+                // Encrypt the history array
+                const encHistObj = await axios.post( "/api/prompt/encrypt", {
+                  content: JSON.stringify(historyState),
+                  salt: props.context.user.salt
+                } );
+    
+                const encHist = encHistObj.data.message;
+
+                // Check if the user previously had a history
+                if(props.context.user.history){
+                // If so get the history
+                  const userhist = props.context.user.history;
+                  // Set the history to the encoded string and update the user
+                  userhist[props.laststate] = encHist;
+                  await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
+                }else{
+                // If the user previously didn't have a history
+                // Init the history
+                  const hist: History = {
+                    monolog: "",
+                    dialog: "",
+                    blog: ""
+                  };
+                  // Update the history state of the assistant and update the user
+                  const encHist = encHistObj.data.message;
+                  hist[props.laststate] = encHist;
+                  await updateDoc( doc( db, "User", props.context.login.uid ), { history: hist } );
+                }
+              }
             }catch(e){
               // If we encounter an error
               if(axios.isCancel(e)){
@@ -461,48 +503,10 @@ const AssistantBase = (props: {
                 setTokens(usedTokens.toString());
                 // Abort the request
                 setCancleController(new AbortController);
-              }
-            }
-
-            // Add the generated answer to the history state
-            // Validate that the answer is not empty
-            if(localAnswer != ""){
-              // We need to check if the user already has 10 saved states
-              if(historyState.length >= 10){
-              // If so remove last Element from array
-                historyState.pop();
-              }
-  
-              // Add the answer with the current time and the used tokens to the front of the history array
-              historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: usedTokens });
-  
-              // Encrypt the history array
-              const encHistObj = await axios.post( "/api/prompt/encrypt", {
-                content: JSON.stringify(historyState),
-                salt: props.context.user.salt
-              } );
-    
-              const encHist = encHistObj.data.message;
-
-              // Check if the user previously had a history
-              if(props.context.user.history){
-                // If so get the history
-                const userhist = props.context.user.history;
-                // Set the history to the encoded string and update the user
-                userhist[props.laststate] = encHist;
-                await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
               }else{
-                // If the user previously didn't have a history
-                // Init the history
-                const hist: History = {
-                  monolog: "",
-                  dialog: "",
-                  blog: ""
-                };
-                // Update the history state of the assistant and update the user
-                const encHist = encHistObj.data.message;
-                hist[props.laststate] = encHist;
-                await updateDoc( doc( db, "User", props.context.login.uid ), { history: hist } );
+                setAnswer("");
+                setPromptError(true);
+                setTokens( "" );
               }
             }
 
@@ -647,7 +651,12 @@ const AssistantBase = (props: {
                 </div>
               }
             >
-              <Answer />
+              {promptError?
+                <Result
+                  status="error"
+                  title="Bei der Erzeugung der Antwort ist ein Fehler aufgetreten!"
+                />
+                : <Answer />}
             </Card>
             <div className={styles.formfootercontainer}>
               <div className={styles.generatebuttonrow}>

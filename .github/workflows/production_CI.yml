@@ -8,11 +8,11 @@ on:
     branches: [ "production" ]
 
 env:
-  IMAGE_NAME: ghcr.io/printerboi/sitware_business:latest
+  IMAGE_NAME: ghcr.io/printerboi/sitware_business_prod:latest
 
 jobs:
   build:
-
+    environment: production
     runs-on: ubuntu-latest
 
     strategy:
@@ -32,6 +32,7 @@ jobs:
     - run: npm run lint
 
   publish:
+    environment: production
     needs: build
     runs-on: ubuntu-latest
 
@@ -61,6 +62,7 @@ jobs:
         docker push ${{ env.IMAGE_NAME }}
 
   deploy:
+    environment: production
     needs: publish
     name: deploy image
     runs-on: ubuntu-latest

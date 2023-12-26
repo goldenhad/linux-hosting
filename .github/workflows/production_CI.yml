@@ -7,9 +7,6 @@ on:
   push:
     branches: [ "production" ]
 
-env:
-  IMAGE_NAME: ghcr.io/printerboi/sitware_business_prod:latest
-
 jobs:
   build:
     environment: production

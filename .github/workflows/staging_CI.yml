@@ -7,9 +7,6 @@ on:
   push:
     branches: [ "main" ]
 
-env:
-  IMAGE_NAME: ghcr.io/printerboi/sitware_business_dev:latest
-
 jobs:
   build:
     environment: staging

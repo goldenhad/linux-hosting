@@ -1,61 +1,60 @@
-import { firebase_app } from "../../db";
-import { signInWithEmailAndPassword, getAuth, fetchSignInMethodsForEmail } from "firebase/auth";
 import { getDocWhere } from "../data/getData";
 
-const auth = getAuth(firebase_app);
+export default async function userExists( email: string ) {
+  const result = null;
+  let error = null;
 
-export default async function userExists(email: String) {
-    let result = null,
-        error = null;
-    try {
-        //console.log(email);
-        let { result, error } = await getDocWhere("User", "email", "==", email.toLowerCase());
-        //console.log(result);
-        return result.length > 0;
-    } catch (e) {
-        error = e;
-        //console.log(e);
-    }
+  try {
+    //console.log(email);
+    const { result } = await getDocWhere( "User", "email", "==", email.toLowerCase() );
+    //console.log(result);
+    return result.length > 0;
+  } catch ( e ) {
+    error = e;
+    //console.log(e);
+  }
 
-    return { result, error };
+  return { result, error };
 }
 
-export async function usernameExists(username: String) {
-    let result = null,
-        error = null;
-    try {
-        let { result, error } = await getDocWhere("User", "username", "==", username.toLowerCase());
-        //console.log(result);
-        return result.length > 0;
-    } catch (e) {
-        error = e;
-        //console.log(e);
-    }
+export async function usernameExists( username: string ) {
+  const result = null;
+  let error = null;
 
-    return { result, error };
+  try {
+    const { result } = await getDocWhere( "User", "username", "==", username.toLowerCase() );
+    //console.log(result);
+    return result.length > 0;
+  } catch ( e ) {
+    error = e;
+    //console.log(e);
+  }
+
+  return { result, error };
 }
 
-export async function usernameExistsAtDifferentUser(username: String, userid: string) {
-    let result = null,
-        error = null;
-    try {
-        let { result, error } = await getDocWhere("User", "username", "==", username.toLowerCase());
-        if(result.length > 0){
-            let exists = false;
-            result.forEach((user: any) => {
-                if(userid != user.id){
-                   exists = true;
-                }
-            })
-
-            return exists;
-        }else{
-            return false;
+export async function usernameExistsAtDifferentUser( username: string, userid: string ) {
+  const result = null;
+  let error = null;
+  
+  try {
+    const { result } = await getDocWhere( "User", "username", "==", username.toLowerCase() );
+    if( result.length > 0 ){
+      let exists = false;
+      result.forEach( ( user ) => {
+        if( userid != user.id ){
+          exists = true;
         }
-    } catch (e) {
-        error = e;
-        //console.log(e);
-    }
+      } )
 
-    return { result, error };
+      return exists;
+    }else{
+      return false;
+    }
+  } catch ( e ) {
+    error = e;
+    //console.log(e);
+  }
+
+  return { result, error };
 }

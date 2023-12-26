@@ -1,258 +1,391 @@
-import { Alert, Button, Card, Form, Input, Tooltip, Modal, Progress, Select, Space, Table, Tag, Typography } from 'antd';
-import styles from './usage.module.scss'
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { GetServerSideProps } from 'next';
-import SidebarLayout from '../../components/Sidebar/SidebarLayout';
-import { useRouter } from 'next/router';
-import { convertToCurrency, handleEmptyString } from '../../helper/architecture';
-import { useAuthContext } from '../../components/context/AuthContext';
-import { getDocWhere } from '../../firebase/data/getData';
-import { EyeOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, ShoppingCartOutlined, FileTextOutlined } from '@ant-design/icons';
-import Link from 'next/link';
-import { Usage } from '../../firebase/types/Company';
+import { Button, Card, Tag, TourProps, Tour, Popover, List, Collapse, Pagination } from "antd";
+import styles from "./usage.module.scss"
+import { useEffect, useRef, useState } from "react";
+import { GetServerSideProps } from "next";
+import SidebarLayout from "../../components/Sidebar/SidebarLayout";
+import { convertToCurrency, handleUndefinedTour, normalizeTokens } from "../../helper/architecture";
+import { useAuthContext } from "../../components/context/AuthContext";
+import { getDocWhere } from "../../firebase/data/getData";
 import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip as ChartTooltip,
-    Legend,
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-import { User } from '../../firebase/types/User';
-const { Paragraph } = Typography;
-
-const { TextArea } = Input;
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
+  ShoppingCartOutlined,
+  FileTextOutlined,
+  InfoCircleOutlined,
+  MailOutlined
+} from "@ant-design/icons";
+import Link from "next/link";
+import { Order, Usage } from "../../firebase/types/Company";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip as ChartTooltip,
+  Legend
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
+import { User } from "../../firebase/types/User";
+import updateData from "../../firebase/data/updateData";
+import Invoice from "../../components/invoice/invoice";
+import { useReactToPrint } from "react-to-print";
+import moment from "moment";
+import { isMobile } from "react-device-detect";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "../../db";
 
 ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    ChartTooltip,
-    Legend
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  ChartTooltip,
+  Legend
 );
 
 const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
-
+const ordersperpage = 10;
 
 export interface InitialProps {
   Data: { paypalURL: string; };
 }
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    //Get the context of the request
-    const { req, res } = ctx;
-    //Get the cookies from the current request
-    const { cookies } = req;
+export const getServerSideProps: GetServerSideProps = async () => {
     
-    return {
-      props: {
-        Data: {
-            paypalURL : process.env.PAYPALURL
-        }
-      },
-    };
+  return {
+    props: {
+      Data: {
+        paypalURL : process.env.PAYPALURL
+      }
+    }
+  };
 };
 
 
 
-export default function Usage(props: InitialProps) {
-    const { login, user, company, role } = useAuthContext();
-    const [ overused, setOverused ] = useState(false);
-    const [ currusage, setCurrusage ] = useState(0);
-    const [ users, setUsers ] = useState([]);
-    const router = useRouter();
+export default function Usage( props: InitialProps ) {
+  const context = useAuthContext();
+  const { login, user, company, calculations } = context
+  const [ users, setUsers ] = useState( [] );
+  const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).usage );
+  const [orderpage, setOrderPage] = useState(1);
 
-    useEffect(() => {
-        if(role.isCompany) {
-            router.push("/");
+  const budgetRef = useRef( null );
+  const statRef = useRef( null );
+  const buyRef = useRef( null );
+  const orderRef = useRef( null );
+
+  const componentRef = useRef( null );
+
+  const steps: TourProps["steps"] = [
+    {
+      title: "Nutzung und Credit-Budget",
+      description: "Willkommen in den Nutzungsinformationen. Hier kannst du dein Credit-Budget überprüfen und Statistiken zur "+
+      "Nutzung unseres Tools einsehen. Außerdem hast du die Möglichkeit, weitere Credits zu kaufen und deine bisherigen Bestellungen einzusehen.",
+      nextButtonProps: {
+        children: (
+          "Weiter"
+        )
+      },
+      prevButtonProps: {
+        children: (
+          "Zurück"
+        )
+      }
+    },
+    {
+      title: "Credit-Budget",
+      description: "Hier wird dein aktuelles Credit-Budget angezeigt. Die angegebene Zahl gibt dir einen Überblick darüber, wie viele Credits"+
+      " du noch zur Verfügung hast.",
+      target: () => budgetRef.current,
+      nextButtonProps: {
+        children: (
+          "Weiter"
+        )
+      },
+      prevButtonProps: {
+        children: (
+          "Zurück"
+        )
+      }
+    },
+    {
+      title: "Ihr wollt noch mehr E-Mails optimieren?",
+      description: "Solltet du den Bedarf haben, mehr E-Mails zu optimieren, kannst du zusätzliche E-Mail-Kapazitäten hier direkt erwerben.",
+      target: () => buyRef.current,
+      nextButtonProps: {
+        children: (
+          "Weiter"
+        )
+      },
+      prevButtonProps: {
+        children: (
+          "Zurück"
+        )
+      }
+    },
+    {
+      title: "Statistik",
+      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Credits du über das aktuelle Jahr mit Siteware.Mail bereits verbraucht hast.",
+      target: () => statRef.current,
+      nextButtonProps: {
+        children: (
+          "Weiter"
+        )
+      },
+      prevButtonProps: {
+        children: (
+          "Zurück"
+        )
+      }
+    },
+    {
+      title: "Deine bisherigen Einkäufe",
+      description: "In dieser Tabelle findet ihr eine Übersicht deiner bisherigen Einkäufe bei Siteware.Mail. Hier hast du die Möglichkeit, "+
+      "Rechnungen herunterzuladen und unterbrochene Einkäufe abzuschließen.",
+      target: () => orderRef.current,
+      nextButtonProps: {
+        children: (
+          "Alles klar"
+        ),
+        onClick: async () => {
+          const currstate = user.tour;
+          currstate.usage = true;
+          updateData( "User", login.uid, { tour: currstate } )
         }
-    }, []);
+      },
+      prevButtonProps: {
+        children: (
+          "Zurück"
+        )
+      }
+    }
+  ];
+
+  useEffect( () => {
+    const load = async () => {
+      const { result, error } = await getDocWhere( "User", "Company", "==", user.Company );
+      if( !error ){
+        //console.log(result);
+        setUsers( result );
+      }else{
+        setUsers( [] );
+      }
+    }
+
+    load();
+  }, [company, user.Company] );
 
 
-    useEffect(() => {
-        const load = async () => {
-            let {result, error} = await getDocWhere("User", "Company", "==", user.Company);
-            if(!error){
-                //console.log(result);
-                setUsers(result);
-            }else{
-                setUsers([]);
-            }
+  const calculateMails = () => {
+    return Math.floor( company.tokens/calculations.tokensPerMail );
+  }
+
+  const handlePrint = useReactToPrint( {
+    content: () => componentRef.current
+  } );
+
+  const orderState = (obj) => {
+    switch( obj.state ){
+    case "completed":
+      return(
+        <Tag className={styles.statustag} icon={<CheckCircleOutlined />} color="success">
+            abgeschlossen
+        </Tag>
+      );
+                  
+    case "awaiting_payment":
+      return(
+        <Tag className={styles.statustag} icon={<ClockCircleOutlined />} color="warning">
+            Wartestellung
+        </Tag>
+      );
+    default:
+      return(
+        <Tag className={styles.statustag} icon={<CloseCircleOutlined />} color="error">
+            abgebrochen
+        </Tag>
+      );
+    }
+  }
+
+  const getTokenDetailInformation = () => {
+    return(
+      <div>
+        <p>Entspricht:</p>
+        <List>
+          <List.Item><span className={styles.listarrow}><MailOutlined /></span>~{calculateMails()} Mails</List.Item>
+        </List>
+      </div>
+    );
+  }
+
+
+  const getOrderItems = () => {
+    const items = [];
+    const orderedorders = company.orders.toSorted((a: Order, b: Order) => {
+      if(a.timestamp < b.timestamp){
+        return 1;
+      }else if(a.timestamp > b.timestamp){
+        return -1;
+      }else{
+        return 0
+      }
+    });
+    
+    for(let i=(orderpage - 1); i  < ordersperpage; i++){
+      if(i < company.orders.length){
+        const order = orderedorders[i];
+        const orderdate = new Date( order.timestamp * 1000 );
+        const datestring = moment(orderdate).format("DD.MM.YYYY");
+
+        const getContinuePayment = () => {
+          if(order.state == "awaiting_payment"){
+            return (
+              <List.Item className={styles.singledetail}>
+                <div className={styles.description}>Einkauf fortsetzen:</div>
+                <div><Link href={`${props.Data.paypalURL}/checkoutnow?token=${order.id}`}><ShoppingCartOutlined style={{ fontSize: 20 }}/></Link></div>  
+              </List.Item>
+            );
+          }else{
+            return <></>;
+          }
         }
 
-        load();
-    }, [company])
+        items.push({
+          key: i,
+          label: <div className={styles.singleorder}>
+            <div className={styles.ordertitle}>
+              <span className={styles.orderdate}>{datestring}</span>
+              {isMobile? <br/>: <></>}<span>{`Bestellung #${order.id}`}</span>
+            </div>
+            <div className={styles.orderstate}>{orderState(order)}</div>
+          </div>,
+          children: <div className={styles.orderoverview}>
+            <div className={styles.orderdetails}>
+              <h3>Details</h3>
+              <List>
+                <List.Item className={styles.singledetail}><div className={styles.description}>Bestellnummer:</div> <div>{order.id}</div></List.Item>
+                <List.Item className={styles.singledetail}><div className={styles.description}>Bezahlmethode:</div> <div>{order.method}</div></List.Item>
+                <List.Item className={styles.singledetail}><div className={styles.description}>Betrag:</div> <div>{convertToCurrency(order.amount)}</div></List.Item>
+                <List.Item className={styles.singledetail}><div className={styles.description}>Credits:</div> <div>{normalizeTokens(order.tokens)}</div></List.Item>
+              </List>
+            </div>
 
-    const purchasecolumns = [
-        {
-            title: 'Status',
-            dataIndex: 'state',
-            key: 'state',
-            render: (_: any, obj: any) => {
-                switch(obj.state){
-                    case "completed":
-                        return(
-                            <Tag icon={<CheckCircleOutlined />} color="success">
-                                abgeschlossen
-                            </Tag>
-                        );
-                    
-                    case "awaiting_payment":
-                        return(
-                            <Tag icon={<ClockCircleOutlined />} color="warning">
-                                Wartestellung
-                            </Tag>
-                        );
-                    default:
-                        return(
-                            <Tag icon={<CloseCircleOutlined />} color="error">
-                                abgebrochen
-                            </Tag>
-                        );
-                }
-            }
-        },
-        {
-            title: 'Transaktion',
-            dataIndex: 'id',
-            key: 'id',
-        },
-        {
-            title: 'Datum',
-            dataIndex: 'timestamp',
-            key: 'timestamp',
-            render: (_: any, obj: any) => {
-                //console.log(obj)
-                return new Date(obj.timestamp * 1000).toLocaleString('de',{timeZone:'Europe/Berlin', timeZoneName: 'short'});
-            }
-        },
-        {
-            title: 'Erworbene Tokens',
-            dataIndex: 'tokens',
-            key: 'tokens',
-        },
-        {
-            title: 'Betrag',
-            dataIndex: 'amount',
-            key: 'amount',
-            render: (_: any, obj: any) => {
-                return convertToCurrency(obj.amount);
-              }
-        },
-        {
-            title: 'Aktionen',
-            dataIndex: 'actions',
-            key: 'actions',
-            render: (_: any, obj: any) => {
-                if(obj.state == "awaiting_payment"){
-                    return (
-                        <div className={styles.actionrow}>
-                            <div className={styles.singleaction}>
-                                <Link href={`/order/invoice/${obj.id}`}>
-                                    <Tooltip title={"Rechnung herunterladen"}>
-                                        <FileTextOutlined style={{ fontSize: 20 }}/>
-                                    </Tooltip>
-                                </Link>
-                            </div>
-                            <div className={styles.singleaction}>
-                                <Link href={`${props.Data.paypalURL}/checkoutnow?token=${obj.id}`}>
-                                    <Tooltip title={"Einkauf fortsetzen"}>
-                                        <ShoppingCartOutlined style={{ fontSize: 20 }}/>
-                                    </Tooltip>
-                                </Link>
-                            </div>
-                        </div>
-                    );
-                }else{
-                    return (
-                        <div className={styles.actionrow}>
-                            <div className={styles.singleaction}>
-                                <Link href={`/order/invoice/${obj.id}`}>
-                                    <Tooltip title={"Rechnung herunterladen"}>
-                                        <FileTextOutlined style={{ fontSize: 20 }}/>
-                                    </Tooltip>
-                                </Link>
-                            </div>
-                        </div>
-                    );
-                }
-            }
-          },
-      ];
+            <div className={styles.orderactions}>
+              <h3>Aktionen</h3>
+              <List>
+                <List.Item className={styles.actiondetail}>
+                  <div className={styles.description}>Rechnung herunterladen:</div>
+                  <div><FileTextOutlined style={{ fontSize: 20 }} onClick={handlePrint}/>
+                    <div style={{ display: "none" }}>
+                      <Invoice company={company} user={user} order={order} ref={componentRef}></Invoice>
+                    </div>
+                  </div>
+                </List.Item>
+                {getContinuePayment()}
+              </List>
+            </div>
+          </div>
+        });
+      }
+    }
+     
+    return items;
+  }
 
   
-    return (
-        <SidebarLayout role={role} user={user} login={login}>
-            <div className={styles.main}>
-                <div className={styles.companyoverview}>
-                    <Card className={styles.tokeninformation} headStyle={{backgroundColor: "#F9FAFB"}} title={"Tokens"} bordered={true}>
-                        <div className={styles.tokeninfocard}>
-                            <h2>Dein Token-Budget</h2>
-                            <div className={styles.quotarow}>
-                            <div className={styles.tokenbudget}>{(company.unlimited)? "∞" : company.tokens} Tokens</div>
-                            </div>
-                        </div>
-                        <div className={styles.generatebuttonrow}>
-                            <Link href={"/upgrade"}>
-                                {(!company.unlimited)? <Button className={styles.backbutton} type='primary'>Weitere Tokens kaufen</Button> : <></>}
-                            </Link>
-                        </div>
-                    </Card>
-                    <Card className={styles.tokenusage} headStyle={{backgroundColor: "#F9FAFB"}} title={"Tokens"} bordered={true}>
-                        <div className={styles.tokeninfocard}>
-                            <h2>Verbrauch</h2>
-                            <div className={styles.usageinfo}>
-                                
-                                <div className={styles.barcontainer}>
-                                    <Bar
-                                        options={{
-                                            maintainAspectRatio: false,
-                                            plugins: {
-                                                legend: {
-                                                    position: 'top' as const,
-                                                },
-                                                title: {
-                                                    display: false,
-                                                    text: 'Chart.js Bar Chart',
-                                                },
-                                            },
-                                        }}
-                                        data={{
-                                            labels:  months,
-                                            datasets: [
-                                                {
-                                                    label: "Tokens",
-                                                    data: months.map((label, idx) => {
-                                                        let sum = 0;
-                                                        users.forEach((su: User) => {
-                                                          su.usedCredits.forEach((usage: Usage) => {
-                                                            if(usage.month == idx+1 && usage.year == new Date().getFullYear()){
-                                                                sum += usage.amount;
-                                                            }
-                                                          });
-                                                        })
-                                                        return sum;
-                                                    }),
-                                                    backgroundColor: 'rgba(16, 24, 40, 0.8)',
-                                                }
-                                            ]
-                                        }}
-                                    />
-                                </div>
-
-                            </div>
-                        </div>
-                        
-                    </Card>
-                </div>
-                <Card title={"Einkäufe"} bordered={true} headStyle={{backgroundColor: "#F9FAFB"}}>
-                    <Table dataSource={company.orders} columns={purchasecolumns} />
-                </Card>
+  return (
+    <SidebarLayout context={context}>
+      <div className={styles.main}>
+        <div className={styles.companyoverview}>
+          <Card ref={budgetRef} className={styles.tokeninformation} title={"Credits"} bordered={true}>
+            <div className={styles.tokeninfocard}>
+              <h2>
+                Dein Credit-Budget
+                <Popover content={getTokenDetailInformation} placement="bottom" title="Details">
+                  <span className={styles.tokeninformation}><InfoCircleOutlined /></span>
+                </Popover>
+              </h2>
+              <div className={styles.quotarow}>
+                <div className={styles.tokenbudget}>{( company.unlimited )? "∞" : `${Math.floor(normalizeTokens(company.tokens))}`} Credits</div>
+              </div>
             </div>
-        </SidebarLayout>
-    );
+            <div className={styles.generatebuttonrow}>
+              <Link href={"/upgrade"}>
+                {( !company.unlimited )? <Button ref={buyRef} className={styles.backbutton} onClick={() => {
+                  logEvent(analytics, "buy_tokens", {
+                    currentCredits: company.tokens
+                  });
+                }} type='primary'>Weitere Credits kaufen</Button> : <></>}
+              </Link>
+            </div>
+          </Card>
+          <Card ref={statRef} className={styles.tokenusage} title={"Credit-Verbrauch"} bordered={true}>
+            <div className={styles.tokeninfocard}>
+              <h2>Verbrauch</h2>
+              <div className={styles.usageinfo}>
+                                
+                <div className={styles.barcontainer}>
+                  <Bar
+                    options={{
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: "top" as const
+                        },
+                        title: {
+                          display: false,
+                          text: "Chart.js Bar Chart"
+                        }
+                      }
+                    }}
+                    data={{
+                      labels:  months,
+                      datasets: [
+                        {
+                          label: "Credits",
+                          data: months.map( ( label, idx ) => {
+                            let sum = 0;
+                            users.forEach( ( su: User ) => {
+                              su.usedCredits.forEach( ( usage: Usage ) => {
+                                if( usage.month == idx+1 && usage.year == new Date().getFullYear() ){
+                                  sum += parseFloat( ( usage.amount/1000 ).toFixed( 2 ) );
+                                }
+                              } );
+                            } )
+                            return sum;
+                          } ),
+                          backgroundColor: "rgba(16, 24, 40, 0.8)"
+                        }
+                      ]
+                    }}
+                  />
+                </div>
+
+              </div>
+            </div>
+                        
+          </Card>
+        </div>
+        <Card ref={orderRef} title={"Einkäufe"} bordered={true}>
+          {/*           <Table rowKey="id" scroll={{ x: true }} dataSource={company.orders} columns={purchasecolumns} />
+ */}          <Collapse items={getOrderItems()} />
+          <div className={styles.orderpagination}>
+            <Pagination onChange={(page: number) => {
+              setOrderPage(page);
+            }} defaultCurrent={1} pageSize={ordersperpage} total={company.orders.length} />
+          </div>
+        </Card>
+        <Tour open={open} onClose={async () => {
+          const currstate = user.tour;
+          currstate.usage = true;
+          updateData( "User", login.uid, { tour: currstate } );
+          setOpen( false );
+        }} steps={steps} />
+      </div>
+    </SidebarLayout>
+  );
 }

@@ -1,68 +1,88 @@
-
-
-.main {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    align-items: center;
-    height: 80vh;
-
-    .greetingrow {
-        .greeting {
-            font-size: 48px;
-            font-weight: 700;
-        }
-    
-        .greeting_subtitle{
-            font-size: 24px;
-            font-weight: 700;
-        }
-    }
-
-    .optioncontainer {
+@media (max-width: 992px) {
+    .main{
         display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        flex-wrap: wrap;
-        width: 100%;
+        flex-direction: column;
+        height: 100%;
+        padding-bottom: 200px;
+        margin-bottom: 200px;
 
-        .optionrow {
-            margin-top: 32px;
-            display: flex;
-            flex-direction: row;
+        .greetingrow {
+            width: 100%;
             
-            gap: 16px;
-
-    
-            .option {
-                width: 300px;
-                height: 100px;
-                background-color: #EAECF0;
-                border-radius: 12px;
-                padding: 25px;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                color: black;
-    
-                &:hover {
-                    cursor: pointer;
-                    border-width: 3px;
-                    border-style: solid;
-                    border-color: #1677ff;
-                    color: black;
-                }
-    
-                .option_title {
-                    font-size: 16px;
-                    font-weight: 700;
-                }
+            .greeting {
+                font-size: large;
+                font-weight: 700;
+                
+            }
+        
+            .greeting_subtitle{
+                font-size: 24px;
+                font-weight: 700;
             }
         }
     }
+}
 
-    
+@media (min-width: 993px) {
+    .main{
+        display: flex;
+        flex-direction: column;
+        height: 90vh;
+
+        .greetingrow {
+            width: 100%;
+            
+            .greeting {
+                font-size: 32px;
+                font-weight: 700;
+                
+            }
+        
+            .greeting_subtitle{
+                font-size: 24px;
+                font-weight: 700;
+            }
+        }
+    }
+}
+
+.main {
+
+    .dividerrow{
+        >* {
+            border-width: 2px;
+        }
+    }
+
+    .content{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100vh;
+
+        @media (max-width: 992px) {
+            .servicelist{
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 32px;
+            }
+        }
+
+        @media (min-width: 993px) {
+            .servicelist{
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 32px;
+            }
+        }
+
+        .bannersection{
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+    }
 }

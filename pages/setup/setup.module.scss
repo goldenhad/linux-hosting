@@ -1,9 +1,23 @@
 
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 0px) {
+    .loginform {
+        width: 25%;
+    }
+
+    .quadform{
+        flex-wrap: wrap;
+    }
+}
 
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 768px) {
     .loginform {
         width: 25%;
+    }
+
+    .quadform{
+        flex-wrap: wrap;
     }
 }
 
@@ -12,12 +26,27 @@
     .loginform {
         width: 25%;
     }
+
+    .quadform{
+        flex-wrap: nowrap;
+    }
 }
 
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 @media only screen and (min-width: 1200px) {
     .loginform {
         width: 25%;
+    }
+
+    .quadform{
+        flex-wrap: nowrap;
+    }
+}
+
+
+@media (max-width: 992px) {
+    .formContainer{
+        margin-top: 100px;
     }
 }
 
@@ -37,13 +66,16 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        height: 80vh;
+        height: 100vh;
 
         .formtitle{
             margin-bottom: 20px;
             font-size: 32px;
             font-weight: 700;
-            line-height: 44px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            text-align: center;
         }
 
         .formexplanation{
@@ -51,14 +83,32 @@
             font-size: 16px;
             line-height: 24px;
             margin-bottom: 32px;
+            text-align: center;
         }
 
         .stepcontainer{
             width: 70%;
             margin-top: 50px;
 
+            .quadform{
+                display: flex;
+                flex-direction: row;
+                gap: 32px;
+            }
+
+            .halfformcontainer{
+                width: 100%;
+            }
+
             .singlestep{
                 font-size: 16px;
+
+                .uploadcontainer{
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
+                    margin-bottom: 80px;
+                }
             }
 
             .stepformcontent{
@@ -93,6 +143,10 @@
             line-height: 20px;
             size: 14px;
             letter-spacing: 1%;
+
+            .formitemlabel{
+                margin-bottom: 16px;
+            }
   
             .forminput{
               background-color: white;

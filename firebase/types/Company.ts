@@ -6,7 +6,7 @@ export type CompanySettings = {
 export type Quota = {
     price: number;
     tokens: number;
-    features: Array<String>
+    features: Array<string>
 }
 
 export type Usage = {
@@ -25,6 +25,13 @@ export type Order = {
     invoiceId: string,
 }
 
+export type InvitedUser = {
+    email: string;
+    name: string;
+    role: string;
+    wasInvited: boolean;
+}
+
 export type Company = {
     name: string;
     street: string;
@@ -34,19 +41,23 @@ export type Company = {
     settings: CompanySettings;
     tokens: number;
     unlimited: boolean;
-    orders: Array<Order>
+    orders: Array<Order>;
+    recommended: boolean;
+    invitedUsers: Array<InvitedUser>;
 }
 
 export const basicCompany = {
-    name: "",
-    street: "",
-    city: "",
-    postalcode: "",
-    country: "",
-    settings: {
-        background: "",
-    },
-    tokens: 0,
-    unlimited: false,
-    orders: []
+  name: "",
+  street: "",
+  city: "",
+  postalcode: "",
+  country: "",
+  settings: {
+    background: ""
+  },
+  tokens: 0,
+  unlimited: false,
+  orders: [],
+  recommended: false,
+  invitedUsers: []
 }

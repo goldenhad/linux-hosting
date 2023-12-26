@@ -1,66 +1,116 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import OpenAI from 'openai';
-import { auth } from '../../../../firebase/admin'
+import type { NextApiRequest, NextApiResponse } from "next";
+import OpenAI from "openai";
+import { auth } from "../../../../firebase/admin"
+import { parseDialogPrompt } from "../../../../helper/prompt";
+import getDocument from "../../../../firebase/data/getData";
+import { encode } from "gpt-tokenizer";
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAIAPIKEY
-});
+const openai = new OpenAI( {
+  apiKey: process.env.OPENAIAPIKEY
+} );
 
 type ResponseData = {
     errorcode: number,
-    message: String,
+    message: string,
     tokens: number
 }
 
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
-    const token = await auth.verifyIdToken(req.cookies.token);
+export default async function handler( req: NextApiRequest, res: NextApiResponse<ResponseData | string> ) {
+  const token = await auth.verifyIdToken( req.cookies.token );
 
-    if(req.method == "POST"){
+  if( req.method == "POST" ){
         
-        if(token){
+    if( token ){
 
-            let data = req.body;
+      const data = req.body;
 
-            if(data.name && data.personal && data.dialog && data.continue && data.address && data.style && data.order && data.emotions && data.length ){
+      if( data.name != undefined &&
+         data.personal != undefined &&
+         data.dialog != undefined &&
+         data.continue != undefined &&
+         data.address != undefined &&
+         data.style != undefined &&
+         data.order != undefined &&
+         data.emotions != undefined &&
+         data.length != undefined &&
+         data.company != undefined
+      ){
                 
-                const prompt = `Mein Name ist ${data.name}. Ich bin ${data.personal}. Ich habe folgenden E-Mail-Dialog erhalten ${data.dialog}. Schreibe in meinem Namen eine Antwort auf den bisherigen Dialog, der dabei folgende Punkte berücksichtigt: "${data.continue}". Schreibe deine Antwort in der ${data.address}-Form. Der allgemeine Stil deiner Antwort sollte dabei ${data.style.toString()} sein. Schätze dein Gegenüber als ${data.order.toString()} ein. Die allgemeine Gemütslage der Nachricht sollte ${data.emotions.toString()} sein. Die Länge der Nachricht sollte ${data.length} sein.`
-            
-                try{
-                    const { data: completions, response: raw } = await openai.chat.completions.create({
-                        model: "gpt-4-1106-preview",
-                        messages: [
-                        { 
-                            role: 'user',
-                            content: prompt
-                        }],
-                    }).withResponse();
-    
-                    if(completions){
-                        if(completions.choices.length >= 1){
-                            if(completions.choices[0].message){
-                                if(completions.choices[0].message.content){
-            
-                                    return res.status(200).send({ errorcode: 0, message: completions.choices[0].message.content, tokens: (completions.usage?.total_tokens)? completions.usage?.total_tokens: -1 });
-                                }
-                            }
-                        }
-                    }
-                    
-                    return res.status(400).send({ errorcode: -1, message: "Error generating answer", tokens: -1});
-                }catch(E){
-                    //console.log(E);
-                    return res.status(400).send({ errorcode: -2, message: "Error generating answer", tokens: -1});
-                }
+        const templatereq = await getDocument( "Settings", "Prompts" );
 
-            }else{
-                return res.status(400).send({ errorcode: 3, message: "Missing Input!", tokens: -1 });
+        if( templatereq.result ){
+          const template = templatereq.result.data();
+
+          const prompt = parseDialogPrompt(
+            template.dialog,
+            data.name,
+            data.company,
+            data.personal,
+            data.dialog,
+            data.continue,
+            data.address,
+            data.style,
+            data.order,
+            data.emotions,
+            data.length
+          )
+
+          res.writeHead(200, {
+            Connection: "keep-alive",
+            "Content-Encoding": "none",
+            "Cache-Control": "no-cache",
+            "Content-Type": "text/event-stream"
+          });
+
+          try{
+            const response = await openai.chat.completions.create( {
+              model: "gpt-4-1106-preview",
+              messages: [
+                {
+                  role: "system",
+                  content: "Du bist ein Assistent zum Erstellen von Mails. Nutzer geben dir Informationen zu sich und ihrem Schreibstil, du erzeugst daraus eine E-Mail."+
+                  "Der Stil sollte sich am Nutzer orientieren"
+                },
+                { 
+                  role: "user",
+                  content: prompt
+                }],
+              stream: true
+            } );
+      
+            let text = "";
+            for await (const chunk of response) {
+              //console.log(chunk.choices[0].delta.content || "");
+              const singletoken = chunk.choices[0].delta.content || "";
+              res.write(singletoken);
+              res.flushHeaders();
+              if (chunk.choices[0].finish_reason === "stop") {
+                console.log("stop!!")
+              }
+              text += singletoken;
             }
-
-        }else{
-            return res.status(400).send({ errorcode: 2, message: "Authentication required!", tokens: -1 });
+  
+            const tokenCountRequest = encode(prompt).length;
+            const tokenCountResult = encode(text).length;
+            
+            return res.status(200).send(`<~${tokenCountResult + tokenCountRequest}~>`);
+          }catch( E ){
+            console.log(E);
+            return res.status( 400 ).send( { errorcode: -2, message: "Error generating answer", tokens: -1 } );
+          }
         }
+            
+        
+
+      }else{
+        return res.status( 500 ).send( { errorcode: 3, message: "Missing Input!", tokens: -1 } );
+      }
+
     }else{
-        return res.status(400).send({ errorcode: 1, message: "The request method is forbidden!", tokens: -1 });
+      return res.status( 400 ).send( { errorcode: 2, message: "Authentication required!", tokens: -1 } );
     }
+  }else{
+    return res.status( 400 ).send( { errorcode: 1, message: "The request method is forbidden!", tokens: -1 } );
+  }
 }

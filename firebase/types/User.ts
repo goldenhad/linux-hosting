@@ -1,6 +1,4 @@
 import { Usage } from "./Company";
-import { Profile } from "./Profile";
-
 
 export type MonologState = {
     profile: string,
@@ -19,9 +17,37 @@ export type DialogState = {
     length: string,
 }
 
+export type BlogState = {
+  profile: string,
+  content: string,
+  order: string,
+  length: string,
+}
+
 type State = {
     dialog: string
     monolog: string
+    blog: string
+}
+
+type RecommendState = {
+    timesUsed: number,
+}
+
+export type TourState = {
+    home: boolean,
+    dialog: boolean,
+    monolog: boolean,
+    blog: boolean,
+    usage: boolean,
+    profiles: boolean,
+    company: boolean
+}
+
+export type History = {
+  dialog: string
+  monolog: string
+  blog: string
 }
 
 export type User =  {
@@ -36,23 +62,50 @@ export type User =  {
     lastState: State,
     setupDone: boolean,
     salt: string,
-    inviteCode: string
+    inviteCode: string,
+    recommend: RecommendState,
+    tour: TourState,
+    services:{
+      favourites: Array<string>
+    }
+    history: History
 }
 
 export const basicUser: User = {
-    username: "",
-    Company: "",
-    firstname: "",
-    lastname: "",
-    email: "",
-    Role: "",
-    profiles: [],
-    usedCredits: [],
-    salt: "",
-    lastState: {
-        dialog: "",
-        monolog: ""
-    },
-    setupDone: false,
-    inviteCode: ""
+  username: "",
+  Company: "",
+  firstname: "",
+  lastname: "",
+  email: "",
+  Role: "",
+  profiles: [],
+  usedCredits: [],
+  salt: "",
+  lastState: {
+    dialog: "",
+    monolog: "",
+    blog: ""
+  },
+  setupDone: false,
+  inviteCode: "",
+  recommend: {
+    timesUsed: 0
+  },
+  tour: {
+    home: false,
+    dialog: false,
+    monolog: false,
+    blog: false,
+    usage: false,
+    profiles: false,
+    company: false
+  },
+  services: {
+    favourites: []
+  },
+  history: {
+    dialog: "",
+    monolog: "",
+    blog: ""
+  }
 }

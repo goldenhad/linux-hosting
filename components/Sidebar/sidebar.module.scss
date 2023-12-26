@@ -1,12 +1,49 @@
 .layout{
     min-height: 100vh;
-    background-color: #fff;
+    background-color: #F2F4F7;
     color: black;
+
+    .header{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0 15px;
+
+        .headerinteraction{
+            margin-left: auto;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+
+            .histicon{
+                font-size: 20px;
+                color: white;
+            }
+    
+            .headericon> svg{
+                font-size: 36px;
+                fill: transparent;
+                color: inherit;
+                stroke: inherit;
+            }
+        }
+
+        .headerlink{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+    }
 
     .sidebar {
         background-color: #101828;
         z-index: 1;
-
+        overflow: hidden;
+        height: 100vh;
+        position: fixed;
+        
         .logobox {
             display: flex;
             flex-direction: row;
@@ -19,23 +56,31 @@
         .navigation {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            min-height: 87vh;
+            justify-content: flex-start;
             background-color: #101828;
+            height: 88%;
 
             .primarymenu {
                 background-color: #101828;
             }
 
-            .secondarymenu {
-                background-color: #101828;
+            .sidebarbottomcontainer{
+                margin-top: auto;
+                margin-bottom: 16px;
+
+                .secondarymenu {
+                    background-color: #101828;
+                    margin-top: auto;
+                }
             }
+
+            
 
             .changelogrow{
                 display: flex;
                 flex-direction: row;
                 justify-content: center;
-                color: white;
+                color: #F2F4F7;
 
                 &:hover {
                     cursor: pointer;
@@ -52,7 +97,7 @@
                 flex-direction: row;
                 justify-content: center;
                 align-items: center;
-                margin-top: 20px;
+                margin-top: 5px;
 
                 &:hover{
                     cursor: pointer;
@@ -62,10 +107,17 @@
     }
 
     .layoutcontent{
-
         .childrencontainer{
-            padding: 30px;
-            background: white;
+            padding-top: 30px;
+            padding-left: 30px;
+            padding-right: 30px;
+            background: #F2F4F7;
+        }
+    }
+
+    @media (min-width: 992px) {
+        .layoutcontent{
+            margin-left: 80px;
         }
     }
     
@@ -121,6 +173,56 @@
 
     >:hover {
         cursor: pointer;
+    }
+}
+
+.mobiledrawer{
+    background-color: #101828;
+    .drawermenu{
+        display: flex;
+        flex-direction: column;
+       
+
+        .primarymenu {
+            background-color: #101828;
+            
+        }
+    }
+}
+
+@media (max-width: 992px) {
+    .sidebar{
+        display: none;
+    }
+
+    .mobilesidebarcontainer{
+        display: flex;
+        flex-direction: column;
+        width: 80px;
+        height: 100%;
+    }
+    .logobox {
+        padding-left: 20px;
+        padding-top: 16px;
+        padding-bottom: 16px;
+    }
+    .sidebariconsvg {
+        margin-right: 80px;
+        padding-left: 4px;
+    }
+
+    .sidebarbottomcontainer{
+        margin-top: auto;
+        margin-bottom: 16px;
+
+        .avatarcontainer{
+            padding-left: 20px;
+            margin-top: 5px;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
     }
 }
 

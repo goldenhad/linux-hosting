@@ -1,5 +1,7 @@
-import { initializeApp, getApps } from 'firebase/app';
+import { getAnalytics } from "firebase/analytics";
+import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 
 const firebaseConfig = {
@@ -9,9 +11,17 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 
-export let firebase_app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-export const db = getFirestore(firebase_app);
+export const firebase_app = getApps().length === 0 ? initializeApp( firebaseConfig ) : getApps()[0];
+export const db = getFirestore( firebase_app );
+export const drive = getStorage( firebase_app );
+
+let windowtest = null;
+if(typeof window !== "undefined"){
+  windowtest = getAnalytics(firebase_app);
+}
+
+export const analytics = windowtest;

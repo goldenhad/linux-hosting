@@ -11,3 +11,7 @@ export type InvoiceSettings = {
     last_used_number: number,
     number_offset: number
 }
+
+export type Calculations = {
+    tokensPerMail: number,
+}

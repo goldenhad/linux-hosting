@@ -1,328 +1,261 @@
-import { Card, Button, Form, Input, Select, Result, Skeleton, Space, Typography, Alert, Divider, List, Slider, Table, Avatar } from 'antd';
-import Icon from '@ant-design/icons';
-import styles from './account.module.scss'
-import { useEffect, useState } from 'react';
-import { GetServerSideProps } from 'next';
-import SidebarLayout from '../../components/Sidebar/SidebarLayout';
-import { useAuthContext } from '../../components/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { handleEmptyString } from '../../helper/architecture';
-import { usernameExists, usernameExistsAtDifferentUser } from '../../firebase/auth/userExists';
-import forgotpassword from '../../firebase/auth/forgot';
-import updateData from '../../firebase/data/updateData';
-var paypal = require('paypal-rest-sdk');
-const { Paragraph } = Typography;
-const { TextArea } = Input;
+import { Card, Button, Form, Input, Result, message, Modal } from "antd";
+import styles from "./account.module.scss"
+import { useEffect, useState } from "react";
+import SidebarLayout from "../../components/Sidebar/SidebarLayout";
+import { useAuthContext } from "../../components/context/AuthContext";
+import forgotpassword from "../../firebase/auth/forgot";
+import updateData from "../../firebase/data/updateData";
+import axios from "axios";
+import { TourState, User } from "../../firebase/types/User";
+import deleteData from "../../firebase/data/deleteData";
+import deleteSitewareUser from "../../firebase/auth/delete";
+import { getDocWhere } from "../../firebase/data/getData";
+import reauthUser from "../../firebase/auth/reauth";
+import { useRouter } from "next/router";
+import { deleteProfilePicture } from "../../firebase/drive/delete";
+import FatButton from "../../components/FatButton";
+import EditUserForm from "../../components/Forms/EditUserForm/EditUserForm";
+import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
 
 
 
-export interface InitialProps {
-  Data: {};
-}
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  //Get the context of the request
-  const { req, res } = ctx;
-  //Get the cookies from the current request
-  const { cookies } = req;
-
-
-  return {
-    props: {
-        Data: {}
-    },
-  };
-};
-
-
-function onlyUpdateIfSet(val, ideal){
-    if(val != ""){
-        return val;
-    }else{
-        return ideal;
-    }
-}
-
-
-export default function Account(props: InitialProps) {
-  const { login, user, company, role } = useAuthContext();
-  const router = useRouter();
+/**
+ * Account-Page
+ * 
+ * Page resolving around everything user account related
+ * 
+ */
+export default function Account() {
+  const context = useAuthContext();
+  const { login, user, company, role, profile } = context;
   const [ personalForm ] = Form.useForm();
-  const [ passwordForm ] = Form.useForm();
-  const [ wasReset, setWasReset ] = useState(false);
-  const [ isErrVisible, setIsErrVisible ] = useState(false);
-  const [ editSuccessfull, setEditSuccessfull ] = useState(false);
+  const [ wasReset, setWasReset ] = useState( false );
+  const [messageApi, contextHolder] = message.useMessage();
+  const [ deleteAccountModal, setDeleteAccountModal ] = useState( false );
+  const [ reauthSuccessfull, setReauthSuccessfull] = useState( false );
+  const [imageUrl, setImageUrl] = useState<string>( profile.picture );
+  const [loading, setLoading] = useState( false );
+  const router = useRouter();
 
-  useEffect(() => {
-    personalForm.setFieldValue("username", user.username);
-    personalForm.setFieldValue("email", login.email);
-    personalForm.setFieldValue("firstname", user.firstname);
-    personalForm.setFieldValue("lastname", user.lastname);
-    personalForm.setFieldValue("street", company.street);
-    personalForm.setFieldValue("postalcode", company.postalcode);
-    personalForm.setFieldValue("city", company.city);
-  }, []);
+  useEffect( () => {
+    // Init the edit account form with the values of the user
+    personalForm.setFieldValue( "username", user.username );
+    personalForm.setFieldValue( "email", login.email );
+    personalForm.setFieldValue( "firstname", user.firstname );
+    personalForm.setFieldValue( "lastname", user.lastname );
+    personalForm.setFieldValue( "street", company.street );
+    personalForm.setFieldValue( "postalcode", company.postalcode );
+    personalForm.setFieldValue( "city", company.city );
+
+    // eslint-disable-next-line
+  }, [] );
 
 
-  const saveAccountInfo = async () => {
-    let username = personalForm.getFieldValue("username");
-    let firstname = personalForm.getFieldValue("firstname");
-    let lastname = personalForm.getFieldValue("lastname");
 
-    let street = personalForm.getFieldValue("street");
-    let postalcode = personalForm.getFieldValue("postalcode");
-    let city = personalForm.getFieldValue("city");
-
-    let { result, error } = await updateData("User", login.uid, { 
-        username: onlyUpdateIfSet(username, user.username),
-        firstname: onlyUpdateIfSet(firstname, user.firstname),
-        lastname: onlyUpdateIfSet(lastname, user.lastname),
-    });
-
-    if(!error){
-        if(!role.isCompany){
-            let { result, error } = await updateData("Company", user.Company, { 
-                street: onlyUpdateIfSet(street, company.street),
-                postalcode: onlyUpdateIfSet(postalcode, company.postalcode),
-                city: onlyUpdateIfSet(city, company.city),
-            });
-        }
-
-        if(!error){
-            setIsErrVisible(false);
-            setEditSuccessfull(true);
-        }else{
-            setIsErrVisible(true);
-            setEditSuccessfull(false);
-        }
+  /**
+   * Local Component regarding the resetting of the users password
+   * @returns JSX regarding the password reset
+   */
+  function PasswordResetButton() {
+    if( wasReset ){
+      return(
+        <Result
+          status="success"
+          title={<div className={styles.passwordresetnotice}>Neues Passwort, Neues Glück – Dein Reset-Link ist Unterwegs!</div>}
+          subTitle={<div className={styles.passwordresetsubtitle}>Checke deine E-Mails – wir haben dir den Link zum Zurücksetzen deines Passworts geschickt! 🚀</div>}
+        />
+      );
     }else{
-        setIsErrVisible(true);
-        setEditSuccessfull(false);
-    }
+      return(
+        <FatButton onClick={async () => {
+          const { error } = await forgotpassword( login.email );
 
-  }
-
-  const getPersonalForm = () => {
-    if(role.isCompany){
-        return(
-            <Form layout='vertical' form={personalForm} onFinish={() => {saveAccountInfo()}} onChange={() => {setIsErrVisible(false), setEditSuccessfull(false)}}>
-                <div className={styles.formrow}>
-                    <Form.Item
-                        className={styles.formpart}
-                        name={"username"}
-                        label="Benutzername"
-                        rules={[
-                            () => ({
-                                async validator(_, value) {
-                                if(value != ""){
-                                    if (await usernameExistsAtDifferentUser(value, login.uid)) {
-                                        return Promise.reject(new Error('Dieser Benutzername wird bereits verwendet!'));
-                                        
-                                    }
-                                }
-                                return Promise.resolve();
-                                },
-                            }),
-                        ]}
-                    >
-                        <Input className={styles.forminput} />
-                    </Form.Item>
-                </div>
-
-                <div className={styles.formrow}>
-                    <Form.Item className={styles.formpart} name={"email"} label="E-Mail">
-                        <Input className={styles.forminput} disabled/>
-                    </Form.Item>
-                </div>
-
-                <div className={`${styles.formrow} ${styles.multiformrow}`}>
-                    <Form.Item className={styles.formpart} name={"firstname"} label="Vorname">
-                        <Input className={styles.forminput} />
-                    </Form.Item>
-
-                    <Form.Item className={styles.formpart} name={"lastname"} label="Nachname">
-                        <Input className={styles.forminput} />
-                    </Form.Item>
-                </div>
-
-                <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
-                    <Alert type='error' message={"Speichern fehlgeschlagen, bitte versuche es erneut!"} />
-                </div>
-
-                <div className={styles.successrow} style={{display: (editSuccessfull)? "block": "none"}}>
-                    <Alert type='success' message="Speichern erfolgreich!" />
-                </div>
-
-                <div className={styles.savebuttonrow}>
-                    <Button type='primary' className={styles.save} htmlType='submit'>Speichern</Button>
-                </div>
-            </Form>
-        );
-    }else{
-        return(
-            <Form layout='vertical' form={personalForm} onFinish={() => {saveAccountInfo()}} onChange={() => {setIsErrVisible(false), setEditSuccessfull(false)}}>
-                <Form.Item
-                        className={styles.formpart}
-                        name={"username"}
-                        label="Benutzername"
-                        rules={[
-                            () => ({
-                                async validator(_, value) {
-                                if(value != ""){
-                                    if (await usernameExistsAtDifferentUser(value, login.uid)) {
-                                        return Promise.reject(new Error('Dieser Benutzername wird bereits verwendet!'));
-                                        
-                                    }
-                                }
-                                return Promise.resolve();
-                                },
-                            }),
-                        ]}
-                    >
-                        <Input className={styles.forminput} />
-                </Form.Item>
-
-                <div className={styles.formrow}>
-                    <Form.Item className={styles.formpart} name={"email"} label="E-Mail">
-                        <Input className={styles.forminput} disabled/>
-                    </Form.Item>
-                </div>
-
-                <div className={`${styles.formrow} ${styles.multiformrow}`}>
-                    <Form.Item className={styles.formpart} name={"firstname"} label="Vorname">
-                        <Input className={styles.forminput} />
-                    </Form.Item>
-
-                    <Form.Item className={styles.formpart} name={"lastname"} label="Nachname">
-                        <Input className={styles.forminput} />
-                    </Form.Item>
-                </div>
-
-                <div className={`${styles.formrow} ${styles.multiformrow}`}>
-                    <Form.Item className={styles.formpart} name={"street"} label="Straße">
-                        <Input className={styles.forminput} />
-                    </Form.Item>
-
-                    <Form.Item className={styles.formpart} name={"postalcode"} label="PLZ">
-                        <Input className={styles.forminput} />
-                    </Form.Item>
-
-                    <Form.Item className={styles.formpart} name={"city"} label="Ort">
-                        <Input className={styles.forminput} />
-                    </Form.Item>
-                </div>
-
-                <div className={styles.errorrow} style={{display: (isErrVisible)? "block": "none"}}>
-                    <Alert type='error' message={"Speichern fehlgeschlagen, bitte versuche es erneut!"} />
-                </div>
-
-                <div className={styles.successrow} style={{display: (editSuccessfull)? "block": "none"}}>
-                    <Alert type='success' message="Speichern erfolgreich!" />
-                </div>
-
-                <div className={styles.savebuttonrow}>
-                    <Button type='primary' className={styles.save} htmlType='submit'>Speichern</Button>
-                </div>
-            </Form>
-        );
+          if ( !error ) {
+            setWasReset( true );
+          }
+        }} text="Passwort zurücksetzen" />
+      );
     }
   }
 
-
-  const sendResetMail = async () => {
-    const { result, error } = await forgotpassword(login.email);
-
-    if (error) {
-        //console.log(error);
-    }else{
-        setWasReset(true);
+  const resetTutorial = async () => {
+    const resetTutObj: TourState = {
+      home: false,
+      dialog: false,
+      monolog: false,
+      blog: false,
+      usage: false,
+      profiles: false,
+      company: false
     }
-};
-
-const getResetButton = () => {
-    if(wasReset){
-        return(
-            <Result
-                status="success"
-                title={<div className={styles.passwordresetnotice}>Neues Passwort, Neues Glück – Dein Reset-Link ist Unterwegs!</div>}
-                subTitle={<div className={styles.passwordresetsubtitle}>Checke deine E-Mails – wir haben dir den Link zum Zurücksetzen deines Passworts geschickt! 🚀</div>}
-            />
-        );
+    const { error } = await updateData( "User", login.uid, { tour: resetTutObj } );
+    if( error ){
+      messageApi.error( "Beim zurücksetzen des Tutorials ist etwas schiefgelaufen. Versuche es später nochmal!" );
     }else{
-        return(
-            <div className={styles.savebuttonrow}>
-                <Button type='primary' onClick={() => {sendResetMail()}} className={styles.save}>Passwort zurücksetzen</Button>
-            </div>
-        );
+      messageApi.success( "Tutorial zurückgesetzt!" );
     }
-}
+  }
+
+  const deleteUser = async () => {
+    // Check role of user...
+
+    switch ( user.Role ) {
+    case "Company-Admin":
+      const { result } = await getDocWhere( "User", "Company", "==", user.Company );
+      if( result ){
+        // Test if the current company-admin is the last person in the company
+        if( result.length > 1 ){
+          // If we are no the last person in the company, query the remaining users
+          const userOfCompany: Array<User & { id: string }> = result;
+
+          for( let i=0; i < userOfCompany.length; i++ ){
+            const userobj = userOfCompany[i];
+            if( userobj.id != login.uid ){
+              await axios.post( "/api/company/member", { id: userobj.id } );
+            }
+          }
+
+          await deleteProfilePicture( login.uid );
+          await deleteData( "User", login.uid );
+          await deleteData( "Company", user.Company );
+          await deleteSitewareUser();
+        }
+      }
+      break;
+
+    case "Company-Manager":
+      const cpmngrDeleteData = await deleteData( "User", login.uid );
+      if( !cpmngrDeleteData.error ){
+        await deleteProfilePicture( login.uid );
+        await deleteSitewareUser()
+      }
+      break;
+            
+    case "Mailagent":
+      // Mailagents can be deleted easily as they have no constraint on the company
+      const mlgntDeleteData = await deleteData( "User", login.uid );
+      if( !mlgntDeleteData.error ){
+        await deleteProfilePicture( login.uid );
+        await deleteSitewareUser()
+      }
+      break;
+
+    case "Singleuser":
+      const cmpnysnglSerDeleteData = await deleteData( "Company", user.Company );
+      console.log( cmpnysnglSerDeleteData );
+      if( !cmpnysnglSerDeleteData.error ){
+        const snglSerDeleteData = await deleteData( "User", login.uid );
+        console.log( snglSerDeleteData );
+        if( !snglSerDeleteData.error ){
+          await deleteProfilePicture( login.uid );
+          const deleteUserCall = await deleteSitewareUser();
+          console.log( deleteUserCall );
+        }
+      }
+      break;
+        
+    default:
+      break;
+    }
+
+    router.push( "/login" );
+  }
 
 
   return (
-    <SidebarLayout role={role} user={user} login={login}>
-      <div className={styles.main}>
-        <Avatar size={250} style={{ backgroundColor: '#f0f0f2', color: '#474747', fontSize: 100 }}>{handleEmptyString(user.firstname).toUpperCase().charAt(0)}{handleEmptyString(user.lastname).toUpperCase().charAt(0)}</Avatar>
-        <div className={styles.personal}>
-            <Card className={styles.personalcard} title="Persönliche Informationen" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
-                {getPersonalForm()}
+    <>
+      {contextHolder}
+      <SidebarLayout context={context}>
+        <div className={styles.main}>
+          <UploadProfileImage 
+            login={login}
+            image={{ url: imageUrl, set: setImageUrl }}
+            loading={{ state: loading, set: setLoading }}
+            messageApi={messageApi}
+            profile={profile}
+          />
+          <div className={styles.personal}>
+            <Card className={styles.personalcard} title="Persönliche Informationen" bordered={true}>
+              <EditUserForm form={personalForm} singleUser={!role.isCompany} user={user} login={login} company={company} messageApi={messageApi} />
             </Card>
-        </div>
-        <div className={styles.password}>
-            <Card className={styles.passwordcard} title="Passwort" headStyle={{backgroundColor: "#F9FAFB"}} bordered={true}>
-                {/* <Form layout='vertical' form={passwordForm}>
-                    <div className={styles.formrow}>
-                        <Form.Item
-                            className={styles.formpart}
-                            name={"password"}
-                            label="Passwort"
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Bitte geben Sie ein Password ein!',
-                                },
-                                () => ({
-                                    validator(_, value: string) {
-                                    if (value.length >= 6) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error('Das Passwort muss länger als 6 Zeichen sein!'));
-                                    },
-                                }),
-                            ]}
-                        >
-                            <Input type='password' className={styles.forminput} />
-                        </Form.Item>
-                    </div>
+          </div>
+          <div className={styles.password}>
+            <Card className={styles.passwordcard} title="Passwort" bordered={true}>
+              <PasswordResetButton />
+            </Card>
+          </div>
 
-                    <div className={styles.formrow}>
-                        <Form.Item
-                            className={styles.formpart}
-                            name={"passwordreapeted"}
-                            label="Passwort wiederholen"
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Bitte wiederholen Sie das Passwort!',
-                                },
-                                ({ getFieldValue }) => ({
-                                    validator(_, value) {
-                                    if (!value || getFieldValue('password') === value) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error('Die Passwörter stimmen nicht überein!'));
-                                    },
-                                }),
-                                
-                            ]}
-                        >
-                            <Input type='password' className={styles.forminput}/>
-                        </Form.Item>
-                    </div>
-                </Form> */}
-                {getResetButton()}
+          <div className={styles.password}>
+            <Card className={styles.passwordcard} title="Einstellungen" bordered={true}>
+              <FatButton onClick={() => {
+                resetTutorial()
+              }} text="Tutorial zurücksetzen" />
             </Card>
+          </div>
+
+          <div className={styles.deleteRow}>
+            <FatButton danger={true} onClick={() => {
+              setDeleteAccountModal( true )
+            }} text="Konto löschen" />
+
+            <Modal
+              open={deleteAccountModal}
+              title="Account wirklich löschen?"
+              onCancel={() => {
+                setDeleteAccountModal( false )
+              }}
+              footer={null}
+            >
+              <div>
+                <p>
+                    Achtung: Du bist dabei, dein Konto zu löschen. Beachte, dass nach der Löschung alle Daten endgültig entfernt werden und nicht wiederhergestellt
+                    werden können. Bitte logge dich noch einmal ein, um die Löschung abzuschließen.</p>
+                {( role.isCompany && role.canSetupCompany )?
+                  <>
+                    <br/>
+                    <p>
+                      <b>Wenn du dein Konto löschst, werden alle Konten deiner Firma gelöscht. Deine Mitarbeiter können sich dann nicht mehr einloggen!</b>
+                    </p>
+                  </> : <></>}
+                <div className={styles.reauthform}>
+                  {( !reauthSuccessfull )? <Form name="reauth" className={styles.loginform} layout='vertical' onFinish={async ( values ) => {
+                    const { error } = await reauthUser( values.email, values.password );
+                    if( error ){
+                      setReauthSuccessfull( false );
+                      messageApi.error("Fehler bei der Authentifizierung")
+
+                    }else{
+                      setReauthSuccessfull( true );
+                    }
+                  }}>
+                    <Form.Item
+                      label="E-Mail"
+                      name="email"
+                      className={styles.loginpart}
+                    >
+                      <Input className={styles.logininput} />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Passwort"
+                      name="password"
+                      className={styles.loginpart}
+                    >
+                      <Input.Password className={styles.logininput} />
+                    </Form.Item>
+
+
+                    <FatButton isSubmitButton={true} text="Login" />
+                  </Form>: <div className={styles.deletefinaly}><Button danger onClick={() => {
+                    deleteUser();
+                  }}>Konto entgültig löschen!</Button></div>}
+                </div>
+              </div>
+            </Modal>
+          </div>
         </div>
-      </div>
-    </SidebarLayout>
+      </SidebarLayout>
+    </>
   )
 }
+

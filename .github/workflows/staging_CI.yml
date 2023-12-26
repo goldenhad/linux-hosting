@@ -1,0 +1,79 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Staging CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  IMAGE_NAME: ghcr.io/printerboi/sitware_business_dev:latest
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    # - run: npm run build --if-present
+    - run: npm run lint
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Create sentry File
+      run: |
+          echo -e "${{ secrets.SENTRY_FILE }}" > .sentryclirc
+
+    - name: Create Firebase File
+      env:
+        JSON: ${{ secrets.FIREBASE_FILE }}
+      run: |
+          echo $JSON > mailbuddy_priv_key.json
+
+    - name: Create .env File
+      run: |
+          echo -e "${{ secrets.ENV_FILE }}" > .env
+
+    - name: Login
+      run: |
+        echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+    
+    - name: Build the Docker image
+      run: |
+        docker build . --file docker/production/Dockerfile --tag ${{ env.IMAGE_NAME }}
+        docker push ${{ env.IMAGE_NAME }}
+
+  deploy:
+    needs: publish
+    name: deploy image
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: install ssh keys
+      # check this thread to understand why its needed:
+      # <https://stackoverflow.com/a/70447517>
+      run: |
+        install -m 600 -D /dev/null ~/.ssh/id_rsa
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+    - name: connect and pull
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin && docker compose pull && docker compose up -d && exit"
+    - name: cleanup
+      run: rm -rf ~/.ssh

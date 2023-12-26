@@ -2,11 +2,19 @@ version: '3'
 
 services:
     mailbuddy:
-        build:
-            context: ../../
-            dockerfile: docker/development/Dockerfile
-        image: mailbuddy
+        image: ghcr.io/printerboi/sitware_business_dev:latest
         ports:
             - '3002:3000'
         volumes:
             - ./stats:/app/stats
+        networks:
+            - mailbuddynetwork
+            - proxynetwork
+
+
+networks:
+  mailbuddynetwork:
+    name: mailbuddynetwork
+  proxynetwork:
+    name: swag_proxynetwork
+    external: true

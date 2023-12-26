@@ -55,12 +55,10 @@ const HomeSidebarLayout = ( props: {
       setBreakpoint("lg");
       setCollapseWidth(0);
       setCollapsed(true);
-      console.log("mobile")
     }else{
       setCollapsed(true);
       setBreakpoint(undefined);
       setCollapseWidth(80);
-      console.log("desktop")
     }
   }, []);
 

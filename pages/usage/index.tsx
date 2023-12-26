@@ -316,7 +316,6 @@ export default function Usage( props: InitialProps ) {
             <div className={styles.generatebuttonrow}>
               <Link href={"/upgrade"}>
                 {( !company.unlimited )? <Button ref={buyRef} className={styles.backbutton} onClick={() => {
-                  console.log(analytics);
                   logEvent(analytics, "buy_tokens", {
                     currentCredits: company.tokens
                   });

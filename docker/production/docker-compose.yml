@@ -2,7 +2,7 @@ version: '3'
 
 services:
     mailbuddy:
-        image: ghcr.io/printerboi/sitware_business_dev:latest
+        image: ghcr.io/printerboi/siteware_business_prod:latest
         ports:
             - '3002:3000'
         volumes:

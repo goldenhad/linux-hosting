@@ -7,9 +7,6 @@ on:
   push:
     branches: [ "main" ]
 
-env:
-  IMAGE_NAME: ghcr.io/printerboi/sitware_business_dev:latest
-
 jobs:
   build:
     environment: staging
@@ -58,8 +55,8 @@ jobs:
     
     - name: Build the Docker image
       run: |
-        docker build . --file docker/production/Dockerfile --tag ${{ env.IMAGE_NAME }}
-        docker push ${{ env.IMAGE_NAME }}
+        docker build . --file docker/production/Dockerfile --tag ${{ vars.IMAGE_NAME }}
+        docker push ${{ vars.IMAGE_NAME }}
 
   deploy:
     environment: staging

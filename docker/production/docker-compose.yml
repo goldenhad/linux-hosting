@@ -4,7 +4,7 @@ services:
     mailbuddy:
         image: ghcr.io/printerboi/siteware_business_prod:latest
         ports:
-            - '3001:3000'
+            - '3002:3002'
         volumes:
             - ./stats:/app/stats
         networks:

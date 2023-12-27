@@ -239,7 +239,9 @@ const HomeSidebarLayout = ( props: {
                     <Icon component={Heart} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Favoriten</div>
                     <div className={styles.assistantcount}>
-                      <Badge className={styles.badge} status="default" color="#f2f4f7" count={props.context.user.services.favourites.length} />
+                      <Badge className={styles.badge} status="default" color="#f2f4f7" count={
+                        (props.context.user.services?.favourites)? props.context.user.services.favourites.length: 0}
+                      />
                     </div>
                   </List.Item>
                   <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
@@ -382,7 +384,9 @@ const HomeSidebarLayout = ( props: {
                       <Icon component={Heart} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Favoriten</div>
                       <div className={styles.assistantcount}>
-                        <Badge className={styles.badge} status="default" color="#f2f4f7" count={props.context.user.services.favourites.length} />
+                        <Badge className={styles.badge} status="default" color="#f2f4f7" count={
+                          (props.context.user.services?.favourites)? props.context.user.services.favourites.length: 0}
+                        />
                       </div>
                     </List.Item>
                     <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {

@@ -66,7 +66,9 @@ const UploadProfileImage = ( props: {
           onSuccess( file );
           props.messageApi.success("Hochladen erfolgreich!")
         } )
-        .catch( ( )=>{
+        .catch( ( e )=>{
+          console.log(e);
+          props.loading.set(false);
           props.messageApi.error("Hochladen fehlgeschlagen. Bitte versuche es später erneut!")
         } );
     }

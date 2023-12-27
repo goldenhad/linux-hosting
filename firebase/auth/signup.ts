@@ -42,6 +42,9 @@ export default async function signUp( firstname, lastname, email, username, pass
               Company: `${companycreationresult.result.id}`,
               profiles: [],
               usedCredits: [],
+              services: {
+                favourites: []
+              },
               lastState: {
                 dialog: "",
                 monolog: "",

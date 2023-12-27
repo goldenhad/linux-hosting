@@ -141,7 +141,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
             style={{ color: "#474747" }}
             src={props.context.profile.picture}
           >
-            {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
+            {(props.context.user.email)? props.context.user.email.charAt(0):""}
           </Avatar>
           <div className={styles.profileinfo}>Mein Account</div>
         </div>
@@ -269,7 +269,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
+                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
                     </Avatar>
                   </Popover>
                 </div>
@@ -340,7 +340,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
+                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
                     </Avatar>
                   </Popover>
                 </div>

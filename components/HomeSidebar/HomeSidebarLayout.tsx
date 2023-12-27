@@ -129,7 +129,7 @@ const HomeSidebarLayout = ( props: {
             style={{ color: "#474747" }}
             src={props.context.profile.picture}
           >
-            Mein Account
+            {(props.context.user.email)? props.context.user.email.charAt(0):""}
           </Avatar>
           <div className={styles.profileinfo}>Mein Account</div>
         </div>
@@ -215,7 +215,7 @@ const HomeSidebarLayout = ( props: {
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>Mein Account</>
+                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
                     </Avatar>
                   </Popover>
                 </div>
@@ -289,7 +289,7 @@ const HomeSidebarLayout = ( props: {
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>Mein Account</>
+                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
                     </Avatar>
                   </Popover>
                 </div>
@@ -358,7 +358,7 @@ const HomeSidebarLayout = ( props: {
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>Maximilian Krebs</>
+                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
                     </Avatar>
                   </Popover>
                 </div>

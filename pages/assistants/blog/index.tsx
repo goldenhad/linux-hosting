@@ -5,6 +5,7 @@ import { Profile } from "../../../firebase/types/Profile";
 import updateData from "../../../firebase/data/updateData";
 import AssistantBase from "../../../components/AssistantBase/AssistantBase";
 import BlogForm from "../../../components/AssistantForms/Blogform/Blogform";
+import { handleUndefinedTour } from "../../../helper/architecture";
 
 
 const blogBasicState = {
@@ -142,6 +143,7 @@ export default function Blog( ) {
       form={form}
       promptFunction={promptFunction}
       routes={ { count: "/api/prompt/blog/count", generate: "/api/prompt/blog/generate" } }
+      tourState={!handleUndefinedTour( user.tour ).blog}
     >
       <BlogForm form={form} state={context} refs={{
         profileRef: profileRef,

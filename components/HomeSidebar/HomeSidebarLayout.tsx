@@ -40,6 +40,8 @@ const HomeSidebarLayout = ( props: {
   const [ version, setVersion ] = useState( "" );
   const [ sidebaropen, setSidebarOpen ] = useState(false);
 
+  const [ screenwidth, setScreenwidth ] = useState(window.innerWidth);
+
   useEffect( () => {
     const setProfileImage = async () => {
       const url = await getImageUrl( props.context.login.uid );
@@ -51,7 +53,7 @@ const HomeSidebarLayout = ( props: {
 
   
   useEffect(() => {
-    if(isMobile || window.innerWidth < 992){
+    if(isMobile || screenwidth < 992){
       setBreakpoint("lg");
       setCollapseWidth(0);
       setCollapsed(true);
@@ -60,7 +62,21 @@ const HomeSidebarLayout = ( props: {
       setBreakpoint(undefined);
       setCollapseWidth(80);
     }
+  }, [screenwidth]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenwidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
+
 
   function getItem( label: React.ReactNode, key: React.Key, check: () => boolean, icon?: React.ReactNode, children?: MenuItem[] ): MenuItem {
     if( check() ){
@@ -151,7 +167,7 @@ const HomeSidebarLayout = ( props: {
   }
 
   const MobileHeader = () => {
-    if(isMobile || window.innerWidth < 992){
+    if(isMobile || screenwidth < 992){
       return(
         <Header className={styles.header}>
           <Link href={"/"} className={styles.headerlink}>
@@ -171,7 +187,7 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
-  if(isMobile || window.innerWidth < 992){
+  if(isMobile || screenwidth < 992){
     return (
       <ConfigProvider theme={{
         components: {
@@ -183,10 +199,13 @@ const HomeSidebarLayout = ( props: {
           Slider: {
             trackBg: "#1478FD",
             handleColor: "#1478FD"
+          },
+          Layout: {
+            headerBg: "#101828"
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!(isMobile || window.innerWidth < 992)}>
+        <Layout className={styles.layout} hasSider={!(isMobile || screenwidth < 992)}>
           <MobileHeader />
           <Drawer
             bodyStyle={{ backgroundColor: "#101828", padding: 0, display: "flex", flexDirection: "row", alignItems: "center" }}
@@ -223,6 +242,10 @@ const HomeSidebarLayout = ( props: {
             </div>
             <div className={styles.homesidebarcontainer_mobile}>
               <div className={styles.homesidebar}>
+                <div className={styles.logo}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={"/logo_w.svg"} alt="Logo" width={100}/>
+                </div>
                 <div className={styles.title}>Assistenten</div>
                 <List className={styles.assistantlist} split={false}>
                   <List.Item className={`${styles.assistantlink} ${isselected("all")}`} onClick={() => {
@@ -327,7 +350,7 @@ const HomeSidebarLayout = ( props: {
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!(isMobile || window.innerWidth < 992)}>
+        <Layout className={styles.layout} hasSider={!(isMobile || screenwidth < 992)}>
           <MobileHeader />
           <Sider
             className={styles.sidebar}
@@ -370,6 +393,10 @@ const HomeSidebarLayout = ( props: {
             <Content className={styles.layoutcontent}>
               <aside className={styles.homesidebarcontainer}>
                 <div className={styles.homesidebar}>
+                  <div className={styles.logo}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={"/logo.svg"} alt="Logo" width={100}/>
+                  </div>
                   <div className={styles.title}>Assistenten</div>
                   <List className={styles.assistantlist} split={false}>
                     <List.Item className={`${styles.assistantlink} ${isselected("all")}`} onClick={() => {

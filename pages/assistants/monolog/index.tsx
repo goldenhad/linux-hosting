@@ -5,6 +5,7 @@ import updateData from "../../../firebase/data/updateData";
 import AssistantBase from "../../../components/AssistantBase/AssistantBase";
 import MonologForm from "../../../components/AssistantForms/Monologform/Monologform";
 import { useRef } from "react";
+import { handleUndefinedTour } from "../../../helper/architecture";
 
 
 const monologBasicState = {
@@ -188,6 +189,7 @@ export default function Monologue( ) {
       form={form}
       promptFunction={promptFunction}
       routes={ { count: "/api/prompt/monolog/count", generate: "/api/prompt/monolog/generate" } }
+      tourState={!handleUndefinedTour( user.tour ).monolog}
     >
       <MonologForm form={form} state={context} refs={{
         profileRef: profileRef,

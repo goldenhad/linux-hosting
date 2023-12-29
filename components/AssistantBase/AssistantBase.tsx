@@ -11,7 +11,7 @@ import Info from "../../public/icons/info.svg";
 import Icon, { ArrowLeftOutlined, EyeOutlined, HistoryOutlined } from "@ant-design/icons";
 import SidebarLayout from "../Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
-import { handleEmptyString, handleUndefinedTour, normalizeTokens } from "../../helper/architecture";
+import { handleEmptyString, normalizeTokens } from "../../helper/architecture";
 import FatButton from "../FatButton";
 import Clipboard from "../../public/icons/clipboard.svg";
 import updateData from "../../firebase/data/updateData";
@@ -68,7 +68,8 @@ const AssistantBase = (props: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     promptFunction: (values: Record<string, any>, profile: Profile) => void,
     routes: { count: string, generate: string }
-    form
+    form,
+    tourState: boolean
 }) => {
   const [ decryptedProfiles, setDecryptedProfiles ] = useState( [] );
   const [ quotaOverused, setQuotaOverused ] =  useState( true );
@@ -86,7 +87,7 @@ const AssistantBase = (props: {
   const [ historyState, setHistoryState ] = useState([]);
   const [ cancleController, setCancleController ] = useState(new AbortController());
   const [ histOpen, setHistOpen ] = useState(false);
-  const [open, setOpen] = useState<boolean>( !handleUndefinedTour( props.context.user.tour ).blog );
+  const [open, setOpen] = useState<boolean>( props.tourState  );
   const router = useRouter();
 
   const now = new Date();

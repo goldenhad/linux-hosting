@@ -5,6 +5,7 @@ import { Profile } from "../../../firebase/types/Profile";
 import updateData from "../../../firebase/data/updateData";
 import AssistantBase from "../../../components/AssistantBase/AssistantBase";
 import DialogForm from "../../../components/AssistantForms/Dialogform/Dialogform";
+import { handleUndefinedTour } from "../../../helper/architecture";
 
 
 const dialogBasicState = {
@@ -205,6 +206,8 @@ export default function Dialogue( ) {
       form={form}
       promptFunction={promptFunction}
       routes={ { count: "/api/prompt/dialog/count", generate: "/api/prompt/dialog/generate" } }
+      tourState={!handleUndefinedTour( user.tour ).dialog}
+
     >
       <DialogForm form={form} state={context} refs={{
         profileRef: profileRef,

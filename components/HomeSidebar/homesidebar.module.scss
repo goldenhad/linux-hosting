@@ -94,13 +94,16 @@
             width: 281px;
             background-color: white;
             color: #344054;
-            padding: 36px 16px 0px 16px;
+            padding: 30px 16px 0px 16px;
             height: 100%;
 
             font-size: 16px;
             font-weight: 500;
 
             .homesidebar {
+                .logo{
+                    margin-bottom: 30px;
+                }
                 .assistantlist {
                     margin-top: 16px;
 
@@ -257,10 +260,14 @@
         background-color: #1D2939;
         color: white;
         padding-left: 20px;
-        padding-top: 32px;
+        padding-top: 20px;
 
         .title {
             margin-bottom: 10px;
+        }
+
+        .logo{
+            margin-bottom: 30px;
         }
 
         .assistantlist {

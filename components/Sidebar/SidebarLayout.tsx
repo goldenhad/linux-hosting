@@ -38,6 +38,8 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
 
   const [ sidebaropen, setSidebarOpen ] = useState(false);
 
+  const [ screenwidth, setScreenwidth ] = useState(window.innerWidth);
+
   useEffect( () => {
     const setProfileImage = async () => {
       const url = await getImageUrl( props.context.login.uid );
@@ -49,7 +51,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
 
 
   useEffect(() => {
-    if(isMobile || window.innerWidth < 992){
+    if(isMobile || screenwidth < 992){
       setBreakpoint("lg");
       setCollapseWidth(0);
       setCollapsed(true);
@@ -58,6 +60,19 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
       setBreakpoint(undefined);
       setCollapseWidth(80);
     }
+  }, [screenwidth]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenwidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
 
@@ -141,7 +156,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
             style={{ color: "#474747" }}
             src={props.context.profile.picture}
           >
-            {handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}
+            {(props.context.user.email)? props.context.user.email.charAt(0):""}
           </Avatar>
           <div className={styles.profileinfo}>Mein Account</div>
         </div>
@@ -157,7 +172,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
   );
 
   const MobileHeader = () => {
-    if(isMobile || window.innerWidth < 992){
+    if(isMobile || screenwidth < 992){
       return(
         <Header className={styles.header}>
           <Link href={"/"} className={styles.headerlink}>
@@ -187,7 +202,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     }
   }
   
-  if(isMobile || window.innerWidth < 992){
+  if(isMobile || screenwidth < 992){
     return (
       <ConfigProvider theme={{
         components: {
@@ -202,7 +217,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!(isMobile || window.innerWidth < 992)}>
+        <Layout className={styles.layout} hasSider={!(isMobile || screenwidth < 992)}>
           <MobileHeader />
           <Drawer
             style={{ backgroundColor: "#101828" }}
@@ -269,7 +284,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
+                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
                     </Avatar>
                   </Popover>
                 </div>
@@ -309,7 +324,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!(isMobile || window.innerWidth < 992)}>
+        <Layout className={styles.layout} hasSider={!(isMobile || screenwidth < 992)}>
           <Sider
             width={80}
             className={`${styles.sidebar}`}
@@ -340,7 +355,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                       style={{ color: "#474747" }}
                       src={props.context.profile.picture}
                     >
-                      <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
+                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
                     </Avatar>
                   </Popover>
                 </div>

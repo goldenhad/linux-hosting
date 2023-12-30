@@ -142,7 +142,7 @@ const HomeSidebarLayout = ( props: {
         <div className={styles.profile}>
           <Avatar
             size={40}
-            style={{ color: "#474747" }}
+            style={{ color: "#474747", backgroundColor: "#F2F4F7" }}
             src={props.context.profile.picture}
           >
             {(props.context.user.email)? props.context.user.email.charAt(0):""}
@@ -163,6 +163,14 @@ const HomeSidebarLayout = ( props: {
   const isselected = (name: string) => {
     if(name == props.category.value){
       return styles.selectedcat;
+    }
+  }
+
+  const FavouriteBadge = () => {
+    if(props.context.user.services?.favourites) {
+      return(
+        <Badge className={styles.badge} status="default" color="#f2f4f7" count={props.context.user.services.favourites.length}/>
+      );
     }
   }
 
@@ -231,10 +239,10 @@ const HomeSidebarLayout = ( props: {
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ color: "#474747" }}
+                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
                     >
-                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
+                      {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
                   </Popover>
                 </div>
@@ -262,9 +270,7 @@ const HomeSidebarLayout = ( props: {
                     <Icon component={Heart} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Favoriten</div>
                     <div className={styles.assistantcount}>
-                      <Badge className={styles.badge} status="default" color="#f2f4f7" count={
-                        (props.context.user.services?.favourites)? props.context.user.services.favourites.length: 0}
-                      />
+                      <FavouriteBadge />
                     </div>
                   </List.Item>
                   <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
@@ -309,10 +315,10 @@ const HomeSidebarLayout = ( props: {
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ color: "#474747" }}
+                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
                     >
-                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
+                      {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
                   </Popover>
                 </div>
@@ -378,10 +384,10 @@ const HomeSidebarLayout = ( props: {
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ color: "#474747" }}
+                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
                     >
-                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
+                      {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
                   </Popover>
                 </div>
@@ -411,9 +417,7 @@ const HomeSidebarLayout = ( props: {
                       <Icon component={Heart} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Favoriten</div>
                       <div className={styles.assistantcount}>
-                        <Badge className={styles.badge} status="default" color="#f2f4f7" count={
-                          (props.context.user.services?.favourites)? props.context.user.services.favourites.length: 0}
-                        />
+                        <FavouriteBadge />
                       </div>
                     </List.Item>
                     <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {

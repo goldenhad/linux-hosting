@@ -48,7 +48,7 @@ export default function Home() {
   const steps: TourProps["steps"] = [
     {
       title: "Willkommen",
-      description: "Willkommen bei Siteware.Mail, dem Ort, an dem wir das E-Mail-Schreiben revolutionieren! Unser Ziel ist es, "+
+      description: "Willkommen bei Siteware.Business, dem Ort, an dem wir das E-Mail-Schreiben revolutionieren! Unser Ziel ist es, "+
       "deine E-Mail-Kommunikation effizienter und angenehmer zu gestalten. Wir bieten dir innovative Funktionen, die deine E-Mail-Erfahrung "+
       "vereinfachen und verbessern. Im folgenden wollen wir dir in diesen Tutorials die wichtigsten Funktionen näher erklären.",
       nextButtonProps: {
@@ -81,7 +81,7 @@ export default function Home() {
       title: "Mail-Dialog fortsetzen",
       description: "Die Funktion \"Mail-Dialog fortsetzen\" ermöglicht es dir, einen bestehenden E-Mail-Verlauf nahtlos fortzuführen. "+
       "Hierbei kannst du einfach den bisherigen E-Mail-Verlauf in das System einfügen und spezifizieren, wie deine gewünschte Antwort aussehen "+
-      "soll. Basierend auf deinen Vorgaben und dem Kontext des E-Mail-Verlaufs generiert Siteware.Mail automatisch eine passende Antwort.",
+      "soll. Basierend auf deinen Vorgaben und dem Kontext des E-Mail-Verlaufs generiert Siteware.Business automatisch eine passende Antwort.",
       target: () => dialogRef.current,
       nextButtonProps: {
         children: (
@@ -98,7 +98,7 @@ export default function Home() {
       title: "E-Mail schreiben",
       description: "Die Funktion \"E-Mail schreiben\" ist ein leistungsstarkes Tool, das dir dabei hilft, schnell und effektiv E-Mails zu verfassen. "+
       "Als Nutzer spezifizierst du einfach den gewünschten Inhalt oder den Hauptzweck deiner E-Mail, zum Beispiel eine Terminanfrage, ein Update für "+
-      "ein Projekt oder eine Rückmeldung zu einer Anfrage. Basierend auf deinen Angaben generiert Siteware.Mail dann einen professionellen und "+
+      "ein Projekt oder eine Rückmeldung zu einer Anfrage. Basierend auf deinen Angaben generiert Siteware.Business dann einen professionellen und "+
       "kohärenten E-Mail-Text, der genau auf deine Bedürfnisse zugeschnitten ist.",
       target: () => monologRef.current,
       nextButtonProps: {
@@ -115,7 +115,7 @@ export default function Home() {
     {
       title: "Blogbeitrag erzeugen",
       description: "Die Funktion \"Blogbeitrag erzeugen\" dient dazu, voll automatisch fesselnde Blogbeiträge zu verfassen. "+
-      "Nachdem du das Thema des Blogtexts sowie individuelle Parameter festgelegt hast, generiert Siteware.Mail automatisch einen professionellen und "+
+      "Nachdem du das Thema des Blogtexts sowie individuelle Parameter festgelegt hast, generiert Siteware.Business automatisch einen professionellen und "+
       "ansprechenden Blogtext, ganz nach Deinen Vorstellungen.",
       target: () => monologRef.current,
       nextButtonProps: {

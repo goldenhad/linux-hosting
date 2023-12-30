@@ -34,7 +34,7 @@ export default function Dialogue( ) {
   const steps: TourProps["steps"] = [
     {
       title: "Dialog forsetzen",
-      description: "Mit dem \"E-Mail Dialog-Fortsetzen-Feature\" von Siteware.Mail kannst du deine E-Mail-Konversationen "+
+      description: "Mit dem \"E-Mail Dialog-Fortsetzen-Feature\" von Siteware.Business kannst du deine E-Mail-Konversationen "+
       "einfach und effizient fortsetzen. Ich werde dir gleich die wichtigsten Parameter genauer erklären, damit du das Tool optimal nutzen kannst.",
       nextButtonProps: {
         children: (

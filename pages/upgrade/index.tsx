@@ -139,7 +139,7 @@ export default function Upgrade( props: InitialProps ) {
           </div>
           <Card className={styles.quoatacard} bordered={true}>
             <div className={styles.tokenrow}>
-              <div className={styles.tokens}>{normalizeTokens(calculateTokens())}</div>
+              <div className={styles.tokens}>{normalizeTokens(calculateTokens()).toFixed(0)}</div>
               <div className={styles.tokeninfo}>Anzahl Credits</div>
             </div>
             <Form>

@@ -153,7 +153,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
         <div className={styles.profile}>
           <Avatar
             size={40}
-            style={{ color: "#474747" }}
+            style={{ color: "#474747", backgroundColor: "#F2F4F7" }}
             src={props.context.profile.picture}
           >
             {(props.context.user.email)? props.context.user.email.charAt(0):""}
@@ -244,10 +244,10 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ color: "#474747" }}
+                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
                     >
-                      <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
+                      <>{(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}</>
                     </Avatar>
                   </Popover>
                 </div>
@@ -281,10 +281,10 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ color: "#474747" }}
+                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
                     >
-                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
+                      {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
                   </Popover>
                 </div>
@@ -352,10 +352,10 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ color: "#474747" }}
+                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
                     >
-                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
+                      {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
                   </Popover>
                 </div>

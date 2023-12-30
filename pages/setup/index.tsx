@@ -171,7 +171,7 @@ export default function Setup(){
             title: "Wie schreibst du deine Mails?",
             content: <div className={styles.singlestep}>
               <Paragraph>
-                Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
+                Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Business ihn perfekt imitieren kann. 
                 Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
               </Paragraph>
               <div className={styles.formpart}>
@@ -296,7 +296,7 @@ export default function Setup(){
             title: "Wie schreibst du deine Mails?",
             content: <div className={styles.singlestep}>
               <Paragraph>
-                Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
+                Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Business ihn perfekt imitieren kann. 
                 Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
               </Paragraph>
               <div className={styles.formpart}>
@@ -398,7 +398,7 @@ export default function Setup(){
           title: "Wie schreibst du deine Mails?",
           content: <div className={styles.singlestep}>
             <Paragraph>
-              Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
+              Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Business ihn perfekt imitieren kann. 
               Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
             </Paragraph>
             <div className={styles.formpart}>
@@ -563,7 +563,7 @@ export default function Setup(){
         </div>
 
         <div className={styles.formContainer}>
-          <div className={styles.formtitle}>Willkommen bei Siteware.Mail</div>
+          <div className={styles.formtitle}>Willkommen bei Siteware.Business</div>
           <div className={styles.formexplanation}>Wir müssen zuerst dein Konto einrichten<br/>Keine Sorge, es dauert nicht lang!</div>
                     
           <div className={styles.stepcontainer}>
@@ -590,7 +590,7 @@ export default function Setup(){
               )}
               {current === getFormSteps().length - 1 && (
                 <Button type="primary" onClick={() => setupUser()} loading={promptProcesing}>
-                  Zu Siteware.Mail
+                  Zu Siteware.Business
                 </Button>
               )}
               {current > 0 && (

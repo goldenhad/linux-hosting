@@ -31,7 +31,7 @@ export default function Blog( ) {
   const steps: TourProps["steps"] = [
     {
       title: "Ein neuer Blogbeitrag",
-      description: "Mit dem \"Blogbeitrag schreiben\"-Feature von Siteware.Mail kannst du mithilfe verschiedener Parameter einen Blogbeitrag erstellen. "+
+      description: "Mit dem \"Blogbeitrag schreiben\"-Feature von Siteware.Business kannst du mithilfe verschiedener Parameter einen Blogbeitrag erstellen. "+
       "Ich werde dir nun die wichtigsten Parameter vorstellen, damit du das Tool optimal nutzen kannst.",
       nextButtonProps: {
         children: "Weiter"

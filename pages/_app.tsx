@@ -66,7 +66,7 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
       <>
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <meta property="og:title" content="Siteware.Mail dein intelligenter Mail-Assistent" />
+          <meta property="og:title" content="Siteware.Business dein intelligenter Mail-Assistent" />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/ogimage.jpg" />
           <meta name="viewport" content="initial-scale=1, maximum-scale=1" />
@@ -84,7 +84,7 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
       <>
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <meta property="og:title" content="Siteware.Mail dein intelligenter Mail-Assistent" />
+          <meta property="og:title" content="Siteware.Business dein intelligenter Mail-Assistent" />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/ogimage.jpg" />
           <meta property="og:url" content={`${process.env.BASEURL}`} />

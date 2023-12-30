@@ -107,10 +107,5 @@ export const onlyUpdateIfSet = ( val, ideal ) => {
 }
 
 export const normalizeTokens = (token: number) => {
-  console.log(token);
   return parseFloat((token/500).toFixed(2));
-}
-
-function reducer(state, item) {
-  return [...state, item]
 }

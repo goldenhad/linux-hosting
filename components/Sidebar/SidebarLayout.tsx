@@ -6,8 +6,7 @@ import { Avatar, ConfigProvider, Divider, Drawer, FloatButton, Layout, Menu, Pop
 import Link from "next/link";
 import { useRouter } from "next/router";
 const { Header, Content, Footer, Sider } = Layout;
-import { User, basicUser } from "../../firebase/types/User";
-import { handleEmptyString } from "../../helper/architecture";
+import { User } from "../../firebase/types/User";
 import styles from "./sidebar.module.scss";
 import Home from "../../public/icons/home.svg";
 import Nav from "../../public/icons/nav.svg";
@@ -138,22 +137,13 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     }
   }
 
-  const getUser = () =>{
-    if( props.context.user != null ){
-      return props.context.user;
-    }else{
-      return basicUser;
-    }
-  }
-
-
   const profilemenu = (
     <div className={styles.avatarmenu}>
       <Link href={"/account"} className={styles.accountlink}>
         <div className={styles.profile}>
           <Avatar
             size={40}
-            style={{ color: "#474747" }}
+            style={{ color: "#474747", backgroundColor: "#F2F4F7" }}
             src={props.context.profile.picture}
           >
             {(props.context.user.email)? props.context.user.email.charAt(0):""}
@@ -244,10 +234,10 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ color: "#474747" }}
+                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
                     >
-                      <>{handleEmptyString( getUser().firstname ).toUpperCase().charAt( 0 )}{handleEmptyString( getUser().lastname ).toUpperCase().charAt( 0 )}</>
+                      <>{(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}</>
                     </Avatar>
                   </Popover>
                 </div>
@@ -281,10 +271,10 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ color: "#474747" }}
+                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
                     >
-                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
+                      {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
                   </Popover>
                 </div>
@@ -352,10 +342,10 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={{ color: "#474747" }}
+                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
                     >
-                      {(props.context.user.email)? props.context.user.email.charAt(0):""}
+                      {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
                   </Popover>
                 </div>

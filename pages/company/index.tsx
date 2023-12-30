@@ -179,7 +179,7 @@ export default function Company( props: InitialProps ) {
       },
       {
         title: "Weitere Teammitglieder einladen",
-        description: "Falls weitere Mitglieder deiner Firma die Funktionen von Siteware.Mail benötigen,"+
+        description: "Falls weitere Mitglieder deiner Firma die Funktionen von Siteware.Business benötigen,"+
         " hast du hier die Möglichkeit, sie direkt einzuladen.",
         target: () => inviteRef.current,
         nextButtonProps: {
@@ -237,7 +237,7 @@ export default function Company( props: InitialProps ) {
       {
         title: "Statistik zur Nutzung",
         description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Mails deine Firma über das "+
-        "aktuelle Jahr mit Siteware.Mail bereits verbraucht hat und wie viele Mails"+
+        "aktuelle Jahr mit Siteware.Business bereits verbraucht hat und wie viele Mails"+
         " noch auf eurem Konto verfügbar sind.",
         target: () => budgetRef.current,
         nextButtonProps: {
@@ -270,7 +270,7 @@ export default function Company( props: InitialProps ) {
       {
         title: "Eure bisherigen Einkäufe",
         description: "In der untenstehenden Tabelle findet ihr eine Übersicht eurer bisherigen Einkäufe bei "+
-        "Siteware.Mail. Hier habt ihr die Möglichkeit, Rechnungen herunterzuladen und unterbrochene"+
+        "Siteware.Business. Hier habt ihr die Möglichkeit, Rechnungen herunterzuladen und unterbrochene"+
         " Einkäufe abzuschließen.",
         target: () => orderRef.current,
         nextButtonProps: {
@@ -859,7 +859,7 @@ export default function Company( props: InitialProps ) {
       setInviteUserModalOpen( false );
     }catch( e ){
       setIsInviteErrVisible( true );
-      setInviteErrMsg( "Ein Nutzer mit dieser E-Mail Adresse nutzt Siteware.Mail bereits!" );
+      setInviteErrMsg( "Ein Nutzer mit dieser E-Mail Adresse nutzt Siteware.Business bereits!" );
     }
   }
 

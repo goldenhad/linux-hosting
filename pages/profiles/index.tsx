@@ -547,7 +547,7 @@ export default function Profiles() {
           title: "Wie schreibst du deine Mails?",
           content: <div className={styles.singlestep}>
             <Paragraph>
-              Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
+              Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Business ihn perfekt imitieren kann. 
               Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
             </Paragraph>
             <div className={styles.formpart}>
@@ -697,7 +697,7 @@ export default function Profiles() {
           title: "Wie schreibst du deine Mails?",
           content: <div className={styles.singlestep}>
             <Paragraph>
-              Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Mail ihn perfekt imitieren kann. 
+              Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Business ihn perfekt imitieren kann. 
               Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
             </Paragraph>
             <div className={styles.formpart}>

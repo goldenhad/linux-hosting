@@ -32,7 +32,7 @@ export default function Monologue( ) {
   const steps: TourProps["steps"] = [
     {
       title: "E-Mail schreiben",
-      description: "Das \"E-Mail schreiben\"-Feature von Siteware.Mail ermöglicht es dir, aus einem kurz skizzierten Inhalt eine E-Mail zu generieren, "+
+      description: "Das \"E-Mail schreiben\"-Feature von Siteware.Business ermöglicht es dir, aus einem kurz skizzierten Inhalt eine E-Mail zu generieren, "+
       "indem du verschiedene Parameter eingibst, um den Inhalt genauer zu definieren. Ich werde dir gleich die wichtigsten Parameter"+
       " genauer erklären, damit du das Tool optimal nutzen kannst.",
       nextButtonProps: {

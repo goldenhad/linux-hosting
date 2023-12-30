@@ -128,7 +128,7 @@ export default function Usage( props: InitialProps ) {
     },
     {
       title: "Statistik",
-      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Credits du über das aktuelle Jahr mit Siteware.Mail bereits verbraucht hast.",
+      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Credits du über das aktuelle Jahr mit Siteware.Business bereits verbraucht hast.",
       target: () => statRef.current,
       nextButtonProps: {
         children: (
@@ -143,7 +143,7 @@ export default function Usage( props: InitialProps ) {
     },
     {
       title: "Deine bisherigen Einkäufe",
-      description: "In dieser Tabelle findet ihr eine Übersicht deiner bisherigen Einkäufe bei Siteware.Mail. Hier hast du die Möglichkeit, "+
+      description: "In dieser Tabelle findet ihr eine Übersicht deiner bisherigen Einkäufe bei Siteware.Business. Hier hast du die Möglichkeit, "+
       "Rechnungen herunterzuladen und unterbrochene Einkäufe abzuschließen.",
       target: () => orderRef.current,
       nextButtonProps: {
@@ -220,6 +220,22 @@ export default function Usage( props: InitialProps ) {
         </List>
       </div>
     );
+  }
+
+  const PurchaseInformation = () => {
+    if(company.orders.length > 0){
+      return(
+        <>
+          <Collapse items={getOrderItems()} /><div className={styles.orderpagination}>
+            <Pagination onChange={(page: number) => {
+              setOrderPage(page);
+            } } defaultCurrent={1} pageSize={ordersperpage} total={company.orders.length} />
+          </div>
+        </>
+      );
+    }else{
+      return(<div className={styles.nopurchase}>Noch keine Einkäufe</div>);
+    }
   }
 
 
@@ -371,13 +387,7 @@ export default function Usage( props: InitialProps ) {
           </Card>
         </div>
         <Card ref={orderRef} title={"Einkäufe"} bordered={true}>
-          {/*           <Table rowKey="id" scroll={{ x: true }} dataSource={company.orders} columns={purchasecolumns} />
- */}          <Collapse items={getOrderItems()} />
-          <div className={styles.orderpagination}>
-            <Pagination onChange={(page: number) => {
-              setOrderPage(page);
-            }} defaultCurrent={1} pageSize={ordersperpage} total={company.orders.length} />
-          </div>
+          <PurchaseInformation />
         </Card>
         <Tour open={open} onClose={async () => {
           const currstate = user.tour;

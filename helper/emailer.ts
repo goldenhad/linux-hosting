@@ -25,7 +25,7 @@ export async function sendMail( receiver: string, subject: string, text: string,
   const sender = process.env.MAILUSER;
     
   const mailReturn = await createTransport().sendMail( {
-    from: `"Siteware.Mail | Siteware" <${sender}>`,
+    from: `"Siteware.Business | Siteware" <${sender}>`,
     to: receiver,
     subject: subject,
     text: text,

@@ -42,29 +42,30 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
           try {
             const text = `Hallo ${data.firstname} ${data.lastname},\n\ndu wurdest von ${data.invitedbyname} von ${data.companyname} 
-            zu Siteware.Mail eingeladen, unserem innovativen Tool, 
-            das das E-Mail-Schreiben revolutioniert.\n\nKlicke hier, um dich zu registrieren: ${baseurl}/register?invite=${invitecode}\n\nMit Siteware.Mail 
+            zu Siteware.Business eingeladen, unserem innovativen Tool, 
+            das das E-Mail-Schreiben revolutioniert.\n\nKlicke hier, um dich zu registrieren: ${baseurl}/register?invite=${invitecode}\n\nMit Siteware.Business 
             erlebst du E-Mail-Kommunikation schneller, smarter und effizienter. Melde dich an und entdecke die Vorteile!\n\nBei Fragen sind wir jederzeit für 
-            dich da.\n\nViel Spaß!\n\nBeste Grüße,\nSiteware.Mail Team`;
+            dich da.\n\nViel Spaß!\n\nBeste Grüße,\nSiteware.Business Team`;
 
             const html = `<div>
                             <p>Hallo ${data.firstname} ${data.lastname},</p>
 
-                            <p>du wurdest von ${data.invitedbyname} von ${data.companyname} zu Siteware.Mail eingeladen, unserem innovativen Tool, 
+                            <p>du wurdest von ${data.invitedbyname} von ${data.companyname} zu Siteware.Business eingeladen, unserem innovativen Tool, 
                             das das E-Mail-Schreiben revolutioniert.</p>
                     
                             <p><a href="${baseurl}/register?invite=${invitecode}">Klicke hier, um dich zu registrieren</a></p>
                     
-                            <p>Mit <em>Siteware.Mail</em> erlebst du E-Mail-Kommunikation schneller, smarter und effizienter. Melde dich an und entdecke die Vorteile!</p>
+                            <p>Mit <em>Siteware.Business</em> erlebst du E-Mail-Kommunikation schneller, smarter und effizienter.
+                            Melde dich an und entdecke die Vorteile!</p>
                     
                             <p>Bei Fragen sind wir jederzeit für dich da.</p>
                     
                             <p>Viel Spaß!</p>
                     
                             <p>Beste Grüße,<br>
-                            dein Siteware.Mail Team</p>
+                            dein Siteware.Business Team</p>
                         `;
-            await sendMail( data.email, "Deine Einladung zu Siteware.Mail", text, html );
+            await sendMail( data.email, "Deine Einladung zu Siteware.Business", text, html );
 
             return res.status( 200 ).send( { errorcode: 0, message: "OK" } );
 

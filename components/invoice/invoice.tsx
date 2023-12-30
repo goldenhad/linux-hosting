@@ -61,7 +61,7 @@ const Invoice = ( props: { company, order: Order, user }, ref ) => {
         </tr>
       </table>
 
-      <div className="invoicedescription">Kauf E-Mails für Software Siteware.Mail</div>
+      <div className="invoicedescription">Kauf Credits für Software Siteware.Business</div>
 
       <table className="postable">
         <tbody>
@@ -78,7 +78,7 @@ const Invoice = ( props: { company, order: Order, user }, ref ) => {
           <tr className="item">
             <td>1</td>
             <td>swm0001</td>
-            <td className="itemname">Siteware.Mail Credits</td>
+            <td className="itemname">Siteware.Business Credits</td>
             <td>{props.order.tokens}</td>
             <td>19%</td>
             <td>{convertToCurrency( props.order.amount / ( 1 + 0.19 ) )}</td>

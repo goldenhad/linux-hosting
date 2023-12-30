@@ -6,8 +6,7 @@ import { Avatar, ConfigProvider, Divider, Drawer, FloatButton, Layout, Menu, Pop
 import Link from "next/link";
 import { useRouter } from "next/router";
 const { Header, Content, Footer, Sider } = Layout;
-import { User, basicUser } from "../../firebase/types/User";
-import { handleEmptyString } from "../../helper/architecture";
+import { User } from "../../firebase/types/User";
 import styles from "./sidebar.module.scss";
 import Home from "../../public/icons/home.svg";
 import Nav from "../../public/icons/nav.svg";
@@ -137,15 +136,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
       return "-1";
     }
   }
-
-  const getUser = () =>{
-    if( props.context.user != null ){
-      return props.context.user;
-    }else{
-      return basicUser;
-    }
-  }
-
 
   const profilemenu = (
     <div className={styles.avatarmenu}>

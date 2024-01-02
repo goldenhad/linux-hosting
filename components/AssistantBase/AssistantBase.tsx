@@ -672,7 +672,7 @@ const AssistantBase = (props: {
           </div>
           <Tour open={open} onClose={async () => {
             const currstate = props.context.user.tour;
-            currstate.blog = true;
+            currstate[props.laststate] = true;
             updateData( "User", props.context.login.uid, { tour: currstate } );
             setOpen( false );
           }} steps={props.Tour} />

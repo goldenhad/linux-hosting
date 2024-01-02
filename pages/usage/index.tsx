@@ -13,7 +13,9 @@ import {
   ShoppingCartOutlined,
   FileTextOutlined,
   InfoCircleOutlined,
-  MailOutlined
+  MailOutlined,
+  LeftOutlined,
+  RightOutlined
 } from "@ant-design/icons";
 import Link from "next/link";
 import { Order, Usage } from "../../firebase/types/Company";
@@ -47,6 +49,8 @@ ChartJS.register(
 
 const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const ordersperpage = 10;
+const thisyear = new Date().getFullYear();
+
 
 export interface InitialProps {
   Data: { paypalURL: string; };
@@ -71,6 +75,8 @@ export default function Usage( props: InitialProps ) {
   const [ users, setUsers ] = useState( [] );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).usage );
   const [orderpage, setOrderPage] = useState(1);
+  const [ visibleYear, setVisibleYear ] = useState(new Date().getFullYear());
+  const [ lowerBound, setLowerBound ] = useState(1970);
 
   const budgetRef = useRef( null );
   const statRef = useRef( null );
@@ -177,6 +183,18 @@ export default function Usage( props: InitialProps ) {
 
     load();
   }, [company, user.Company] );
+
+  useEffect( () => {
+    let min = Number.MAX_SAFE_INTEGER;
+
+    user.usedCredits.forEach((credits: Usage) => {
+      if (credits.year < min) {
+        min = credits.year;
+      }
+    });
+
+    setLowerBound(min);
+  }, [])
 
 
   const calculateMails = () => {
@@ -325,9 +343,23 @@ export default function Usage( props: InitialProps ) {
           </Card>
           <Card ref={statRef} className={styles.tokenusage} title={"Credit-Verbrauch"} bordered={true}>
             <div className={styles.tokeninfocard}>
-              <h2>Verbrauch</h2>
-              <div className={styles.usageinfo}>
-                                
+              <div className={styles.stattitlerow}>
+                <h2>Verbrauch</h2>
+                <div className={styles.switchyearrow}>
+                  <Button className={`${styles.yearswitchbutton} ${styles.left}`} disabled={visibleYear <= lowerBound} onClick={() => {
+                    if(visibleYear > lowerBound){
+                      setVisibleYear(visibleYear - 1);
+                    } 
+                  }}><LeftOutlined /></Button>
+                  <Button className={`${styles.yearswitchbutton} ${styles.right}`} disabled={visibleYear >= thisyear} onClick={() => {
+
+                    if(visibleYear < thisyear ){
+                      setVisibleYear(visibleYear + 1); 
+                    }
+                  }}><RightOutlined /></Button>
+                </div>
+              </div>
+              <div className={styles.usageinfo}>                                
                 <div className={styles.barcontainer}>
                   <Bar
                     options={{
@@ -346,12 +378,12 @@ export default function Usage( props: InitialProps ) {
                       labels:  months,
                       datasets: [
                         {
-                          label: "Credits",
+                          label: `Credits ${visibleYear}`,
                           data: months.map( ( label, idx ) => {
                             let sum = 0;
                             users.forEach( ( su: User ) => {
                               su.usedCredits.forEach( ( usage: Usage ) => {
-                                if( usage.month == idx+1 && usage.year == new Date().getFullYear() ){
+                                if( usage.month == idx+1 && usage.year == visibleYear ){
                                   sum += parseFloat( ( usage.amount/1000 ).toFixed( 2 ) );
                                 }
                               } );
@@ -364,7 +396,6 @@ export default function Usage( props: InitialProps ) {
                     }}
                   />
                 </div>
-
               </div>
             </div>
                         

@@ -70,7 +70,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                 {
                   role: "system",
                   content: "Du bist ein Assistent zum Erstellen von Mails. Nutzer geben dir Informationen zu sich und ihrem Schreibstil, du erzeugst daraus eine E-Mail."+
-                  "Der Stil sollte sich am Nutzer orientieren"
+                  "Der Stil sollte sich am Nutzer orientieren. Daten, Fakten und Zahlen sollten immer unverändert wiedergegeben werden."
                 },
                 { 
                   role: "user",

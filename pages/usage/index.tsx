@@ -194,6 +194,7 @@ export default function Usage( props: InitialProps ) {
     });
 
     setLowerBound(min);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
 

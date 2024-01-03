@@ -31,12 +31,11 @@ import {
 import { Bar } from "react-chartjs-2";
 import { User } from "../../firebase/types/User";
 import updateData from "../../firebase/data/updateData";
-import Invoice from "../../components/invoice/invoice";
-import { useReactToPrint } from "react-to-print";
 import moment from "moment";
 import { isMobile } from "react-device-detect";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "../../db";
+import { getPDFUrl } from "../../helper/invoice";
 
 ChartJS.register(
   CategoryScale,
@@ -71,7 +70,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default function Usage( props: InitialProps ) {
   const context = useAuthContext();
-  const { login, user, company, calculations } = context
+  const { role, login, user, company, calculations } = context
   const [ users, setUsers ] = useState( [] );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).usage );
   const [orderpage, setOrderPage] = useState(1);
@@ -82,8 +81,6 @@ export default function Usage( props: InitialProps ) {
   const statRef = useRef( null );
   const buyRef = useRef( null );
   const orderRef = useRef( null );
-
-  const componentRef = useRef( null );
 
   const steps: TourProps["steps"] = [
     {
@@ -202,10 +199,6 @@ export default function Usage( props: InitialProps ) {
     return Math.floor( company.tokens/calculations.tokensPerMail );
   }
 
-  const handlePrint = useReactToPrint( {
-    content: () => componentRef.current
-  } );
-
   const orderState = (obj) => {
     switch( obj.state ){
     case "completed":
@@ -314,9 +307,11 @@ export default function Usage( props: InitialProps ) {
               <List>
                 <List.Item className={styles.actiondetail}>
                   <div className={styles.description}>Rechnung herunterladen:</div>
-                  <div><FileTextOutlined style={{ fontSize: 20 }} onClick={handlePrint}/>
-                    <div style={{ display: "none" }}>
-                      <Invoice company={company} user={user} order={order} ref={componentRef}></Invoice>
+                  <div style={{ overflow: "none" }}>
+                    <FileTextOutlined style={{ fontSize: 20 }} onClick={() => {
+                      getPDFUrl(role, user, company, order).download(`Siteware_business_invoice_${order.invoiceId}`)
+                    }}/>
+                    <div style={{ display: "none", overflow: "none" }}>
                     </div>
                   </div>
                 </List.Item>

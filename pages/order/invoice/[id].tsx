@@ -6,7 +6,6 @@ import { useRouter } from "next/router";
 import { useAuthContext } from "../../../components/context/AuthContext";
 import { Order } from "../../../firebase/types/Company";
 import { FileOutlined } from "@ant-design/icons"
-import Invoice from "../../../components/invoice/invoice";
 import { useReactToPrint } from "react-to-print";
 import { isMobile } from "react-device-detect";
 
@@ -30,7 +29,8 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 
 export default function InvoiceDownload( props: InitialProps ) {
   const context = useAuthContext();
-  const { user, company } = context;
+  const { company } = context;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [ order, setOrder ] = useState( {
     id: "",
     timestamp: 0,
@@ -70,7 +70,6 @@ export default function InvoiceDownload( props: InitialProps ) {
           {(isMobile)? <FileOutlined />: <></>}
         </div>
         <div style={(isMobile)? { display: "none", width: 800 }: { display: "block", width: 800 }}>
-          <Invoice company={company} user={user} order={order} ref={componentRef}></Invoice>
         </div>
         <div style={{ width: "360px", display: "flex", flexDirection: "row", justifyContent: "center" }}>
           <Button

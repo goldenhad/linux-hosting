@@ -24,6 +24,11 @@ export type BlogState = {
   length: string,
 }
 
+export type ExcelState = {
+  profile: string,
+  question: string,
+}
+
 type State = {
     dialog: string
     monolog: string
@@ -41,13 +46,15 @@ export type TourState = {
     blog: boolean,
     usage: boolean,
     profiles: boolean,
-    company: boolean
+    company: boolean,
+    excel: boolean,
 }
 
 export type History = {
   dialog: string
   monolog: string
-  blog: string
+  blog: string,
+  excel: string
 }
 
 export type User =  {
@@ -98,7 +105,8 @@ export const basicUser: User = {
     blog: false,
     usage: false,
     profiles: false,
-    company: false
+    company: false,
+    excel: false
   },
   services: {
     favourites: []
@@ -106,6 +114,7 @@ export const basicUser: User = {
   history: {
     dialog: "",
     monolog: "",
-    blog: ""
+    blog: "",
+    excel: ""
   }
 }

@@ -235,7 +235,7 @@ export default function Profiles() {
             {
               name: values.name,
               settings: {
-                personal: aiinfo,
+                personal: aiinfo.data.message,
                 stil: handleEmptyArray( values.style ),
                 emotions: handleEmptyArray( values.emotions ),
                 tags: handleEmptyArray( values.tags ),

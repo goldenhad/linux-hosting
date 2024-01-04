@@ -80,5 +80,17 @@ export function parseProfilePrompt(
     .replace( "<communicationstyle>", communicationstyle )    
       
   return parsed
+}
 
+
+export function parseExcelPrompt(
+  prompt: string, name: string, company: string, personal: string, question: string
+){
+  const parsed = prompt
+    .replace( "<name>", name )
+    .replace( "<company>", company )
+    .replace( "<personal>", personal )
+    .replace( "<question>", question )
+      
+  return parsed
 }

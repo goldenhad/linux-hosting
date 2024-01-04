@@ -282,6 +282,13 @@ const HomeSidebarLayout = ( props: {
                     <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Content-Erstellung</div>  
                   </List.Item>
+                  <List.Item className={`${styles.assistantlink} ${isselected("productivity")}`} onClick={() => {
+                    props.category.setter("productivity");
+                    setSidebarOpen(false);
+                  }}>
+                    <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Produktivität</div>  
+                  </List.Item>
                 </List>
               </div>
             </div>
@@ -427,6 +434,13 @@ const HomeSidebarLayout = ( props: {
                     }}>
                       <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Content-Erstellung</div>  
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("productivity")}`} onClick={() => {
+                      props.category.setter("productivity");
+                      setSidebarOpen(false);
+                    }}>
+                      <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Produktivität</div>  
                     </List.Item>
                   </List>
                 </div>

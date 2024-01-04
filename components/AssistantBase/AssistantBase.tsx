@@ -18,6 +18,7 @@ import updateData from "../../firebase/data/updateData";
 import { encode } from "gpt-tokenizer";
 import moment from "moment";
 import { isMobile } from "react-device-detect";
+import Markdown from "react-markdown";
 
 const { Paragraph } = Typography;
 
@@ -195,6 +196,7 @@ const AssistantBase = (props: {
         // Parse the decrypted profiles as json and push them to the array
         try{
           const singleProfile: Profile = JSON.parse( profilejson );
+          console.log(singleProfile);
           profilearr.push( singleProfile );
         }catch(e){
           console.log("Could not decode profile...");
@@ -318,7 +320,7 @@ const AssistantBase = (props: {
       // Return the answer state and the information about the used tokens
       return (
         <>
-          <div className={styles.answer} style={{ transition: "all 0.5s ease" }} >{answer}</div>
+          <div className={styles.answer} style={{ transition: "all 0.5s ease" }} ><Markdown skipHtml={true}>{answer}</Markdown></div>
           <TokenInfo />
         </>
       );
@@ -489,7 +491,8 @@ const AssistantBase = (props: {
                   const hist: History = {
                     monolog: "",
                     dialog: "",
-                    blog: ""
+                    blog: "",
+                    excel: ""
                   };
                   // Update the history state of the assistant and update the user
                   const encHist = encHistObj.data.message;
@@ -586,7 +589,8 @@ const AssistantBase = (props: {
         const hist: History = {
           monolog: "",
           dialog: "",
-          blog: ""
+          blog: "",
+          excel: ""
         };
         // Update the history state of the assistant and update the user
         const encHist = encHistObj.data.message;

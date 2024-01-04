@@ -167,7 +167,10 @@
     }
 
     .answer{
-      white-space: pre-line;
+      //white-space: pre-line;
+      > ol {
+        margin-left: 20px;
+      }
     }
 
     .clipboardextra{

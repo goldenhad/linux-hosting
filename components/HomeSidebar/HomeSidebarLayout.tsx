@@ -15,6 +15,8 @@ import Heart from "../../public/icons/heart.svg";
 import Nav from "../../public/icons/nav.svg";
 import Stats from "../../public/icons/stat.svg";
 import Settings from "../../public/icons/settings.svg";
+import All from "../../public/icons/all.svg";
+import Chat from "../../public/icons/chat.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
 import { getImageUrl } from "../../firebase/drive/upload_file";
 import { isMobile } from "react-device-detect";
@@ -260,7 +262,7 @@ const HomeSidebarLayout = ( props: {
                     props.category.setter("all");
                     setSidebarOpen(false);
                   }}>
-                    <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Alle</div>
                   </List.Item>
                   <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} onClick={() => {
@@ -277,8 +279,15 @@ const HomeSidebarLayout = ( props: {
                     props.category.setter("content");
                     setSidebarOpen(false);
                   }}>
-                    <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Content-Erstellung</div>  
+                  </List.Item>
+                  <List.Item className={`${styles.assistantlink} ${isselected("productivity")}`} onClick={() => {
+                    props.category.setter("productivity");
+                    setSidebarOpen(false);
+                  }}>
+                    <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Produktivität</div>  
                   </List.Item>
                 </List>
               </div>
@@ -408,7 +417,7 @@ const HomeSidebarLayout = ( props: {
                     <List.Item className={`${styles.assistantlink} ${isselected("all")}`} onClick={() => {
                       props.category.setter("all"); 
                     }}>
-                      <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Alle</div>
                     </List.Item>
                     <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} onClick={() => {
@@ -423,8 +432,15 @@ const HomeSidebarLayout = ( props: {
                     <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
                       props.category.setter("content"); 
                     }}>
-                      <Icon component={Profiles} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Content-Erstellung</div>  
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("productivity")}`} onClick={() => {
+                      props.category.setter("productivity");
+                      setSidebarOpen(false);
+                    }}>
+                      <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Produktivität</div>  
                     </List.Item>
                   </List>
                 </div>

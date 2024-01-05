@@ -86,7 +86,8 @@ export default function Account() {
       blog: false,
       usage: false,
       profiles: false,
-      company: false
+      company: false,
+      excel: false
     }
     const { error } = await updateData( "User", login.uid, { tour: resetTutObj } );
     if( error ){

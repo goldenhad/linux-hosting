@@ -37,8 +37,8 @@ const AssistantCard = ( props: {
       <div className={styles.servicefooter}>
         <div className={styles.actions}>
           {(props.fav)?
-            <Icon component={HeartFull} onClick={props.onDeFav} className={`${styles.iconsvg} ${styles.active}`} viewBox='0 0 22 22'/>:
-            <Icon component={Heart} onClick={props.onFav} className={styles.iconsvg} viewBox='0 0 22 22'/>}
+            <Icon component={HeartFull} onClick={props.onDeFav} className={`${styles.iconsvg} ${styles.active}`} viewBox='0 0 22 25'/>:
+            <Icon component={Heart} onClick={props.onFav} className={styles.iconsvg} viewBox='0 0 22 25'/>}
           <Link href={props.video} rel="noopener noreferrer" target="_blank">
             <Icon component={Play} className={styles.iconsvg} viewBox='0 0 22 22'/>
           </Link>

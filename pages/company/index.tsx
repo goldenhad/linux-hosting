@@ -602,18 +602,18 @@ export default function Company( props: InitialProps ) {
             if( obj.username ){
               const usageidx = obj.usedCredits.findIndex( ( val ) => {
                 return val.month == props.Data.currentMonth && val.year == props.Data.currentYear;
-              } );
+              });
     
               const lastUsageIdx = obj.usedCredits.findIndex( ( val ) => {
                 let yearToSearch = props.Data.currentYear;
                 let monthToSearch = props.Data.currentMonth - 1;
-                if( val.month == 1 ){
+                if( monthToSearch == 0 ){
                   yearToSearch = yearToSearch - 1;
-                  monthToSearch = 1;
+                  monthToSearch = 12;
                 }
     
                 return val.month == monthToSearch && val.year == yearToSearch;
-              } );
+              });
     
               if( usageidx != -1 && lastUsageIdx != -1 ) {
                 const currentvalue = obj.usedCredits[usageidx].amount;
@@ -749,9 +749,9 @@ export default function Company( props: InitialProps ) {
             const lastUsageIdx = obj.usedCredits.findIndex( ( val ) => {
               let yearToSearch = props.Data.currentYear;
               let monthToSearch = props.Data.currentMonth - 1;
-              if( val.month == 1 ){
+              if( monthToSearch == 0 ){
                 yearToSearch = yearToSearch - 1;
-                monthToSearch = 1;
+                monthToSearch = 12;
               }
   
               return val.month == monthToSearch && val.year == yearToSearch;

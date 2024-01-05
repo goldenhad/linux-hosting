@@ -8,7 +8,7 @@ import { Profile } from "../../firebase/types/Profile";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../db";
 import Info from "../../public/icons/info.svg";
-import Icon, { ArrowLeftOutlined, EyeOutlined, HistoryOutlined } from "@ant-design/icons";
+import Icon, { ArrowLeftOutlined, EyeOutlined, HistoryOutlined, CloseOutlined } from "@ant-design/icons";
 import SidebarLayout from "../Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
 import { handleEmptyString, normalizeTokens } from "../../helper/architecture";
@@ -18,6 +18,7 @@ import updateData from "../../firebase/data/updateData";
 import { encode } from "gpt-tokenizer";
 import moment from "moment";
 import { isMobile } from "react-device-detect";
+import Markdown from "react-markdown";
 
 const { Paragraph } = Typography;
 
@@ -87,6 +88,7 @@ const AssistantBase = (props: {
   const [ historyState, setHistoryState ] = useState([]);
   const [ cancleController, setCancleController ] = useState(new AbortController());
   const [ histOpen, setHistOpen ] = useState(false);
+  const [ histloading, setHistloading ] = useState(false);
   const [open, setOpen] = useState<boolean>( props.tourState  );
   const router = useRouter();
 
@@ -194,6 +196,7 @@ const AssistantBase = (props: {
         // Parse the decrypted profiles as json and push them to the array
         try{
           const singleProfile: Profile = JSON.parse( profilejson );
+          console.log(singleProfile);
           profilearr.push( singleProfile );
         }catch(e){
           console.log("Could not decode profile...");
@@ -317,7 +320,7 @@ const AssistantBase = (props: {
       // Return the answer state and the information about the used tokens
       return (
         <>
-          <div className={styles.answer} style={{ transition: "all 0.5s ease" }} >{answer}</div>
+          <div className={styles.answer} style={{ transition: "all 0.5s ease" }} ><Markdown skipHtml={true}>{answer}</Markdown></div>
           <TokenInfo />
         </>
       );
@@ -488,7 +491,8 @@ const AssistantBase = (props: {
                   const hist: History = {
                     monolog: "",
                     dialog: "",
-                    blog: ""
+                    blog: "",
+                    excel: ""
                   };
                   // Update the history state of the assistant and update the user
                   const encHist = encHistObj.data.message;
@@ -563,6 +567,41 @@ const AssistantBase = (props: {
     }
   }
 
+  const updateHist = async () => {
+    try{
+      const encHistObj = await axios.post( "/api/prompt/encrypt", {
+        content: JSON.stringify(historyState),
+        salt: props.context.user.salt
+      } );
+
+      const encHist = encHistObj.data.message;
+
+      // Check if the user previously had a history
+      if(props.context.user.history){
+      // If so get the history
+        const userhist = props.context.user.history;
+        // Set the history to the encoded string and update the user
+        userhist[props.laststate] = encHist;
+        await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
+      }else{
+      // If the user previously didn't have a history
+      // Init the history
+        const hist: History = {
+          monolog: "",
+          dialog: "",
+          blog: "",
+          excel: ""
+        };
+        // Update the history state of the assistant and update the user
+        const encHist = encHistObj.data.message;
+        hist[props.laststate] = encHist;
+        await updateDoc( doc( db, "User", props.context.login.uid ), { history: hist } );
+      }
+    }catch(e){
+      console.log(e);
+    }
+  }
+
   /**
    * Component for displaying the history
    * @returns List of history objects
@@ -572,9 +611,10 @@ const AssistantBase = (props: {
       return(
         <List
           bordered
+          loading={histloading}
           dataSource={historyState}
           locale={{ emptyText: "Noch keine Anfragen" }}
-          renderItem={(item: { content: string, time: string, tokens: string }) => (
+          renderItem={(item: { content: string, time: string, tokens: string }, id) => (
             <List.Item>
               <div className={styles.singlehistitem}>
                 <Paragraph className={styles.histitem}>{item.content.slice(0, 100)}...</Paragraph>
@@ -589,6 +629,18 @@ const AssistantBase = (props: {
                     setPromptError( false );
                     setTokens( "" );
                     setAnswer(item.content);
+                  }}></Button>
+                  <Button icon={<CloseOutlined />} onClick={async () => {
+                    setHistloading(true);
+                    console.log("deleting...", id);
+                    const locHistState= historyState;
+                    locHistState.splice(id, 1);
+                    console.log(locHistState);
+                    setHistoryState(locHistState);
+
+                    await updateHist();
+
+                    setHistloading(false);
                   }}></Button>
                 </div>
               </div>
@@ -672,7 +724,7 @@ const AssistantBase = (props: {
           </div>
           <Tour open={open} onClose={async () => {
             const currstate = props.context.user.tour;
-            currstate.blog = true;
+            currstate[props.laststate] = true;
             updateData( "User", props.context.login.uid, { tour: currstate } );
             setOpen( false );
           }} steps={props.Tour} />

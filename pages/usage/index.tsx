@@ -13,7 +13,9 @@ import {
   ShoppingCartOutlined,
   FileTextOutlined,
   InfoCircleOutlined,
-  MailOutlined
+  MailOutlined,
+  LeftOutlined,
+  RightOutlined
 } from "@ant-design/icons";
 import Link from "next/link";
 import { Order, Usage } from "../../firebase/types/Company";
@@ -29,12 +31,11 @@ import {
 import { Bar } from "react-chartjs-2";
 import { User } from "../../firebase/types/User";
 import updateData from "../../firebase/data/updateData";
-import Invoice from "../../components/invoice/invoice";
-import { useReactToPrint } from "react-to-print";
 import moment from "moment";
 import { isMobile } from "react-device-detect";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "../../db";
+import { getPDFUrl } from "../../helper/invoice";
 
 ChartJS.register(
   CategoryScale,
@@ -47,6 +48,8 @@ ChartJS.register(
 
 const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const ordersperpage = 10;
+const thisyear = new Date().getFullYear();
+
 
 export interface InitialProps {
   Data: { paypalURL: string; };
@@ -67,17 +70,17 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default function Usage( props: InitialProps ) {
   const context = useAuthContext();
-  const { login, user, company, calculations } = context
+  const { role, login, user, company, calculations } = context
   const [ users, setUsers ] = useState( [] );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).usage );
   const [orderpage, setOrderPage] = useState(1);
+  const [ visibleYear, setVisibleYear ] = useState(new Date().getFullYear());
+  const [ lowerBound, setLowerBound ] = useState(1970);
 
   const budgetRef = useRef( null );
   const statRef = useRef( null );
   const buyRef = useRef( null );
   const orderRef = useRef( null );
-
-  const componentRef = useRef( null );
 
   const steps: TourProps["steps"] = [
     {
@@ -178,14 +181,23 @@ export default function Usage( props: InitialProps ) {
     load();
   }, [company, user.Company] );
 
+  useEffect( () => {
+    let min = Number.MAX_SAFE_INTEGER;
+
+    user.usedCredits.forEach((credits: Usage) => {
+      if (credits.year < min) {
+        min = credits.year;
+      }
+    });
+
+    setLowerBound(min);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
 
   const calculateMails = () => {
     return Math.floor( company.tokens/calculations.tokensPerMail );
   }
-
-  const handlePrint = useReactToPrint( {
-    content: () => componentRef.current
-  } );
 
   const orderState = (obj) => {
     switch( obj.state ){
@@ -295,9 +307,11 @@ export default function Usage( props: InitialProps ) {
               <List>
                 <List.Item className={styles.actiondetail}>
                   <div className={styles.description}>Rechnung herunterladen:</div>
-                  <div><FileTextOutlined style={{ fontSize: 20 }} onClick={handlePrint}/>
-                    <div style={{ display: "none" }}>
-                      <Invoice company={company} user={user} order={order} ref={componentRef}></Invoice>
+                  <div style={{ overflow: "none" }}>
+                    <FileTextOutlined style={{ fontSize: 20 }} onClick={() => {
+                      getPDFUrl(role, user, company, order).download(`Siteware_business_invoice_${order.invoiceId}`)
+                    }}/>
+                    <div style={{ display: "none", overflow: "none" }}>
                     </div>
                   </div>
                 </List.Item>
@@ -341,9 +355,23 @@ export default function Usage( props: InitialProps ) {
           </Card>
           <Card ref={statRef} className={styles.tokenusage} title={"Credit-Verbrauch"} bordered={true}>
             <div className={styles.tokeninfocard}>
-              <h2>Verbrauch</h2>
-              <div className={styles.usageinfo}>
-                                
+              <div className={styles.stattitlerow}>
+                <h2>Verbrauch</h2>
+                <div className={styles.switchyearrow}>
+                  <Button className={`${styles.yearswitchbutton} ${styles.left}`} disabled={visibleYear <= lowerBound} onClick={() => {
+                    if(visibleYear > lowerBound){
+                      setVisibleYear(visibleYear - 1);
+                    } 
+                  }}><LeftOutlined /></Button>
+                  <Button className={`${styles.yearswitchbutton} ${styles.right}`} disabled={visibleYear >= thisyear} onClick={() => {
+
+                    if(visibleYear < thisyear ){
+                      setVisibleYear(visibleYear + 1); 
+                    }
+                  }}><RightOutlined /></Button>
+                </div>
+              </div>
+              <div className={styles.usageinfo}>                                
                 <div className={styles.barcontainer}>
                   <Bar
                     options={{
@@ -362,12 +390,12 @@ export default function Usage( props: InitialProps ) {
                       labels:  months,
                       datasets: [
                         {
-                          label: "Credits",
+                          label: `Credits ${visibleYear}`,
                           data: months.map( ( label, idx ) => {
                             let sum = 0;
                             users.forEach( ( su: User ) => {
                               su.usedCredits.forEach( ( usage: Usage ) => {
-                                if( usage.month == idx+1 && usage.year == new Date().getFullYear() ){
+                                if( usage.month == idx+1 && usage.year == visibleYear ){
                                   sum += parseFloat( ( usage.amount/1000 ).toFixed( 2 ) );
                                 }
                               } );
@@ -380,7 +408,6 @@ export default function Usage( props: InitialProps ) {
                     }}
                   />
                 </div>
-
               </div>
             </div>
                         

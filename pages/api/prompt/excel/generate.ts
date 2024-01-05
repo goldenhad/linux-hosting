@@ -2,10 +2,10 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import { auth } from "../../../../firebase/admin"
 import getDocument from "../../../../firebase/data/getData";
-import { parseMonologPrompt } from "../../../../helper/prompt";
 import {
   encode
 } from "gpt-tokenizer"
+import { parseExcelPrompt } from "../../../../helper/prompt";
 
 const openai = new OpenAI( {
   apiKey: process.env.OPENAIAPIKEY
@@ -29,13 +29,8 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
       if( data.name != undefined &&
         data.personal != undefined &&
-        data.content != undefined &&
-        data.address != undefined &&
-        data.order != undefined &&
-        data.style != undefined &&
-        data.emotions != undefined &&
-        data.length != undefined
-        && data.company != undefined
+        data.question != undefined &&
+        data.company != undefined
       ){
 
         const templatereq = await getDocument( "Settings", "Prompts" );
@@ -43,18 +38,15 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
         if( templatereq.result ){
           const template = templatereq.result.data();
 
-          const prompt = parseMonologPrompt(
-            template.monolog,
+          const prompt = parseExcelPrompt(
+            template.excel,
             data.name,
             data.company,
             data.personal,
-            data.content,
-            data.address,
-            data.style,
-            data.order,
-            data.emotions,
-            data.length
+            data.question
           )
+
+          console.log(data.personal);
 
           res.writeHead(200, {
             Connection: "keep-alive",
@@ -70,8 +62,10 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
               messages: [
                 {
                   role: "system",
-                  content: "Du bist ein Assistent zum Erstellen von Mails. Nutzer geben dir Informationen zu sich und ihrem Schreibstil, du erzeugst daraus eine E-Mail."+
-                  "Der Stil sollte sich am Nutzer orientieren. Daten, Fakten und Zahlen sollten immer unverändert wiedergegeben werden."
+                  content: "Du bist ein Assistent und Beantwortest Fragen rund um das Thema Microsoft Excel."+
+                  "Nutzer geben dir Informationen zu sich und eine Frage, du beantwortest diese Frage."+
+                  "Die Antwort sollte auf den Nutzer zugeschnitten sein. Daten, Fakten und Zahlen sollten immer unverändert wiedergegeben werden."+
+                  "Adressiere den Nutzer nicht direkt mit seinem Namen. Schreibe in der DU-Form"
                 },
                 { 
                   role: "user",

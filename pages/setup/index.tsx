@@ -520,7 +520,7 @@ export default function Setup(){
           content: JSON.stringify({
             name: "Hauptprofil",
             settings: {
-              personal: aiinfo,
+              personal: aiinfo.data.message,
               emotions: userEmotions,
               stil: userstyles,
               parameters: {

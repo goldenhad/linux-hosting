@@ -196,7 +196,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
         }
       }}>
         <Layout className={styles.layout} hasSider={(screenwidth > 700)}>
-          {screenwidth}
           <MobileHeader />
           <Drawer
             style={{ backgroundColor: "#101828" }}
@@ -304,7 +303,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
         }
       }}>
         <Layout className={styles.layout} hasSider={true}>
-          {screenwidth}
           <Sider
             width={80}
             className={`${styles.sidebar}`}

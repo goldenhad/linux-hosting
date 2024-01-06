@@ -312,7 +312,7 @@ const AssistantBase = (props: {
         return(
           <div className={styles.tokeninfo}>
             <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' />
-            Bitte beachten Sie, dass diese Antwort von einer KI generiert wurde und deshalb kann eine vollständige Verlässlichkeit der Antwort nicht garantiert werden
+            Bitte beachte, dass diese Antwort von einer KI generiert wurde und deshalb kann eine vollständige Verlässlichkeit der Antwort nicht garantiert werden.
           </div>
         );
       }

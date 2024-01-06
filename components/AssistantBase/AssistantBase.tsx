@@ -81,6 +81,7 @@ const AssistantBase = (props: {
   const [ isAnswerVisible, setIsAnswerVisible ] = useState( false );
   const [ isLoaderVisible, setIsLoaderVisible ] = useState( false );
   const [ isAnswerCardVisible, setIsAnswerCardvisible ] = useState( false );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [ tokens, setTokens ] = useState( "" );
   const [ answer, setAnswer ] = useState( "" );
   const [ formDisabled, setFormDisabled ] = useState( false );
@@ -93,7 +94,6 @@ const AssistantBase = (props: {
   const [ histloading, setHistloading ] = useState(false);
   const [open, setOpen] = useState<boolean>( props.tourState  );
   const [notificationAPI, notificationContextHolder] = notification.useNotification();
-  const TokenContext = React.createContext({ token: tokens });
   const router = useRouter();
 
   const now = new Date();

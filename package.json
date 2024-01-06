@@ -46,7 +46,8 @@
     "react-dom": "^18.2.0",
     "react-markdown": "^9.0.1",
     "react-pdf": "^7.6.0",
-    "react-to-print": "^2.14.15"
+    "react-to-print": "^2.14.15",
+    "remark-breaks": "^4.0.0"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^1.4.1",

@@ -1,3 +1,292 @@
+	
+/* For very small screen devices (500px and below) */
+@media only screen and (max-width: 500px){ 
+/* CSS Styling */
+  .msg {
+    font-size: large;
+    font-weight: bold;
+  }
+
+  .userinputform{
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    width: 100%;
+
+    .userinputcardmain{
+      width: 100%;
+      border-radius: 12px;
+      border-color: #EAECF0;
+    }
+
+    .userinputcardsub{
+      width: 100%;
+      border-left-width: 0px;
+      border-radius: 12px;
+      border-color: #EAECF0;
+    }
+  }
+
+  .formfootercontainer{
+    min-height: 100px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .generatebuttonrow{
+      margin-bottom: 44px;
+      margin-top: 44px;
+      
+      button {
+          
+
+          .buttonicon > svg{
+            transform: translate(-1px, 4px);
+            fill: transparent;
+            color: inherit;
+            stroke: inherit;
+        }
+      }
+    }
+  }
+
+  .answercard{
+    border-radius: 12px;
+  }
+}
+ 
+ 
+/* Small screen devices (600px and above) */
+@media only screen and (min-width: 600px) {
+  /* CSS Styling */
+   // applied CSS styling
+   .msg {
+    font-size: large;
+    font-weight: bold;
+  }
+
+  .userinputform{
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    width: 100%;
+
+    .userinputcardmain{
+      width: 100%;
+      border-radius: 12px;
+      border-color: #EAECF0;
+    }
+
+    .userinputcardsub{
+      width: 100%;
+      border-left-width: 0px;
+      border-radius: 12px;
+      border-color: #EAECF0;
+    }
+  }
+
+  .formfootercontainer{
+    min-height: 100px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .generatebuttonrow{
+      margin-bottom: 44px;
+      margin-top: 44px;
+      
+      button {
+          
+
+          .buttonicon > svg{
+            transform: translate(-1px, 4px);
+            fill: transparent;
+            color: inherit;
+            stroke: inherit;
+        }
+      }
+    }
+  }
+
+  .answercard{
+    border-radius: 12px;
+  }
+}
+ 
+ 
+/* Medium screen devices (700px and above) */
+@media only screen and (min-width: 700px) {
+  /* CSS Styling */
+  // applied CSS styling
+  .msg {
+    font-size: large;
+    font-weight: bold;
+  }
+
+  .userinputform{
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    width: 100%;
+
+    .userinputcardmain{
+      width: 100%;
+      border-radius: 12px;
+      border-color: #EAECF0;
+    }
+
+    .userinputcardsub{
+      width: 100%;
+      border-left-width: 0px;
+      border-radius: 12px;
+      border-color: #EAECF0;
+    }
+  }
+
+  .formfootercontainer{
+    min-height: 100px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .generatebuttonrow{
+      margin-bottom: 44px;
+      margin-top: 44px;
+      
+      button {
+          
+
+          .buttonicon > svg{
+            transform: translate(-1px, 4px);
+            fill: transparent;
+            color: inherit;
+            stroke: inherit;
+        }
+      }
+    }
+  }
+
+  .answercard{
+    border-radius: 12px;
+  }
+}
+ 
+ 
+/* Big screen devices (900px and above) */
+@media only screen and (min-width: 900px) {
+  /* CSS Styling */
+  // applied CSS styling
+  .msg {
+    font-size: large;
+    font-weight: bold;
+  }
+
+  .userinputform{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+
+    .userinputcardmain{
+      width: 60%;
+      border-radius: 12px 0px 0px 0px;
+      border-color: #EAECF0;
+    }
+
+    .userinputcardsub{
+      width: 40%;
+      border-left-width: 0px;
+      border-radius: 0px 12px 0px 0px;
+      border-color: #EAECF0;
+    }
+  }
+
+  .formfootercontainer{
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #EAECF0;
+    min-height: 100px;
+    border-radius: 0px 0px 12px 12px;
+    background-color: white;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .generatebuttonrow{
+      margin-bottom: 44px;
+      margin-top: 44px;
+      
+    }
+  }
+
+  .answercard{
+    border-radius: 12px 12px 0px 0px;
+  }
+}
+ 
+ 
+/* Extra big screen devices (1200px and above) */
+@media only screen and (min-width: 1200px) {
+  /* CSS Styling */
+  // applied CSS styling
+  .msg {
+    font-size: large;
+    font-weight: bold;
+  }
+
+  .userinputform{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+
+    .userinputcardmain{
+      width: 60%;
+      border-radius: 12px 0px 0px 0px;
+      border-color: #EAECF0;
+    }
+
+    .userinputcardsub{
+      width: 40%;
+      border-left-width: 0px;
+      border-radius: 0px 12px 0px 0px;
+      border-color: #EAECF0;
+    }
+  }
+
+  .formfootercontainer{
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #EAECF0;
+    min-height: 100px;
+    border-radius: 0px 0px 12px 12px;
+    background-color: white;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .generatebuttonrow{
+      margin-bottom: 44px;
+      margin-top: 44px;
+      
+    }
+  }
+
+  .answercard{
+    border-radius: 12px 12px 0px 0px;
+  }
+}
+
+
+
 .main {
   display: flex;
   flex-direction: column;
@@ -16,19 +305,6 @@
         margin-left: auto;
       }
 
-      @media (max-width: 992px){
-        .msg {
-          font-size: large;
-          font-weight: bold;
-        }
-      }
-
-      @media (min-width: 993px){
-        .msg {
-          font-size: 32px;
-          font-weight: bold;
-        }
-      }
     }
 
     .welcomeseperator{
@@ -37,102 +313,6 @@
       border-color: #D0D5DD;
       color: #D0D5DD;
       background-color: #D0D5DD;
-    }
-  }
-
-  @media (max-width: 992px) {
-    .userinputform{
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-      width: 100%;
-
-      .userinputcardmain{
-        width: 100%;
-        border-radius: 12px;
-        border-color: #EAECF0;
-      }
-
-      .userinputcardsub{
-        width: 100%;
-        border-left-width: 0px;
-        border-radius: 12px;
-        border-color: #EAECF0;
-      }
-    }
-
-    .formfootercontainer{
-      min-height: 100px;
-
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-
-      .generatebuttonrow{
-        margin-bottom: 44px;
-        margin-top: 44px;
-        
-        button {
-            
-
-            .buttonicon > svg{
-              transform: translate(-1px, 4px);
-              fill: transparent;
-              color: inherit;
-              stroke: inherit;
-          }
-        }
-      }
-    }
-
-    .answercard{
-      border-radius: 12px;
-    }
-  }
-
-  @media (min-width: 993px) {
-    .userinputform{
-      display: flex;
-      flex-direction: row;
-      width: 100%;
-
-      .userinputcardmain{
-        width: 60%;
-        border-radius: 12px 0px 0px 0px;
-        border-color: #EAECF0;
-      }
-
-      .userinputcardsub{
-        width: 40%;
-        border-left-width: 0px;
-        border-radius: 0px 12px 0px 0px;
-        border-color: #EAECF0;
-      }
-    }
-
-    .formfootercontainer{
-      border-width: 0px 1px 1px 1px;
-      border-style: solid;
-      border-color: #EAECF0;
-      min-height: 100px;
-      border-radius: 0px 0px 12px 12px;
-      background-color: white;
-
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-
-      .generatebuttonrow{
-        margin-bottom: 44px;
-        margin-top: 44px;
-        
-      }
-    }
-
-    .answercard{
-      border-radius: 12px 12px 0px 0px;
     }
   }
 
@@ -199,7 +379,6 @@
     .tokeninfo{
       background-color: #F2F4F7;
       padding: 12px;
-      max-width: 330px;
       width: 100%;
       border-radius: 8px;
       margin-top: 30px;
@@ -372,100 +551,6 @@ font-size: 14px;
   }
 }
 
-/* Mobile */
-@media (max-width: 700px) {
-  .content {
-    padding: 4rem;
-  }
-
-  .grid {
-    grid-template-columns: 1fr;
-    margin-bottom: 120px;
-    max-width: 320px;
-    text-align: center;
-  }
-
-  .card {
-    padding: 1rem 2.5rem;
-  }
-
-  .card h2 {
-    margin-bottom: 0.5rem;
-  }
-
-  .center {
-    padding: 8rem 0 6rem;
-  }
-
-  .center::before {
-    transform: none;
-    height: 300px;
-  }
-
-  .description {
-    font-size: 0.8rem;
-  }
-
-  .description a {
-    padding: 1rem;
-  }
-
-  .description p,
-  .description div {
-    display: flex;
-    justify-content: center;
-    position: fixed;
-    width: 100%;
-  }
-
-  .description p {
-    align-items: center;
-    inset: 0 0 auto;
-    padding: 2rem 1rem 1.4rem;
-    border-radius: 0;
-    border: none;
-    border-bottom: 1px solid rgba(var(--callout-border-rgb), 0.25);
-    background: linear-gradient(
-      to bottom,
-      rgba(var(--background-start-rgb), 1),
-      rgba(var(--callout-rgb), 0.5)
-    );
-    background-clip: padding-box;
-    backdrop-filter: blur(24px);
-  }
-
-  .description div {
-    align-items: flex-end;
-    pointer-events: none;
-    inset: auto 0 0;
-    padding: 2rem;
-    height: 200px;
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgb(var(--background-end-rgb)) 40%
-    );
-    z-index: 1;
-  }
-}
-
-/* Tablet and Smaller Desktop */
-@media (min-width: 701px) and (max-width: 1120px) {
-  .grid {
-    grid-template-columns: repeat(2, 50%);
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .vercelLogo {
-    filter: invert(1);
-  }
-
-  .logo {
-    filter: invert(1) drop-shadow(0 0 0.3rem #ffffff70);
-  }
-}
-
 @keyframes rotate {
   from {
     transform: rotate(360deg);
@@ -523,18 +608,6 @@ font-size: 14px;
   width: 30%;
 }
 
-@media (max-width: 700px) {
-  .mrow{
-    display: flex;
-    flex-direction: column;
-  }
-
-  .mcol{
-    width: 100%;
-    margin-bottom: 20px;
-  }
-}
-
 .tokenalert{
 margin-top: 20px;
 margin-bottom: 20px;
@@ -555,4 +628,9 @@ margin-bottom: 20px;
     gap: 16px;
     color: #667085;
   }
+}
+
+.disclaimer{
+  margin-top: 20px;
+  margin-bottom: 20px;
 }

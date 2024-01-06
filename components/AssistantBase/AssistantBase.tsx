@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Divider, Form, List, Result, Skeleton, Tour, TourProps, message, Typography, Drawer } from "antd";
+import { Alert, Button, Card, Divider, Form, List, Result, Skeleton, Tour, TourProps, message, Typography, Drawer, notification } from "antd";
 import axios from "axios";
 import styles from "./AssistantBase.module.scss";
 import { createContext, useEffect, useState } from "react";
@@ -20,6 +20,7 @@ import moment from "moment";
 import { isMobile } from "react-device-detect";
 import Markdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
+import React from "react";
 
 const { Paragraph } = Typography;
 
@@ -80,6 +81,7 @@ const AssistantBase = (props: {
   const [ isAnswerVisible, setIsAnswerVisible ] = useState( false );
   const [ isLoaderVisible, setIsLoaderVisible ] = useState( false );
   const [ isAnswerCardVisible, setIsAnswerCardvisible ] = useState( false );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [ tokens, setTokens ] = useState( "" );
   const [ answer, setAnswer ] = useState( "" );
   const [ formDisabled, setFormDisabled ] = useState( false );
@@ -91,6 +93,7 @@ const AssistantBase = (props: {
   const [ histOpen, setHistOpen ] = useState(false);
   const [ histloading, setHistloading ] = useState(false);
   const [open, setOpen] = useState<boolean>( props.tourState  );
+  const [notificationAPI, notificationContextHolder] = notification.useNotification();
   const router = useRouter();
 
   const now = new Date();
@@ -197,7 +200,6 @@ const AssistantBase = (props: {
         // Parse the decrypted profiles as json and push them to the array
         try{
           const singleProfile: Profile = JSON.parse( profilejson );
-          console.log(singleProfile);
           profilearr.push( singleProfile );
         }catch(e){
           console.log("Could not decode profile...");
@@ -305,12 +307,12 @@ const AssistantBase = (props: {
      * Subcomoponent containing information about the used tokens of the assistant request
      * @returns Information box with normalized use of token
      */
-    const TokenInfo = () => {
+    const Disclaimer = () => {
       if(tokenCountVisible){
         return(
           <div className={styles.tokeninfo}>
             <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' />
-            Die Anfrage hat {normalizeTokens(parseFloat(tokens))} Credits verbraucht
+            Bitte beachte, dass diese Antwort von einer KI generiert wurde und deshalb kann eine vollständige Verlässlichkeit der Antwort nicht garantiert werden.
           </div>
         );
       }
@@ -326,7 +328,7 @@ const AssistantBase = (props: {
               {answer.replace(/\n/gi, "&nbsp; \n")}
             </Markdown>
           </div>
-          <TokenInfo />
+          <Disclaimer />
         </>
       );
     }else if(isLoaderVisible){
@@ -447,6 +449,12 @@ const AssistantBase = (props: {
                     // Update the used tokens and display them
                     setTokens(usedTokens.toString());
                     setTokenCountVisible(true);
+                    
+                    notificationAPI.info({
+                      message: "Tokenverbrauch",
+                      description: `Die Anfrage hat ${normalizeTokens(parseFloat(usedTokens.toString()))} Credits verbraucht`,
+                      duration: 10 
+                    });
                     
                     // Set the answer to the recieved data without the control sequence
                     setAnswer(dataChunk);
@@ -637,10 +645,8 @@ const AssistantBase = (props: {
                   }}></Button>
                   <Button icon={<CloseOutlined />} onClick={async () => {
                     setHistloading(true);
-                    console.log("deleting...", id);
                     const locHistState= historyState;
                     locHistState.splice(id, 1);
-                    console.log(locHistState);
                     setHistoryState(locHistState);
 
                     await updateHist();
@@ -670,6 +676,7 @@ const AssistantBase = (props: {
     }}
     >
       {contextHolder}
+      {notificationContextHolder}
       <SidebarLayout context={props.context} hist={setHistOpen}>
         <div className={styles.main}>
           <div className={styles.welcomemessage}>

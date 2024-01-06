@@ -1,3 +1,99 @@
+	
+/* For very small screen devices (500px and below) */
+@media only screen and (max-width: 700px){ 
+    .navigation {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 80vh;
+        background-color: #101828;
+
+        .primarymenu {
+            background-color: #101828;
+        }
+
+        .secondarymenu {
+            background-color: #101828;
+        }
+
+        .changelogrow{
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            color: #F2F4F7;
+
+            &:hover {
+                cursor: pointer;
+            }
+
+            .changelog{
+                color: #D0D5DD;
+                font-size: 20px;
+            }
+        }
+
+        .avatarcontainer {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            margin-top: 5px;
+
+            &:hover{
+                cursor: pointer;
+            }
+        }
+    }
+}
+     
+/* Extra big screen devices (1200px and above) */
+@media only screen and (min-width: 1200px) {
+    .navigation {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 87svh;
+        background-color: #101828;
+
+        .primarymenu {
+            background-color: #101828;
+        }
+
+        .secondarymenu {
+            background-color: #101828;
+        }
+
+        .changelogrow{
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            color: #F2F4F7;
+
+            &:hover {
+                cursor: pointer;
+            }
+
+            .changelog{
+                color: #D0D5DD;
+                font-size: 20px;
+            }
+        }
+
+        .avatarcontainer {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            margin-top: 5px;
+
+            &:hover{
+                cursor: pointer;
+            }
+        }
+    }
+}
+
+
 .layout{
     background-color: #F2F4F7;
     color: black;
@@ -36,50 +132,6 @@
             align-items: center;
             margin-bottom: 25px;
             margin-top: 25px;
-        }
-
-        .navigation {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 87vh;
-            background-color: #101828;
-
-            .primarymenu {
-                background-color: #101828;
-            }
-
-            .secondarymenu {
-                background-color: #101828;
-            }
-
-            .changelogrow{
-                display: flex;
-                flex-direction: row;
-                justify-content: center;
-                color: #F2F4F7;
-
-                &:hover {
-                    cursor: pointer;
-                }
-
-                .changelog{
-                    color: #D0D5DD;
-                    font-size: 20px;
-                }
-            }
-
-            .avatarcontainer {
-                display: flex;
-                flex-direction: row;
-                justify-content: center;
-                align-items: center;
-                margin-top: 5px;
-
-                &:hover{
-                    cursor: pointer;
-                }
-            }
         }
     }
 
@@ -216,7 +268,7 @@
     }
 }
 
-@media (max-width: 992px) {
+@media (max-width: 700px) {
     .sidebar{
         display: none;
     }

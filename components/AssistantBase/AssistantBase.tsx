@@ -19,6 +19,7 @@ import { encode } from "gpt-tokenizer";
 import moment from "moment";
 import { isMobile } from "react-device-detect";
 import Markdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 
 const { Paragraph } = Typography;
 
@@ -320,7 +321,11 @@ const AssistantBase = (props: {
       // Return the answer state and the information about the used tokens
       return (
         <>
-          <div className={styles.answer} style={{ transition: "all 0.5s ease" }} ><Markdown skipHtml={true}>{answer}</Markdown></div>
+          <div className={styles.answer} style={{ transition: "all 0.5s ease" }} >
+            <Markdown skipHtml={true} remarkPlugins={[ remarkBreaks ]}>
+              {answer.replace(/\n/gi, "&nbsp; \n")}
+            </Markdown>
+          </div>
           <TokenInfo />
         </>
       );

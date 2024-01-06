@@ -47,7 +47,7 @@
 }
      
 /* Extra big screen devices (1200px and above) */
-@media only screen and (min-width: 1200px) {
+@media only screen and (min-width: 700px) {
     .navigation {
         display: flex;
         flex-direction: column;

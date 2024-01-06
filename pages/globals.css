@@ -373,3 +373,5 @@
 .ant-badge-count{
   color: inherit !important;
 }
+
+.ant-menu-inline-collapsed-tooltip { display: none; }

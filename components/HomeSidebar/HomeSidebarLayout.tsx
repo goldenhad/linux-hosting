@@ -19,7 +19,6 @@ import All from "../../public/icons/all.svg";
 import Chat from "../../public/icons/chat.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
 import { getImageUrl } from "../../firebase/drive/upload_file";
-import { isMobile } from "react-device-detect";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -55,7 +54,7 @@ const HomeSidebarLayout = ( props: {
 
   
   useEffect(() => {
-    if(isMobile || screenwidth < 992){
+    if(screenwidth <= 700){
       setBreakpoint("lg");
       setCollapseWidth(0);
       setCollapsed(true);
@@ -93,18 +92,17 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
-
   const items = [
-    getItem( <Link href={"/"}>Home</Link>, "1", () => {
+    getItem( <Link href={"/"}>Home</Link>, "0", () => {
       return true 
     }, <Icon component={Home} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/profiles"}>Profile</Link>, "4", () => {
+    getItem( <Link href={"/profiles"}>Profile</Link>, "3", () => {
       return true 
     }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/usage"}>Nutzung</Link>, "3", () => {
+    getItem( <Link href={"/usage"}>Nutzung</Link>, "2", () => {
       return true
     }, <Icon component={Stats} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/company"}>Firma</Link>, "5", () => {
+    getItem( <Link href={"/company"}>Firma</Link>, "1", () => {
       return props.context.role.isCompany 
     }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
   ];
@@ -112,30 +110,23 @@ const HomeSidebarLayout = ( props: {
   const footeritems = [];
 
   const getDefaultSelected = () => {
-    switch( router.pathname ){
-    case "/": 
-      return "1";
-    case "/companies/list/[[...search]]":
-      return "2";
-    case "/dialog":
-      return "1";
-    case "/monolog":
-      return "1";
-    case "/company":
-      return "5";
-    case "/usage":
-      return "3";
-    case "/order/invoice/[id]":
-      return "3";
-    case "/upgrade":
-      return "3";
-    case "/thankyou":
-      return "3";
-    case "/profiles":
-      return "4";
-    default:
-      return "-1";
-    }
+    let lastfound = -1;
+    
+    const patterns = [
+      /(^\/$)|(\/assistants\/(a-zA-Z)*)/gm,
+      /(^\/company$)/gm,
+      /(\/usage)|(\/thankyou)/gm,
+      /(^\/profiles$)/gm
+    ];
+
+    patterns.forEach((pattern, id) => {
+      if( pattern.exec(router.pathname) !== null){
+        lastfound = id;
+      }
+    })
+
+    console.log(lastfound);
+    return lastfound.toString();
   }
 
   const profilemenu = (
@@ -177,7 +168,7 @@ const HomeSidebarLayout = ( props: {
   }
 
   const MobileHeader = () => {
-    if(isMobile || screenwidth < 992){
+    if(screenwidth <= 700){
       return(
         <Header className={styles.header}>
           <Link href={"/"} className={styles.headerlink}>
@@ -197,7 +188,7 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
-  if(isMobile || screenwidth < 992){
+  if(screenwidth <= 700){
     return (
       <ConfigProvider theme={{
         components: {
@@ -215,7 +206,7 @@ const HomeSidebarLayout = ( props: {
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!(isMobile || screenwidth < 992)}>
+        <Layout className={styles.layout} hasSider={!(screenwidth <= 700)}>
           <MobileHeader />
           <Drawer
             bodyStyle={{ backgroundColor: "#101828", padding: 0, display: "flex", flexDirection: "row", alignItems: "center" }}
@@ -365,7 +356,7 @@ const HomeSidebarLayout = ( props: {
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!(isMobile || screenwidth < 992)}>
+        <Layout className={styles.layout} hasSider={!(screenwidth <= 700)}>
           <MobileHeader />
           <Sider
             className={styles.sidebar}

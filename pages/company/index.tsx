@@ -45,7 +45,6 @@ import {
 import { User } from "../../firebase/types/User";
 import { InvitedUser } from "../../firebase/types/Company";
 import { getImageUrl } from "../../firebase/drive/upload_file";
-import { isMobile } from "react-device-detect";
 const { TextArea } = Input;
 
 ChartJS.register(
@@ -588,7 +587,7 @@ export default function Company( props: InitialProps ) {
 
   let usercolumns = [];
 
-  if(isMobile){
+  if(window.innerWidth <= 700){
     usercolumns = [
       {
         title: "Mitarbeiter",

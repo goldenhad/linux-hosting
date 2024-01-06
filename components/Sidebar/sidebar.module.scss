@@ -1,3 +1,52 @@
+	
+/* For very small screen devices (500px and below) */
+@media only screen and (max-width: 700px){ 
+/* CSS Styling */
+    .sidebar{
+        display: none;
+    }
+
+    .mobilesidebarcontainer{
+        display: flex;
+        flex-direction: column;
+        width: 80px;
+        height: 100%;
+    }
+    .logobox {
+        padding-left: 20px;
+        padding-top: 16px;
+        padding-bottom: 16px;
+    }
+    .sidebariconsvg {
+        margin-right: 80px;
+        padding-left: 4px;
+    }
+
+    .sidebarbottomcontainer{
+        margin-top: auto;
+        margin-bottom: 16px;
+
+        .avatarcontainer{
+            padding-left: 20px;
+            margin-top: 5px;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+    }
+}
+ 
+/* Extra big screen devices (1200px and above) */
+@media only screen and (min-width: 700px) {
+  /* CSS Styling */
+  .layoutcontent{
+    margin-left: 60px;
+  }
+
+  
+}
+
 .layout{
     min-height: 100vh;
     background-color: #F2F4F7;
@@ -41,7 +90,7 @@
         background-color: #101828;
         z-index: 1;
         overflow: hidden;
-        height: 100vh;
+        height: 100%;
         position: fixed;
         
         .logobox {
@@ -114,12 +163,6 @@
             background: #F2F4F7;
         }
     }
-
-    @media (min-width: 992px) {
-        .layoutcontent{
-            margin-left: 80px;
-        }
-    }
     
 }
 
@@ -186,42 +229,6 @@
         .primarymenu {
             background-color: #101828;
             
-        }
-    }
-}
-
-@media (max-width: 992px) {
-    .sidebar{
-        display: none;
-    }
-
-    .mobilesidebarcontainer{
-        display: flex;
-        flex-direction: column;
-        width: 80px;
-        height: 100%;
-    }
-    .logobox {
-        padding-left: 20px;
-        padding-top: 16px;
-        padding-bottom: 16px;
-    }
-    .sidebariconsvg {
-        margin-right: 80px;
-        padding-left: 4px;
-    }
-
-    .sidebarbottomcontainer{
-        margin-top: auto;
-        margin-bottom: 16px;
-
-        .avatarcontainer{
-            padding-left: 20px;
-            margin-top: 5px;
-
-            &:hover {
-                cursor: pointer;
-            }
         }
     }
 }

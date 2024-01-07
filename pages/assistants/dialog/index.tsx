@@ -14,6 +14,8 @@ const dialogBasicState = {
   continue: "",
   address: "",
   order: "",
+  style: "",
+  emotions: "",
   length: ""
 }
 
@@ -30,6 +32,8 @@ export default function Dialogue( ) {
   const classificationRef = useRef( null );
   const lengthRef = useRef( null );
   const generateRef = useRef( null );
+  const styleref = useRef( null );
+  const emotionsref = useRef( null );
 
   const steps: TourProps["steps"] = [
     {
@@ -187,9 +191,9 @@ export default function Dialogue( ) {
       dialog: cleanedDialog,
       continue: cleanedContinue,
       address: values.address,
-      style: profile.settings.stil,
+      style: values.style,
       order: values.order,
-      emotions: profile.settings.emotions,
+      emotions: values.emotions,
       length: values.length
     }
 
@@ -216,7 +220,9 @@ export default function Dialogue( ) {
         lengthRef: lengthRef,
         generateRef: generateRef,
         addressRef: addressRef,
-        dialogRef: dialogRef
+        dialogRef: dialogRef,
+        styleref: styleref,
+        emotionsref: emotionsref
       }}/>
     </AssistantBase>
   );

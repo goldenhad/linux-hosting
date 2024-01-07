@@ -14,7 +14,7 @@ const { TextArea } = Input;
  * @param props Object containting the current state of the AuthContext and the form component used by the AssistantContext
  * @returns Form used for creating blog content
  */
-const MonologForm = (props: { state, form, refs: { profileRef, continueRef, classificationRef, lengthRef, generateRef, addressRef  } }) => {
+const MonologForm = (props: { state, form, refs: { profileRef, continueRef, classificationRef, lengthRef, generateRef, addressRef, styleref, emotionsref  } }) => {
   const AssistantContextState = useContext(AssistantContext);
   const form = props.form;
 
@@ -112,6 +112,68 @@ const MonologForm = (props: { state, form, refs: { profileRef, continueRef, clas
               <Select
                 placeholder="Wie ordnest du deinen Gesprächpartner ein?"
                 options={listToOptions( props.state.parameters.motives )}
+                mode="multiple"
+                allowClear
+                className={styles.formselect}
+                size='large'
+                disabled={AssistantContextState.requestState.formDisabled || AssistantContextState.requestState.quotaOverused}
+              />
+            </Form.Item>
+          </div>
+
+          <div ref={props.refs.styleref}>
+            <Form.Item className={styles.formpart} label={<b>Stil (maximal 3)</b>} name="style"
+              rules={[
+                () => ( {
+                  validator( _, value ) {
+                    if(value){
+                      if( value.length > 3 ){
+                        form.setFieldValue( "style", value.slice( 0, 3 ) )
+                      }
+                    }
+                    return Promise.resolve();
+                  }
+                } ),
+                {
+                  required: true,
+                  message: "Bitte lege den Stil der Antwort fest!"
+                }
+              ]}
+            >
+              <Select
+                placeholder="Welchen Stil soll die Antwort haben?"
+                options={listToOptions( props.state.parameters.style )}
+                mode="multiple"
+                allowClear
+                className={styles.formselect}
+                size='large'
+                disabled={AssistantContextState.requestState.formDisabled || AssistantContextState.requestState.quotaOverused}
+              />
+            </Form.Item>
+          </div>
+
+          <div ref={props.refs.emotionsref}>
+            <Form.Item className={styles.formpart} label={<b>Emotionen (maximal 3)</b>} name="emotions"
+              rules={[
+                () => ( {
+                  validator( _, value ) {
+                    if(value){
+                      if( value.length > 3 ){
+                        form.setFieldValue( "order", value.slice( 0, 3 ) )
+                      }
+                    }
+                    return Promise.resolve();
+                  }
+                } ),
+                {
+                  required: true,
+                  message: "Bitte lege die Emotionen der Antwort fest!"
+                }
+              ]}
+            >
+              <Select
+                placeholder="Welche Emotionen soll die Antwort wiederspiegeln?"
+                options={listToOptions( props.state.parameters.emotions )}
                 mode="multiple"
                 allowClear
                 className={styles.formselect}

@@ -4,7 +4,6 @@ import { Button, Form, Input, Select, Steps, Typography, message } from "antd";
 import styles from "./setup.module.scss"
 import { useAuthContext } from "../../components/context/AuthContext";
 import updateData from "../../firebase/data/updateData";
-import { listToOptions } from "../../helper/architecture";
 import axios from "axios";
 import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
 const { Paragraph } = Typography;
@@ -18,7 +17,7 @@ const { TextArea } = Input;
  * 
  */
 export default function Setup(){
-  const { login, user, role, profile, parameters, company } = useAuthContext();
+  const { login, user, role, profile, company } = useAuthContext();
   const [current, setCurrent] = useState( 0 );
   const [ setupForm ] = Form.useForm();
   const [ position, setPosition ] = useState(false);
@@ -168,52 +167,6 @@ export default function Setup(){
           },
           {
             step: 2,
-            title: "Wie schreibst du deine Mails?",
-            content: <div className={styles.singlestep}>
-              <Paragraph>
-                Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Business ihn perfekt imitieren kann. 
-                Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
-              </Paragraph>
-              <div className={styles.formpart}>
-                <Form.Item name={"mail.styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
-                  rules={[
-                    () => ( {
-                      validator( _, value ) {
-                        if(value){
-                          if( value.length > 3 ){
-                            setupForm.setFieldValue( "styles", value.slice( 0, 3 ) )
-                          }
-                        }
-                        return Promise.resolve();
-                      }
-                    } )
-                  ]}
-                >
-                  <Select options={listToOptions( parameters.style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
-                </Form.Item>
-              </div>
-              <div className={styles.formpart}>
-                <Form.Item name={"mail.emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
-                  rules={[
-                    () => ( {
-                      validator( _, value ) {
-                        if(value){
-                          if( value.length > 3 ){
-                            setupForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
-                          }
-                        }
-                        return Promise.resolve();
-                      }
-                    } )
-                  ]}
-                >
-                  <Select options={listToOptions( parameters.emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
-                </Form.Item>
-              </div>
-            </div>
-          },
-          {
-            step: 3,
             title: "Lade ein Profilbild hoch",
             content: <div className={styles.singlestep}>
               <Paragraph>
@@ -293,52 +246,6 @@ export default function Setup(){
           },
           {
             step: 1,
-            title: "Wie schreibst du deine Mails?",
-            content: <div className={styles.singlestep}>
-              <Paragraph>
-                Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Business ihn perfekt imitieren kann. 
-                Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
-              </Paragraph>
-              <div className={styles.formpart}>
-                <Form.Item name={"mail.styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
-                  rules={[
-                    () => ( {
-                      validator( _, value ) {
-                        if(value){
-                          if( value.length > 3 ){
-                            setupForm.setFieldValue( "styles", value.slice( 0, 3 ) )
-                          }
-                        }
-                        return Promise.resolve();
-                      }
-                    } )
-                  ]}
-                >
-                  <Select options={listToOptions( parameters.style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
-                </Form.Item>
-              </div>
-              <div className={styles.formpart}>
-                <Form.Item name={"mail.emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
-                  rules={[
-                    () => ( {
-                      validator( _, value ) {
-                        if(value){
-                          if( value.length > 3 ){
-                            setupForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
-                          }
-                        }
-                        return Promise.resolve();
-                      }
-                    } )
-                  ]}
-                >
-                  <Select options={listToOptions( parameters.emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
-                </Form.Item>
-              </div>
-            </div>
-          },
-          {
-            step: 2,
             title: "Lade ein Profilbild hoch",
             content: <div className={styles.singlestep}>
               <Paragraph>
@@ -395,52 +302,6 @@ export default function Setup(){
         },
         {
           step: 1,
-          title: "Wie schreibst du deine Mails?",
-          content: <div className={styles.singlestep}>
-            <Paragraph>
-              Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Business ihn perfekt imitieren kann. 
-              Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
-            </Paragraph>
-            <div className={styles.formpart}>
-              <Form.Item name={"mail.styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
-                rules={[
-                  () => ( {
-                    validator( _, value ) {
-                      if(value){
-                        if( value.length > 3 ){
-                          setupForm.setFieldValue( "mail.styles", value.slice( 0, 3 ) )
-                        }
-                      }
-                      return Promise.resolve();
-                    }
-                  } )
-                ]}
-              >
-                <Select options={listToOptions( parameters.style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
-              </Form.Item>
-            </div>
-            <div className={styles.formpart}>
-              <Form.Item name={"mail.emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
-                rules={[
-                  () => ( {
-                    validator( _, value ) {
-                      if(value){
-                        if( value.length > 3 ){
-                          setupForm.setFieldValue( "mail.emotions", value.slice( 0, 3 ) )
-                        }
-                      }
-                      return Promise.resolve();
-                    }
-                  } )
-                ]}
-              >
-                <Select options={listToOptions( parameters.emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
-              </Form.Item>
-            </div>
-          </div>
-        },
-        {
-          step: 2,
           title: "Lade ein Profilbild hoch",
           content: <div className={styles.singlestep}>
             <Paragraph>
@@ -496,8 +357,6 @@ export default function Setup(){
 
     // Get the mail relevant information from the prompt
     let profileArr = [];
-    const userstyles = setupForm.getFieldValue( "mail.styles" );
-    const userEmotions = setupForm.getFieldValue( "mail.emotions" );
 
     setPromptProcessing(true);
     try{
@@ -521,8 +380,6 @@ export default function Setup(){
             name: "Hauptprofil",
             settings: {
               personal: aiinfo.data.message,
-              emotions: userEmotions,
-              stil: userstyles,
               parameters: {
                 position: positioninfo,
                 tasks: tasksinfo,

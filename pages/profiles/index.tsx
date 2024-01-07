@@ -11,7 +11,7 @@ import { useAuthContext } from "../../components/context/AuthContext";
 import { Profile, ProfileSettings } from "../../firebase/types/Profile";
 import updateData from "../../firebase/data/updateData";
 import { arrayUnion } from "firebase/firestore";
-import { handleEmptyArray, handleUndefinedTour, listToOptions } from "../../helper/architecture";
+import { handleEmptyArray, handleUndefinedTour } from "../../helper/architecture";
 import axios from "axios";
 import environment from "dotenv";
 import { isMobile } from "react-device-detect";
@@ -44,7 +44,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default function Profiles() {
   const context = useAuthContext();
-  const { login, user, parameters, role, company } = context;
+  const { login, user, role, company } = context;
   const [ isCreateModalOpen, setIsCreateModalOpen ]  = useState( false );
   const [ isEditModalOpen, setIsEditModalOpen ]  = useState( false );
   const [ isDeleteModalOpen, setIsDeleteModalOpen ]  = useState( false );
@@ -62,8 +62,6 @@ export default function Profiles() {
   const [ tasks, setTasks ] = useState(false);
   const [ knowledge, setKnowledge ] = useState(false);
   const [ communicationstyle, setCommunicationstyle ] = useState(false);
-  const [ emotionBarrier, setEmotionBarrier ] = useState(false);
-  const [ styleBarrier, setStyleBarrier ] = useState(false);
   const [ promptProcesing, setPromptProcessing ] = useState(false);
 
   const addRef = useRef( null );
@@ -359,8 +357,6 @@ export default function Profiles() {
         setTasks(false);
         setKnowledge(false);
         setCommunicationstyle(false);
-        setEmotionBarrier(false);
-        setStyleBarrier(false);
       }
     }catch(e){
       message.error("Bei der Erstellung des Profils ist etwas schiefgelaufen bitte versuche es erneut!");

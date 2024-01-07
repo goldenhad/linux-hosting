@@ -11,7 +11,7 @@ import { useAuthContext } from "../../components/context/AuthContext";
 import { Profile, ProfileSettings } from "../../firebase/types/Profile";
 import updateData from "../../firebase/data/updateData";
 import { arrayUnion } from "firebase/firestore";
-import { handleEmptyArray, handleUndefinedTour, listToOptions } from "../../helper/architecture";
+import { handleEmptyArray, handleUndefinedTour } from "../../helper/architecture";
 import axios from "axios";
 import environment from "dotenv";
 import { isMobile } from "react-device-detect";
@@ -44,7 +44,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default function Profiles() {
   const context = useAuthContext();
-  const { login, user, parameters, role, company } = context;
+  const { login, user, role, company } = context;
   const [ isCreateModalOpen, setIsCreateModalOpen ]  = useState( false );
   const [ isEditModalOpen, setIsEditModalOpen ]  = useState( false );
   const [ isDeleteModalOpen, setIsDeleteModalOpen ]  = useState( false );
@@ -62,8 +62,6 @@ export default function Profiles() {
   const [ tasks, setTasks ] = useState(false);
   const [ knowledge, setKnowledge ] = useState(false);
   const [ communicationstyle, setCommunicationstyle ] = useState(false);
-  const [ emotionBarrier, setEmotionBarrier ] = useState(false);
-  const [ styleBarrier, setStyleBarrier ] = useState(false);
   const [ promptProcesing, setPromptProcessing ] = useState(false);
 
   const addRef = useRef( null );
@@ -170,8 +168,6 @@ export default function Profiles() {
   const setEditFields = ( obj: {name: string, settings: ProfileSettings} ) => {
     editForm.setFieldValue( "name", obj.name );
     editForm.setFieldValue( "personal", obj.settings.personal );
-    editForm.setFieldValue( "style", obj.settings.stil );
-    editForm.setFieldValue( "emotions", obj.settings.emotions );
     editForm.setFieldValue( "tags", obj.settings.tags );
     editForm.setFieldValue( "user.position.edit", obj.settings.parameters?.position );
     editForm.setFieldValue( "user.tasks.edit", obj.settings.parameters?.tasks );
@@ -236,8 +232,6 @@ export default function Profiles() {
               name: values.name,
               settings: {
                 personal: aiinfo.data.message,
-                stil: handleEmptyArray( values.style ),
-                emotions: handleEmptyArray( values.emotions ),
                 tags: handleEmptyArray( values.tags ),
                 parameters: {
                   position: positioninfo,
@@ -287,8 +281,6 @@ export default function Profiles() {
     const tasksinfo = form.getFieldValue( "user.tasks" );
     const knowledgeinfo = form.getFieldValue( "user.knowledge" );
     const communicationstyleinfo = form.getFieldValue( "user.communicationstyle" );
-    const styles = form.getFieldValue( "styles" );
-    const emotions = form.getFieldValue( "emotions" );
 
     // Create a sample text containing the user information
     /* let userinfo = "";
@@ -322,8 +314,6 @@ export default function Profiles() {
             name: values.name,
             settings: {
               personal: aiinfo.data.message,
-              stil: handleEmptyArray( styles ),
-              emotions: handleEmptyArray( emotions ),
               tags: handleEmptyArray( values.tags ),
               parameters: {
                 position: positioninfo,
@@ -367,8 +357,6 @@ export default function Profiles() {
         setTasks(false);
         setKnowledge(false);
         setCommunicationstyle(false);
-        setEmotionBarrier(false);
-        setStyleBarrier(false);
       }
     }catch(e){
       message.error("Bei der Erstellung des Profils ist etwas schiefgelaufen bitte versuche es erneut!");
@@ -544,76 +532,6 @@ export default function Profiles() {
         },
         {
           step: 1,
-          title: "Wie schreibst du deine Mails?",
-          content: <div className={styles.singlestep}>
-            <Paragraph>
-              Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Business ihn perfekt imitieren kann. 
-              Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
-            </Paragraph>
-            <div className={styles.formpart}>
-              <Form.Item name={"styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
-                rules={[
-                  () => ( {
-                    validator( _, value ) {
-                      if(value){
-                        if( value.length > 3 ){
-                          form.setFieldValue( "styles", value.slice( 0, 3 ) )
-                        }
-
-                        if(value.length > 0){
-                          setStyleBarrier(true);
-                        }else{
-                          setStyleBarrier(false);
-                        }
-                      }else{
-                        setStyleBarrier(false);
-                      }
-                      return Promise.resolve();
-                    }
-                  }),
-                  {
-                    required: true,
-                    message: "Bitte gib einen Stil an!"
-                  }
-                ]}
-              >
-                <Select options={listToOptions( parameters.style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
-              </Form.Item>
-            </div>
-            <div className={styles.formpart}>
-              <Form.Item name={"emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
-                rules={[
-                  () => ( {
-                    validator( _, value ) {
-                      if(value){
-                        if( value.length > 3 ){
-                          form.setFieldValue( "emotions", value.slice( 0, 3 ) )
-                        }
-
-                        if(value.length > 0){
-                          setEmotionBarrier(true);
-                        }else{
-                          setEmotionBarrier(false);
-                        }
-                      }else{
-                        setEmotionBarrier(false);
-                      }
-                      return Promise.resolve();
-                    }
-                  }),
-                  {
-                    required: true,
-                    message: "Bitte lege die Gemütslage fest!"
-                  }
-                ]}
-              >
-                <Select options={listToOptions( parameters.emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
-              </Form.Item>
-            </div>
-          </div>
-        },
-        {
-          step: 2,
           title: "Abschließen",
           content: <div>
             <Paragraph>
@@ -694,76 +612,6 @@ export default function Profiles() {
         },
         {
           step: 1,
-          title: "Wie schreibst du deine Mails?",
-          content: <div className={styles.singlestep}>
-            <Paragraph>
-              Wir möchten mehr über deinen Schreibstil erfahren, damit Siteware.Business ihn perfekt imitieren kann. 
-              Das hilft uns, dir eine personalisierte und natürliche Erfahrung zu bieten.
-            </Paragraph>
-            <div className={styles.formpart}>
-              <Form.Item name={"styles"} label={"Wir würdest du den Stil deiner E-Mails beschreiben? (maximal  3)"}
-                rules={[
-                  () => ( {
-                    validator( _, value ) {
-                      if(value){
-                        if( value.length > 3 ){
-                          form.setFieldValue( "styles", value.slice( 0, 3 ) )
-                        }
-
-                        if(value.length > 0){
-                          setStyleBarrier(true);
-                        }else{
-                          setStyleBarrier(false);
-                        }
-                      }else{
-                        setStyleBarrier(false);
-                      }
-                      return Promise.resolve();
-                    }
-                  }),
-                  {
-                    required: true,
-                    message: "Bitte gib einen Stil an!"
-                  }
-                ]}
-              >
-                <Select options={listToOptions( parameters.style )} className={styles.formselect} size='large' mode="multiple" allowClear/>
-              </Form.Item>
-            </div>
-            <div className={styles.formpart}>
-              <Form.Item name={"emotions"} label={"Welche Gemütslage hast du dabei? (maximal  3)"}
-                rules={[
-                  () => ( {
-                    validator( _, value ) {
-                      if(value){
-                        if( value.length > 3 ){
-                          form.setFieldValue( "emotions", value.slice( 0, 3 ) )
-                        }
-
-                        if(value.length > 0){
-                          setEmotionBarrier(true);
-                        }else{
-                          setEmotionBarrier(false);
-                        }
-                      }else{
-                        setEmotionBarrier(false);
-                      }
-                      return Promise.resolve();
-                    }
-                  }),
-                  {
-                    required: true,
-                    message: "Bitte lege die Gemütslage fest!"
-                  }
-                ]}
-              >
-                <Select options={listToOptions( parameters.emotions )} className={styles.formselect} size='large' mode="multiple" allowClear/>
-              </Form.Item>
-            </div>
-          </div>
-        },
-        {
-          step: 2,
           title: "Abschließen",
           content: <div>
             <Paragraph>
@@ -984,16 +832,6 @@ export default function Profiles() {
                     </Button>
                   )}
 
-                  {current == 1 && (
-                    <Button
-                      type="primary"
-                      onClick={() => setCurrent( current + 1 )}
-                      disabled={( !emotionBarrier || !styleBarrier )}
-                    >
-                    Weiter
-                    </Button>
-                  )}
-
                   {current === getSteps().length - 1 && (
                     <Button loading={promptProcesing} type="primary" htmlType='submit'>
                     Speichern
@@ -1037,56 +875,6 @@ export default function Profiles() {
             </Form.Item>
   
             <EditForm />
-
-            <Form.Item className={styles.formpart} label={<b>Allgemeine Stilistik (maximal 3)</b>} name="style"
-              rules={[
-                () => ( {
-                  validator( _, value ) {
-                    if( value.length > 3 ){
-                      editForm.setFieldValue( "style", value.slice( 0, 3 ) )
-                    }
-                    return Promise.resolve();
-                  }
-                } ),
-                {
-                  required: true,
-                  message: "Bitte gib deine Stilistik an!"
-                }
-              ]}
-            >
-              <Select
-                className={styles.formselect}
-                placeholder="In welchem Stil soll geantwortet werden?"
-                options={listToOptions( parameters.style )}
-                mode="multiple"
-                allowClear
-              />
-            </Form.Item>
-
-            <Form.Item className={styles.formpart} label={<b>Allgemeine Gemütslage (maximal 3)</b>} name="emotions"
-              rules={[
-                () => ( {
-                  validator( _, value ) {
-                    if( value.length > 3 ){
-                      editForm.setFieldValue( "emotions", value.slice( 0, 3 ) )
-                    }
-                    return Promise.resolve();
-                  }
-                } ),
-                {
-                  required: true,
-                  message: "Bitte lege deine Gemütslage fest!"
-                }
-              ]}
-            >
-              <Select
-                className={styles.formselect}
-                placeholder="Wie ist deine allgemeine Gemütslage?"
-                options={listToOptions( parameters.emotions )}
-                mode="multiple"
-                allowClear
-              />
-            </Form.Item>
 
             <Form.Item className={styles.formpart} label={<b>Tags {tokenCount}/4</b>} name="tags">
               <Select

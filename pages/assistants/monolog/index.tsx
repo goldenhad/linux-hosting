@@ -13,6 +13,8 @@ const monologBasicState = {
   content: "",
   address: "",
   order: "",
+  style: "",
+  emotions: "",
   length: ""
 }
 
@@ -27,6 +29,8 @@ export default function Monologue( ) {
   const classificationRef = useRef( null );
   const lengthRef = useRef( null );
   const generateRef = useRef( null );
+  const styleref = useRef( null );
+  const emotionsref = useRef( null );
 
 
   const steps: TourProps["steps"] = [
@@ -169,9 +173,9 @@ export default function Monologue( ) {
       company: companyinfo,
       content: cleanedContet,
       address: values.address,
-      style: profile.settings.stil,
+      style: values.style,
       order: values.order,
-      emotions: profile.settings.emotions,
+      emotions: values.emotions,
       length: values.length
     }
 
@@ -197,7 +201,9 @@ export default function Monologue( ) {
         classificationRef: classificationRef,
         lengthRef: lengthRef,
         generateRef: generateRef,
-        addressRef: addressRef
+        addressRef: addressRef,
+        styleref: styleref,
+        emotionsref: emotionsref
       }}/>
     </AssistantBase>
   )

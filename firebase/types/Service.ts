@@ -6,5 +6,6 @@ export type Service = {
     description: string,
     video: string,
     link: string,
-    category: string
+    category: string,
+    rank: number
 }

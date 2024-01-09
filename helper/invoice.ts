@@ -139,7 +139,7 @@ export const createInvoice = (role: Role, user: User, company: Company, order: O
             [
               { text: "1", align: "left" },
               { text: "swm0001", align: "left" },
-              { text: "Siteware.Business Credits", align: "left", bold: true },
+              { text: "Siteware business Credits", align: "left", bold: true },
               { text: normalizeTokens(order.tokens), align: "right" },
               { text: "19%", align: "right" },
               { text: convertToCurrency( order.amount / ( 1 + 0.19 ) ), align: "right" },

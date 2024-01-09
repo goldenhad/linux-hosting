@@ -131,7 +131,7 @@ export default function Usage( props: InitialProps ) {
     },
     {
       title: "Statistik",
-      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Credits du über das aktuelle Jahr mit Siteware.Business bereits verbraucht hast.",
+      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Credits du über das aktuelle Jahr mit Siteware business bereits verbraucht hast.",
       target: () => statRef.current,
       nextButtonProps: {
         children: (
@@ -146,7 +146,7 @@ export default function Usage( props: InitialProps ) {
     },
     {
       title: "Deine bisherigen Einkäufe",
-      description: "In dieser Tabelle findet ihr eine Übersicht deiner bisherigen Einkäufe bei Siteware.Business. Hier hast du die Möglichkeit, "+
+      description: "In dieser Tabelle findet ihr eine Übersicht deiner bisherigen Einkäufe bei Siteware business. Hier hast du die Möglichkeit, "+
       "Rechnungen herunterzuladen und unterbrochene Einkäufe abzuschließen.",
       target: () => orderRef.current,
       nextButtonProps: {

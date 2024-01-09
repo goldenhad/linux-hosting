@@ -6,6 +6,7 @@ import addData from "../data/setData";
 import crypto from "crypto";
 import updateData from "../data/updateData";
 import { InvitedUser } from "../types/Company";
+import { denormalizeTokens } from "../../helper/architecture";
 
 const auth = getAuth( firebase_app );
 
@@ -70,11 +71,8 @@ export default async function signUp( firstname, lastname, email, username, pass
               const cmpny_result = await getDocument( "Company", recommended );
               const cmpny = cmpny_result.result.data();
 
-              const setting_result = await getDocument( "Settings", "Calculation" );
-              const settings = setting_result.result.data();
-
               if( !cmpny.recommended ){
-                await updateData( "Company", recommended, { tokens: cmpny.tokens + settings.tokensPerMail * 200, recommended: true } );
+                await updateData( "Company", recommended, { tokens: cmpny.tokens +  denormalizeTokens(200), recommended: true } );
               }
             }
             //console.log(usercreationresult);

@@ -57,7 +57,7 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
       const { result } = await getDocWhere( "User", "inviteCode", "==", invitiparams.code );
 
       if( result.length == 0 ){
-        if( ( timeDifference/60 )/60 <= 24 ){
+        if( ( timeDifference / 60 ) / 60 <= 24 ){
           return { 
             props: { 
               invite: {
@@ -148,6 +148,8 @@ export default function Register( props ){
         return router.push( "/setup" )
       }
     }else{
+      const recommendCode = props.invitedBy?.code;
+
       const { error } = await signUp( 
         values.firstname,
         values.lastname,
@@ -160,7 +162,7 @@ export default function Register( props ){
         values.postalcode,
         "DE",
         isPersonal,
-        undefined
+        recommendCode
       );
             
       if ( error ) {

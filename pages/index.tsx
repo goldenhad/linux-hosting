@@ -154,6 +154,16 @@ export default function Home() {
       }
     }
 
+    servicearr = servicearr.sort((a: Service, b: Service) => {
+      if( a.rank < b.rank){
+        return -1;
+      }else if( a.rank > b.rank){
+        return 1;
+      }else{
+        return 0;
+      }
+    })
+
     return (
       <div className={styles.servicelist}>
         {servicearr.map((singleService: Service, idx: number) => {

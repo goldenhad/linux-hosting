@@ -182,15 +182,17 @@ export default function Usage( props: InitialProps ) {
   }, [company, user.Company] );
 
   useEffect( () => {
-    let min = Number.MAX_SAFE_INTEGER;
+    if(user){
+      let min = Number.MAX_SAFE_INTEGER;
 
-    user.usedCredits.forEach((credits: Usage) => {
-      if (credits.year < min) {
-        min = credits.year;
-      }
-    });
+      user.usedCredits.forEach((credits: Usage) => {
+        if (credits.year < min) {
+          min = credits.year;
+        }
+      });
 
-    setLowerBound(min);
+      setLowerBound(min);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -394,12 +396,14 @@ export default function Usage( props: InitialProps ) {
                           data: months.map( ( label, idx ) => {
                             let sum = 0;
                             users.forEach( ( su: User ) => {
-                              su.usedCredits.forEach( ( usage: Usage ) => {
-                                if( usage.month == idx+1 && usage.year == visibleYear ){
-                                  sum += parseFloat( ( usage.amount/1000 ).toFixed( 2 ) );
-                                }
-                              } );
-                            } )
+                              if(su.usedCredits){
+                                su.usedCredits.forEach( ( usage: Usage ) => {
+                                  if( usage.month == idx+1 && usage.year == visibleYear ){
+                                    sum += parseFloat( ( usage.amount/1000 ).toFixed( 2 ) );
+                                  }
+                                });
+                              }
+                            })
                             return sum;
                           } ),
                           backgroundColor: "rgba(16, 24, 40, 0.8)"

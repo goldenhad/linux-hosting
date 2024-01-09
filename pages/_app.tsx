@@ -67,13 +67,13 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
       <>
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <meta property="og:title" content="Siteware.Business dein intelligenter Mail-Assistent" />
+          <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/ogimage.jpg" />
           <meta name="viewport" content="initial-scale=1, maximum-scale=1" />
           <meta property="og:url" content={`${process.env.BASEURL}`} />
           <link rel="icon" type="image/x-icon" href="/small_logo.ico" />
-          <title>Siteware.Business | ai assistant</title>
+          <title>Siteware business | ai assistant</title>
         </Head>
         <div className={roboto.className}>
           <Component {...pageProps}/>
@@ -85,12 +85,12 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
       <>
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <meta property="og:title" content="Siteware.Business dein intelligenter Mail-Assistent" />
+          <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/ogimage.jpg" />
           <meta property="og:url" content={`${process.env.BASEURL}`} />
           <link rel="icon" type="image/x-icon" href="/small_logo.ico" />
-          <title>Siteware.Business | ai assistant</title>
+          <title>Siteware business | ai assistant</title>
         </Head>
         <AuthContextProvider>
           <div className={roboto.className}>

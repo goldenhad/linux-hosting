@@ -6,6 +6,7 @@
  */
 
 import nodemailer from "nodemailer";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require( "dotenv" ).config();
 
 
@@ -25,7 +26,7 @@ export async function sendMail( receiver: string, subject: string, text: string,
   const sender = process.env.MAILUSER;
     
   const mailReturn = await createTransport().sendMail( {
-    from: `"Siteware.Business | Siteware" <${sender}>`,
+    from: `"Siteware business | Siteware" <${sender}>`,
     to: receiver,
     subject: subject,
     text: text,

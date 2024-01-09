@@ -40,7 +40,7 @@ const frontendnav: MenuProps["items"] = [
     key: "legal"
   },
   {
-    label: <Link href={"login"}>Siteware Business</Link>,
+    label: <Link href={"login"}>Siteware business</Link>,
     key: "login"
   }
 ]
@@ -146,7 +146,7 @@ export default function Login(){
           </div>
         </div>
       </div>
-      <div className={styles.copyrightfooter}>© Siteware.Business 2023</div>
+      <div className={styles.copyrightfooter}>© Siteware business 2024</div>
     </div>
   );
 }
@@ -156,12 +156,12 @@ Login.getLayout = ( page ) => {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Siteware.Business dein intelligenter Mail-Assistent" />
+        <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/ogimage.jpg" />
         <meta property="og:url" content={`${process.env.BASEURL}`} />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware.Business | ai assistant</title>
+        <title>Siteware business | ai assistant</title>
       </Head>
       <main>
         {page}

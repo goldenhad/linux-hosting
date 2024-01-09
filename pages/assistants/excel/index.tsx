@@ -26,7 +26,7 @@ export default function Dialogue( ) {
   const steps: TourProps["steps"] = [
     {
       title: "Excel Hilfe",
-      description: "Das \"Excel-Hilfe\"-Feature von Siteware.Business bietet dir eine persönliche und zielgerichtete Unterstützung"+
+      description: "Das \"Excel-Hilfe\"-Feature von Siteware business bietet dir eine persönliche und zielgerichtete Unterstützung"+
       "für alle deine Anliegen rund um Microsoft Excel. Egal, ob du eine spezifische Frage hast, Hilfe bei komplexen Formeln benötigst"+
       " oder Unterstützung bei der Datenaufbereitung suchst, dieses Feature steht dir zur Seite. Du kannst deine Fragen eingeben"+
       " und erhältst maßgeschneiderte Antworten und Anleitungen, die genau auf deine Bedürfnisse und dein aktuelles Problem zugeschnitten"+

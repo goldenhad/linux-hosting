@@ -103,7 +103,11 @@ const HomeSidebarLayout = ( props: {
       return true
     }, <Icon component={Stats} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
     getItem( <Link href={"/company"}>Firma</Link>, "1", () => {
-      return props.context.role.isCompany 
+      if(props.context.role){
+        return props.context.role.isCompany;
+      }else{
+        return false;
+      }
     }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
   ];
 

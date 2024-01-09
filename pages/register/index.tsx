@@ -24,7 +24,7 @@ const frontendnav: MenuProps["items"] = [
     key: "legal"
   },
   {
-    label: <Link href={"login"}>Siteware Business</Link>,
+    label: <Link href={"login"}>Siteware business</Link>,
     key: "login"
   }
 ]
@@ -57,7 +57,7 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
       const { result } = await getDocWhere( "User", "inviteCode", "==", invitiparams.code );
 
       if( result.length == 0 ){
-        if( ( timeDifference/60 )/60 <= 24 ){
+        if( ( timeDifference / 60 ) / 60 <= 24 ){
           return { 
             props: { 
               invite: {
@@ -148,6 +148,8 @@ export default function Register( props ){
         return router.push( "/setup" )
       }
     }else{
+      const recommendCode = props.invitedBy?.code;
+
       const { error } = await signUp( 
         values.firstname,
         values.lastname,
@@ -160,7 +162,7 @@ export default function Register( props ){
         values.postalcode,
         "DE",
         isPersonal,
-        undefined
+        recommendCode
       );
             
       if ( error ) {
@@ -605,7 +607,7 @@ export default function Register( props ){
           <Form.Item label="Nutzung" name={"usecase"} className={styles.loginpart}>
             <Select onChange={( value ) => {
               ( value == "Für mein Unternehmen" )? setRegisteringCompany( true ): setRegisteringCompany( false ) 
-            }} placeholder={"Wie planst du Siteware.Business zu nutzen?"}
+            }} placeholder={"Wie planst du Siteware business zu nutzen?"}
             options={[{ key: 0, value: "Nur für mich persönlich" }, { key: 1, value: "Für mein Unternehmen" }]}/>
           </Form.Item>
     
@@ -663,7 +665,7 @@ export default function Register( props ){
         <div className={styles.formContainer}>
           <div className={styles.formtitle}>Registrieren</div>
           <div className={styles.formexplanation}>
-            Sparen Sie Zeit und steigern Sie Ihre Produktivität mit Siteware.Business – 
+            Sparen Sie Zeit und steigern Sie Ihre Produktivität mit Siteware business – 
             melden Sie sich jetzt über das untenstehende Formular an und entdecken Sie die Kraft unserer KI-Lösungen!
           </div>
           {getForm()}
@@ -678,12 +680,12 @@ Register.getLayout = ( page ) => {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Siteware.Business dein intelligenter Mail-Assistent" />
+        <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/ogimage.jpg" />
         <meta property="og:url" content={`${process.env.BASEURL}`} />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware.Business | ai assistant</title>
+        <title>Siteware business | ai assistant</title>
       </Head>
       <main>
         {page}

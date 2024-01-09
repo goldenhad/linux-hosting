@@ -98,7 +98,7 @@ export default function Home() {
       title: "E-Mail schreiben",
       description: "Die Funktion \"E-Mail schreiben\" ist ein leistungsstarkes Tool, das dir dabei hilft, schnell und effektiv E-Mails zu verfassen. "+
       "Als Nutzer spezifizierst du einfach den gewünschten Inhalt oder den Hauptzweck deiner E-Mail, zum Beispiel eine Terminanfrage, ein Update für "+
-      "ein Projekt oder eine Rückmeldung zu einer Anfrage. Basierend auf deinen Angaben generiert Siteware.Business dann einen professionellen und "+
+      "ein Projekt oder eine Rückmeldung zu einer Anfrage. Basierend auf deinen Angaben generiert Siteware business dann einen professionellen und "+
       "kohärenten E-Mail-Text, der genau auf deine Bedürfnisse zugeschnitten ist.",
       target: () => monologRef.current,
       nextButtonProps: {
@@ -115,7 +115,7 @@ export default function Home() {
     {
       title: "Blogbeitrag erzeugen",
       description: "Die Funktion \"Blogbeitrag erzeugen\" dient dazu, voll automatisch fesselnde Blogbeiträge zu verfassen. "+
-      "Nachdem du das Thema des Blogtexts sowie individuelle Parameter festgelegt hast, generiert Siteware.Business automatisch einen professionellen und "+
+      "Nachdem du das Thema des Blogtexts sowie individuelle Parameter festgelegt hast, generiert Siteware business automatisch einen professionellen und "+
       "ansprechenden Blogtext, ganz nach Deinen Vorstellungen.",
       target: () => monologRef.current,
       nextButtonProps: {
@@ -153,6 +153,16 @@ export default function Home() {
         });
       }
     }
+
+    servicearr = servicearr.sort((a: Service, b: Service) => {
+      if( a.rank < b.rank){
+        return -1;
+      }else if( a.rank > b.rank){
+        return 1;
+      }else{
+        return 0;
+      }
+    })
 
     return (
       <div className={styles.servicelist}>

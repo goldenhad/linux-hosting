@@ -23,7 +23,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
           try{
             try{
-              const data = await axios.get( `https://api.sandbox.paypal.com/v2/checkout/orders/${id}`, {
+              const data = await axios.get( `${process.env.PAYPALURL}/v2/checkout/orders/${id}`, {
                 headers: {
                   "Accept": "application/json",
                   "Accept-Language": "en_US",

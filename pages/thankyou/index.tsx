@@ -37,7 +37,7 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 
 export default function Thankyou( props: InitialProps ) {
   const context = useAuthContext();
-  const { role, user, company } = context;
+  const { role, user, company, calculations } = context;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [seed, setSeed] = useState( 1 );
   const [order, setOrder] = useState({
@@ -83,6 +83,7 @@ export default function Thankyou( props: InitialProps ) {
         updateOrder();
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getResult = () => {
@@ -124,7 +125,7 @@ export default function Thankyou( props: InitialProps ) {
         return (
           <div className={styles.buttongroup}>
             <Button className={styles.backnow} onClick={() => {
-              getPDFUrl(role, user, company, order).download(`Siteware_business_invoice_${order.invoiceId}`)
+              getPDFUrl(role, user, company, order, calculations).download(`Siteware_business_invoice_${order.invoiceId}`)
             }}>Rechnung herunterladen</Button>
   
             <Link href={"/usage"}>

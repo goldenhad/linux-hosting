@@ -1,3 +1,5 @@
+import { Calculations } from "../firebase/types/Settings"
+
 export const mailPriceMapping = [
   5.0,
   15.0,
@@ -38,16 +40,16 @@ export const mailMarks = {
   6: "5000 Mails"
 }
 
-export const convertTokensToPrice = (tokens: number) => {
-  return parseFloat((tokens/3000 * 0.03 * 6).toFixed(0));
+export const convertTokensToPrice = (tokens: number, calculations: Calculations) => {
+  return parseFloat((tokens/calculations.tokensPerCredit * calculations.costPerToken * calculations.profitPercent/100).toFixed(0));
 }
 
-export const priceToIndex = (price: number) => {
-  return mailPriceMapping.findIndex((value) => {
+export const priceToIndex = (price: number, calculations: Calculations) => {
+  return calculations.products.findIndex((value) => {
     return value == price;
   })
 }
 
-export const calculateTokens = (tokenstobuy) => {
-  return parseFloat((mailPriceMapping[tokenstobuy]/( 0.03 * 6 ) *3000).toFixed(2));
+export const calculateTokens = (tokenstobuy: number, calculations: Calculations) => {
+  return parseFloat((calculations.products[tokenstobuy]/( calculations.costPerToken * calculations.profitPercent/100 ) * calculations.tokensPerCredit).toFixed(2));
 }

@@ -5,6 +5,7 @@ import { User } from "../firebase/types/User";
 import { Company, Order } from "../firebase/types/Company";
 import moment from "moment";
 import { convertToCurrency, normalizeTokens } from "./architecture";
+import { Calculations } from "../firebase/types/Settings";
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -50,12 +51,12 @@ pdfMake.tableLayouts = {
   }
 }
 
-export const getPDFUrl = (role, user, company, order) => {
+export const getPDFUrl = (role, user, company, order, calculations) => {
 
-  return pdfMake.createPdf(createInvoice(role, user, company, order), pdfMake.tableLayouts, InvoiceFonts, null);
+  return pdfMake.createPdf(createInvoice(role, user, company, order, calculations), pdfMake.tableLayouts, InvoiceFonts, null);
 }
 
-export const createInvoice = (role: Role, user: User, company: Company, order: Order) => {
+export const createInvoice = (role: Role, user: User, company: Company, order: Order, calculations: Calculations) => {
   let customername = {};
   if(!role.isCompany){
     customername = {
@@ -140,7 +141,7 @@ export const createInvoice = (role: Role, user: User, company: Company, order: O
               { text: "1", align: "left" },
               { text: "swm0001", align: "left" },
               { text: "Siteware business Credits", align: "left", bold: true },
-              { text: normalizeTokens(order.tokens), align: "right" },
+              { text: normalizeTokens(order.tokens, calculations).toFixed(0), align: "right" },
               { text: "19%", align: "right" },
               { text: convertToCurrency( order.amount / ( 1 + 0.19 ) ), align: "right" },
               { text: convertToCurrency( order.amount ), align: "right" }

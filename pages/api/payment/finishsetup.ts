@@ -5,6 +5,7 @@ import Stripe from "stripe";
 type ResponseData = {
     errorcode: number,
     message: string,
+    intent?: Stripe.SetupIntent
 }
 
 const stripe = new Stripe(process.env.STRIPEPRIV, {
@@ -23,22 +24,28 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       if( token ){
         const data = req.body;
                 
-        if( data.name != undefined && data.email != undefined ){
+        if( data.setupintent != undefined && data.customer != undefined ){
 
           try {
+
+            const setupintent = await stripe.setupIntents.retrieve(data.setupintent);
                 
-            const customer = await stripe.customers.create({
-              name: data.name,
-              email: data.email,
-              address: {
-                city: data.address.city,
-                country: "de",
-                line1: data.address.street,
-                postal_code: data.address.postalcode
+            if(setupintent.payment_method){
+                
+              const update = await stripe.customers.update(data.customer, {
+                invoice_settings: {
+                  default_payment_method: setupintent.payment_method as string
+                }
+              });
+
+              if(update.id){
+                return res.status( 200 ).send( { errorcode: 0, message: "OK", intent: setupintent } );
+              }else{
+                return res.status( 400 ).send( { errorcode: 0, message: "Customer could not be updated" } );
               }
-            })
-                
-            return res.status( 200 ).send( { errorcode: 0, message: customer.id } );
+            }else{
+              return res.status( 400 ).send( { errorcode: 0, message: "Payment Method not found!" } );
+            }
           } catch (error) {
             console.log(error);
             return res.status( 400 ).send( { errorcode: 4, message: "Something went wrong" } );

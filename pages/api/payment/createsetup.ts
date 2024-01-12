@@ -23,22 +23,18 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       if( token ){
         const data = req.body;
                 
-        if( data.name != undefined && data.email != undefined ){
+        if( data.customer != undefined ){
 
           try {
+
+            const setupintent = await stripe.setupIntents.create({
+              automatic_payment_methods: {
+                enabled: true
+              },
+              customer: data.customer
+            });
                 
-            const customer = await stripe.customers.create({
-              name: data.name,
-              email: data.email,
-              address: {
-                city: data.address.city,
-                country: "de",
-                line1: data.address.street,
-                postal_code: data.address.postalcode
-              }
-            })
-                
-            return res.status( 200 ).send( { errorcode: 0, message: customer.id } );
+            return res.status( 200 ).send( { errorcode: 0, message: setupintent.client_secret } );
           } catch (error) {
             console.log(error);
             return res.status( 400 ).send( { errorcode: 4, message: "Something went wrong" } );

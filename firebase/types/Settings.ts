@@ -15,4 +15,10 @@ export type InvoiceSettings = {
 
 export type Calculations = {
     tokensPerMail: number,
+    costPerToken: number,
+    products: Array<number>,
+    profitPercent: number,
+    tokensPerCredit: number,
+    normalizer: number,
+    startCredits: number
 }

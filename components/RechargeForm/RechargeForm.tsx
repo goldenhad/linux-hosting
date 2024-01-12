@@ -6,18 +6,25 @@ import styles from "./rechargeform.module.scss"
 import { useEffect, useState } from "react";
 import { convertToCurrency, normalizeTokens } from "../../helper/architecture";
 import { calculateTokens, mailPriceMapping } from "../../helper/price";
-import { useElements, useStripe } from "@stripe/react-stripe-js";
+import { useStripe } from "@stripe/react-stripe-js";
 import axios from "axios";
 import { Company, Plan } from "../../firebase/types/Company";
 import { User } from "../../firebase/types/User";
 import { Role } from "../../firebase/types/Role";
 import updateData from "../../firebase/data/updateData";
+import { Calculations } from "../../firebase/types/Settings";
 
 
-const RechargeForm = ( props: { defaultstate: { threshold: number, tokens: number }, company: Company, user: User, role: Role, onCustomerApprove } ) => {
+const RechargeForm = ( props: { 
+  defaultstate: { threshold: number, tokens: number },
+  company: Company,
+  user: User,
+  role: Role,
+  onCustomerApprove,
+  calculations: Calculations 
+} ) => {
   const [ tokenstobuy, setTokenstobuy ] = useState( 0 );
   const stripe = useStripe();
-  const elements = useElements();
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
 
@@ -26,6 +33,7 @@ const RechargeForm = ( props: { defaultstate: { threshold: number, tokens: numbe
       editForm.setFieldValue("threshold", props.defaultstate.threshold);
       editForm.setFieldValue("tokenamount", props.defaultstate.tokens);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props]);
 
 
@@ -59,11 +67,11 @@ const RechargeForm = ( props: { defaultstate: { threshold: number, tokens: numbe
     
 
     const newplan: Plan = {
-      tokens: calculateTokens(tokenstobuy),
+      tokens: calculateTokens(tokenstobuy, props.calculations),
       timestamp: Math.floor( Date.now() / 1000 ),
       state: "active",
       amount: mailPriceMapping[tokenstobuy],
-      threshold: form.getFieldValue("threshold")
+      threshold: editForm.getFieldValue("threshold")
     }
 
 
@@ -103,7 +111,7 @@ const RechargeForm = ( props: { defaultstate: { threshold: number, tokens: numbe
 
           <Card className={styles.quoatacard} bordered={true}>
             <div className={styles.tokenrow}>
-              <div className={styles.tokens}>{normalizeTokens(calculateTokens(tokenstobuy)).toFixed(0)}</div>
+              <div className={styles.tokens}>{normalizeTokens(calculateTokens(tokenstobuy, props.calculations), props.calculations).toFixed(0)}</div>
               <div className={styles.tokeninfo}>Anzahl Credits</div>
             </div>
             <Form.Item className={styles.tokenslideritem} name={"tokenamount"}>
@@ -161,7 +169,7 @@ const RechargeForm = ( props: { defaultstate: { threshold: number, tokens: numbe
 
           <Card className={styles.quoatacard} bordered={true}>
             <div className={styles.tokenrow}>
-              <div className={styles.tokens}>{normalizeTokens(calculateTokens(tokenstobuy)).toFixed(0)}</div>
+              <div className={styles.tokens}>{normalizeTokens(calculateTokens(tokenstobuy, props.calculations), props.calculations).toFixed(0)}</div>
               <div className={styles.tokeninfo}>Anzahl Credits</div>
             </div>
             <Form.Item className={styles.tokenslideritem} name={"tokenamount"}>

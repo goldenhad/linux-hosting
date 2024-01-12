@@ -505,13 +505,66 @@
     margin-bottom: 16px;
 }
 
-.paymentcard{
+.paymentmethod{
     width: 80%;
-    height: 300px;
+    margin-top: 20px;
+
+    .container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+
+        .name {
+            font-weight: bold;
+
+            .cardicon{
+                margin-right: 6px;
+            }
+        }
+
+        .trashicon{
+            &:hover{
+                cursor: pointer;
+                color: #F24E1E;
+            }
+        }
+    }
 }
 
-.cardcard{
-    border: 1px  solid rgb(217, 217, 217);
-    background-color: #F9FAFB;
-    width: 80%;
+.buttonrow{
+    width: 100%;
+    height: 44px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    
+    button {
+        width: 250px;
+        height: 44px;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 24px;
+        padding: 10px 18px 10px 18px;
+
+        .buttonicon > svg{
+            transform: translate(-1px, 4px);
+            fill: transparent;
+            color: inherit;
+            stroke: inherit;
+        }
+    }
+}
+
+.paymenterror{
+    width: 100%;
+    margin-top: 50px;
+}
+
+.addPayment{
+    margin-top: 25px;
+
+    .buttoncontainer{
+        margin-top: 20px;
+    }
 }

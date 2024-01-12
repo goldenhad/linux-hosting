@@ -1,20 +1,11 @@
 "use client";
-import { Card, Button, Form, Divider, Slider, ConfigProvider, Switch } from "antd";
+import { ConfigProvider } from "antd";
 import styles from "./upgrade.module.scss"
-import axios from "axios";
-import { useEffect, useState } from "react";
 import { GetServerSideProps } from "next";
 import { useAuthContext } from "../../components/context/AuthContext";
-import { useRouter } from "next/navigation";
-import { Order, Plan } from "../../firebase/types/Company";
-import { convertToCurrency, normalizeTokens } from "../../helper/architecture";
-import updateData from "../../firebase/data/updateData";
-import { mailAmountMapping, mailSavingMapping, mailPriceMapping } from "../../helper/price";
-import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
-import { CardElement, useElements, useStripe, Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
 import Creditform from "../../components/CreditForm/Creditform";
 import getStripe from "../../helper/stripe";
+import { Elements } from "@stripe/react-stripe-js";
 
 
 export interface InitialProps {
@@ -39,9 +30,9 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 
 
 
-export default function Upgrade( props: InitialProps ) {
+export default function Upgrade( ) {
   const context = useAuthContext();
-  const { user, company, invoice_data } = context;
+  const { user, company, invoice_data, calculations } = context;
 
   return (
     <ConfigProvider theme={{
@@ -64,7 +55,7 @@ export default function Upgrade( props: InitialProps ) {
           </div>
         </div>
         <Elements stripe={stripePromise}>
-          <Creditform user={user} company={company} invoiceData={invoice_data}/>
+          <Creditform user={user} company={company} invoiceData={invoice_data} calculation={calculations}/>
         </Elements>
       </div>
     </ConfigProvider>

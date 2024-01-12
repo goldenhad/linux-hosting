@@ -3,7 +3,7 @@ import axios from "axios";
 import styles from "./AssistantBase.module.scss";
 import { createContext, useEffect, useState } from "react";
 import { History, User } from "../../firebase/types/User";
-import { Company } from "../../firebase/types/Company";
+import { Company, Order } from "../../firebase/types/Company";
 import { Profile } from "../../firebase/types/Profile";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../db";
@@ -21,6 +21,8 @@ import { isMobile } from "react-device-detect";
 import Markdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import React from "react";
+import { convertTokensToPrice } from "../../helper/price";
+import { Calculations, InvoiceSettings } from "../../firebase/types/Settings";
 
 const { Paragraph } = Typography;
 
@@ -63,7 +65,7 @@ export const AssistantContext = createContext({
 
 const AssistantBase = (props: { 
     children,
-    context: {user: User, company: Company,  login, role, profile}
+    context: {user: User, company: Company,  login, role, profile, invoice_data: InvoiceSettings, calculations: Calculations}
     name: string,
     laststate: string,
     basicState: Record<string, string>,
@@ -452,7 +454,7 @@ const AssistantBase = (props: {
                     
                     notificationAPI.info({
                       message: "Tokenverbrauch",
-                      description: `Die Anfrage hat ${normalizeTokens(parseFloat(usedTokens.toString()))} Credits verbraucht`,
+                      description: `Die Anfrage hat ${normalizeTokens(parseFloat(usedTokens.toString()), props.context.calculations)} Credits verbraucht`,
                       duration: 10 
                     });
                     
@@ -543,8 +545,93 @@ const AssistantBase = (props: {
               props.context.company.tokens -= usedTokens
             }
 
-            // Update the balance of the company
-            await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
+            // Check if the user activated automatic recharge. If charge them and add tokens
+
+            if(props.context.company.plan.state == "active"){
+              let paymentSuccesfull = false;
+              let invoiceid = "";
+
+              // Try to charge the user with the values defined in the plan
+              try{
+                const paymentreq = await axios.post("/api/payment/issuepayment", { 
+                  price: convertTokensToPrice(props.context.company.plan?.tokens, props.context.calculations),
+                  customer: props.context.company.customerId,
+                  method: props.context.company.paymentMethods[0].methodId
+                });
+
+                invoiceid = paymentreq.data.message;
+
+                paymentSuccesfull = true;
+              }catch{
+                paymentSuccesfull = false;
+              }
+
+            
+              // If the payment was successfull
+              if(paymentSuccesfull){
+                // Get the tokens that will be added according to the plan
+                const amountToAdd = props.context.company.plan.tokens;
+                // Add the totkens to the tokens of the company
+                const updatedTokenValue = props.context.company.tokens + amountToAdd;
+
+                // Update paymentmethod
+                const newState = props.context.company.paymentMethods[0];
+                newState.lastState = "successfull"
+                const updatedMethods = [newState]
+
+                // Create an order for the charged amount
+                const currentOrders = props.context.company.orders;
+                const nextInvoiceNumber = props.context.invoice_data.last_used_number+1;
+
+                const newOrder: Order = {
+                  id: invoiceid,
+                  timestamp: Math.floor( Date.now() / 1000 ),
+                  tokens: amountToAdd,
+                  amount: props.context.company.plan.amount,
+                  method: "Stripe",
+                  state: "accepted",
+                  type: "recharge",
+                  invoiceId: `SM${props.context.invoice_data.number_offset + nextInvoiceNumber}`
+                }
+
+                // Added the new order to the company orders
+                currentOrders.push( newOrder );
+                // Update the last used invoice id
+                await updateData( "Settings", "Invoices", { last_used_number: nextInvoiceNumber } );
+
+                // Update the tokens of the company
+                await updateData("Company", props.context.user.Company, { 
+                  tokens: updatedTokenValue,
+                  paymentMethods: updatedMethods,
+                  orders: currentOrders 
+                });
+
+                notificationAPI.info({
+                  message: "Automatisches Nafüllen",
+                  description: `Dein Credit-Budget wurde automatisch um ${normalizeTokens(amountToAdd, props.context.calculations)} Tokens aufgefüllt!`,
+                  duration: 10 
+                });
+              }else{
+                const newState = props.context.company.paymentMethods[0];
+                newState.lastState = "error"
+                const updatedMethods = [newState]
+
+                await updateData("Company", props.context.user.Company, { tokens: props.context.company.tokens, paymentMethods: updatedMethods })
+
+                notificationAPI.error({
+                  message: "Automatisches Nafüllen",
+                  description: "Es ist ein Fehler beim automatischen Auffüllen deines Credit-Budgets aufgetreten.",
+                  duration: 10 
+                });
+              }
+
+            }else{
+              // Update the balance of the company
+              await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
+            }
+
+
+            
 
             // Get the usage of the current month and year from the user
             const userusageidx = props.context.user.usedCredits.findIndex( ( val ) => {
@@ -633,7 +720,7 @@ const AssistantBase = (props: {
                 <Paragraph className={styles.histitem}>{item.content.slice(0, 100)}...</Paragraph>
                 <div className={styles.subcontent}>
                   <span>{item.time}</span>
-                  <span>Credits: {normalizeTokens(parseFloat(item.tokens))}</span>
+                  <span>Credits: {normalizeTokens(parseFloat(item.tokens), props.context.calculations)}</span>
                   <Button icon={<EyeOutlined />} onClick={() => {
                     setHistOpen(false);
                     setIsAnswerCardvisible( true );

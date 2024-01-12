@@ -40,7 +40,6 @@
     "nookies": "^2.5.2",
     "openai": "^4.11.0",
     "openai-streams": "^6.2.0",
-    "paypal-rest-sdk": "^1.8.1",
     "pdfmake": "^0.2.9",
     "pino": "^8.17.0",
     "react": "^18.2.0",

@@ -3,7 +3,6 @@ import { Stripe, loadStripe } from "@stripe/stripe-js";
 
 let stripePromise: Promise<Stripe | null>;
 const getStripe = () => {
-  console.log(process.env.NEXT_PUBLIC_STRIPEPUB);
   if(process.env.NEXT_PUBLIC_STRIPEPUB){
     if (!stripePromise) {
       stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPEPUB);

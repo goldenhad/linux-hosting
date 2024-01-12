@@ -23,38 +23,26 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       if( token ){
         const data = req.body;
                 
-        if( data.price != undefined && data.email != undefined ){
+        if( data.price != undefined && data.customer != undefined && data.method != undefined ){
 
           try{
             const price = data.price;
 
+            console.log(data);
             if( price > 0 && price < Number.MAX_SAFE_INTEGER ){
               try {
 
-                const redirectURL = `${process.env.BASEURL}/thankyou`
-                const transformedItem = {
-                  price_data: {
-                    currency: "EUR",
-                    product_data: {
-                      name: "Siteware business Credits"
-                    },
-                    // Unit amount has to be in cents
-                    unit_amount: price * 100
-                  },
-                  quantity: 1,
-                  tax_rates: ["txr_1OXTEAHQUxIWnEqkTPClNGtz"]
-                };
-
-                const paymentIntent = await stripe.checkout.sessions.create({
-                  payment_method_types: ["card"],
-                  line_items: [transformedItem],
-                  mode: "payment",
-                  customer_email: data.email,
-                  success_url: redirectURL + "?status=success&sessionid={CHECKOUT_SESSION_ID}",
-                  cancel_url: redirectURL + "?status=cancel&sessionid={CHECKOUT_SESSION_ID}",
-                  invoice_creation: {
+                const paymentIntent = await stripe.paymentIntents.create({
+                  amount: price * 100,
+                  confirm: true,
+                  customer: data.customer,
+                  currency: "eur",
+                  automatic_payment_methods: {
                     enabled: true
-                  }
+                  },
+                  payment_method: data.method,
+                  off_session: true,
+                  description: "Automatische Nachbuchung Siteware business Credits"
                 });
                 
                 return res.status( 200 ).send( { errorcode: 0, message: paymentIntent.id } );

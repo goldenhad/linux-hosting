@@ -1,23 +1,21 @@
-import { Button, Card, Divider, Form, Slider, Switch } from "antd";
+import { Button, Card, Divider, Form, Slider } from "antd";
 import styles from "./creditform.module.scss";
 import { calculateTokens, mailAmountMapping, mailPriceMapping, mailSavingMapping } from "../../helper/price";
 import { useState } from "react";
 import { convertToCurrency, normalizeTokens } from "../../helper/architecture";
-import { CardElement, Elements, useElements, useStripe } from "@stripe/react-stripe-js";
+import { useStripe } from "@stripe/react-stripe-js";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { User } from "../../firebase/types/User";
 import { Company, Order } from "../../firebase/types/Company";
-import { InvoiceSettings } from "../../firebase/types/Settings";
+import { Calculations, InvoiceSettings } from "../../firebase/types/Settings";
 import updateData from "../../firebase/data/updateData";
 
 
 
-const Creditform = ( props: { user: User, company: Company, invoiceData: InvoiceSettings } ) => {
+const Creditform = ( props: { user: User, company: Company, invoiceData: InvoiceSettings, calculation: Calculations } ) => {
   const [ tokenstobuy, setTokenstobuy ] = useState( 0 );
-  const [ sub, setSub ] = useState(false);
   const stripe = useStripe();
-  const elements = useElements();
   const router = useRouter();
     
   const calculatePricePerMail = () => {
@@ -46,8 +44,7 @@ const Creditform = ( props: { user: User, company: Company, invoiceData: Invoice
 
     const { data } = await axios.post("/api/payment/checkout", {
       price: mailPriceMapping[tokenstobuy],
-      email: props.user.email,
-      subscription: sub
+      email: props.user.email
     });
 
     const currentOrders = props.company.orders;
@@ -56,7 +53,7 @@ const Creditform = ( props: { user: User, company: Company, invoiceData: Invoice
     const newOrder: Order = {
       id: data.message,
       timestamp: Math.floor( Date.now() / 1000 ),
-      tokens: calculateTokens(tokenstobuy),
+      tokens: calculateTokens(tokenstobuy, props.calculation),
       amount: mailPriceMapping[tokenstobuy],
       method: "Stripe",
       state: "awaiting_payment",
@@ -85,7 +82,8 @@ const Creditform = ( props: { user: User, company: Company, invoiceData: Invoice
       </div>
       <Card className={styles.quoatacard} bordered={true}>
         <div className={styles.tokenrow}>
-          <div className={styles.tokens}>{normalizeTokens(calculateTokens(tokenstobuy)).toFixed(0)}</div>
+          <div className={styles.tokens}>{normalizeTokens(
+            calculateTokens(tokenstobuy, props.calculation), props.calculation).toFixed(0)}</div>
           <div className={styles.tokeninfo}>Anzahl Credits</div>
         </div>
         <Form>
@@ -98,7 +96,6 @@ const Creditform = ( props: { user: User, company: Company, invoiceData: Invoice
               tooltip={{ formatter: null }}
               onChange={
                 ( val ) => {
-                  console.log(val);
                   setTokenstobuy( val )
                 }
               }/>
@@ -125,12 +122,6 @@ const Creditform = ( props: { user: User, company: Company, invoiceData: Invoice
 
       <div className={styles.buyrow}>
         <div className={styles.checkout}>
-          <div>
-            <Switch checked={sub} onChange={(checked) => {
-              setSub(checked)
-            }}/>
-            <span className={styles.subscribe}>Automatisch nachladen</span>
-          </div>
           <Divider className={styles.tokendivider} />
           <div className={styles.checkoutheadline}>Deine Ersparnis</div>
           <div className={styles.savings}>

@@ -41,6 +41,15 @@ export type InvitedUser = {
     wasInvited: boolean;
 }
 
+export type PaymentMethod = {
+    id: string,
+    type: string,
+    name: string,
+    default: boolean,
+    methodId: string,
+    lastState: "error" | "successfull" | "init"
+}
+
 export type Company = {
     name: string;
     street: string;
@@ -55,6 +64,7 @@ export type Company = {
     invitedUsers: Array<InvitedUser>;
     plan?: Plan;
     customerId?: string;
+    paymentMethods: Array<PaymentMethod>
 }
 
 export const basicCompany = {

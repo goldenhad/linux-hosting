@@ -23,6 +23,15 @@ export type Order = {
     method: string,
     state: string,
     invoiceId: string,
+    type: string
+}
+
+export type Plan = {
+    tokens: number,
+    timestamp: number,
+    state: string,
+    amount: number,
+    threshold: number
 }
 
 export type InvitedUser = {
@@ -44,6 +53,8 @@ export type Company = {
     orders: Array<Order>;
     recommended: boolean;
     invitedUsers: Array<InvitedUser>;
+    plan?: Plan;
+    customerId?: string;
 }
 
 export const basicCompany = {

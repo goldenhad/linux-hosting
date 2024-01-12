@@ -1,0 +1,126 @@
+.tokeninformationicon{
+    font-size: 14px;
+    color: #8e8e93;
+    margin-left: 10px;
+}
+
+.formpart{
+    font-weight: 700;
+    line-height: 20px;
+    size: 14px;
+    letter-spacing: 1%;
+
+    .forminput{
+      background-color: white;
+      padding: 10px 14px 10px 14px;
+      border-radius: 8px;
+      box-shadow: 0px 1px 2px 0px #1018280D;
+      border-color: #D0D5DD;
+    }
+
+    .formselect{
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0px 1px 2px 0px #1018280D;
+      border-color: #D0D5DD;
+      font-weight: normal;
+    }
+}
+
+.tokenrow {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    margin-bottom: 25px;
+    margin-top: 25px;
+
+    .tokens{
+        font-size: 24px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .tokeninfo{
+        font-size: 16px;
+        color: #475467;
+        text-align: center;
+    }
+}
+
+.quoatacard{
+    width: 100%;
+    border-radius: 12px;
+    flex-direction: column;
+    border: 1px  solid rgb(217, 217, 217);
+    background-color: #F9FAFB;
+
+    .tokendivider{
+        height: 2px;
+        background: #EAECF0;
+    }
+
+    .tokenslideritem{
+        display: flex;
+        flex-direction: column;
+        padding-left: 16px;
+        padding-right: 16px;
+
+        .tokenslider{
+            color: #1478FD;
+        }
+        
+    }
+}
+
+.summary{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    .summarytext{
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    .summarysum{
+        font-weight: 700;
+        font-size: 18px;
+    }
+}
+
+.buybuttonrow{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 32px;
+
+    .buybutton{
+        margin-bottom: 20px;
+
+        @media(max-width: 992px){
+            button {
+                width: 200px;
+                height: 44px;
+                font-weight: 700;
+                font-size: 16px;
+                line-height: 24px;
+                padding: 10px 18px 10px 18px;
+                font-weight: bold;
+            }
+        }
+        
+        @media(min-width: 993px){
+            button {
+                width: 446px;
+                height: 44px;
+                font-weight: 700;
+                font-size: 16px;
+                line-height: 24px;
+                padding: 10px 18px 10px 18px;
+                font-weight: bold;
+            }
+        }
+    }
+}

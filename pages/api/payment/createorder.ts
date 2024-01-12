@@ -39,7 +39,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                   "paypal": {
                     "experience_context": {
                       "payment_method_preference": "IMMEDIATE_PAYMENT_REQUIRED",
-                      "brand_name": "Sugarpool GmbH",
+                      "brand_name": "Siteware business",
                       "locale": "de-DE",
                       "landing_page": "LOGIN",
                       "user_action": "PAY_NOW",
@@ -49,8 +49,6 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                   }
                 }
               }
-
-              console.log(`${process.env.PAYPALURL}/v2/checkout/orders`);
 
               try{
                 const data = await axios.post( `${process.env.PAYPALURL}/v2/checkout/orders`, paymentobj, {

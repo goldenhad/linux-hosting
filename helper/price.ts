@@ -37,3 +37,17 @@ export const mailMarks = {
   5: "2150 Mails",
   6: "5000 Mails"
 }
+
+export const convertTokensToPrice = (tokens: number) => {
+  return parseFloat((tokens/3000 * 0.03 * 6).toFixed(0));
+}
+
+export const priceToIndex = (price: number) => {
+  return mailPriceMapping.findIndex((value) => {
+    return value == price;
+  })
+}
+
+export const calculateTokens = (tokenstobuy) => {
+  return parseFloat((mailPriceMapping[tokenstobuy]/( 0.03 * 6 ) *3000).toFixed(2));
+}

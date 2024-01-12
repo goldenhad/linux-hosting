@@ -9,7 +9,8 @@ export type Parameters = {
 
 export type InvoiceSettings = {
     last_used_number: number,
-    number_offset: number
+    number_offset: number,
+    prices: Array<string>
 }
 
 export type Calculations = {

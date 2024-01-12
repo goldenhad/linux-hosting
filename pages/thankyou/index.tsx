@@ -1,32 +1,31 @@
 import { Button, Result } from "antd";
 import styles from "./thankyou.module.scss"
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { GetServerSideProps } from "next";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useAuthContext } from "../../components/context/AuthContext";
 import Link from "next/link";
 import { Order } from "../../firebase/types/Company";
-import { useRouter } from "next/router";
+import { getPDFUrl } from "../../helper/invoice";
 import updateData from "../../firebase/data/updateData";
 
 
 
 export interface InitialProps {
   Data: {
-    orderId: string,
-    payerId: string,
+    sessionid: string,
+    status: string,
   };
 }
 
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
-  if( ctx.query.token != undefined && ctx.query.PayerID != undefined ){
+  if( ctx.query.sessionid != undefined && ctx.query.status != undefined ){
     //console.log(ctx.query.token);
     return {
       props: {
         Data: {
-          orderId: ctx.query.token,
-          payerId: ctx.query.PayerID
+          sessionid: ctx.query.sessionid,
+          status: ctx.query.status
         }
       }
     };
@@ -36,84 +35,73 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 };
 
 
-export default function Upgrade( props: InitialProps ) {
+export default function Thankyou( props: InitialProps ) {
   const context = useAuthContext();
-  const { user, company } = context;
+  const { role, user, company } = context;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [seed, setSeed] = useState( 1 );
-  const router = useRouter();
+  const [order, setOrder] = useState({
+    id: "",
+    timestamp: Math.floor( Date.now() / 1000 ),
+    tokens: 0,
+    amount: 0,
+    method: "undefined",
+    state: "undefined",
+    type: "undefined",
+    invoiceId: "undefined"
+  })
 
-  useEffect( () => {
-    const handleOrderState = async ( order: Order ) => {
-      const paypalOrder = await axios.get( `/api/payment/orderdetails/${order.id}` );
-        
-      const currentOrders = company.orders;
-
-      const orderidx = currentOrders.findIndex( ( iter: Order ) => {
-        return iter.id == order.id;
-      } )
-
-      //console.log(paypalOrder.data.message);
-
-      if( orderidx != -1 ){
-        if( paypalOrder.data.message.status == "APPROVED" ){
-          const updatedOrder = order;
-          updatedOrder.state = "completed"
-          currentOrders[orderidx] = updatedOrder;
-          const updatedTokens = company.tokens + order.tokens;
-
-          await updateData( "Company", user.Company, { orders: currentOrders, tokens: updatedTokens } );
-        }
-      }else{
-        throw "ORDER GOT MISSING DURING HANDLING."
-      }
+  useEffect(() => {
+    const updateOrder = async () => {
+      await updateData( "Company", user.Company, { orders: company.orders } );
     }
 
-    if( props.Data.orderId && props.Data.payerId ){
-
-      const order = company.orders.find( ( order: Order ) => {
-        return order.id == props.Data.orderId
-      } );
-
-      if( order ){
-        if( order.state != "completed" ){
-          try{
-            handleOrderState( order );
-          }catch( e ){
-            router.push( "/" );
-          }
-        }
-      }else{
-        router.push( "/" )
-      }
-
+    const updateTokens = async () => {
+      await updateData( "Company", user.Company, { tokens: company.tokens } );
     }
-    // eslint-disable-next-line
-  }, [] );
 
 
-  const getResult = () => {
-    if(props.Data.orderId){
-      const order = company.orders.find( ( order: Order ) => {
-        return order.id == props.Data.orderId
+    if(props.Data.sessionid){
+      const orderid = company.orders.findIndex( ( order: Order ) => {
+        return order.id == props.Data.sessionid
       } );
   
-      if( order.state == "payment_received" || order.state == "completed" ){
+      if(company.orders[orderid]){
+        setOrder(company.orders[orderid]);
+  
+        if(props.Data.status == "success"){
+          if(company.orders[orderid].state == "awaiting_payment"){
+            company.orders[orderid].state = "accepted";
+            company.tokens += company.orders[orderid].tokens;
+            
+            updateTokens();
+          }
+        }else{
+          company.orders[orderid].state = "cancled";
+        }
+
+        updateOrder();
+      }
+    }
+  }, []);
+
+  const getResult = () => {
+    if(props.Data.sessionid){
+      if( props.Data.status == "success" ){
         return(
           <Result
             status="success"
             title="Kauf erfolgreich abgeschlossen!"
-            subTitle={`Transaktion #${props.Data.orderId} abgeschlossen. Die erworbenen Credits sollten umgehend in dein Konto gebucht werden.`}
+            subTitle={`Transaktion #${order.invoiceId} abgeschlossen. Die erworbenen Credits sollten umgehend in dein Konto gebucht werden.`}
           />
         );
       }else{
         return(
           <Result
-            status="warning"
-            title="Kauf noch nicht autorisiert!"
+            status="error"
+            title="Kauf abgebrochen"
             subTitle={
-              `Transaktion #${props.Data.orderId} ist noch nicht autorisiert. 
-              Sobald der Kaufvorgang abgeschlossen ist verbuchen wir deine Credits. Lade diese Seite in den kommenden Minuten nochmal neu!
+              `Transaktion #${order.invoiceId} wurde abgebrochen. 
               `
             }
           />
@@ -130,17 +118,14 @@ export default function Upgrade( props: InitialProps ) {
   }
 
   const getButton = () => {
-    if(props.Data.orderId){
-      const order = company.orders.find( ( order: Order ) => {
-        return order.id == props.Data.orderId
-      } );
+    if(props.Data.sessionid){
   
-      if( order.state == "completed" ) {
+      if( props.Data.status == "success" ) {
         return (
           <div className={styles.buttongroup}>
-            <Link href={`/order/invoice/${order.id}`}>
-              <Button className={styles.backnow}>Rechnung herunterladen</Button>
-            </Link>
+            <Button className={styles.backnow} onClick={() => {
+              getPDFUrl(role, user, company, order).download(`Siteware_business_invoice_${order.invoiceId}`)
+            }}>Rechnung herunterladen</Button>
   
             <Link href={"/usage"}>
               <Button type="primary" className={styles.backnow}>Zurück zu meinem Konto</Button>
@@ -148,9 +133,11 @@ export default function Upgrade( props: InitialProps ) {
           </div>
         );
       }else{
-        return( <Button onClick={() => {
-          setSeed( Math.random() );
-        }} className={styles.backnow}>Aktualisieren</Button> );
+        return(
+          <Link href={"/usage"}>
+            <Button type="primary" className={styles.backnow}>Zurück zu meinem Konto</Button>
+          </Link>
+        );
       }
     }else{
       return(

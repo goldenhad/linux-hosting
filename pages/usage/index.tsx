@@ -1,4 +1,4 @@
-import { Button, Card, Tag, TourProps, Tour, Popover, List, Collapse, Pagination } from "antd";
+import { Button, Card, Tag, TourProps, Tour, Popover, List, Collapse, Pagination, Modal, Form, Input, Tabs } from "antd";
 import styles from "./usage.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -10,7 +10,6 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
-  ShoppingCartOutlined,
   FileTextOutlined,
   InfoCircleOutlined,
   MailOutlined,
@@ -33,9 +32,16 @@ import { User } from "../../firebase/types/User";
 import updateData from "../../firebase/data/updateData";
 import moment from "moment";
 import { isMobile } from "react-device-detect";
-import { logEvent } from "firebase/analytics";
+import { logEvent, settings } from "firebase/analytics";
 import { analytics } from "../../db";
 import { getPDFUrl } from "../../helper/invoice";
+import axios from "axios";
+import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { useRouter } from "next/router";
+import RechargeForm from "../../components/RechargeForm/RechargeForm";
+import { CardElement, Elements } from "@stripe/react-stripe-js";
+import getStripe from "../../helper/stripe";
+import { convertTokensToPrice, priceToIndex } from "../../helper/price";
 
 ChartJS.register(
   CategoryScale,
@@ -49,33 +55,32 @@ ChartJS.register(
 const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const ordersperpage = 10;
 const thisyear = new Date().getFullYear();
+const stripePromise = getStripe();
 
-
-export interface InitialProps {
-  Data: { paypalURL: string; };
-}
 
 export const getServerSideProps: GetServerSideProps = async () => {
     
   return {
     props: {
-      Data: {
-        paypalURL : process.env.PAYPALURL
-      }
     }
   };
 };
 
 
 
-export default function Usage( props: InitialProps ) {
+export default function Usage( ) {
   const context = useAuthContext();
-  const { role, login, user, company, calculations } = context
+  const { role, login, user, company, calculations, invoice_data } = context
   const [ users, setUsers ] = useState( [] );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).usage );
   const [orderpage, setOrderPage] = useState(1);
   const [ visibleYear, setVisibleYear ] = useState(new Date().getFullYear());
   const [ lowerBound, setLowerBound ] = useState(1970);
+  const { push } = useRouter();
+  const [rechargeModalOpen, setRechargeModalOpen] = useState(false);
+  const [threshold, setThreshold] = useState(0);
+  const [tokens, setTokens] = useState(0);
+
 
   const budgetRef = useRef( null );
   const statRef = useRef( null );
@@ -203,7 +208,13 @@ export default function Usage( props: InitialProps ) {
 
   const orderState = (obj) => {
     switch( obj.state ){
-    case "completed":
+    case "accepted":
+      return(
+        <Tag className={styles.statustag} icon={<CheckCircleOutlined />} color="success">
+            abgeschlossen
+        </Tag>
+      );
+    case "subscribed":
       return(
         <Tag className={styles.statustag} icon={<CheckCircleOutlined />} color="success">
             abgeschlossen
@@ -252,7 +263,6 @@ export default function Usage( props: InitialProps ) {
     }
   }
 
-
   const getOrderItems = () => {
     const items = [];
     const orderedorders = company.orders.toSorted((a: Order, b: Order) => {
@@ -271,25 +281,12 @@ export default function Usage( props: InitialProps ) {
         const orderdate = new Date( order.timestamp * 1000 );
         const datestring = moment(orderdate).format("DD.MM.YYYY");
 
-        const getContinuePayment = () => {
-          if(order.state == "awaiting_payment"){
-            return (
-              <List.Item className={styles.singledetail}>
-                <div className={styles.description}>Einkauf fortsetzen:</div>
-                <div><Link href={`${props.Data.paypalURL}/checkoutnow?token=${order.id}`}><ShoppingCartOutlined style={{ fontSize: 20 }}/></Link></div>  
-              </List.Item>
-            );
-          }else{
-            return <></>;
-          }
-        }
-
         items.push({
           key: i,
           label: <div className={styles.singleorder}>
             <div className={styles.ordertitle}>
               <span className={styles.orderdate}>{datestring}</span>
-              {isMobile? <br/>: <></>}<span>{`Bestellung #${order.id}`}</span>
+              {isMobile? <br/>: <></>}<span>{`Bestellung #${order.invoiceId}`}</span>
             </div>
             <div className={styles.orderstate}>{orderState(order)}</div>
           </div>,
@@ -297,10 +294,15 @@ export default function Usage( props: InitialProps ) {
             <div className={styles.orderdetails}>
               <h3>Details</h3>
               <List>
-                <List.Item className={styles.singledetail}><div className={styles.description}>Bestellnummer:</div> <div>{order.id}</div></List.Item>
+                <List.Item className={styles.singledetail}><div className={styles.description}>Bestellnummer:</div> <div>{order.invoiceId}</div></List.Item>
+                <List.Item className={styles.singledetail}>
+                  <div className={styles.description}>Art:</div>
+                  <div>{(order.type == "plan")? "Abonnement": "Bestellung"}</div></List.Item>
                 <List.Item className={styles.singledetail}><div className={styles.description}>Bezahlmethode:</div> <div>{order.method}</div></List.Item>
                 <List.Item className={styles.singledetail}><div className={styles.description}>Betrag:</div> <div>{convertToCurrency(order.amount)}</div></List.Item>
-                <List.Item className={styles.singledetail}><div className={styles.description}>Credits:</div> <div>{normalizeTokens(order.tokens)}</div></List.Item>
+                <List.Item className={styles.singledetail}>
+                  <div className={styles.description}>Credits:</div> <div>{normalizeTokens(order.tokens).toFixed(0)}</div>
+                </List.Item>
               </List>
             </div>
 
@@ -317,7 +319,6 @@ export default function Usage( props: InitialProps ) {
                     </div>
                   </div>
                 </List.Item>
-                {getContinuePayment()}
               </List>
             </div>
           </div>
@@ -328,32 +329,121 @@ export default function Usage( props: InitialProps ) {
     return items;
   }
 
+  const getBuyOptions = () => {
+    if(company?.plan && company?.plan.state == "active"){
+      return(
+        <>
+          <div className={styles.generatebuttonrow}>
+            <Link href={"/upgrade"}>
+              {( !company.unlimited )? <Button ref={buyRef} className={styles.backbutton} onClick={() => {
+                logEvent(analytics, "buy_tokens", {
+                  currentCredits: company.tokens
+                });
+              }} type='primary'>Weitere Credits kaufen</Button> : <></>}
+            </Link>
+          </div>
+          <div className={styles.planwindow}>
+            <div className={styles.plantitle}>
+            Automatisches Nachladen ist aktiv
+            </div>
+            <div className={styles.planinfo}>
+              Das automatische Auffüllen ist aktiv.
+              Dein Konto wird automatisch um
+              <span className={styles.creds}> {Math.round(normalizeTokens(company.plan.tokens))}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
+              <span className={styles.creds}> {company.plan.threshold}</span> Credits fällt.
+            </div>
+            <Button type="link" className={styles.planedit} onClick={() => {
+              setRechargeModalOpen(true);
+            }}>anpassen</Button>
+            <Button onClick={async () => {
+              await axios.post("/api/payment/createbilling", { 
+                amount: invoice_data.prices[priceToIndex(convertTokensToPrice(company.plan?.tokens))],
+                customer: company.customerId
+              })
+            }}>
+              TEST
+            </Button>
+          </div>
+        </>
+      );
+    }else{
+      return(
+        <>
+          <div className={styles.generatebuttonrow}>
+            <Link href={"/upgrade"}>
+              {( !company?.unlimited )? <Button ref={buyRef} className={styles.backbutton} onClick={() => {
+                logEvent(analytics, "buy_tokens", {
+                  currentCredits: (company.tokens)? company.tokens: 0
+                });
+              }} type='primary'>Weitere Credits kaufen</Button> : <></>}
+            </Link>
+          </div>
+          <div className={styles.planwindow}>
+            <div className={styles.plantitle}>
+            Automatisches Nachladen aktivieren
+            </div>
+            <div className={styles.planinfo}>
+              Schalte die automatische Aufladung ein, damit dein Credit-Konto immer gefüllt bleibt.
+            </div>
+            <Button type="link" className={styles.planedit} onClick={() => {
+              setRechargeModalOpen(true)
+            }}>aktivieren</Button>
+          </div>
+        </>
+      );
+    }
+  }
+
+  const credittabsitems = [
+    {
+      key: "1",
+      label: "Credit-Budget",
+      children: <>
+        
+        <div className={styles.tokeninfocard}>
+          <h2>
+          Dein Credit-Budget
+            <Popover content={getTokenDetailInformation} placement="bottom" title="Details">
+              <span className={styles.tokeninformationicon}><InfoCircleOutlined /></span>
+            </Popover>
+          </h2>
+          <div className={styles.quotarow}>
+            <div className={styles.tokenbudget}>{( company?.unlimited )? "∞" : `${Math.floor(normalizeTokens(company.tokens))}`} Credits</div>
+          </div>
+        </div>
+        {getBuyOptions()}
+      </>
+    },
+    {
+      key: "2",
+      label: "Bezahlmethode",
+      children: <>
+        <div className={styles.tokeninfocard}>
+          <h2>
+            Deine Bezahlmethode
+          </h2>
+          <div className={styles.quotarow}>
+            <Card className={styles.cardcard}>
+              <Elements stripe={stripePromise}>
+                <CardElement />
+              </Elements>
+            </Card>
+            <h3>Noch keine Bezahlmethode hinzugefügt</h3>
+            <Button>Jetzt Bezahlmethode hinzufügen</Button>
+          </div>
+        </div>
+      </>
+    }
+  ]
+
   
   return (
     <SidebarLayout context={context}>
       <div className={styles.main}>
         <div className={styles.companyoverview}>
           <Card ref={budgetRef} className={styles.tokeninformation} title={"Credits"} bordered={true}>
-            <div className={styles.tokeninfocard}>
-              <h2>
-                Dein Credit-Budget
-                <Popover content={getTokenDetailInformation} placement="bottom" title="Details">
-                  <span className={styles.tokeninformation}><InfoCircleOutlined /></span>
-                </Popover>
-              </h2>
-              <div className={styles.quotarow}>
-                <div className={styles.tokenbudget}>{( company.unlimited )? "∞" : `${Math.floor(normalizeTokens(company.tokens))}`} Credits</div>
-              </div>
-            </div>
-            <div className={styles.generatebuttonrow}>
-              <Link href={"/upgrade"}>
-                {( !company.unlimited )? <Button ref={buyRef} className={styles.backbutton} onClick={() => {
-                  logEvent(analytics, "buy_tokens", {
-                    currentCredits: company.tokens
-                  });
-                }} type='primary'>Weitere Credits kaufen</Button> : <></>}
-              </Link>
-            </div>
+            <Tabs items={credittabsitems}/>
+            
           </Card>
           <Card ref={statRef} className={styles.tokenusage} title={"Credit-Verbrauch"} bordered={true}>
             <div className={styles.tokeninfocard}>
@@ -420,6 +510,27 @@ export default function Usage( props: InitialProps ) {
         <Card ref={orderRef} title={"Einkäufe"} bordered={true}>
           <PurchaseInformation />
         </Card>
+        <Modal title="Automatisches Aufladen aktivieren" open={rechargeModalOpen} footer={null} onCancel={() => {
+          setRechargeModalOpen(false)
+        }}>
+          <p className={styles.rechargeinformation}>
+            Das automatische Nachladen sorgt dafür, dass dein Credit-Konto immer ausreichend gedeckt ist. 
+            Du kannst einen bestimmten Wert festlegen, und sobald dein Credit-Budget unter diesen Wert fällt, bucht das System automatisch 
+            neue Credits nach. So stellst du sicher, dass du immer genügend Credits zur Verfügung hast, ohne manuell nachladen zu müssen.
+          </p>
+          <Elements stripe={stripePromise}>
+            <RechargeForm
+              defaultstate={{ threshold: company.plan?.threshold, tokens: priceToIndex(convertTokensToPrice(company.plan?.tokens)) }}
+              user={user}
+              company={company}
+              role={role}
+              onCustomerApprove={() => {
+                setRechargeModalOpen(false)
+              }}
+            />
+          </Elements>
+          
+        </Modal>
         <Tour open={open} onClose={async () => {
           const currstate = user.tour;
           currstate.usage = true;

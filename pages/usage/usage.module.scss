@@ -29,11 +29,6 @@
                         justify-content: space-between;
                     }
     
-                    .tokeninformation{
-                        font-size: 14px;
-                        color: #8e8e93;
-                        margin-left: 10px;
-                    }
     
                     .quotatitle{
                         margin-bottom: 12px;
@@ -48,6 +43,14 @@
                         }
                     }
                 }
+
+                .planwindow{
+                    width: 100%;
+                    height: 88px;
+                    margin-bottom: 10px;
+                    border: #1677ff 4px solid;
+                }
+
     
                 .generatebuttonrow{
                     width: 100%;
@@ -113,7 +116,7 @@
     
             .quotarow{
                 display: flex;
-                flex-direction: row;
+                flex-direction: column;
                 justify-content: center;
                 align-items: center;
                 margin-bottom: 50px;
@@ -151,11 +154,6 @@
                     flex-direction: column;
                     justify-content: center;
     
-                    .tokeninformation{
-                        font-size: 14px;
-                        color: #8e8e93;
-                        margin-left: 10px;
-                    }
 
                     .stattitlerow{
                         display: flex;
@@ -176,11 +174,37 @@
                         }
                     }
                 }
+
+                .planwindow{
+                    width: 100%;
+                    height: auto;
+                    margin-bottom: 10px;
+                    border: 2px solid #f0f0f0;
+                    padding-left: 20px;
+                    padding-top: 10px;
+                    padding-right: 20px;
+                    padding-bottom: 10px;
+                    border-radius: 8px;
+
+                    .plantitle{
+                        font-weight: bold;
+                    }
+
+                    .creds{
+                        font-weight: bold;
+                    }
+
+                    .planedit{
+                        font-weight: bold;
+                        color: #1478FD;
+                        padding: 0px;
+                    }
+                }
     
                 .generatebuttonrow{
                     width: 100%;
                     height: 44px;
-                    margin-bottom: 10px;
+                    margin-bottom: 20px;
                     display: flex;
                     flex-direction: row;
                     justify-content: center;
@@ -241,7 +265,7 @@
     
             .quotarow{
                 display: flex;
-                flex-direction: row;
+                flex-direction: column;
                 justify-content: center;
                 align-items: center;
                 margin-bottom: 50px;
@@ -469,4 +493,25 @@
     display: flex;
     flex-direction: row;
     justify-content: center;
+}
+
+.tokeninformationicon{
+    font-size: 14px;
+    color: #8e8e93;
+    margin-left: 10px;
+}
+
+.rechargeinformation{
+    margin-bottom: 16px;
+}
+
+.paymentcard{
+    width: 80%;
+    height: 300px;
+}
+
+.cardcard{
+    border: 1px  solid rgb(217, 217, 217);
+    background-color: #F9FAFB;
+    width: 80%;
 }

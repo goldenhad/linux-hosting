@@ -57,7 +57,7 @@ ChartJS.register(
 );
 
 export interface InitialProps {
-  Data: { currentMonth: number, currentYear: number; paypalURL: string; };
+  Data: { currentMonth: number, currentYear: number; };
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -67,8 +67,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
     props: {
       Data: {
         currentMonth: datum.getMonth() + 1,
-        currentYear: datum.getFullYear(),
-        paypalURL : process.env.PAYPALURL
+        currentYear: datum.getFullYear()
       }
     }
   };

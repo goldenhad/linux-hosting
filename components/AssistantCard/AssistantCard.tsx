@@ -20,7 +20,7 @@ const AssistantCard = ( props: {
     onDeFav?: () => void,
     video: string
   } ) => {
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState("/base.svg");
 
   useEffect(() => {
     const loadImage = async () => {
@@ -28,8 +28,7 @@ const AssistantCard = ( props: {
         const url = await getAssistantImage(props.image);
         setImage(url);
       }else{
-        const url = await getAssistantImage("base.svg");
-        setImage(url);
+        setImage("/base.svg");
       }
     }
 

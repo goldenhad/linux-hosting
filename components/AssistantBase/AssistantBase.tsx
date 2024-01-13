@@ -134,7 +134,20 @@ const AssistantBase = (props: {
       // Update the form with the parsed JSON object
       // Make it dynamicly to support the abstraction of the assistants
       Object.keys(props.basicState).forEach((field) => {
-        updateField(props.form, field, parsed[field] );
+        let fieldvalue = parsed[field];
+
+        if(field == "profile"){
+          // Test if the saved profile exists in the list of the profiles
+          const profIndex = decryptedProfiles.findIndex((profile: Profile) => {
+            return profile.name == parsed["field"];
+          });
+
+          // If the profile can't be found set the profile to the first profile in the list
+          if(profIndex == -1){
+            fieldvalue = decryptedProfiles[0].name
+          }
+        }
+        updateField(props.form, field, fieldvalue );
       })
     }
     

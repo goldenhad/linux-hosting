@@ -17,6 +17,7 @@ import Stats from "../../public/icons/stat.svg";
 import Settings from "../../public/icons/settings.svg";
 import All from "../../public/icons/all.svg";
 import Chat from "../../public/icons/chat.svg";
+import Zap from "../../public/icons/zap.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
 import { getImageUrl } from "../../firebase/drive/upload_file";
 
@@ -282,7 +283,7 @@ const HomeSidebarLayout = ( props: {
                     props.category.setter("productivity");
                     setSidebarOpen(false);
                   }}>
-                    <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Produktivität</div>  
                   </List.Item>
                 </List>
@@ -435,7 +436,7 @@ const HomeSidebarLayout = ( props: {
                       props.category.setter("productivity");
                       setSidebarOpen(false);
                     }}>
-                      <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Produktivität</div>  
                     </List.Item>
                   </List>

@@ -121,7 +121,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
       }
     })
 
-    console.log(lastfound);
     return lastfound.toString();
   }
 

@@ -159,7 +159,7 @@ const MonologForm = (props: { state, form, refs: { profileRef, continueRef, clas
                   validator( _, value ) {
                     if(value){
                       if( value.length > 3 ){
-                        form.setFieldValue( "order", value.slice( 0, 3 ) )
+                        form.setFieldValue( "emotions", value.slice( 0, 3 ) )
                       }
                     }
                     return Promise.resolve();

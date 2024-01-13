@@ -7,6 +7,8 @@ import crypto from "crypto";
 import updateData from "../data/updateData";
 import { InvitedUser } from "../types/Company";
 import { denormalizeTokens } from "../../helper/architecture";
+import axios from "axios";
+import { Calculations } from "../types/Settings";
 
 const auth = getAuth( firebase_app );
 
@@ -66,13 +68,35 @@ export default async function signUp( firstname, lastname, email, username, pass
                 company: false
               }
             } );
+            
+            try{
+              const { data } = await axios.post("/api/payment/createcustomer", {
+                name: (name != "")? name: `${firstname} ${lastname}`,
+                email: email,
+                address: {
+                  city: city,
+                  street: street,
+                  postalcode: postalcode
+                }
+              });
+
+              const customerid = data.message;
+              await updateData("Company", companycreationresult.result.id , { customerId: customerid });
+            }catch{
+              console.log("Could not create the customer at stripe...");
+            }
 
             if( recommended ){
               const cmpny_result = await getDocument( "Company", recommended );
               const cmpny = cmpny_result.result.data();
+              const calculationsres = await getDocument( "Settings", "Calculation");
+              const calculations: Calculations = calculationsres.result;
 
               if( !cmpny.recommended ){
-                await updateData( "Company", recommended, { tokens: cmpny.tokens +  denormalizeTokens(200), recommended: true } );
+                await updateData( "Company", recommended, {
+                  tokens: cmpny.tokens +  denormalizeTokens(calculations.startCredits, calculations),
+                  recommended: true 
+                } );
               }
             }
             //console.log(usercreationresult);

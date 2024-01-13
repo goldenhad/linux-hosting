@@ -5,6 +5,7 @@
  * 
  */
 
+import { Calculations } from "../firebase/types/Settings";
 import { TourState, User, basicUser } from "../firebase/types/User";
 
 /**
@@ -107,10 +108,10 @@ export const onlyUpdateIfSet = ( val, ideal ) => {
   }
 }
 
-export const normalizeTokens = (token: number) => {
-  return parseFloat((token/500).toFixed(2));
+export const normalizeTokens = (token: number, calculations: Calculations) => {
+  return parseFloat((token/calculations.normalizer).toFixed(2));
 }
 
-export const denormalizeTokens = (token: number) => {
-  return parseFloat((token*500).toFixed(2));
+export const denormalizeTokens = (token: number, calculations: Calculations) => {
+  return parseFloat((token*calculations.normalizer).toFixed(2));
 }

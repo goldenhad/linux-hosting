@@ -23,6 +23,15 @@ export type Order = {
     method: string,
     state: string,
     invoiceId: string,
+    type: string
+}
+
+export type Plan = {
+    tokens: number,
+    timestamp: number,
+    state: string,
+    amount: number,
+    threshold: number
 }
 
 export type InvitedUser = {
@@ -30,6 +39,15 @@ export type InvitedUser = {
     name: string;
     role: string;
     wasInvited: boolean;
+}
+
+export type PaymentMethod = {
+    id: string,
+    type: string,
+    name: string,
+    default: boolean,
+    methodId: string,
+    lastState: "error" | "successfull" | "init"
 }
 
 export type Company = {
@@ -44,6 +62,9 @@ export type Company = {
     orders: Array<Order>;
     recommended: boolean;
     invitedUsers: Array<InvitedUser>;
+    plan?: Plan;
+    customerId?: string;
+    paymentMethods: Array<PaymentMethod>
 }
 
 export const basicCompany = {

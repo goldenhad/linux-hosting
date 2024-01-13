@@ -126,13 +126,13 @@ export default function Register( props ){
       const { error } = await signUp(
         values.firstname,
         values.lastname,
-        values.email,
+        (values.email as string).toLowerCase(),
         values.username,
         values.password,
         "",
-        "",
-        "",
-        "",
+        values.street,
+        values.city,
+        values.postalcode,
         "DE",
         isPersonal,
         recommendCode
@@ -153,7 +153,7 @@ export default function Register( props ){
       const { error } = await signUp( 
         values.firstname,
         values.lastname,
-        values.email,
+        (values.email as string).toLowerCase(),
         values.username,
         values.password,
         values.company,
@@ -280,6 +280,55 @@ export default function Register( props ){
           </Form.Item>
         </Space.Compact>
       </>
+    }else{
+      return(
+        <Space.Compact style={{ width: "100%" }} block>
+          <Form.Item
+            label="Straße"
+            name="street"
+            style={{ width: "50%" }}
+            rules={[
+              {
+                required: true,
+                message: "Bitte geben Sie einen Namen für Ihr Unternehmen ein!"
+              }
+            ]}
+            className={styles.loginpart}
+          >
+            <Input className={styles.logininput_left} />
+          </Form.Item>
+
+          <Form.Item
+            label="Ort"
+            name="city"
+            style={{ width: "30%" }}
+            rules={[
+              {
+                required: true,
+                message: "Bitte geben Sie einen Namen für Ihr Unternehmen ein!"
+              }
+            ]}
+            className={styles.loginpart}
+          >
+            <Input className={styles.logininput_middle} />
+          </Form.Item>
+
+          <Form.Item
+            label="PLZ"
+            name="postalcode"
+            style={{ width: "20%" }}
+            rules={[
+              {
+                required: true,
+                message: "Bitte geben Sie einen Namen für Ihr Unternehmen ein!"
+              }
+            ]}
+            className={styles.loginpart}
+          >
+            <Input className={styles.logininput_right} />
+          </Form.Item>
+        </Space.Compact>
+      );
     }
   }
 

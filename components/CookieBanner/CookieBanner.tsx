@@ -22,7 +22,6 @@ const CookieBanner = (  ) => {
     aYearFromNow.setFullYear( aYearFromNow.getFullYear() + 1 );
         
     cookieCutter.set( "mailbuddy-opt-consent", "1", { expires: aYearFromNow } );
-    console.log(activateAnalytics)
     if(activateAnalytics){
       cookieCutter.set( "mailbuddy-opt-analytics-consent", "1", { expires: aYearFromNow } );
     }else{
@@ -51,7 +50,6 @@ const CookieBanner = (  ) => {
         <List.Item>
           <span className={styles.cookiedescription}>Marketing Cookies:</span>
           <Switch defaultChecked onChange={(checked: boolean) => {
-            console.log(checked);
             SetActivateAnalyctics(checked) 
           }} />
         </List.Item>

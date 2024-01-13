@@ -23,6 +23,22 @@ const AddCreditCardForm = ( props: { company: Company, user: User, reddirectURL:
     if (!stripe || !card) return null;
 
     try{
+      if(!props.company.customerId){        
+        const { data } = await axios.post("/api/payment/createcustomer", {
+          name: (props.company.name != "")? props.company.name: `${props.user.firstname} ${props.user.lastname}`,
+          email: props.user.email,
+          address: {
+            city: props.company.city,
+            street: props.company.street,
+            postalcode: props.company.postalcode
+          }
+        });
+
+        console.log(data.message);
+
+        const customerid = data.message;
+        await updateData("Company", props.user.Company , { customerId: customerid });
+      }
       const createsetupintent = await axios.post("/api/payment/createsetup", {
         customer: props.company.customerId
       })

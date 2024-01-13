@@ -71,7 +71,7 @@ const RechargeForm = ( props: {
       timestamp: Math.floor( Date.now() / 1000 ),
       state: "active",
       amount: mailPriceMapping[tokenstobuy],
-      threshold: editForm.getFieldValue("threshold")
+      threshold: form.getFieldValue("threshold")
     }
 
 
@@ -96,7 +96,7 @@ const RechargeForm = ( props: {
     if(props.company.plan && props.company.plan.state == "active"){
 
       return(
-        <Form layout="vertical" form={editForm}>
+        <Form layout="vertical" form={form}>
           <Form.Item className={styles.formpart} label={
             <b>
                 Grenze

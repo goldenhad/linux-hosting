@@ -203,7 +203,7 @@ export default function Usage( props ) {
   }, [])
 
   const calculateMails = () => {
-    return Math.floor( company.tokens/calculations.tokensPerMail );
+    return Math.floor( company.tokens/calculations.creditsProMail );
   }
 
   const orderState = (obj) => {
@@ -349,8 +349,7 @@ export default function Usage( props ) {
               </div>
               <div className={styles.planinfo}>
                 Das automatische Auffüllen ist aktiv.
-                Dein Konto wird automatisch um
-                <span className={styles.creds}>
+                Dein Konto wird automatisch um <span className={styles.creds}>
                   {Math.round(normalizeTokens(company.plan.tokens, calculations))}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
                 <span className={styles.creds}> {company.plan.threshold}</span> Credits fällt.
               </div>

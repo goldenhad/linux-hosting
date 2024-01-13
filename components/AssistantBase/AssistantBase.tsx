@@ -453,7 +453,7 @@ const AssistantBase = (props: {
                     setTokenCountVisible(true);
                     
                     notificationAPI.info({
-                      message: "Tokenverbrauch",
+                      message: "Creditverbrauch",
                       description: `Die Anfrage hat ${normalizeTokens(parseFloat(usedTokens.toString()), props.context.calculations)} Credits verbraucht`,
                       duration: 10 
                     });
@@ -551,78 +551,81 @@ const AssistantBase = (props: {
               let paymentSuccesfull = false;
               let invoiceid = "";
 
-              // Try to charge the user with the values defined in the plan
-              try{
-                const paymentreq = await axios.post("/api/payment/issuepayment", { 
-                  price: convertTokensToPrice(props.context.company.plan?.tokens, props.context.calculations),
-                  customer: props.context.company.customerId,
-                  method: props.context.company.paymentMethods[0].methodId
-                });
+              // Check if company has less tokens than the threshold
+              if(props.context.company.tokens < props.context.company.plan.threshold){
+                // Try to charge the user with the values defined in the plan
+                try{
+                  const paymentreq = await axios.post("/api/payment/issuepayment", { 
+                    price: convertTokensToPrice(props.context.company.plan?.tokens, props.context.calculations),
+                    customer: props.context.company.customerId,
+                    method: props.context.company.paymentMethods[0].methodId
+                  });
 
-                invoiceid = paymentreq.data.message;
+                  invoiceid = paymentreq.data.message;
 
-                paymentSuccesfull = true;
-              }catch{
-                paymentSuccesfull = false;
-              }
-
-            
-              // If the payment was successfull
-              if(paymentSuccesfull){
-                // Get the tokens that will be added according to the plan
-                const amountToAdd = props.context.company.plan.tokens;
-                // Add the totkens to the tokens of the company
-                const updatedTokenValue = props.context.company.tokens + amountToAdd;
-
-                // Update paymentmethod
-                const newState = props.context.company.paymentMethods[0];
-                newState.lastState = "successfull"
-                const updatedMethods = [newState]
-
-                // Create an order for the charged amount
-                const currentOrders = props.context.company.orders;
-                const nextInvoiceNumber = props.context.invoice_data.last_used_number+1;
-
-                const newOrder: Order = {
-                  id: invoiceid,
-                  timestamp: Math.floor( Date.now() / 1000 ),
-                  tokens: amountToAdd,
-                  amount: props.context.company.plan.amount,
-                  method: "Stripe",
-                  state: "accepted",
-                  type: "recharge",
-                  invoiceId: `SM${props.context.invoice_data.number_offset + nextInvoiceNumber}`
+                  paymentSuccesfull = true;
+                }catch{
+                  paymentSuccesfull = false;
                 }
 
-                // Added the new order to the company orders
-                currentOrders.push( newOrder );
-                // Update the last used invoice id
-                await updateData( "Settings", "Invoices", { last_used_number: nextInvoiceNumber } );
+            
+                // If the payment was successfull
+                if(paymentSuccesfull){
+                // Get the tokens that will be added according to the plan
+                  const amountToAdd = props.context.company.plan.tokens;
+                  // Add the totkens to the tokens of the company
+                  const updatedTokenValue = props.context.company.tokens + amountToAdd;
 
-                // Update the tokens of the company
-                await updateData("Company", props.context.user.Company, { 
-                  tokens: updatedTokenValue,
-                  paymentMethods: updatedMethods,
-                  orders: currentOrders 
-                });
+                  // Update paymentmethod
+                  const newState = props.context.company.paymentMethods[0];
+                  newState.lastState = "successfull"
+                  const updatedMethods = [newState]
 
-                notificationAPI.info({
-                  message: "Automatisches Nafüllen",
-                  description: `Dein Credit-Budget wurde automatisch um ${normalizeTokens(amountToAdd, props.context.calculations)} Tokens aufgefüllt!`,
-                  duration: 10 
-                });
-              }else{
-                const newState = props.context.company.paymentMethods[0];
-                newState.lastState = "error"
-                const updatedMethods = [newState]
+                  // Create an order for the charged amount
+                  const currentOrders = props.context.company.orders;
+                  const nextInvoiceNumber = props.context.invoice_data.last_used_number+1;
 
-                await updateData("Company", props.context.user.Company, { tokens: props.context.company.tokens, paymentMethods: updatedMethods })
+                  const newOrder: Order = {
+                    id: invoiceid,
+                    timestamp: Math.floor( Date.now() / 1000 ),
+                    tokens: amountToAdd,
+                    amount: props.context.company.plan.amount,
+                    method: "Stripe",
+                    state: "accepted",
+                    type: "recharge",
+                    invoiceId: `SM${props.context.invoice_data.number_offset + nextInvoiceNumber}`
+                  }
 
-                notificationAPI.error({
-                  message: "Automatisches Nafüllen",
-                  description: "Es ist ein Fehler beim automatischen Auffüllen deines Credit-Budgets aufgetreten.",
-                  duration: 10 
-                });
+                  // Added the new order to the company orders
+                  currentOrders.push( newOrder );
+                  // Update the last used invoice id
+                  await updateData( "Settings", "Invoices", { last_used_number: nextInvoiceNumber } );
+
+                  // Update the tokens of the company
+                  await updateData("Company", props.context.user.Company, { 
+                    tokens: updatedTokenValue,
+                    paymentMethods: updatedMethods,
+                    orders: currentOrders 
+                  });
+
+                  notificationAPI.info({
+                    message: "Automatisches Nachfüllen",
+                    description: `Dein Credit-Budget wurde automatisch um ${normalizeTokens(amountToAdd, props.context.calculations).toFixed(0)} Tokens aufgefüllt!`,
+                    duration: 10 
+                  });
+                }else{
+                  const newState = props.context.company.paymentMethods[0];
+                  newState.lastState = "error"
+                  const updatedMethods = [newState]
+
+                  await updateData("Company", props.context.user.Company, { tokens: props.context.company.tokens, paymentMethods: updatedMethods })
+
+                  notificationAPI.error({
+                    message: "Automatisches Nafüllen",
+                    description: "Es ist ein Fehler beim automatischen Auffüllen deines Credit-Budgets aufgetreten.",
+                    duration: 10 
+                  });
+                }
               }
 
             }else{

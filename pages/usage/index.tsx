@@ -188,7 +188,7 @@ export default function Usage( props ) {
   }, [company, user.Company] );
 
   useEffect( () => {
-    if(user){
+    if(user && user.usedCredits){
       let min = Number.MAX_SAFE_INTEGER;
 
       user.usedCredits.forEach((credits: Usage) => {

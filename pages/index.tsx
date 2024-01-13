@@ -137,7 +137,6 @@ export default function Home() {
   ];
 
   const AssistantCardList = () => {
-    console.log(services);
     let servicearr = services;
 
     if(selectedCat != "all"){

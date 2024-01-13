@@ -40,8 +40,10 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
 
   useEffect( () => {
     const setProfileImage = async () => {
-      const url = await getImageUrl( props.context.login.uid );
-      setImageUrl( url );
+      if(props.context.login?.uid){
+        const url = await getImageUrl( props.context.login.uid );
+        setImageUrl( url );
+      }
     }
 
     setProfileImage();

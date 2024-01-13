@@ -58,14 +58,13 @@ export const AuthContextProvider = ( {
   const router = useRouter();
 
   useEffect( () => {
-    const unsubscribe = auth.onIdTokenChanged( async ( user ) => {
+    const unsubscribe = auth.onIdTokenChanged( async ( login ) => {
       //console.log("Token changed!");
 
-
       //console.log(`token changed!`);
-      if ( !user ) {
+      if ( !login ) {
         //console.log(`no token found...`);
-        setUser( null );
+        setLogin( null );
         nookies.destroy( null, "token" );
         nookies.set( null, "token", "", { path: "/" } );
         router.replace( "/login" );
@@ -73,14 +72,14 @@ export const AuthContextProvider = ( {
       }
 
       //console.log(`updating token...`);
-      const token = await user.getIdToken();
-      setUser( user );
+      const token = await login.getIdToken();
+      //setUser( user );
       nookies.destroy( null, "token" );
       nookies.set( null, "token", token, { path: "/" } );
 
       try {
-        if ( user ) {
-          const userdoc = await getDocument( "User", user.uid );
+        if ( login != null ) {
+          const userdoc = await getDocument( "User", login.uid );
 
           if( userdoc.result ){
             const userobj = userdoc.result.data() as User;
@@ -94,13 +93,13 @@ export const AuthContextProvider = ( {
                 const invoice_data = await getDocument( "Settings", "Invoices" );
                 const calculations = await getDocument( "Settings", "Calculation" );
                 const services = await getAllDocs( "Services" );
-                const url = await getImageUrl( user.uid );
+                const url = await getImageUrl( login.uid );
 
                 if( parameters.result && invoice_data.result ){
                   
                   setProfilePicture( url );
 
-                  setLogin( user );
+                  setLogin( login );
                   setUser( userdoc.result.data() as User );
                   setRole( roledoc.result.data() as Role );
                   setCompany( companydoc.result.data() as Company );
@@ -142,19 +141,19 @@ export const AuthContextProvider = ( {
 
   useEffect( () => {
     const handle = setInterval( async () => {
-      console.log( "refreshing token..." );
-      const user = auth.currentUser;
+      //console.log( "refreshing token...!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11" );
+      const login = auth.currentUser;
       setLoading( true );
-      if ( user ) await user.getIdToken( true );
+      if ( login ) await login.getIdToken( true );
       setLoading( false );
       // The Refresh-rate still needs tweaking
       // The Refresh of the token will cause a rerender!
-    }, 100 * 60 * 1000 );
+    }, 60 * 60 * 1000 );
     return () => clearInterval( handle );
   }, [] );
 
   useEffect( () => {
-    if( user ){
+    if( user != null ){
       const unsubscribe = onSnapshot( doc( db, "Company", user.Company ), ( doc ) => {
         setCompany( doc.data() );
       } )
@@ -165,9 +164,9 @@ export const AuthContextProvider = ( {
   }, [login] );
 
   useEffect( () => {
-    if( login ){
+    if( login != null ){
       const unsubscribe = onSnapshot( doc( db, "User", login.uid ), ( doc ) => {
-        setUser( doc.data() );
+        setUser( doc.data() as User );
       } )
     
       return unsubscribe;
@@ -175,7 +174,7 @@ export const AuthContextProvider = ( {
   }, [login] );
 
   useEffect( () => {
-    if( login ){
+    if( login != null ){
       const unsubscribe = onSnapshot( doc( db, "Settings", "Invoices" ), ( doc ) => {
         setInvoiceData( doc.data() );
       } )

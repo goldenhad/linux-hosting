@@ -1,7 +1,7 @@
 import { getDownloadURL, getMetadata, ref, uploadBytes } from "firebase/storage";
 import { drive } from "../../db";
 
-export async function uploadFile( blob: any, id: string ) {
+export async function uploadFile( blob, id: string ) {
   try{
     const storageRef = ref( drive, `profilepictures/${id}` );
     await uploadBytes( storageRef, blob );
@@ -17,6 +17,17 @@ export async function uploadFile( blob: any, id: string ) {
 export async function getImageUrl( id: string ) {
   try{
     const storageRef = ref( drive, `profilepictures/${id}` );
+
+    const url = await getDownloadURL( storageRef );
+    return url;
+  } catch( error ) {
+    return undefined;
+  }
+}
+
+export async function getAssistantImage( name: string ) {
+  try{
+    const storageRef = ref( drive, `assistants/${name}` );
 
     const url = await getDownloadURL( storageRef );
     return url;

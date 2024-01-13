@@ -5,6 +5,8 @@ import Link from "next/link";
 import Play from "../../public/icons/play.svg";
 import Heart from "../../public/icons/heart.svg";
 import HeartFull from "../../public/icons/heartFull.svg";
+import { useEffect, useState } from "react";
+import { getAssistantImage } from "../../firebase/drive/upload_file";
 
 const { Paragraph } = Typography;
 
@@ -18,6 +20,22 @@ const AssistantCard = ( props: {
     onDeFav?: () => void,
     video: string
   } ) => {
+  const [image, setImage] = useState("");
+
+  useEffect(() => {
+    const loadImage = async () => {
+      if(props.image){
+        const url = await getAssistantImage(props.image);
+        setImage(url);
+      }else{
+        const url = await getAssistantImage("base.svg");
+        setImage(url);
+      }
+    }
+
+    loadImage();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [image]);
 
 
   return (
@@ -26,7 +44,7 @@ const AssistantCard = ( props: {
         <div className={styles.serviceheadline}>
           <div className={styles.servicelogo}>
             {/* eslint-disable-next-line */}
-            <img width={50} height={50} src={props.image} alt="logo" />
+            <img width={50} height={50} src={image} alt="logo" />
           </div>
           <div className={styles.servicetitle}>{props.title}</div>
         </div>

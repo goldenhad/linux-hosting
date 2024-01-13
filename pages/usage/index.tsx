@@ -330,7 +330,7 @@ export default function Usage( props ) {
   }
 
   const getBuyOptions = () => {
-    if(company.paymentMethods?.length > 0){
+    if(company?.paymentMethods?.length > 0){
       if(company?.plan && company?.plan.state == "active"){
         return(
           <>
@@ -433,33 +433,46 @@ export default function Usage( props ) {
   }
 
   const getSetups = () => {
-    if(company.paymentMethods?.length > 0){
-      return <>
-        {company.paymentMethods.map((method: PaymentMethod, idx: number) => {
-          return (
-            <Card className={styles.paymentmethod} key={idx}>
-              <div className={styles.container}>
-                <div className={styles.name}><CreditCardOutlined className={styles.cardicon}/>{method.name}</div>
-                <div className={styles.actions}>
-                  <div onClick={async () => {
-                    setDeletePaymentMethod(true);
-                  }}><DeleteOutlined className={styles.trashicon} /></div>
+    if(company?.paymentMethods){
+      if(company.paymentMethods.length > 0){
+        return <>
+          {company.paymentMethods.map((method: PaymentMethod, idx: number) => {
+            return (
+              <Card className={styles.paymentmethod} key={idx}>
+                <div className={styles.container}>
+                  <div className={styles.name}><CreditCardOutlined className={styles.cardicon}/>{method.name}</div>
+                  <div className={styles.actions}>
+                    <div onClick={async () => {
+                      setDeletePaymentMethod(true);
+                    }}><DeleteOutlined className={styles.trashicon} /></div>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          );
-        })}
-        {(company.paymentMethods[0].lastState == "error")?
-          <Alert
-            className={styles.paymenterror}
-            showIcon
-            banner
-            type="error"
-            message={"Die letzte Abbuchung von deiner Bezahlmethode ist fehlgeschlagen. Bitte prüfe deine Zahlungsdaten!"}
-          />:
-          <></>
-        }
-      </>
+              </Card>
+            );
+          })}
+          {(company.paymentMethods[0].lastState == "error")?
+            <Alert
+              className={styles.paymenterror}
+              showIcon
+              banner
+              type="error"
+              message={"Die letzte Abbuchung von deiner Bezahlmethode ist fehlgeschlagen. Bitte prüfe deine Zahlungsdaten!"}
+            />:
+            <></>
+          }
+        </>
+      }else{
+        return(<div className={styles.addPayment}>
+          <div className={styles.buttoncontainer}>
+            <div className={styles.buttonrow}>
+              <Button type="primary" onClick={() => {
+                setAddPaymentOpen(true)
+              }}>Hinzufügen</Button>
+            </div>
+          </div>
+        </div>  
+        );
+      }
     }else{
       return(<div className={styles.addPayment}>
         <div className={styles.buttoncontainer}>

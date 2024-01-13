@@ -203,7 +203,7 @@ export default function Usage( props ) {
   }, [])
 
   const calculateMails = () => {
-    return Math.floor( company.tokens/calculations.creditsProMail );
+    return Math.floor( company?.tokens/calculations.creditsProMail );
   }
 
   const orderState = (obj) => {
@@ -301,7 +301,7 @@ export default function Usage( props ) {
                 <List.Item className={styles.singledetail}><div className={styles.description}>Bezahlmethode:</div> <div>{order.method}</div></List.Item>
                 <List.Item className={styles.singledetail}><div className={styles.description}>Betrag:</div> <div>{convertToCurrency(order.amount)}</div></List.Item>
                 <List.Item className={styles.singledetail}>
-                  <div className={styles.description}>Credits:</div> <div>{normalizeTokens(order.tokens, calculations).toFixed(0)}</div>
+                  <div className={styles.description}>Credits:</div> <div>{normalizeTokens(order?.tokens, calculations).toFixed(0)}</div>
                 </List.Item>
               </List>
             </div>
@@ -338,7 +338,7 @@ export default function Usage( props ) {
               <Link href={"/upgrade"}>
                 {( !company.unlimited )? <Button ref={buyRef} className={styles.backbutton} onClick={() => {
                   logEvent(analytics, "buy_tokens", {
-                    currentCredits: company.tokens
+                    currentCredits: company?.tokens
                   });
                 }} type='primary'>Weitere Credits kaufen</Button> : <></>}
               </Link>
@@ -350,8 +350,8 @@ export default function Usage( props ) {
               <div className={styles.planinfo}>
                 Das automatische Auffüllen ist aktiv.
                 Dein Konto wird automatisch um <span className={styles.creds}>
-                  {Math.round(normalizeTokens(company.plan.tokens, calculations))}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
-                <span className={styles.creds}> {company.plan.threshold}</span> Credits fällt.
+                  {Math.round(normalizeTokens(company?.plan?.tokens, calculations))}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
+                <span className={styles.creds}> {company?.plan?.threshold}</span> Credits fällt.
               </div>
               <Button type="link" className={styles.planedit} onClick={() => {
                 setRechargeModalOpen(true);
@@ -423,6 +423,8 @@ export default function Usage( props ) {
       if(currentplan){
         currentplan.state = "inactive";
         await updateData("Company", user.Company, { paymentMethods: [], plan: currentplan });
+      }else{
+        await updateData("Company", user.Company, { paymentMethods: [] });
       }
       messageApi.success("Bezahlmethode erfolgreich entfernt!")
     }else{
@@ -486,7 +488,9 @@ export default function Usage( props ) {
             </Popover>
           </h2>
           <div className={styles.quotarow}>
-            <div className={styles.tokenbudget}>{( company?.unlimited )? "∞" : `${Math.floor(normalizeTokens(company.tokens, calculations))}`} Credits</div>
+            <div className={styles.tokenbudget}>
+              {( company?.unlimited )? "∞" : `${Math.floor(normalizeTokens((company?.tokens)? company.tokens: 0, calculations))}`} Credits
+            </div>
           </div>
         </div>
         {getBuyOptions()}
@@ -557,7 +561,7 @@ export default function Usage( props ) {
           </p>
           <Elements stripe={stripePromise}>
             <RechargeForm
-              defaultstate={{ threshold: company.plan?.threshold, tokens: priceToIndex(convertTokensToPrice(company.plan?.tokens, calculations), calculations) }}
+              defaultstate={{ threshold: company.plan?.threshold, tokens: priceToIndex(convertTokensToPrice(company?.plan?.tokens, calculations), calculations) }}
               user={user}
               company={company}
               role={role}

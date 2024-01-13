@@ -45,8 +45,10 @@ const HomeSidebarLayout = ( props: {
 
   useEffect( () => {
     const setProfileImage = async () => {
-      const url = await getImageUrl( props.context.login.uid );
-      setImageUrl( url );
+      if(props.context.login?.uid){
+        const url = await getImageUrl( props.context.login.uid );
+        setImageUrl( url );
+      }
     }
 
     setProfileImage();
@@ -129,7 +131,6 @@ const HomeSidebarLayout = ( props: {
       }
     })
 
-    console.log(lastfound);
     return lastfound.toString();
   }
 

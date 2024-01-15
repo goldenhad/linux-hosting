@@ -429,10 +429,16 @@ export default function Register( props ){
               () => ( {
                 async validator( _, value ) {
                   if( value != "" ){
-                    if ( await usernameExists( value ) ) {
-                      return Promise.reject( new Error( "Dieser Benutzername wird bereits verwendet!" ) );
-                                            
+                    if( /\s/g.test(value) ){
+                      return Promise.reject( new Error( "Der Benutzername darf keine Leerzeichen enthalten!" ) );
+                    }else{
+                      if ( await usernameExists( value ) ) {
+                        return Promise.reject( new Error( "Dieser Benutzername wird bereits verwendet!" ) );               
+                      }
+                      return Promise.resolve();
                     }
+                  }else{
+                    return Promise.reject( new Error( "Der Benutzername darf nicht leer sein!" ) );
                   }
                   return Promise.resolve();
                 }

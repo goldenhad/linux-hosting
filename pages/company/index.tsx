@@ -45,6 +45,7 @@ import {
 import { User } from "../../firebase/types/User";
 import { InvitedUser } from "../../firebase/types/Company";
 import { getImageUrl } from "../../firebase/drive/upload_file";
+import FatButton from "../../components/FatButton";
 const { TextArea } = Input;
 
 ChartJS.register(
@@ -77,11 +78,8 @@ export const getServerSideProps: GetServerSideProps = async () => {
 export default function Company( props: InitialProps ) {
   const context = useAuthContext();
   const { login, user, company, role } = context;
-  const [ errMsg, setErrMsg ] = useState( [] );
-  const [ isErrVisible, setIsErrVisible ] = useState( false );
   const [ inviteErrMsg, setInviteErrMsg ] = useState( "" );
   const [ isInviteErrVisible, setIsInviteErrVisible ] = useState( false );
-  const [ editSuccessfull, setEditSuccessfull ] = useState( false );
   const [ userTableData, setUserTableData ] = useState( [] );
   const [ inviteUserModalOpen, setInviteUserModalOpen ] = useState( false );
   const [ inviteForm ] = Form.useForm();
@@ -103,6 +101,20 @@ export default function Company( props: InitialProps ) {
   const orderRef = useRef( null );
   const userRef = useRef( null );
   const inviteRef = useRef( null );
+
+  const [ nameblocker, setNameblocker ] = useState(false);
+  const [ streetBlocker, setStreetBlocker ] = useState(false);
+  const [ cityBlocker, setCityBlocker ] = useState(false);
+  const [ postalcodeBlocker, setPostalcodeBlocker ] = useState(false);
+  const [ countryBlocker, setCountryBlocker ] = useState(false);
+  const [ backgroundBlocker, setBackgroundBlocker ] = useState(false);
+
+  const [ buttonDisabled, setButtonDisabled ] = useState(false);
+
+
+  useEffect(() => {
+    setButtonDisabled(!( nameblocker || streetBlocker || cityBlocker || postalcodeBlocker || countryBlocker || backgroundBlocker));
+  }, [backgroundBlocker, cityBlocker, countryBlocker, nameblocker, postalcodeBlocker, streetBlocker])
 
 
   let steps: TourProps["steps"] = [];
@@ -378,13 +390,16 @@ export default function Company( props: InitialProps ) {
 
     try{
       await updateData( "Company", user.Company, comp );
-
-      setErrMsg( [] );
-      setIsErrVisible( false );
-      setEditSuccessfull( true );
+      message.success("Speichern erfolgreich!");
+      setButtonDisabled(true);
+      setNameblocker(false);
+      setStreetBlocker(false);
+      setCityBlocker(false);
+      setPostalcodeBlocker(false);
+      setCountryBlocker(false);
+      setBackgroundBlocker(false);
     } catch( e ) {
-      setErrMsg( ["Speichern fehlgeschlagen!"] );
-      setIsErrVisible( true );
+      message.error("Speichern fehlgeschlagen!");
     }
   }
 
@@ -408,18 +423,20 @@ export default function Company( props: InitialProps ) {
           <Form 
             layout='vertical'
             onFinish={editCompany}
-            onChange={() => {
-              setIsErrVisible( false ), setEditSuccessfull( false )
-            }}
             form={form}
           >
-
             <Form.Item
               label="Firmenname"
               name="companyname"
               className={styles.formpart}
             >
-              <Input className={styles.forminput} placeholder="Name der Firma..." />
+              <Input className={styles.forminput} placeholder="Name der Firma..." onChange={(event) => {
+                if(event.target.value != company.name ){
+                  setNameblocker(true);
+                }else{
+                  setNameblocker(false);
+                }
+              }}/>
             </Form.Item>
 
             <div className={styles.addressrow}>
@@ -428,7 +445,13 @@ export default function Company( props: InitialProps ) {
                 name="companystreet"
                 className={styles.formpart}
               >
-                <Input className={styles.forminput} placeholder="Musterstraße 1..." />
+                <Input className={styles.forminput} placeholder="Musterstraße 1..." onChange={(event) => {
+                  if(event.target.value != company.street ){
+                    setStreetBlocker(true);
+                  }else{
+                    setStreetBlocker(false);
+                  }
+                }}/>
               </Form.Item>
 
               <Form.Item
@@ -436,7 +459,13 @@ export default function Company( props: InitialProps ) {
                 name="companycity"
                 className={styles.formpart}
               >
-                <Input className={styles.forminput} placeholder="Musterstadt..." />
+                <Input className={styles.forminput} placeholder="Musterstadt..." onChange={(event) => {
+                  if(event.target.value != company.city ){
+                    setCityBlocker(true);
+                  }else{
+                    setCityBlocker(false);
+                  }
+                }}/>
               </Form.Item>
 
               <Form.Item
@@ -444,7 +473,13 @@ export default function Company( props: InitialProps ) {
                 name="companypostalcode"
                 className={styles.formpart}
               >
-                <Input className={styles.forminput} placeholder="123456"/>
+                <Input className={styles.forminput} placeholder="123456" onChange={(event) => {
+                  if(event.target.value != company.postalcode ){
+                    setPostalcodeBlocker(true);
+                  }else{
+                    setPostalcodeBlocker(false);
+                  }
+                }}/>
               </Form.Item>
 
               <Form.Item
@@ -461,6 +496,13 @@ export default function Company( props: InitialProps ) {
                     }
                   ]}
                   style={{ width: 150 }}
+                  onChange={(event) => {
+                    if(event.target.value != company.country ){
+                      setCountryBlocker(true);
+                    }else{
+                      setCountryBlocker(false);
+                    }
+                  }}
                 />
               </Form.Item>
             </div>
@@ -471,20 +513,19 @@ export default function Company( props: InitialProps ) {
                 name="companybackground"
                 className={styles.formpart}
               >
-                <TextArea className={styles.forminput} rows={10} placeholder="Was ist das Kerngeschäft der Firma?"/>
+                <TextArea className={styles.forminput} rows={10} placeholder="Was ist das Kerngeschäft der Firma?" onChange={(event) => {
+                  if(event.target.value != company.settings.background ){
+                    setBackgroundBlocker(true);
+                  }else{
+                    setBackgroundBlocker(false);
+                  }
+                }}/>
               </Form.Item>
             </div>
 
-            <div className={styles.errorrow} style={{ display: ( isErrVisible )? "block": "none" }}>
-              <Alert type='error' message={errMsg} />
-            </div>
-
-            <div className={styles.successrow} style={{ display: ( editSuccessfull )? "block": "none" }}>
-              <Alert type='success' message="Speichern erfolgreich!" />
-            </div>
 
             <div className={styles.finishformrow}>
-              <Button className={styles.savebutton} type='primary' htmlType='submit'>Speichern</Button>
+              <FatButton isSubmitButton={true} text="Speichern" disabled={buttonDisabled}/>
             </div>
 
           </Form>

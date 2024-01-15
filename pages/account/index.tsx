@@ -177,7 +177,7 @@ export default function Account() {
           />
           <div className={styles.personal}>
             <Card className={styles.personalcard} title="Persönliche Informationen" bordered={true}>
-              <EditUserForm form={personalForm} singleUser={!role.isCompany} user={user} login={login} company={company} messageApi={messageApi} />
+              <EditUserForm form={personalForm} singleUser={!role.isCompany} user={user} login={login} messageApi={messageApi} />
             </Card>
           </div>
           <div className={styles.password}>

@@ -6,6 +6,8 @@ import updateData from "../../../firebase/data/updateData";
 import AssistantBase from "../../../components/AssistantBase/AssistantBase";
 import DialogForm from "../../../components/AssistantForms/Dialogform/Dialogform";
 import { handleUndefinedTour } from "../../../helper/architecture";
+import { Templates } from "../../../firebase/types/Settings";
+import { parseDialogPrompt } from "../../../helper/prompt";
 
 
 const dialogBasicState = {
@@ -175,7 +177,7 @@ export default function Dialogue( ) {
   ];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const promptFunction = (values: Record<string, any>, profile: Profile) => {
+  const promptFunction = (values: Record<string, any>, profile: Profile, templates: Templates) => {
     let companyinfo = "";
     if( role.isCompany ){
       companyinfo = `Ich arbeite für ${company.name}. Wir beschäftigen uns mit: ${company.settings.background}`;
@@ -197,19 +199,33 @@ export default function Dialogue( ) {
       length: values.length
     }
 
-    return promptdata;
+    const prompt = parseDialogPrompt(
+      templates.dialog,
+      promptdata.name,
+      promptdata.company,
+      promptdata.personal,
+      promptdata.dialog,
+      promptdata.continue,
+      promptdata.address,
+      promptdata.style,
+      promptdata.order,
+      promptdata.emotions,
+      promptdata.length
+    )
+
+    return { data: promptdata, prompt: prompt };
   }
 
   return(
     <AssistantBase
       context={context}
-      name={"Dialog 3.5 Turbo"}
-      laststate={"dialog_old"}
+      name={"Dialog"}
+      laststate={"dialog"}
       basicState={dialogBasicState}
       Tour={steps}
       form={form}
       promptFunction={promptFunction}
-      routes={ { count: "/api/prompt/dialog_old/count", generate: "/api/prompt/dialog_old/generate" } }
+      routes={ { generate: "/api/prompt/dialog_old/generate" } }
       tourState={!handleUndefinedTour( user.tour ).dialog}
 
     >

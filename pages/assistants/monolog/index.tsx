@@ -6,6 +6,8 @@ import AssistantBase from "../../../components/AssistantBase/AssistantBase";
 import MonologForm from "../../../components/AssistantForms/Monologform/Monologform";
 import { useRef } from "react";
 import { handleUndefinedTour } from "../../../helper/architecture";
+import { Templates } from "../../../firebase/types/Settings";
+import { parseMonologPrompt } from "../../../helper/prompt";
 
 
 const monologBasicState = {
@@ -157,7 +159,7 @@ export default function Monologue( ) {
   ];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const promptFunction = (values: Record<string, any>, profile: Profile) => {
+  const promptFunction = (values: Record<string, any>, profile: Profile, templates: Templates) => {
     let companyinfo = "";
     if( role.isCompany ){
       companyinfo = `Ich arbeite für ${company.name}. Wir beschäftigen uns mit: ${company.settings.background}`;
@@ -179,7 +181,20 @@ export default function Monologue( ) {
       length: values.length
     }
 
-    return promptdata;
+    const prompt = parseMonologPrompt(
+      templates.monolog,
+      promptdata.name,
+      promptdata.company,
+      promptdata.personal,
+      promptdata.content,
+      promptdata.address,
+      promptdata.style,
+      promptdata.order,
+      promptdata.emotions,
+      promptdata.length
+    )
+
+    return { data: promptdata, prompt: prompt };
   }
 
 
@@ -192,7 +207,7 @@ export default function Monologue( ) {
       Tour={steps}
       form={form}
       promptFunction={promptFunction}
-      routes={ { count: "/api/prompt/monolog/count", generate: "/api/prompt/monolog/generate" } }
+      routes={ { generate: "/api/prompt/monolog/generate" } }
       tourState={!handleUndefinedTour( user.tour ).monolog}
     >
       <MonologForm form={form} state={context} refs={{

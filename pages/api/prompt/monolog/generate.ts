@@ -1,11 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import { auth } from "../../../../firebase/admin"
-import getDocument from "../../../../firebase/data/getData";
-import { parseMonologPrompt } from "../../../../helper/prompt";
-import {
-  encode
-} from "gpt-tokenizer"
+import { countFunction } from "../count";
 
 const openai = new OpenAI( {
   apiKey: process.env.OPENAIAPIKEY
@@ -27,82 +23,52 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
       const data = req.body;
 
-      if( data.name != undefined &&
-        data.personal != undefined &&
-        data.content != undefined &&
-        data.address != undefined &&
-        data.order != undefined &&
-        data.style != undefined &&
-        data.emotions != undefined &&
-        data.length != undefined
-        && data.company != undefined
-      ){
-
-        const templatereq = await getDocument( "Settings", "Prompts" );
+      if( data.prompt != undefined ){
         
-        if( templatereq.result ){
-          const template = templatereq.result.data();
+        res.writeHead(200, {
+          Connection: "keep-alive",
+          "Content-Encoding": "none",
+          "Cache-Control": "no-cache",
+          "Content-Type": "text/event-stream"
+        });
 
-          const prompt = parseMonologPrompt(
-            template.monolog,
-            data.name,
-            data.company,
-            data.personal,
-            data.content,
-            data.address,
-            data.style,
-            data.order,
-            data.emotions,
-            data.length
-          )
-
-          res.writeHead(200, {
-            Connection: "keep-alive",
-            "Content-Encoding": "none",
-            "Cache-Control": "no-cache",
-            "Content-Type": "text/event-stream"
-          });
-
-          try{
-            
-            const response = await openai.chat.completions.create( {
-              model: "gpt-4-1106-preview",
-              messages: [
-                {
-                  role: "system",
-                  content: "Du bist ein Assistent zum Erstellen von Mails. Nutzer geben dir Informationen zu sich und ihrem Schreibstil, du erzeugst daraus eine E-Mail."+
-                  "Der Stil sollte sich am Nutzer orientieren. Daten, Fakten und Zahlen sollten immer unverändert wiedergegeben werden."
-                },
-                { 
-                  role: "user",
-                  content: prompt
-                }],
-              stream: true
-            } );
-            
-            let text = "";
-            for await (const chunk of response) {
-              //console.log(chunk.choices[0].delta.content || "");
-              const singletoken = chunk.choices[0].delta.content || "";
-              res.write(singletoken);
-              res.flushHeaders();
-              if (chunk.choices[0].finish_reason === "stop") {
-                console.log("stop!!")
-              }
-              text += singletoken;
+        try{
+          
+          const response = await openai.chat.completions.create( {
+            model: "gpt-4-1106-preview",
+            messages: [
+              {
+                role: "system",
+                content: "Du bist ein Assistent zum Erstellen von Mails. Nutzer geben dir Informationen zu sich und ihrem Schreibstil, du erzeugst daraus eine E-Mail."+
+                "Der Stil sollte sich am Nutzer orientieren. Daten, Fakten und Zahlen sollten immer unverändert wiedergegeben werden."
+              },
+              { 
+                role: "user",
+                content: data.prompt
+              }],
+            stream: true
+          } );
+          
+          let text = "";
+          for await (const chunk of response) {
+            //console.log(chunk.choices[0].delta.content || "");
+            const singletoken = chunk.choices[0].delta.content || "";
+            res.write(singletoken);
+            res.flushHeaders();
+            if (chunk.choices[0].finish_reason === "stop") {
+              console.log("stop!!")
             }
-  
-            const tokenCountRequest = encode(prompt).length;
-            const tokenCountResult = encode(text).length;
-            
-            return res.status(200).send(`<~${tokenCountResult + tokenCountRequest}~>`);
-                      
-          }catch( E ){
-            console.log(E);
-            return res.status( 400 ).send( { errorcode: -2, message: "Error generating answer", tokens: -1 } );
+            text += singletoken;
           }
-        }else{
-          return res.status( 400 ).send( { errorcode: -3, message: "Error generating answer", tokens: -1 } );
+
+          const tokenCountRequest = countFunction(data.prompt);
+          const tokenCountResult = countFunction(text);
+          
+          return res.status(200).send(`<~${tokenCountResult + tokenCountRequest}~>`);
+                    
+        }catch( E ){
+          console.log(E);
+          return res.status( 400 ).send( { errorcode: -2, message: "Error generating answer", tokens: -1 } );
         }
       }else{
         return res.status( 400 ).send( { errorcode: 3, message: "Missing Input!", tokens: -1 } );

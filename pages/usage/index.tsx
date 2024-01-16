@@ -42,7 +42,6 @@ import getStripe from "../../helper/stripe";
 import AddCreditCardForm from "../../components/AddCreditCardForm/AddCreditCardForm";
 import UsageStatistic from "../../components/UsageStatistic/UsageStatistic";
 import { TokenCalculator } from "../../helper/price";
-import Creditform from "../../components/CreditForm/Creditform";
 
 ChartJS.register(
   CategoryScale,
@@ -71,7 +70,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default function Usage( props ) {
   const context = useAuthContext();
-  const { role, login, user, company, calculations, invoice_data } = context
+  const { role, login, user, company, calculations } = context
   const [ users, setUsers ] = useState( [] );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).usage );
   const [orderpage, setOrderPage] = useState(1);

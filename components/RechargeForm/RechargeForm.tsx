@@ -1,4 +1,4 @@
-import { Button, Card, Divider, Form, Input, Popover, Slider } from "antd";
+import { Card, Divider, Form, Input, Popover, Slider } from "antd";
 import {
   InfoCircleOutlined
 } from "@ant-design/icons";
@@ -27,7 +27,6 @@ const RechargeForm = ( props: {
   const [ tokenstobuy, setTokenstobuy ] = useState( 0 );
   const stripe = useStripe();
   const [form] = Form.useForm();
-  const [editForm] = Form.useForm();
   const [ calculator ] = useState(new TokenCalculator(props.calculations));
 
   const calculateSavings = () => {
@@ -38,10 +37,6 @@ const RechargeForm = ( props: {
 
   const possibleMails = () => {
     return calculator.indexToCredits(tokenstobuy);
-  }
-
-  const calculateHours = () => {
-    return Math.floor((possibleMails() * props.calculations.savedMinutesProMail)/60);
   }
 
   const calculatePricePerMail = () => {
@@ -112,137 +107,6 @@ const RechargeForm = ( props: {
       props.onCustomerApprove();
       setTokenstobuy(0);
       resetForm();
-    }
-  }
-
-  const FormElement = () => {
-    if(props.company.plan && props.company.plan.state == "active"){
-
-      return(
-        <Form layout="vertical" form={form}>
-          <Form.Item className={styles.formpart} label={
-            <b>
-                Grenze
-              <Popover content={"Die Grenzeinstellung bestimmt, dass neue Credits automatisch hinzugefügt werden, "+
-                "sobald dein Budget einen festgelegten Wert unterschreitet."} placement="top" title="Details">
-                <span className={styles.tokeninformationicon}><InfoCircleOutlined /></span>
-              </Popover>
-            </b>
-          } name="threshold" rules={[{ required: true, message: "Eine Grenze muss definiert werden!" }]}>
-            <Input className={styles.forminput} type="number"/>
-          </Form.Item>
-
-          <Card className={styles.quoatacard} bordered={true}>
-            <div className={styles.tokenrow}>
-              <div className={styles.tokens}>{calculator.indexToCredits(tokenstobuy)}</div>
-              <div className={styles.tokeninfo}>Anzahl Credits</div>
-            </div>
-            <Form.Item className={styles.tokenslideritem} name={"tokenamount"}>
-              <Slider
-                className={styles.tokenslider}
-                max={props.calculations.products.length - 1}
-                step={1}
-                tooltip={{ formatter: null }}
-                onChange={
-                  ( val ) => {
-                    setTokenstobuy( val )
-                  }
-                }/>
-            </Form.Item>
-            <Divider className={styles.tokendivider} />
-        
-            <div className={styles.summary}>
-              <div className={styles.summarytext}>Gesamtpreis</div>
-              <div className={styles.summarysum}>{convertToCurrency( props.calculations.products[tokenstobuy].price )}</div>
-            </div>
-          </Card>
-
-          <Divider className={styles.tokendivider} />
-      
-          <div className={styles.buybuttonrow}>
-            <div className={styles.buybutton}>
-              <Button type="primary" onClick={async () => {
-                onPayment()
-              }}>Aufladen aktualisieren</Button>
-                
-            </div>
-            <div className={styles.buybutton}>
-              <Button onClick={async () => {
-                onDeactivate()
-              }}>Aufladen deaktivieren</Button>
-                
-            </div>
-          </div>
-        </Form>
-      );
-    }else{
-      return(
-        <Form layout="vertical" initialValues={{ "threshold": 10 }} form={form}>
-          <Form.Item className={styles.formpart} label={
-            <b>
-                Grenze
-              <Popover content={"Die Grenzeinstellung bestimmt, dass neue Credits automatisch hinzugefügt werden, "+
-                "sobald dein Budget einen festgelegten Wert unterschreitet."} placement="top" title="Details">
-                <span className={styles.tokeninformationicon}><InfoCircleOutlined /></span>
-              </Popover>
-            </b>
-          } name="threshold" rules={[{ required: true, message: "Eine Grenze muss definiert werden!" }]}>
-            <Input className={styles.forminput} type="number"/>
-          </Form.Item>
-
-          <Card className={styles.quoatacard} bordered={true}>
-            <div className={styles.tokenrow}>
-              <div className={styles.tokens}>{calculator.indexToCredits(tokenstobuy)}</div>
-              <div className={styles.tokeninfo}>Anzahl Credits</div>
-            </div>
-            <Form>
-              <Form.Item className={styles.tokenslideritem} name={"tokenamount"}>
-                <Slider
-                  className={styles.tokenslider}
-                  defaultValue={0}
-                  max={props.calculations.products.length-1}
-                  step={1}
-                  tooltip={{ formatter: null }}
-                  onChange={
-                    ( val ) => {
-                      setTokenstobuy( val )
-                    }
-                  }/>
-              </Form.Item>
-            </Form>
-            <div className={styles.details}>
-              <div className={styles.singledetail}>Entspricht: <span className={styles.detailhighlight}>{
-                0
-              } Mails</span></div>
-              <div className={styles.singledetail}>Preis je Mail: <span className={styles.detailhighlight}>{convertToCurrency( 0 )}</span></div>
-              <div className={styles.singledetail}>
-                Deine Ersparnis:
-                <span className={`${styles.detailhighlight} ${(tokenstobuy > 0)? styles.savingsamount: ""}`}>
-                  {convertToCurrency( 0 )} ({props.calculations.products[tokenstobuy].discount} %)
-                </span>
-              </div>
-            </div>
-
-            <Divider className={styles.tokendivider} />
-
-            <div className={styles.summary}>
-              <div className={styles.summarytext}>Gesamtpreis</div>
-              <div className={styles.summarysum}>{convertToCurrency( props.calculations.products[tokenstobuy].price )}</div>
-            </div>
-          </Card>
-
-          <Divider className={styles.tokendivider} />
-      
-          <div className={styles.buybuttonrow}>
-            <div className={styles.buybutton}>
-              <Button onClick={async () => {
-                onPayment()
-              }}>Aufladen aktivieren</Button>
-                
-            </div>
-          </div>
-        </Form>
-      );
     }
   }
 

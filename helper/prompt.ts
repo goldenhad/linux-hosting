@@ -32,14 +32,12 @@ export function parseMonologPrompt(
  */
 
 export function parseBlogPrompt(
-  prompt: string, company: string, content: string,
-  style: Array<string>, order: Array<string>, length: string
+  prompt: string, company: string, content: string, order: Array<string>, length: string
 ) {
 
   const parsed = prompt
     .replace("<company>", company)
     .replace("<content>", content)
-    .replace("<style>", style.toString())
     .replace("<order>", order.toString())
     .replace("<length>", length);
 

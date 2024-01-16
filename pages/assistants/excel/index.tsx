@@ -6,6 +6,8 @@ import updateData from "../../../firebase/data/updateData";
 import AssistantBase from "../../../components/AssistantBase/AssistantBase";
 import { handleUndefinedTour } from "../../../helper/architecture";
 import ExcelForm from "../../../components/AssistantForms/ExcelForm/Excelform";
+import { Templates } from "../../../firebase/types/Settings";
+import { parseExcelPrompt } from "../../../helper/prompt";
 
 
 const excelBasicState = {
@@ -100,7 +102,7 @@ export default function Dialogue( ) {
   ];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const promptFunction = (values: Record<string, any>, profile: Profile) => {
+  const promptFunction = (values: Record<string, any>, profile: Profile, templates: Templates) => {
     let companyinfo = "";
     if( role.isCompany ){
       companyinfo = `Ich arbeite für ${company.name}. Wir beschäftigen uns mit: ${company.settings.background}`;
@@ -115,7 +117,15 @@ export default function Dialogue( ) {
       question: cleanedQuestion
     }
 
-    return promptdata;
+    const prompt = parseExcelPrompt(
+      templates.excel,
+      promptdata.name,
+      promptdata.company,
+      promptdata.personal,
+      promptdata.question
+    );
+
+    return { data: promptdata, prompt: prompt };
   }
 
   return(
@@ -127,7 +137,7 @@ export default function Dialogue( ) {
       Tour={steps}
       form={form}
       promptFunction={promptFunction}
-      routes={ { count: "/api/prompt/excel/count", generate: "/api/prompt/excel/generate" } }
+      routes={ { generate: "/api/prompt/excel/generate" } }
       tourState={!handleUndefinedTour( user.tour ).excel}
 
     >

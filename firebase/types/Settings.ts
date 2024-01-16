@@ -1,4 +1,18 @@
 
+export type Templates = {
+    aboutus: string,
+    blog: string,
+    description: string,
+    dialog: string,
+    excel: string,
+    member: string,
+    monolog: string,
+    ownaboutus: string,
+    services: string,
+    singleuser: string,
+    webcontent: string
+}
+
 export type Parameters = {
     emotions: Array<string>,
     lengths: Array<string>,

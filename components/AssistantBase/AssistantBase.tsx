@@ -15,14 +15,14 @@ import { handleEmptyString } from "../../helper/architecture";
 import FatButton from "../FatButton";
 import Clipboard from "../../public/icons/clipboard.svg";
 import updateData from "../../firebase/data/updateData";
-import { encode } from "gpt-tokenizer";
 import moment from "moment";
 import { isMobile } from "react-device-detect";
 import Markdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import React from "react";
 import { TokenCalculator } from "../../helper/price";
-import { Calculations, InvoiceSettings } from "../../firebase/types/Settings";
+import { Calculations, InvoiceSettings, Templates } from "../../firebase/types/Settings";
+import getDocument from "../../firebase/data/getData";
 
 const { Paragraph } = Typography;
 
@@ -71,8 +71,8 @@ const AssistantBase = (props: {
     basicState: Record<string, string>,
     Tour: TourProps["steps"],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    promptFunction: (values: Record<string, any>, profile: Profile) => void,
-    routes: { count: string, generate: string }
+    promptFunction: (values: Record<string, any>, profile: Profile, templates: Templates) => { data: Record<string, any>, prompt: string },
+    routes: { count?: string, generate: string }
     form,
     tourState: boolean
 }) => {
@@ -427,12 +427,23 @@ const AssistantBase = (props: {
         let isFreed = false;
         const usedTokens = { in: 0, out: 0 };
         let realusedTokens = 0;
+
+        // Retrieve the template for prompts from the database
+        const templatereq = await getDocument("Settings", "Prompts");
+
+        // Check if the template request was successful
+        if (!templatereq.result) {
+          throw Error("Settings not found...");
+        }
+        
+        // Extract the template data
+        const templates: Templates = templatereq.result.data();
         
         // Format the given values to fit to the prompt api
-        const promptdata = props.promptFunction( values, profile )
+        const { prompt } = props.promptFunction( values, profile, templates )
 
         //Calculate the used tokens of the input
-        const costbeforereq = await axios.post(props.routes.count, promptdata);
+        const costbeforereq = await axios.post("/api/prompt/count", { prompt: prompt });
         
         if(costbeforereq){
           const costbefore = costbeforereq.data.tokens;
@@ -443,8 +454,8 @@ const AssistantBase = (props: {
 
             try{
               // Query the api for a answer to the input
-              await axios.post( props.routes.generate, promptdata,
-                { onDownloadProgress: (progressEvent) => {
+              await axios.post( props.routes.generate, { prompt: prompt },
+                { onDownloadProgress: async (progressEvent) => {
                   // Disable the loading of the answer if we have recieved a chunk of data
                   if(!isFreed){
                     setIsLoaderVisible( false );
@@ -466,39 +477,47 @@ const AssistantBase = (props: {
                     dataChunk = dataChunk.replace(`<~${parsedval[0]}~>`, "");
                     localAnswer = dataChunk;
 
-                    if(props.context.calculations.costPerToken.in > props.context.calculations.costPerToken.out){
-                      realusedTokens = usedTokens.in * (props.context.calculations.costPerToken.in/props.context.calculations.costPerToken.out) + usedTokens.out;
-                    }else if(props.context.calculations.costPerToken.in < props.context.calculations.costPerToken.out){
-                      realusedTokens = usedTokens.in + (props.context.calculations.costPerToken.out/props.context.calculations.costPerToken.in) * usedTokens.out;
-                    }else{
-                      realusedTokens = usedTokens.in + usedTokens.out;
+                    // Calculate the tokens of the answer
+                    const costbeforereq = await axios.post("/api/prompt/count", { prompt: localtext });
+                    if(costbeforereq){
+                      const tokensused = costbeforereq.data.tokens
+                      // Set the tokens to the sum of the input and the received answer
+                      usedTokens.in = costbefore;
+                      usedTokens.out = tokensused;
+                      
+                      if(props.context.calculations.costPerToken.in > props.context.calculations.costPerToken.out){
+                        realusedTokens = usedTokens.in * (props.context.calculations.costPerToken.in/props.context.calculations.costPerToken.out) + usedTokens.out;
+                      }else if(props.context.calculations.costPerToken.in < props.context.calculations.costPerToken.out){
+                        realusedTokens = usedTokens.in + (props.context.calculations.costPerToken.out/props.context.calculations.costPerToken.in) * usedTokens.out;
+                      }else{
+                        realusedTokens = usedTokens.in + usedTokens.out;
+                      }
+  
+                      console.log(realusedTokens);
+                      
+                      // Update the used tokens and display them
+                      setTokens(realusedTokens.toString());
+                      setTokenCountVisible(true);
+                      
+                      notificationAPI.info({
+                        message: "Creditverbrauch",
+                        description: `Die Anfrage hat ${calculator.round(calculator.normalizeTokens(realusedTokens), 2)} Credits verbraucht`,
+                        duration: 10 
+                      });
+                      
+                      // Set the answer to the recieved data without the control sequence
+                      setAnswer(dataChunk);
                     }
 
-                    console.log(realusedTokens);
                     
-                    // Update the used tokens and display them
-                    setTokens(realusedTokens.toString());
-                    setTokenCountVisible(true);
-                    
-                    notificationAPI.info({
-                      message: "Creditverbrauch",
-                      description: `Die Anfrage hat ${calculator.round(calculator.normalizeTokens(realusedTokens), 2)} Credits verbraucht`,
-                      duration: 10 
-                    });
-                    
-                    // Set the answer to the recieved data without the control sequence
-                    setAnswer(dataChunk);
                   }else{
-                    // Calculate the tokens of the answer
-                    const tokensused = encode(localtext).length;
-                    // Set the tokens to the sum of the input and the received answer
-                    usedTokens.in = costbefore;
-                    usedTokens.out = tokensused;
-
                     // Update the answer and show the cursor char
                     setAnswer(dataChunk + "█");
                     localAnswer = dataChunk;
+                    
                   }
+
+
                   
                 }, signal: cancleController.signal
                 });

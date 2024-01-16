@@ -6,6 +6,7 @@ import updateData from "../../../firebase/data/updateData";
 import AssistantBase from "../../../components/AssistantBase/AssistantBase";
 import BlogForm from "../../../components/AssistantForms/Blogform/Blogform";
 import { handleUndefinedTour } from "../../../helper/architecture";
+import { parseBlogPrompt } from "../../../helper/prompt";
 
 
 const blogBasicState = {
@@ -108,7 +109,7 @@ export default function Blog( ) {
   ];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const promptFunction = (values: Record<string, any>, profile: Profile) => {
+  const promptFunction = (values: Record<string, any>, profile: Profile, templates: any) => {
     let companyinfo = "";
     if( role.isCompany ){
       companyinfo = `Ich arbeite für ${company.name}. Wir beschäftigen uns mit: ${company.settings.background}`;
@@ -123,15 +124,20 @@ export default function Blog( ) {
       personal: profile.settings.personal,
       company: companyinfo,
       content: cleanedContet,
-      style: profile.settings.stil,
       order: values.order,
-      emotions: profile.settings.emotions,
       length: values.length
     }
 
-    return promptdata;
-  }
+    const prompt = parseBlogPrompt(
+      templates.blog,
+      promptdata.company,
+      promptdata.content,
+      promptdata.order,
+      promptdata.length
+    );
 
+    return { data: promptdata, prompt: prompt };
+  }
 
   return (
     <AssistantBase
@@ -142,7 +148,7 @@ export default function Blog( ) {
       Tour={steps}
       form={form}
       promptFunction={promptFunction}
-      routes={ { count: "/api/prompt/blog/count", generate: "/api/prompt/blog/generate" } }
+      routes={ { generate: "/api/prompt/blog/generate" } }
       tourState={!handleUndefinedTour( user.tour ).blog}
     >
       <BlogForm form={form} state={context} refs={{

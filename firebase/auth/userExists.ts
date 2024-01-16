@@ -38,7 +38,7 @@ export async function usernameExistsAtDifferentUser( username: string, userid: s
   let error = null;
   
   try {
-    const { result } = await getDocWhere( "User", "username", "==", username.toLowerCase() );
+    const { result } = await getDocWhere( "User", "username", "==", username );
     if( result.length > 0 ){
       let exists = false;
       result.forEach( ( user ) => {

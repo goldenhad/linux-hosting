@@ -32,18 +32,19 @@
         height: 2px;
         background: #EAECF0;
     }
+    
+}
 
-    .tokenslideritem{
-        display: flex;
-        flex-direction: column;
-        padding-left: 16px;
-        padding-right: 16px;
+.tokenslideritem{
+    display: flex;
+    flex-direction: column;
+    padding-left: 16px;
+    padding-right: 16px;
 
-        .tokenslider{
-            color: #1478FD;
-        }
-        
+    .tokenslider{
+        color: #1478FD;
     }
+
 
     .tokenrow {
         display: flex;

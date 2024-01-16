@@ -11,7 +11,6 @@ const FatButton = ( props: {
   type?: "link" | "text" | "primary" | "default" | "dashed"
 } ) => {
 
-
   if(props.isSubmitButton){
     return (
       <div className={styles.buttonrow}>

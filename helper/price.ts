@@ -61,14 +61,17 @@ export class TokenCalculator{
     this.parameter = calc;
   }
 
-  indexToCredits(index: number): number{
+  indexToCredits(index: number, additionalDiscount?: boolean): number{
     const priceObj = this.parameter.products.find((obj: Product) => {
       return obj.id === index;
     });
 
     if(priceObj){
       const price = priceObj.price;
-      const discount = priceObj.discount;
+      let discount = priceObj.discount;
+      if(additionalDiscount){
+        discount += this.parameter.autoDiscountPercent;
+      }
 
       const nomalizer = 1/(this.parameter.tokenProMail.in + this.parameter.tokenProMail.out);
       const cost = (this.parameter.costPerToken.in)/1000 + (this.parameter.costPerToken.out)/1000;
@@ -80,14 +83,17 @@ export class TokenCalculator{
     }
   }
 
-  indexToTokens(index: number): number{
+  indexToTokens(index: number, additionalDiscount?: boolean): number{
     const priceObj = this.parameter.products.find((obj: Product) => {
       return obj.id === index;
     });
 
     if(priceObj){
       const price = priceObj.price;
-      const discount = priceObj.discount;
+      let discount = priceObj.discount;
+      if(additionalDiscount){
+        discount += this.parameter.autoDiscountPercent;
+      }
 
       const cost = (this.parameter.costPerToken.in)/1000 + (this.parameter.costPerToken.out)/1000;
       const profit = this.parameter.profitPercent/100;

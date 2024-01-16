@@ -2,15 +2,11 @@ import { Bar } from "react-chartjs-2";
 import styles from "./usagestatistic.module.scss"
 import { User } from "../../firebase/types/User";
 import { Usage } from "../../firebase/types/Company";
-import { useMemo } from "react";
 
 
 
 const UsageStatistic = (props: { visibleYear: number, users: Array<User> }) => {
   const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
-  const usageUser = useMemo(() => {
-    return props.users 
-  }, [props.users])
 
   return(
     <div className={styles.barcontainer}>
@@ -34,7 +30,7 @@ const UsageStatistic = (props: { visibleYear: number, users: Array<User> }) => {
               label: `Credits ${props.visibleYear}`,
               data: months.map( ( label, idx ) => {
                 let sum = 0;
-                usageUser.forEach( ( su: User ) => {
+                props.users.forEach( ( su: User ) => {
                   if(su.usedCredits){
                     su.usedCredits.forEach( ( usage: Usage ) => {
                       if( usage.month == idx+1 && usage.year == props.visibleYear ){

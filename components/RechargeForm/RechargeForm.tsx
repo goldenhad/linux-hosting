@@ -31,12 +31,12 @@ const RechargeForm = ( props: {
 
   const calculateSavings = () => {
     const reduced = props.calculations.products[tokenstobuy].price;
-    const before = props.calculations.products[tokenstobuy].price/ (1 - props.calculations.products[tokenstobuy].discount/100);
+    const before = props.calculations.products[tokenstobuy].price/ (1 - (props.calculations.products[tokenstobuy].discount + props.calculations.autoDiscountPercent)/100);
     return before - reduced;
   }
 
   const possibleMails = () => {
-    return calculator.indexToCredits(tokenstobuy);
+    return calculator.indexToCredits(tokenstobuy, true);
   }
 
   const calculatePricePerMail = () => {
@@ -146,7 +146,7 @@ const RechargeForm = ( props: {
         </Form.Item>
         <Card className={styles.quoatacard} bordered={true}>
           <div className={styles.tokenrow}>
-            <div className={styles.tokens}>{calculator.indexToCredits(tokenstobuy)}</div>
+            <div className={styles.tokens}>{calculator.indexToCredits(tokenstobuy, true)}</div>
             <div className={styles.tokeninfo}>Anzahl Credits</div>
           </div>
         
@@ -170,8 +170,8 @@ const RechargeForm = ( props: {
             <div className={styles.singledetail}>Preis je Mail: <span className={styles.detailhighlight}>{convertToCurrency( calculatePricePerMail() )}</span></div>
             <div className={styles.singledetail}>
                 Deine Ersparnis:
-              <span className={`${styles.detailhighlight} ${(tokenstobuy > 0)? styles.savingsamount: ""}`}>
-                {convertToCurrency( calculateSavings() )} ({props.calculations.products[tokenstobuy].discount} %)
+              <span className={`${styles.detailhighlight} ${(tokenstobuy >= 0)? styles.savingsamount: ""}`}>
+                {convertToCurrency( calculateSavings() )} ({Number(props.calculations.products[tokenstobuy].discount) + 5} %)
               </span>
             </div>
           </div>

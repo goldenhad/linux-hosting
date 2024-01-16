@@ -628,7 +628,7 @@ const AssistantBase = (props: {
                 // If the payment was successfull
                 if(paymentSuccesfull){
                 // Get the tokens that will be added according to the plan
-                  const amountToAdd = calculator.indexToTokens(props.context.company.plan?.product);
+                  const amountToAdd = calculator.indexToTokens(props.context.company.plan?.product, true);
                   // Add the totkens to the tokens of the company
                   const updatedTokenValue = props.context.company.tokens + amountToAdd;
 

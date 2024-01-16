@@ -45,5 +45,6 @@ export type Calculations = {
     products: Array<Product>,
     profitPercent: number,
     startCredits: number,
-    savedMinutesProMail: number
+    savedMinutesProMail: number,
+    autoDiscountPercent: number
 }

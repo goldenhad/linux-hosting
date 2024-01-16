@@ -536,6 +536,8 @@ const AssistantBase = (props: {
                   const hist: History = {
                     monolog: "",
                     dialog: "",
+                    monolog_old: "",
+                    dialog_old: "",
                     blog: "",
                     excel: ""
                   };
@@ -730,6 +732,8 @@ const AssistantBase = (props: {
         const hist: History = {
           monolog: "",
           dialog: "",
+          monolog_old: "",
+          dialog_old: "",
           blog: "",
           excel: ""
         };

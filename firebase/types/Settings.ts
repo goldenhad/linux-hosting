@@ -13,12 +13,23 @@ export type InvoiceSettings = {
     prices: Array<string>
 }
 
+export type Product = {
+    id: number,
+    price: number,
+    discount: number
+}
+
 export type Calculations = {
-    creditsProMail: number,
-    costPerToken: number,
-    products: Array<number>,
+    tokenProMail: {
+        in: number,
+        out: number
+    },
+    costPerToken: {
+        in: number,
+        out: number
+    },
+    products: Array<Product>,
     profitPercent: number,
-    tokensPerCredit: number,
-    normalizer: number,
-    startCredits: number
+    startCredits: number,
+    savedMinutesProMail: number
 }

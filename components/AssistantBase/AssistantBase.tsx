@@ -11,7 +11,7 @@ import Info from "../../public/icons/info.svg";
 import Icon, { ArrowLeftOutlined, EyeOutlined, HistoryOutlined, CloseOutlined } from "@ant-design/icons";
 import SidebarLayout from "../Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
-import { handleEmptyString, normalizeTokens } from "../../helper/architecture";
+import { handleEmptyString } from "../../helper/architecture";
 import FatButton from "../FatButton";
 import Clipboard from "../../public/icons/clipboard.svg";
 import updateData from "../../firebase/data/updateData";
@@ -21,7 +21,7 @@ import { isMobile } from "react-device-detect";
 import Markdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import React from "react";
-import { convertTokensToPrice } from "../../helper/price";
+import { TokenCalculator } from "../../helper/price";
 import { Calculations, InvoiceSettings } from "../../firebase/types/Settings";
 
 const { Paragraph } = Typography;
@@ -96,6 +96,7 @@ const AssistantBase = (props: {
   const [ histloading, setHistloading ] = useState(false);
   const [open, setOpen] = useState<boolean>( props.tourState  );
   const [notificationAPI, notificationContextHolder] = notification.useNotification();
+  const [ calculator ] = useState(new TokenCalculator(props.context.calculations))
   const router = useRouter();
 
   const now = new Date();
@@ -136,15 +137,18 @@ const AssistantBase = (props: {
       Object.keys(props.basicState).forEach((field) => {
         let fieldvalue = parsed[field];
 
-        if(field == "profile"){
-          // Test if the saved profile exists in the list of the profiles
-          const profIndex = decryptedProfiles.findIndex((profile: Profile) => {
-            return profile.name == parsed["field"];
-          });
-
-          // If the profile can't be found set the profile to the first profile in the list
-          if(profIndex == -1){
-            fieldvalue = decryptedProfiles[0].name
+        if(decryptedProfiles.length){
+          if(field == "profile"){
+            // Test if the saved profile exists in the list of the profiles
+            const profIndex = decryptedProfiles.findIndex((profile: Profile) => {
+              return profile.name == parsed["field"];
+            });
+  
+            // If the profile can't be found set the profile to the first profile in the list
+            if(profIndex == -1){
+              console.log(decryptedProfiles);
+              fieldvalue = decryptedProfiles[0].name
+            }
           }
         }
         updateField(props.form, field, fieldvalue );
@@ -421,7 +425,8 @@ const AssistantBase = (props: {
 
 
         let isFreed = false;
-        let usedTokens = 0;
+        const usedTokens = { in: 0, out: 0 };
+        let realusedTokens = 0;
         
         // Format the given values to fit to the prompt api
         const promptdata = props.promptFunction( values, profile )
@@ -460,14 +465,24 @@ const AssistantBase = (props: {
                     // Remove the control sequence
                     dataChunk = dataChunk.replace(`<~${parsedval[0]}~>`, "");
                     localAnswer = dataChunk;
+
+                    if(props.context.calculations.costPerToken.in > props.context.calculations.costPerToken.out){
+                      realusedTokens = usedTokens.in * (props.context.calculations.costPerToken.in/props.context.calculations.costPerToken.out) + usedTokens.out;
+                    }else if(props.context.calculations.costPerToken.in < props.context.calculations.costPerToken.out){
+                      realusedTokens = usedTokens.in + (props.context.calculations.costPerToken.out/props.context.calculations.costPerToken.in) * usedTokens.out;
+                    }else{
+                      realusedTokens = usedTokens.in + usedTokens.out;
+                    }
+
+                    console.log(realusedTokens);
                     
                     // Update the used tokens and display them
-                    setTokens(usedTokens.toString());
+                    setTokens(realusedTokens.toString());
                     setTokenCountVisible(true);
                     
                     notificationAPI.info({
                       message: "Creditverbrauch",
-                      description: `Die Anfrage hat ${normalizeTokens(parseFloat(usedTokens.toString()), props.context.calculations)} Credits verbraucht`,
+                      description: `Die Anfrage hat ${calculator.round(calculator.normalizeTokens(realusedTokens), 2)} Credits verbraucht`,
                       duration: 10 
                     });
                     
@@ -477,7 +492,9 @@ const AssistantBase = (props: {
                     // Calculate the tokens of the answer
                     const tokensused = encode(localtext).length;
                     // Set the tokens to the sum of the input and the received answer
-                    usedTokens = costbefore + tokensused;
+                    usedTokens.in = costbefore;
+                    usedTokens.out = tokensused;
+
                     // Update the answer and show the cursor char
                     setAnswer(dataChunk + "█");
                     localAnswer = dataChunk;
@@ -496,7 +513,7 @@ const AssistantBase = (props: {
                 }
   
                 // Add the answer with the current time and the used tokens to the front of the history array
-                historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: usedTokens });
+                historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: realusedTokens });
   
                 // Encrypt the history array
                 const encHistObj = await axios.post( "/api/prompt/encrypt", {
@@ -545,17 +562,22 @@ const AssistantBase = (props: {
 
 
             try{
-              await axios.post( "/api/stats", { tokens: usedTokens, time: usedTokens, type: props.name } );
+              await axios.post( "/api/stats", { tokens: { in: usedTokens.in, out: usedTokens.out }, time: -1, type: props.name } );
             }catch( e ){
               //console.log(e);
               //console.log("Timing logging failed!");
             }
+
+            console.log("IN: ", usedTokens.in, " OUT: ", usedTokens.out);
+
             
             // Reduce the token balance by the used token
-            if( props.context.company.tokens - usedTokens <= 0 ){
+            if( props.context.company.tokens - realusedTokens <= 0 ){
               props.context.company.tokens = 0;
             }else{
-              props.context.company.tokens -= usedTokens
+              console.log(props.context.company.tokens);
+              props.context.company.tokens -= realusedTokens
+              console.log(props.context.company.tokens);
             }
 
             // Check if the user activated automatic recharge. If charge them and add tokens
@@ -569,7 +591,7 @@ const AssistantBase = (props: {
                 // Try to charge the user with the values defined in the plan
                 try{
                   const paymentreq = await axios.post("/api/payment/issuepayment", { 
-                    price: convertTokensToPrice(props.context.company.plan?.tokens, props.context.calculations),
+                    price: props.context.calculations.products[props.context.company.plan?.product].price,
                     customer: props.context.company.customerId,
                     method: props.context.company.paymentMethods[0].methodId
                   });
@@ -585,7 +607,7 @@ const AssistantBase = (props: {
                 // If the payment was successfull
                 if(paymentSuccesfull){
                 // Get the tokens that will be added according to the plan
-                  const amountToAdd = props.context.company.plan.tokens;
+                  const amountToAdd = calculator.indexToTokens(props.context.company.plan?.product);
                   // Add the totkens to the tokens of the company
                   const updatedTokenValue = props.context.company.tokens + amountToAdd;
 
@@ -602,7 +624,7 @@ const AssistantBase = (props: {
                     id: invoiceid,
                     timestamp: Math.floor( Date.now() / 1000 ),
                     tokens: amountToAdd,
-                    amount: props.context.company.plan.amount,
+                    amount: props.context.calculations.products[props.context.company.plan?.product].price,
                     method: "Stripe",
                     state: "accepted",
                     type: "recharge",
@@ -623,7 +645,7 @@ const AssistantBase = (props: {
 
                   notificationAPI.info({
                     message: "Automatisches Nachfüllen",
-                    description: `Dein Credit-Budget wurde automatisch um ${normalizeTokens(amountToAdd, props.context.calculations).toFixed(0)} Tokens aufgefüllt!`,
+                    description: `Dein Credit-Budget wurde automatisch um ${calculator.round(calculator.normalizeTokens(amountToAdd), 0)} Tokens aufgefüllt!`,
                     duration: 10 
                   });
                 }else{
@@ -639,6 +661,9 @@ const AssistantBase = (props: {
                     duration: 10 
                   });
                 }
+              }else{
+                // Update the balance of the company
+                await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
               }
 
             }else{
@@ -658,12 +683,12 @@ const AssistantBase = (props: {
             if( userusageidx != -1 ){
               // If so just update the usage with the used tokens
               const usageupdates = props.context.user.usedCredits;
-              usageupdates[userusageidx].amount += usedTokens;
+              usageupdates[userusageidx].amount += realusedTokens;
               await updateDoc( doc( db, "User", props.context.login.uid ), { usedCredits: usageupdates } );
             }else{
               // Otherwise create a new usage object and write it to the user
               const usageupdates = props.context.user.usedCredits;
-              usageupdates.push( { month: currentMonth, year: currentYear, amount: usedTokens } );
+              usageupdates.push( { month: currentMonth, year: currentYear, amount: realusedTokens } );
               await updateDoc( doc( db, "User", props.context.login.uid ), { usedCredits: usageupdates } );
             }
           }else{
@@ -730,13 +755,13 @@ const AssistantBase = (props: {
           loading={histloading}
           dataSource={historyState}
           locale={{ emptyText: "Noch keine Anfragen" }}
-          renderItem={(item: { content: string, time: string, tokens: string }, id) => (
-            <List.Item>
+          renderItem={(item: { content: string, time: string, tokens: string }, id) => {
+            return(<List.Item>
               <div className={styles.singlehistitem}>
                 <Paragraph className={styles.histitem}>{item.content.slice(0, 100)}...</Paragraph>
                 <div className={styles.subcontent}>
                   <span>{item.time}</span>
-                  <span>Credits: {normalizeTokens(parseFloat(item.tokens), props.context.calculations)}</span>
+                  <span>Credits: {calculator.round(calculator.normalizeTokens(parseFloat(item.tokens)), 2)}</span>
                   <Button icon={<EyeOutlined />} onClick={() => {
                     setHistOpen(false);
                     setIsAnswerCardvisible( true );
@@ -759,7 +784,8 @@ const AssistantBase = (props: {
                 </div>
               </div>
             </List.Item>
-          )}
+            );
+          }}
         />
       );
     }else{

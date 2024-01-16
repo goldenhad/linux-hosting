@@ -1,51 +1,24 @@
-.tokeninformationicon{
-    font-size: 14px;
-    color: #8e8e93;
-    margin-left: 10px;
-}
-
-.formpart{
-    font-weight: 700;
-    line-height: 20px;
-    size: 14px;
-    letter-spacing: 1%;
-
-    .forminput{
-      background-color: white;
-      padding: 10px 14px 10px 14px;
-      border-radius: 8px;
-      box-shadow: 0px 1px 2px 0px #1018280D;
-      border-color: #D0D5DD;
-    }
-
-    .formselect{
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0px 1px 2px 0px #1018280D;
-      border-color: #D0D5DD;
-      font-weight: normal;
-    }
-}
-
-.tokenrow {
+.cardrow{
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
+    width: 100%;
 
-    margin-bottom: 25px;
-    margin-top: 25px;
+    .headline{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
 
-    .tokens{
-        font-size: 24px;
-        font-weight: 700;
-        text-align: center;
+        .subheadline{
+            color: #475467;
+        }
     }
 
-    .tokeninfo{
-        font-size: 16px;
-        color: #475467;
-        text-align: center;
-    }
+    
 }
 
 .quoatacard{
@@ -71,57 +44,218 @@
     .tokenslider{
         color: #1478FD;
     }
+
+
+    .tokenrow {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        margin-bottom: 25px;
+
+        .tokens{
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .tokeninfo{
+            font-size: 16px;
+            color: #475467;
+            text-align: center;
+        }
+    }
+
+    .details {
+        font-size: 16px;
+
+        .singledetail{
+            color: #475467;
+            .detailhighlight {
+                color: black;
+                font-weight: 700;
+                margin-left: 8px;
+            }
+
+            .savingsamount{
+                color: #00cc33;
+            }
+        }
+
+        .listicon{
+            margin-right: 10px;
+        }
+    }
+
+    .quoataprice{
+        font-size: 32px;
+        font-weight: bold;
+        margin-top: 32px;
+    }
     
-}
+    .featuremap{
+        margin-top: 50px;
+        height: 300px;
+        padding-left: 20px;
+        padding-right: 20px;
+        .feature{
+            display: flex;
+            flex-direction: row;
+            text-align: left;
 
-.summary{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-
-    .summarytext{
-        font-weight: 700;
-        font-size: 18px;
+            .featureicon{
+                margin-right: 10px;
+            }
+        }
     }
 
-    .summarysum{
-        font-weight: 700;
-        font-size: 18px;
+    .summary{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+
+        .summarytext{
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .summarysum{
+            font-weight: 700;
+            font-size: 18px;
+        }
     }
 }
 
-.buybuttonrow{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+.buyrow{
+    width: 100%;
+    max-width: 400px;
     margin-top: 32px;
 
-    .buybutton{
-        margin-bottom: 20px;
+    .buybuttonrow{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-top: 32px;
 
-        @media(max-width: 992px){
-            button {
-                width: 200px;
-                height: 44px;
-                font-weight: 700;
-                font-size: 16px;
-                line-height: 24px;
-                padding: 10px 18px 10px 18px;
-                font-weight: bold;
+        .buybutton{
+            margin-bottom: 20px;
+
+            @media(max-width: 992px){
+                button {
+                    width: 200px;
+                    height: 44px;
+                    font-weight: 700;
+                    font-size: 16px;
+                    line-height: 24px;
+                    padding: 10px 18px 10px 18px;
+                    font-weight: bold;
+                }
             }
-        }
-        
-        @media(min-width: 993px){
-            button {
-                width: 446px;
-                height: 44px;
-                font-weight: 700;
-                font-size: 16px;
-                line-height: 24px;
-                padding: 10px 18px 10px 18px;
-                font-weight: bold;
+            
+            @media(min-width: 993px){
+                button {
+                    width: 446px;
+                    height: 44px;
+                    font-weight: 700;
+                    font-size: 16px;
+                    line-height: 24px;
+                    padding: 10px 18px 10px 18px;
+                    font-weight: bold;
+                }
             }
         }
     }
+
+    .checkout{
+        width: 100%;
+
+        .subscribe{
+            margin-left: 20px;
+        }
+
+        .checkoutheadline{
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .savings {
+            font-size: 16px;
+
+            .singlesaving{
+                color: #475467;
+                margin-bottom: 24px;
+                
+                .savinghighlight {
+                    color: black;
+                    font-weight: 700;
+                    margin-left: 8px;
+                }
+            }
+
+            .listicon{
+                margin-right: 10px;
+            }
+        }
+    }
+
+    .checkouttable{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding-right: 32px;
+
+        .topic{
+            display: flex;
+            flex-direction: column;
+
+            .sumtext{
+                font-weight: 700;
+                font-size: 16px;
+            }
+
+            .sumsubtitle{
+                font-size: 11px;
+                color: lightgray
+            }
+            
+        }
+
+        .value {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+    }
+}
+
+.formpart{
+    font-weight: 700;
+    line-height: 20px;
+    size: 14px;
+    letter-spacing: 1%;
+    width: 100%;
+
+    .forminput{
+      background-color: white;
+      padding: 10px 14px 10px 14px;
+      border-radius: 8px;
+      box-shadow: 0px 1px 2px 0px #1018280D;
+      border-color: #D0D5DD;
+    }
+
+    .formselect{
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0px 1px 2px 0px #1018280D;
+      border-color: #D0D5DD;
+      font-weight: normal;
+    }
+}
+
+.tokeninformationicon{
+    font-size: 14px;
+    color: #8e8e93;
+    margin-left: 10px;
 }

@@ -27,10 +27,9 @@ export type Order = {
 }
 
 export type Plan = {
-    tokens: number,
+    product: number,
     timestamp: number,
     state: string,
-    amount: number,
     threshold: number
 }
 

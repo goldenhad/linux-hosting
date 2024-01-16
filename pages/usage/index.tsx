@@ -3,7 +3,7 @@ import styles from "./usage.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
-import { convertToCurrency, handleUndefinedTour, normalizeTokens } from "../../helper/architecture";
+import { convertToCurrency, handleUndefinedTour } from "../../helper/architecture";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { getDocWhere } from "../../firebase/data/getData";
 import {
@@ -39,9 +39,10 @@ import axios from "axios";
 import RechargeForm from "../../components/RechargeForm/RechargeForm";
 import { Elements } from "@stripe/react-stripe-js";
 import getStripe from "../../helper/stripe";
-import { convertTokensToPrice, priceToIndex } from "../../helper/price";
 import AddCreditCardForm from "../../components/AddCreditCardForm/AddCreditCardForm";
 import UsageStatistic from "../../components/UsageStatistic/UsageStatistic";
+import { TokenCalculator } from "../../helper/price";
+import Creditform from "../../components/CreditForm/Creditform";
 
 ChartJS.register(
   CategoryScale,
@@ -70,7 +71,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default function Usage( props ) {
   const context = useAuthContext();
-  const { role, login, user, company, calculations } = context
+  const { role, login, user, company, calculations, invoice_data } = context
   const [ users, setUsers ] = useState( [] );
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).usage );
   const [orderpage, setOrderPage] = useState(1);
@@ -81,6 +82,7 @@ export default function Usage( props ) {
   const [ deletePaymentMethod, setDeletePaymentMethod ] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [ activeTab, setActiveTab ] = useState("1");
+  const [ calculator ] = useState(new TokenCalculator(calculations));
 
 
   const budgetRef = useRef( null );
@@ -203,7 +205,7 @@ export default function Usage( props ) {
   }, [])
 
   const calculateMails = () => {
-    return Math.floor( company?.tokens/calculations.creditsProMail );
+    return Math.floor( company?.tokens/(calculations.tokenProMail.in + calculations.tokenProMail.out) );
   }
 
   const orderState = (obj) => {
@@ -301,7 +303,7 @@ export default function Usage( props ) {
                 <List.Item className={styles.singledetail}><div className={styles.description}>Bezahlmethode:</div> <div>{order.method}</div></List.Item>
                 <List.Item className={styles.singledetail}><div className={styles.description}>Betrag:</div> <div>{convertToCurrency(order.amount)}</div></List.Item>
                 <List.Item className={styles.singledetail}>
-                  <div className={styles.description}>Credits:</div> <div>{normalizeTokens(order?.tokens, calculations).toFixed(0)}</div>
+                  <div className={styles.description}>Credits:</div> <div>{calculator.round(calculator.normalizeTokens(order?.tokens), 0)}</div>
                 </List.Item>
               </List>
             </div>
@@ -350,7 +352,7 @@ export default function Usage( props ) {
               <div className={styles.planinfo}>
                 Das automatische Auffüllen ist aktiv.
                 Dein Konto wird automatisch um <span className={styles.creds}>
-                  {Math.round(normalizeTokens(company?.plan?.tokens, calculations))}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
+                  {calculator.indexToCredits(company.plan?.product)}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
                 <span className={styles.creds}> {company?.plan?.threshold}</span> Credits fällt.
               </div>
               <Button type="link" className={styles.planedit} onClick={() => {
@@ -502,7 +504,7 @@ export default function Usage( props ) {
           </h2>
           <div className={styles.quotarow}>
             <div className={styles.tokenbudget}>
-              {( company?.unlimited )? "∞" : `${Math.floor(normalizeTokens((company?.tokens)? company.tokens: 0, calculations))}`} Credits
+              {( company?.unlimited )? "∞" : `${calculator.round(calculator.normalizeTokens(company.tokens), 0)}`} Credits
             </div>
           </div>
         </div>
@@ -564,7 +566,7 @@ export default function Usage( props ) {
         <Card ref={orderRef} title={"Einkäufe"} bordered={true}>
           <PurchaseInformation />
         </Card>
-        <Modal title="Automatisches Aufladen aktivieren" open={rechargeModalOpen} footer={null} onCancel={() => {
+        <Modal mask={true} title="Automatisches Aufladen aktivieren" open={rechargeModalOpen} footer={null} onCancel={() => {
           setRechargeModalOpen(false)
         }}>
           <p className={styles.rechargeinformation}>
@@ -574,7 +576,7 @@ export default function Usage( props ) {
           </p>
           <Elements stripe={stripePromise}>
             <RechargeForm
-              defaultstate={{ threshold: company.plan?.threshold, tokens: priceToIndex(convertTokensToPrice(company?.plan?.tokens, calculations), calculations) }}
+              defaultstate={{ threshold: company.plan?.threshold, product: company.plan?.product }}
               user={user}
               company={company}
               role={role}

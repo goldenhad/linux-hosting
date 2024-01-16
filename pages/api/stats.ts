@@ -27,7 +27,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           type: data.type
         }
 
-        fs.appendFileSync( "/app/stats/prompt_stats.log", JSON.stringify( logobj ) + "\n" );
+        fs.appendFileSync( "prompt_stats.log", JSON.stringify( logobj ) + "\n" );
 
         return res.status( 200 ).send( { errorcode: 0, message: "OK" } );
 

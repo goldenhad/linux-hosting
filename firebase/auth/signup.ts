@@ -6,9 +6,9 @@ import addData from "../data/setData";
 import crypto from "crypto";
 import updateData from "../data/updateData";
 import { InvitedUser } from "../types/Company";
-import { denormalizeTokens } from "../../helper/architecture";
 import axios from "axios";
 import { Calculations } from "../types/Settings";
+import { TokenCalculator } from "../../helper/price";
 
 const auth = getAuth( firebase_app );
 
@@ -92,9 +92,11 @@ export default async function signUp( firstname, lastname, email, username, pass
               const calculationsres = await getDocument( "Settings", "Calculation");
               const calculations: Calculations = calculationsres.result;
 
+              const calc = new TokenCalculator(calculations);
+
               if( !cmpny.recommended ){
                 await updateData( "Company", recommended, {
-                  tokens: cmpny.tokens +  denormalizeTokens(calculations.startCredits, calculations),
+                  tokens: cmpny.tokens +  calc.denormalizeTokens(calculations.startCredits),
                   recommended: true 
                 } );
               }

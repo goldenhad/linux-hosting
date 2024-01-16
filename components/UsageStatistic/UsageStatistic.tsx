@@ -38,6 +38,7 @@ const UsageStatistic = (props: { visibleYear: number, users: Array<User> }) => {
                   if(su.usedCredits){
                     su.usedCredits.forEach( ( usage: Usage ) => {
                       if( usage.month == idx+1 && usage.year == props.visibleYear ){
+                        console.log(usage.amount);
                         sum += parseFloat( ( usage.amount/1000 ).toFixed( 2 ) );
                       }
                     });

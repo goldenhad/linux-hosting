@@ -4,8 +4,9 @@ import { Role } from "../firebase/types/Role";
 import { User } from "../firebase/types/User";
 import { Company, Order } from "../firebase/types/Company";
 import moment from "moment";
-import { convertToCurrency, normalizeTokens } from "./architecture";
+import { convertToCurrency } from "./architecture";
 import { Calculations } from "../firebase/types/Settings";
+import { TokenCalculator } from "./price";
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -82,6 +83,7 @@ export const createInvoice = (role: Role, user: User, company: Company, order: O
 
   const orderdate = new Date( order.timestamp * 1000 );
   const datestring = moment(orderdate).format("DD.MM.YYYY");
+  const calculator = new TokenCalculator(calculations);
 
   const definition = {
 
@@ -141,7 +143,7 @@ export const createInvoice = (role: Role, user: User, company: Company, order: O
               { text: "1", align: "left" },
               { text: "swm0001", align: "left" },
               { text: "Siteware business Credits", align: "left", bold: true },
-              { text: normalizeTokens(order.tokens, calculations).toFixed(0), align: "right" },
+              { text: calculator.round(calculator.normalizeTokens(order.tokens), 0), align: "right" },
               { text: "19%", align: "right" },
               { text: convertToCurrency( order.amount / ( 1 + 0.19 ) ), align: "right" },
               { text: convertToCurrency( order.amount ), align: "right" }

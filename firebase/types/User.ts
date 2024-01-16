@@ -51,10 +51,12 @@ export type TourState = {
 }
 
 export type History = {
-  dialog: string
-  monolog: string
+  dialog: string,
+  monolog: string,
+  dialog_old: string,
+  monolog_old: string,
   blog: string,
-  excel: string
+  excel: string,
 }
 
 export type User =  {
@@ -114,6 +116,8 @@ export const basicUser: User = {
   history: {
     dialog: "",
     monolog: "",
+    dialog_old: "",
+    monolog_old: "",
     blog: "",
     excel: ""
   }

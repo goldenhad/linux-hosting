@@ -46,9 +46,28 @@
 
                 .planwindow{
                     width: 100%;
-                    height: 88px;
+                    height: auto;
                     margin-bottom: 10px;
-                    border: #1677ff 4px solid;
+                    border: 2px solid #f0f0f0;
+                    padding-left: 20px;
+                    padding-top: 10px;
+                    padding-right: 20px;
+                    padding-bottom: 10px;
+                    border-radius: 8px;
+
+                    .plantitle{
+                        font-weight: bold;
+                    }
+
+                    .creds{
+                        font-weight: bold;
+                    }
+
+                    .planedit{
+                        font-weight: bold;
+                        color: #1478FD;
+                        padding: 0px;
+                    }
                 }
 
     

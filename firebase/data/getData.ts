@@ -1,7 +1,9 @@
 import { firebase_app } from "../../db";
 import { getFirestore, doc, getDoc, query, where, getDocs, collection } from "firebase/firestore";
 
-const db = getFirestore( firebase_app )
+const db = getFirestore( firebase_app );
+
+
 export default async function getDocument( collection, id ) {
   const docRef = doc( db, collection, id );
 

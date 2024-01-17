@@ -51,7 +51,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
 
 
   useEffect(() => {
-    if(screenwidth <= 700 ){
+    if(screenwidth <= 1500 ){
       setBreakpoint("lg");
       setCollapseWidth(0);
       setCollapsed(true);
@@ -151,7 +151,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
   );
 
   const MobileHeader = () => {
-    if(screenwidth <= 700){
+    if(screenwidth <= 1500){
       return(
         <Header className={styles.header}>
           <Link href={"/"} className={styles.headerlink}>
@@ -181,7 +181,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     }
   }
   
-  if(screenwidth <= 700){
+  if(screenwidth <= 1500){
     return (
       <ConfigProvider theme={{
         components: {
@@ -196,7 +196,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={(screenwidth > 700)}>
+        <Layout className={styles.layout} hasSider={(screenwidth > 1500)}>
           <MobileHeader />
           <Drawer
             style={{ backgroundColor: "#101828" }}

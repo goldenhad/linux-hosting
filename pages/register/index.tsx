@@ -134,7 +134,7 @@ export default function Register( props ){
         values.city,
         values.postalcode,
         "DE",
-        isPersonal,
+        true,
         recommendCode
       );
             
@@ -150,6 +150,8 @@ export default function Register( props ){
     }else{
       const recommendCode = props.invitedBy?.code;
 
+      console.log(values);
+
       const { error } = await signUp( 
         values.firstname,
         values.lastname,
@@ -161,22 +163,22 @@ export default function Register( props ){
         values.city,
         values.postalcode,
         "DE",
-        isPersonal,
+        false,
         recommendCode
       );
+
+      console.log("came this far");
             
       if ( error ) {
-        //console.log(error);
+        console.log(error);
         setLoginFailed( true );
       }else{
         setLoginFailed( false );
+        console.log("register successfull");
         // else successful
-        //console.log(result)
         return router.push( "/setup" )
       }
     }
-
-        
   };
 
 

@@ -12,6 +12,8 @@ import Nav from "../../public/icons/nav.svg";
 import Icon from "@ant-design/icons";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "../../db";
+import getDocument from "../../firebase/data/getData";
+import { User } from "../../firebase/types/User";
 
 
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
@@ -50,7 +52,7 @@ export default function Login(){
 
 
   const onFinish = async ( values ) => {
-    const { error } = await signIn( values.email, values.password );
+    const { result, error } = await signIn( values.email, values.password );
 
     if ( error ) {
       //console.log(error);
@@ -61,7 +63,22 @@ export default function Login(){
       logEvent(analytics, "login", {
         email: values.email
       });
-      return router.push( "/" )
+
+      const usereq = await getDocument("Users", result.user?.uid);
+      if(usereq.result){
+        const userobj = usereq.result as User;
+        if(userobj){
+          if(userobj.setupDone){
+            return router.push( "/" )
+          }else{
+            return router.push( "/setup" )
+          }
+        }else{
+          return router.push( "/setup" )
+        }
+      }else{
+        setLoginFailed( true );
+      }
     }
   };
 

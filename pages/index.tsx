@@ -1,4 +1,4 @@
-import { TourProps, Tour, Divider, message } from "antd";
+import { TourProps, Tour, Divider, message, Modal } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -10,6 +10,8 @@ import AssistantCard from "../components/AssistantCard/AssistantCard";
 import RecommendBox from "../components/RecommendBox/RecommendBox";
 import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
 import { Service } from "../firebase/types/Service";
+import ReactPlayer from "react-player/lazy"
+
 
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -35,6 +37,11 @@ export default function Home() {
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).home );
   const [messageApi, contextHolder] = message.useMessage();
   const [ selectedCat, setSelectedCat ] = useState("all");
+  const [ videoPopupVisible, setVideoPopupVisible ] = useState(false);
+  const [ videoLink, setVideoLink ] = useState("");
+  const [play, setPlay] = useState(false);
+
+  const videoplayer = useRef(null);
 
 
 
@@ -173,7 +180,11 @@ export default function Home() {
             description={singleService.description}
             link={singleService.link}
             fav={user.services?.favourites.includes(singleService.uid)}
-            video={singleService.video}
+            onVideoClick={() => {
+              setVideoLink(singleService.video);
+              setVideoPopupVisible(true);
+              setPlay(true);
+            }}
             onFav={async () => {
               const currentfavs = (user.services?.favourites)? user.services.favourites: [];
               currentfavs.push(singleService.uid);
@@ -197,7 +208,7 @@ export default function Home() {
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>
-          <div className={styles.greeting}>Willkommen {user.firstname}</div>
+          <div className={styles.greeting}>Willkommen {user.firstname} {(play)? "spiele": "spiele nicht"}</div>
         </div>
 
         <div className={styles.dividerrow}>
@@ -212,7 +223,22 @@ export default function Home() {
           <div className={styles.bannersection}><RecommendBox user={user} messageApi={messageApi} /></div>
         </div>
 
-        
+        <Modal className={styles.videopopup} footer={null} width={800} open={videoPopupVisible} onCancel={() => {
+          setPlay(false);
+          setVideoPopupVisible(false);
+          if(videoLink){
+            const player = videoplayer.current as ReactPlayer;
+            if(player.getCurrentTime ){
+              player.getInternalPlayer().pauseVideo();
+              player.seekTo(0);
+            }
+            
+          }
+        }}>
+          <div className={styles.videoplayer}>
+            <ReactPlayer ref={videoplayer} url={videoLink} width='100%' height='100%'/>
+          </div>
+        </Modal>
 
         <Tour open={open} onClose={async () => {
           const currstate = user.tour;

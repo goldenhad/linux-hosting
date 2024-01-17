@@ -18,7 +18,7 @@ const AssistantCard = ( props: {
     fav?: boolean
     onFav?: () => void,
     onDeFav?: () => void,
-    video: string
+    onVideoClick?: () => void
   } ) => {
   const [image, setImage] = useState("/base.svg");
 
@@ -56,9 +56,9 @@ const AssistantCard = ( props: {
           {(props.fav)?
             <Icon component={HeartFull} onClick={props.onDeFav} className={`${styles.iconsvg} ${styles.active}`} viewBox='0 0 22 25'/>:
             <Icon component={Heart} onClick={props.onFav} className={styles.iconsvg} viewBox='0 0 22 25'/>}
-          <Link href={props.video} rel="noopener noreferrer" target="_blank">
+          <div onClick={props.onVideoClick} className={styles.videobuttoncontainer}>
             <Icon component={Play} className={styles.iconsvg} viewBox='0 0 22 22'/>
-          </Link>
+          </div>
         </div>
         <Link href={props.link}>
           <span className={styles.assistantlink}>Zum Assistenten</span>

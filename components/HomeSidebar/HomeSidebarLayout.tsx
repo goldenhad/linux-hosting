@@ -57,7 +57,7 @@ const HomeSidebarLayout = ( props: {
 
   
   useEffect(() => {
-    if(screenwidth <= 700){
+    if(screenwidth <= 1500){
       setBreakpoint("lg");
       setCollapseWidth(0);
       setCollapsed(true);
@@ -174,7 +174,7 @@ const HomeSidebarLayout = ( props: {
   }
 
   const MobileHeader = () => {
-    if(screenwidth <= 700){
+    if(screenwidth <= 1500){
       return(
         <Header className={styles.header}>
           <Link href={"/"} className={styles.headerlink}>
@@ -194,7 +194,7 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
-  if(screenwidth <= 700){
+  if(screenwidth <= 1500){
     return (
       <ConfigProvider theme={{
         components: {
@@ -212,7 +212,7 @@ const HomeSidebarLayout = ( props: {
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!(screenwidth <= 700)}>
+        <Layout className={styles.layout} hasSider={!(screenwidth <= 1500)}>
           <MobileHeader />
           <Drawer
             bodyStyle={{ backgroundColor: "#101828", padding: 0, display: "flex", flexDirection: "row", alignItems: "center" }}
@@ -362,7 +362,7 @@ const HomeSidebarLayout = ( props: {
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={!(screenwidth <= 700)}>
+        <Layout className={styles.layout} hasSider={!(screenwidth <= 1500)}>
           <MobileHeader />
           <Sider
             className={styles.sidebar}

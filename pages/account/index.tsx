@@ -103,8 +103,9 @@ export default function Account() {
     switch ( user.Role ) {
     case "Company-Admin":
       const { result } = await getDocWhere( "User", "Company", "==", user.Company );
+      console.log(result);
       if( result ){
-        // Test if the current company-admin is the last person in the company
+        // Test if there are any other users of the company
         if( result.length > 1 ){
           // If we are no the last person in the company, query the remaining users
           const userOfCompany: Array<User & { id: string }> = result;
@@ -115,12 +116,16 @@ export default function Account() {
               await axios.post( "/api/company/member", { id: userobj.id } );
             }
           }
-
-          await deleteProfilePicture( login.uid );
-          await deleteData( "User", login.uid );
-          await deleteData( "Company", user.Company );
-          await deleteSitewareUser();
         }
+      }
+
+      try{
+        await deleteProfilePicture( login.uid );
+        await deleteData( "User", login.uid );
+        await deleteData( "Company", user.Company );
+        await deleteSitewareUser();
+      }catch(e){
+        console.log( e );
       }
       break;
 

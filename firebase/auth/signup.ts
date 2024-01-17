@@ -6,7 +6,6 @@ import addData from "../data/setData";
 import crypto from "crypto";
 import updateData from "../data/updateData";
 import { InvitedUser } from "../types/Company";
-import axios from "axios";
 import { Calculations } from "../types/Settings";
 import { TokenCalculator } from "../../helper/price";
 
@@ -18,6 +17,8 @@ export default async function signUp( firstname, lastname, email, username, pass
         
   try {
     const usernameexistsquery = await getDocWhere( "User", "username", "==", username );
+    //console.log(usernameexistsquery);
+    //console.log(usernameexistsquery.result.length == 0);
     if( usernameexistsquery.result.length == 0 ){
       try {
         result = await createUserWithEmailAndPassword( auth, email, password );
@@ -35,6 +36,8 @@ export default async function signUp( firstname, lastname, email, username, pass
             orders: [],
             invitedUsers: []
           } );
+
+          //console.log("created the company");
           try {
             await addData( "User", result.user.uid, {
               firstname: firstname,
@@ -68,8 +71,10 @@ export default async function signUp( firstname, lastname, email, username, pass
                 company: false
               }
             } );
+
+            //console.log("Created the user");
             
-            try{
+            /* try{
               const { data } = await axios.post("/api/payment/createcustomer", {
                 name: (name != "")? name: `${firstname} ${lastname}`,
                 email: email,
@@ -81,10 +86,13 @@ export default async function signUp( firstname, lastname, email, username, pass
               });
 
               const customerid = data.message;
+              console.log("created the customer at stripe")
               await updateData("Company", companycreationresult.result.id , { customerId: customerid });
-            }catch{
+              console.log("Updated the company with the customer id")
+            }catch(e){
+              console.log(e);
               console.log("Could not create the customer at stripe...");
-            }
+            } */
 
             if( recommended ){
               const cmpny_result = await getDocument( "Company", recommended );
@@ -101,19 +109,24 @@ export default async function signUp( firstname, lastname, email, username, pass
                 } );
               }
             }
+
+            //console.log(companycreationresult);
+
             //console.log(usercreationresult);
           } catch( e ) {
-            //console.log(e);
+            console.log(e);
           }
         }catch( e ){
-          //console.log(e);
+          console.log(e);
         }
       } catch ( e ) {
-        //console.log(e);
+        console.log(e);
       }
+    }else{
+      throw error("Username already exists!")
     }
   } catch ( ie ) {
-    //console.log(ie);
+    console.log(ie);
   }
     
 

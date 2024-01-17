@@ -23,6 +23,8 @@ const AddCreditCardForm = ( props: { company: Company, user: User, reddirectURL:
     if (!stripe || !card) return null;
 
     try{
+      let companyCustomerId = props.company.customerId;
+      console.log(companyCustomerId);
       if(!props.company.customerId){        
         const { data } = await axios.post("/api/payment/createcustomer", {
           name: (props.company.name != "")? props.company.name: `${props.user.firstname} ${props.user.lastname}`,
@@ -37,10 +39,12 @@ const AddCreditCardForm = ( props: { company: Company, user: User, reddirectURL:
         console.log(data.message);
 
         const customerid = data.message;
+        companyCustomerId = customerid;
         await updateData("Company", props.user.Company , { customerId: customerid });
       }
+      console.log(companyCustomerId);
       const createsetupintent = await axios.post("/api/payment/createsetup", {
-        customer: props.company.customerId
+        customer: companyCustomerId
       })
 
       const confirm = await stripe.confirmCardSetup(createsetupintent.data.message, {
@@ -53,7 +57,7 @@ const AddCreditCardForm = ( props: { company: Company, user: User, reddirectURL:
 
         const finish = await axios.post("/api/payment/finishsetup", {
           setupintent: confirm.setupIntent.id,
-          customer: props.company.customerId
+          customer: companyCustomerId
         });
 
 

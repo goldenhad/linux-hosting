@@ -53,5 +53,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     }else{
       return res.status( 400 ).send( { errorcode: 1, message: "The request method is forbidden!" } );
     }
+  }else{
+    return res.status( 400 ).send( { errorcode: 2, message: "Authentication required!" } );
   }
 }

@@ -105,3 +105,9 @@
         }
     }
 }
+
+.videobuttoncontainer{
+    &:hover {
+        cursor: pointer;
+    }
+}

@@ -64,9 +64,11 @@ export default function Login(){
         email: values.email
       });
 
+      console.log(result.user);
+
       const usereq = await getDocument("Users", result.user?.uid);
       if(usereq.result){
-        const userobj = usereq.result as User;
+        const userobj = usereq.result.data() as User;
         if(userobj){
           if(userobj.setupDone){
             return router.push( "/" )
@@ -74,7 +76,7 @@ export default function Login(){
             return router.push( "/setup" )
           }
         }else{
-          return router.push( "/setup" )
+          return router.push( "/" )
         }
       }else{
         setLoginFailed( true );

@@ -126,15 +126,15 @@ export default function Register( props ){
       const { error } = await signUp(
         values.firstname,
         values.lastname,
-        values.email,
+        (values.email as string).toLowerCase(),
         values.username,
         values.password,
         "",
-        "",
-        "",
-        "",
+        values.street,
+        values.city,
+        values.postalcode,
         "DE",
-        isPersonal,
+        true,
         recommendCode
       );
             
@@ -150,10 +150,12 @@ export default function Register( props ){
     }else{
       const recommendCode = props.invitedBy?.code;
 
+      console.log(values);
+
       const { error } = await signUp( 
         values.firstname,
         values.lastname,
-        values.email,
+        (values.email as string).toLowerCase(),
         values.username,
         values.password,
         values.company,
@@ -161,22 +163,22 @@ export default function Register( props ){
         values.city,
         values.postalcode,
         "DE",
-        isPersonal,
+        false,
         recommendCode
       );
+
+      console.log("came this far");
             
       if ( error ) {
-        //console.log(error);
+        console.log(error);
         setLoginFailed( true );
       }else{
         setLoginFailed( false );
+        console.log("register successfull");
         // else successful
-        //console.log(result)
         return router.push( "/setup" )
       }
     }
-
-        
   };
 
 
@@ -280,6 +282,55 @@ export default function Register( props ){
           </Form.Item>
         </Space.Compact>
       </>
+    }else{
+      return(
+        <Space.Compact style={{ width: "100%" }} block>
+          <Form.Item
+            label="Straße"
+            name="street"
+            style={{ width: "50%" }}
+            rules={[
+              {
+                required: true,
+                message: "Bitte geben Sie einen Namen für Ihr Unternehmen ein!"
+              }
+            ]}
+            className={styles.loginpart}
+          >
+            <Input className={styles.logininput_left} />
+          </Form.Item>
+
+          <Form.Item
+            label="Ort"
+            name="city"
+            style={{ width: "30%" }}
+            rules={[
+              {
+                required: true,
+                message: "Bitte geben Sie einen Namen für Ihr Unternehmen ein!"
+              }
+            ]}
+            className={styles.loginpart}
+          >
+            <Input className={styles.logininput_middle} />
+          </Form.Item>
+
+          <Form.Item
+            label="PLZ"
+            name="postalcode"
+            style={{ width: "20%" }}
+            rules={[
+              {
+                required: true,
+                message: "Bitte geben Sie einen Namen für Ihr Unternehmen ein!"
+              }
+            ]}
+            className={styles.loginpart}
+          >
+            <Input className={styles.logininput_right} />
+          </Form.Item>
+        </Space.Compact>
+      );
     }
   }
 
@@ -380,10 +431,16 @@ export default function Register( props ){
               () => ( {
                 async validator( _, value ) {
                   if( value != "" ){
-                    if ( await usernameExists( value ) ) {
-                      return Promise.reject( new Error( "Dieser Benutzername wird bereits verwendet!" ) );
-                                            
+                    if( /\s/g.test(value) ){
+                      return Promise.reject( new Error( "Der Benutzername darf keine Leerzeichen enthalten!" ) );
+                    }else{
+                      if ( await usernameExists( value ) ) {
+                        return Promise.reject( new Error( "Dieser Benutzername wird bereits verwendet!" ) );               
+                      }
+                      return Promise.resolve();
                     }
+                  }else{
+                    return Promise.reject( new Error( "Der Benutzername darf nicht leer sein!" ) );
                   }
                   return Promise.resolve();
                 }

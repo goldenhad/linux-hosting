@@ -40,8 +40,10 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
 
   useEffect( () => {
     const setProfileImage = async () => {
-      const url = await getImageUrl( props.context.login.uid );
-      setImageUrl( url );
+      if(props.context.login?.uid){
+        const url = await getImageUrl( props.context.login.uid );
+        setImageUrl( url );
+      }
     }
 
     setProfileImage();
@@ -121,7 +123,6 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
       }
     })
 
-    console.log(lastfound);
     return lastfound.toString();
   }
 
@@ -134,7 +135,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
             style={{ color: "#474747", backgroundColor: "#F2F4F7" }}
             src={props.context.profile.picture}
           >
-            {(props.context.user.email)? props.context.user.email.charAt(0):""}
+            {(props.context.user?.email)? props.context.user.email.charAt(0):""}
           </Avatar>
           <div className={styles.profileinfo}>Mein Account</div>
         </div>
@@ -225,7 +226,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                       style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
                     >
-                      <>{(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}</>
+                      <>{(props.context.user?.email)? props.context.user.email.charAt(0).toUpperCase():""}</>
                     </Avatar>
                   </Popover>
                 </div>
@@ -262,7 +263,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                       style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
                     >
-                      {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
+                      {(props.context.user?.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
                   </Popover>
                 </div>
@@ -333,7 +334,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                       style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
                     >
-                      {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
+                      {(props.context.user?.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
                   </Popover>
                 </div>

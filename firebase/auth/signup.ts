@@ -6,7 +6,8 @@ import addData from "../data/setData";
 import crypto from "crypto";
 import updateData from "../data/updateData";
 import { InvitedUser } from "../types/Company";
-import { denormalizeTokens } from "../../helper/architecture";
+import { Calculations } from "../types/Settings";
+import { TokenCalculator } from "../../helper/price";
 
 const auth = getAuth( firebase_app );
 
@@ -16,6 +17,8 @@ export default async function signUp( firstname, lastname, email, username, pass
         
   try {
     const usernameexistsquery = await getDocWhere( "User", "username", "==", username );
+    //console.log(usernameexistsquery);
+    //console.log(usernameexistsquery.result.length == 0);
     if( usernameexistsquery.result.length == 0 ){
       try {
         result = await createUserWithEmailAndPassword( auth, email, password );
@@ -33,6 +36,8 @@ export default async function signUp( firstname, lastname, email, username, pass
             orders: [],
             invitedUsers: []
           } );
+
+          //console.log("created the company");
           try {
             await addData( "User", result.user.uid, {
               firstname: firstname,
@@ -67,27 +72,61 @@ export default async function signUp( firstname, lastname, email, username, pass
               }
             } );
 
+            //console.log("Created the user");
+            
+            /* try{
+              const { data } = await axios.post("/api/payment/createcustomer", {
+                name: (name != "")? name: `${firstname} ${lastname}`,
+                email: email,
+                address: {
+                  city: city,
+                  street: street,
+                  postalcode: postalcode
+                }
+              });
+
+              const customerid = data.message;
+              console.log("created the customer at stripe")
+              await updateData("Company", companycreationresult.result.id , { customerId: customerid });
+              console.log("Updated the company with the customer id")
+            }catch(e){
+              console.log(e);
+              console.log("Could not create the customer at stripe...");
+            } */
+
             if( recommended ){
               const cmpny_result = await getDocument( "Company", recommended );
               const cmpny = cmpny_result.result.data();
+              const calculationsres = await getDocument( "Settings", "Calculation");
+              const calculations: Calculations = calculationsres.result;
+
+              const calc = new TokenCalculator(calculations);
 
               if( !cmpny.recommended ){
-                await updateData( "Company", recommended, { tokens: cmpny.tokens +  denormalizeTokens(200), recommended: true } );
+                await updateData( "Company", recommended, {
+                  tokens: cmpny.tokens +  calc.denormalizeTokens(calculations.startCredits),
+                  recommended: true 
+                } );
               }
             }
+
+            //console.log(companycreationresult);
+
             //console.log(usercreationresult);
           } catch( e ) {
-            //console.log(e);
+            console.log(e);
           }
         }catch( e ){
-          //console.log(e);
+          console.log(e);
         }
       } catch ( e ) {
-        //console.log(e);
+        console.log(e);
       }
+    }else{
+      throw error("Username already exists!")
     }
   } catch ( ie ) {
-    //console.log(ie);
+    console.log(ie);
   }
     
 

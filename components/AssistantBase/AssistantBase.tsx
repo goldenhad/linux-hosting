@@ -603,7 +603,7 @@ const AssistantBase = (props: {
 
             // Check if the user activated automatic recharge. If charge them and add tokens
 
-            if(props.context.company.plan.state == "active"){
+            if(props.context.company.plan?.state == "active"){
               let paymentSuccesfull = false;
               let invoiceid = "";
 

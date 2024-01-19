@@ -35,3 +35,26 @@
 //     }
 //   }
 // }
+
+
+Cypress.Commands.add( "multiSelect", ( selector , text) => {
+  cy.get(`.ant-select${selector} > .ant-select-selector > .ant-select-selection-overflow`).click();
+  cy.get(`.ant-select${selector} .ant-select-selection-search input`).clear()
+  cy.get(`.ant-select${selector} .ant-select-selection-search input`).invoke("attr", "id").then((selElm) => {
+    const dropDownSelector = `#${selElm}_list`;
+    cy.get(`.ant-select${selector} .ant-select-selection-search input`).type(`${text}`);
+    cy.get(dropDownSelector).next().find(".ant-select-item-option-content").click()
+  })
+});
+  
+Cypress.Commands.add( "antselect", ( selector , text) => {
+  getById(selector).click();
+  cy
+    .get(".ant-select-dropdown :not(.ant-select-dropdown-hidden)")
+    .find(".ant-select-item-option")
+    .each((el) => {
+      if (el.text() === text) {
+        cy.wrap(el).click();
+      }
+    });
+})

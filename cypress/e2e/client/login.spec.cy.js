@@ -17,7 +17,6 @@ describe("Login-Page tests", () => {
     cy.visit("http://localhost:3000/login");
     cy.setCookie("mailbuddy-opt-consent", "1");
     cy.setCookie("mailbuddy-opt-analytics-consent", "1");
-    cy.wait(2000);
   })
   
   /**

@@ -722,10 +722,13 @@ export default function Register( props ){
         <div className={styles.formContainer}>
           <div className={styles.formtitle}>Registrieren</div>
           <div className={styles.formexplanation}>
-            Sparen Sie Zeit und steigern Sie Ihre Produktivität mit Siteware business – 
-            melden Sie sich jetzt über das untenstehende Formular an und entdecken Sie die Kraft unserer KI-Lösungen!
+            Spare Zeit und steigere deine Produktivität mit Siteware Business – 
+            melde dich jetzt an und entdecke die Kraft unserer KI-Assistenten!
           </div>
           {getForm()}
+          <div className={styles.backtologin}>
+            Du hast schon einen Account? Zum <Link className={styles.loginlink} href={"/login"}>Login</Link>
+          </div>
         </div>
       </div>
     </div>

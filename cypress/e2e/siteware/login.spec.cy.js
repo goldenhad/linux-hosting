@@ -20,13 +20,55 @@ describe("Login-Page tests", () => {
     cy.wait(2000);
   })
   
-  it("login displays two inputs and button", () => {
+  /**
+   * Check if all possible inputs are visible
+   */
+  it("Login displays two inputs and button", () => {
     cy.get("#basic_email").should("have.length", 1);
     cy.get("#basic_password").should("have.length", 1);
     cy.get("button[type=submit]").should("have.length", 1);
   });
 
-  it("user can sign in", () => {
+  /**
+   * Test if users can reach the reset password page
+   */
+  it("Password reset reachable", () => {
+    cy.get("a:contains('Passwort vergessen')").should("have.length", 1);
+    cy.contains("Passwort vergessen").click();
+    cy.url().should("eq", "http://localhost:3000/forgot/password");
+  });
+
+  /**
+   * Test if users can reach the register page
+   */
+  it("Register reachable", () => {
+    cy.contains("Jetzt registrieren").should("have.length", 1);
+    cy.contains("Jetzt registrieren").click();
+    cy.url().should("eq", "http://localhost:3000/register");
+  });
+
+  /**
+   * Test if users can reach the Datenschutz page
+   */
+  it("Datenschutz reachable", () => {
+    cy.contains("Datenschutz").should("have.length", 1);
+    cy.contains("Datenschutz").click();
+    cy.url().should("eq", "http://localhost:3000/privacy");
+  });
+
+  /**
+   * Test if users can reach the Impressum page
+   */
+  it("Impressum reachable", () => {
+    cy.contains("Impressum").should("have.length", 1);
+    cy.contains("Impressum").click();
+    cy.url().should("eq", "http://localhost:3000/legal");
+  });
+
+  /**
+   * Test if users can sign in with correct data
+   */
+  it("User can sign in", () => {
     cy.get("#basic_email").type("m.krebs@sugarpool.de");
     cy.get("#basic_password").type("abcdefg");
     cy.get("button[type=submit]").then((signingbutton) => {
@@ -36,7 +78,11 @@ describe("Login-Page tests", () => {
     })
   });
 
-  it("sign in wrong data", () => {
+  /**
+   * Test if users can't sign in with incorrect data
+   * and if the app displays an error message
+   */
+  it("Sign in wrong data", () => {
     cy.get("#basic_email").type("m.krebs@sugarpool.de");
     cy.get("#basic_password").type("wrongpassword1337");
     cy.get("button[type=submit]").then((signingbutton) => {

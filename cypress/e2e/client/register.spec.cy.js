@@ -13,12 +13,10 @@
  * - Test reachability of the legal pages
  */
 
-describe("Reigster-Page tests", () => {
+describe("Register-Page tests", () => {
   beforeEach(() => {
     // Init Tests to visit localhost
-    cy.visit("http://localhost:3000/register");
-    cy.setCookie("mailbuddy-opt-consent", "1");
-    cy.setCookie("mailbuddy-opt-analytics-consent", "1");
+    cy.optin("http://localhost:3000/register");
   })
 
   /**
@@ -44,14 +42,110 @@ describe("Reigster-Page tests", () => {
 
 
   /**
-    * Check if all usecase displays additional input
+    * Check if company usecase displays additional input
     */
   it("Register displays additional content for companies", () => {
-    cy.antselect("#basic_usecase", "Für mein Unternehmen")
+    cy.antselect("#basic_usecase", "Für mein Unternehmen");
 
     cy.get("#basic_company").should("have.length", 1);
   });
 
+  /**
+    * Check if singleuser usecase displays no additional input
+    */
+  it("Register displays additional content for companies", () => {
+    cy.get("#basic_company").should("have.length", 0);
+    cy.antselect("#basic_usecase", "Nur für mich persönlich");
+    cy.get("#basic_company").should("have.length", 0);
+  });
+
+
+  /**
+    * Check if registering does not work with missing data
+    */
+  it("Register fails with missing data", () => {
+    cy.get("#basic_firstname").type("Max");
+    cy.get("#basic_lastname").type("Mustermann");
+    cy.get("#basic_email").type("test@sugarpool.de");
+    //cy.get("#basic_username").type("testdummy");
+    cy.get("#basic_password").type("123456");
+    cy.get("#basic_passwordwdhl").type("123456");
+    cy.antselect("#basic_usecase", "Nur für mich persönlich");
+
+    cy.get("#basic_street").type("Teststraße 1");
+    cy.get("#basic_city").type("Teststadt");
+    cy.get("#basic_postalcode").type("000000");
+
+    cy.get("#basic_agb").check();
+
+    cy.get("button[type=submit]").click();
+    cy.url().should("eq", "http://localhost:3000/register");
+  });
+
+
+  /**
+    * Check if working sign up (singleuser)
+    */
+  it("Register works for singleuser", () => {
+    cy.get("#basic_firstname").type("Max");
+    cy.get("#basic_lastname").type("Mustermann");
+    cy.get("#basic_email").type("test@sugarpool.de");
+    cy.get("#basic_username").type("testdummy");
+    cy.get("#basic_password").type("123456");
+    cy.get("#basic_passwordwdhl").type("123456");
+    cy.antselect("#basic_usecase", "Nur für mich persönlich");
+
+    cy.get("#basic_street").type("Teststraße 1");
+    cy.get("#basic_city").type("Teststadt");
+    cy.get("#basic_postalcode").type("000000");
+
+    cy.get("#basic_agb").check();
+
+    cy.get("button[type=submit]").click();
+    cy.url().should("eq", "http://localhost:3000/setup");
+
+    // Delete the account after successfull redirect
+    cy.visit("/account");
+    cy.contains("Konto löschen").click();
+    cy.get("#reauth_email").type("test@sugarpool.de");
+    cy.get("#reauth_password").type("123456");
+    cy.contains("Login").click();
+    cy.contains("Konto entgültig löschen").click();
+    cy.url().should("eq", "http://localhost:3000/login");
+  });
+
+  /**
+    * Check if working sign up (company)
+    */
+  it("Register works for company", () => {
+    cy.get("#basic_firstname").type("Max");
+    cy.get("#basic_lastname").type("Mustermann");
+    cy.get("#basic_email").type("test@sugarpool.de");
+    cy.get("#basic_username").type("testdummy");
+    cy.get("#basic_password").type("123456");
+    cy.get("#basic_passwordwdhl").type("123456");
+    cy.antselect("#basic_usecase", "Für mein Unternehmen");
+
+    cy.get("#basic_company").type("Testunternehmen");
+
+    cy.get("#basic_street").type("Teststraße 1");
+    cy.get("#basic_city").type("Teststadt");
+    cy.get("#basic_postalcode").type("000000");
+
+    cy.get("#basic_agb").check();
+
+    cy.get("button[type=submit]").click();
+    cy.url().should("eq", "http://localhost:3000/setup");
+
+    // Delete the account after successfull redirect
+    cy.visit("/account");
+    cy.contains("Konto löschen").click();
+    cy.get("#reauth_email").type("test@sugarpool.de");
+    cy.get("#reauth_password").type("123456");
+    cy.contains("Login").click();
+    cy.contains("Konto entgültig löschen").click();
+    cy.url().should("eq", "http://localhost:3000/login");
+  });
 
   /**
    * Test if users can reach the register page

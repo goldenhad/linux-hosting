@@ -48,7 +48,7 @@ Cypress.Commands.add( "multiSelect", ( selector , text) => {
 });
   
 Cypress.Commands.add( "antselect", ( selector , text) => {
-  getById(selector).click();
+  cy.get(selector).click();
   cy
     .get(".ant-select-dropdown :not(.ant-select-dropdown-hidden)")
     .find(".ant-select-item-option")
@@ -58,3 +58,21 @@ Cypress.Commands.add( "antselect", ( selector , text) => {
       }
     });
 })
+
+Cypress.Commands.add( "optin", ( baseurl: string ) => {
+  cy.visit(baseurl);
+  cy.setCookie("mailbuddy-opt-consent", "1");
+  cy.setCookie("mailbuddy-opt-analytics-consent", "1");
+});
+
+
+Cypress.Commands.add( "sitewareLogin", ( username , password) => {
+  cy.visit("http://localhost:3000/login");
+  cy.get("#basic_email").type(username);
+  cy.get("#basic_password").type(password);
+  cy.get("button[type=submit]").then((signingbutton) => {
+    signingbutton.trigger("click");
+  });
+
+  cy.url().should("eq", "http://localhost:3000/");
+});

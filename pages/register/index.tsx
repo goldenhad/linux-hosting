@@ -215,7 +215,7 @@ export default function Register( props ){
 
   const onFinishFailed = () => {
     //console.log('Failed:', errorInfo);
-    setLoginFailed( true );
+    //setLoginFailed( true );
   };
 
   const evalUseCase = () => {
@@ -371,7 +371,7 @@ export default function Register( props ){
               rules={[
                 {
                   required: true,
-                  message: "Bitte geben Sie einen Vornamen ein!"
+                  message: "Bitte gebe einen Vornamen ein!"
                 }
               ]}
               className={styles.loginpart}
@@ -386,7 +386,7 @@ export default function Register( props ){
               rules={[
                 {
                   required: true,
-                  message: "Bitte geben Sie einen Nachnamen ein!"
+                  message: "Bitte gebe einen Nachnamen ein!"
                 }
               ]}
               className={styles.loginpart}
@@ -401,7 +401,7 @@ export default function Register( props ){
             rules={[
               {
                 required: true,
-                message: "Bitte geben Sie ein E-Mail ein!"
+                message: "Bitte gebe eine E-Mail ein!"
               },
               () => ( {
                 async validator( _, value ) {
@@ -426,7 +426,7 @@ export default function Register( props ){
             rules={[
               {
                 required: true,
-                message: "Bitte geben Sie einen Usernamen ein!"
+                message: "Bitte gebe einen Usernamen ein!"
               },
               () => ( {
                 async validator( _, value ) {
@@ -541,7 +541,7 @@ export default function Register( props ){
               rules={[
                 {
                   required: true,
-                  message: "Bitte geben Sie einen Vornamen ein!"
+                  message: "Bitte gebe einen Vornamen ein!"
                 }
               ]}
               className={styles.loginpart}
@@ -556,7 +556,7 @@ export default function Register( props ){
               rules={[
                 {
                   required: true,
-                  message: "Bitte geben Sie einen Nachnamen ein!"
+                  message: "Bitte gebe einen Nachnamen ein!"
                 }
               ]}
               className={styles.loginpart}
@@ -571,7 +571,7 @@ export default function Register( props ){
             rules={[
               {
                 required: true,
-                message: "Bitte geben Sie ein E-Mail ein!"
+                message: "Bitte gebe eine E-Mail ein!"
               },
               () => ( {
                 async validator( _, value ) {
@@ -596,7 +596,7 @@ export default function Register( props ){
             rules={[
               {
                 required: true,
-                message: "Bitte geben Sie einen Usernamen ein!"
+                message: "Bitte gebe einen Usernamen ein!"
               },
               () => ( {
                 async validator( _, value ) {
@@ -622,7 +622,7 @@ export default function Register( props ){
               rules={[
                 {
                   required: true,
-                  message: "Bitte geben Sie ein Password ein!"
+                  message: "Bitte gebe ein Password ein!"
                 }
               ]}
               className={styles.loginpart}
@@ -636,7 +636,7 @@ export default function Register( props ){
               rules={[
                 {
                   required: true,
-                  message: "Bitte wiederholen Sie das Passwort!"
+                  message: "Bitte wiederhole das Passwort!"
                 },
                 ( { getFieldValue } ) => ( {
                   validator( _, value ) {
@@ -661,7 +661,11 @@ export default function Register( props ){
             </Form.Item>
           </Space.Compact>
     
-          <Form.Item label="Nutzung" name={"usecase"} className={styles.loginpart}>
+          <Form.Item label="Nutzung" name={"usecase"} className={styles.loginpart} rules={[
+            {
+              required: true,
+              message: "Bitte wähle einen Verwendungszweck!"
+            }]}>
             <Select onChange={( value ) => {
               ( value == "Für mein Unternehmen" )? setRegisteringCompany( true ): setRegisteringCompany( false ) 
             }} placeholder={"Wie planst du Siteware business zu nutzen?"}

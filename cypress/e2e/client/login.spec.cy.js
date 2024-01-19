@@ -14,9 +14,7 @@
 describe("Login-Page tests", () => {
   beforeEach(() => {
     // Init Tests to visit localhost
-    cy.visit("http://localhost:3000/login");
-    cy.setCookie("mailbuddy-opt-consent", "1");
-    cy.setCookie("mailbuddy-opt-analytics-consent", "1");
+    cy.optin("http://localhost:3000/login");
   })
   
   /**
@@ -68,13 +66,7 @@ describe("Login-Page tests", () => {
    * Test if users can sign in with correct data
    */
   it("User can sign in", () => {
-    cy.get("#basic_email").type("m.krebs@sugarpool.de");
-    cy.get("#basic_password").type("abcdefg");
-    cy.get("button[type=submit]").then((signingbutton) => {
-      signingbutton.trigger("click");
-
-      cy.url().should("eq", "http://localhost:3000/");
-    })
+    cy.sitewareLogin("m.krebs@sugarpool.de", "abcdefg");
   });
 
   /**

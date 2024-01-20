@@ -174,6 +174,7 @@ export default function Home() {
       <div className={styles.servicelist}>
         {servicearr.map((singleService: Service, idx: number) => {
           return <AssistantCard
+            name={singleService.uid}
             key={idx}
             image={singleService.image}
             title={singleService.title}

@@ -96,16 +96,16 @@ const HomeSidebarLayout = ( props: {
   }
 
   const items = [
-    getItem( <Link href={"/"}>Home</Link>, "0", () => {
+    getItem( <Link href={"/"} data-linkname={"home"}>Home</Link>, "0", () => {
       return true 
     }, <Icon component={Home} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/profiles"}>Profile</Link>, "3", () => {
+    getItem( <Link href={"/profiles"} data-linkname={"profiles"}>Profile</Link>, "3", () => {
       return true 
     }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/usage"}>Nutzung</Link>, "2", () => {
+    getItem( <Link href={"/usage"} data-linkname={"usage"}>Nutzung</Link>, "2", () => {
       return true
     }, <Icon component={Stats} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/company"}>Firma</Link>, "1", () => {
+    getItem( <Link href={"/company"} data-linkname={"company"}>Firma</Link>, "1", () => {
       if(props.context.role){
         return props.context.role.isCompany;
       }else{
@@ -137,7 +137,7 @@ const HomeSidebarLayout = ( props: {
 
   const profilemenu = (
     <div className={styles.avatarmenu}>
-      <Link href={"/account"} className={styles.accountlink}>
+      <Link href={"/account"} data-linkname={"account"} className={styles.accountlink}>
         <div className={styles.profile}>
           <Avatar
             size={40}
@@ -151,7 +151,7 @@ const HomeSidebarLayout = ( props: {
       </Link>
       <Divider className={styles.menudivider} />
       <div className={styles.iconlink}>
-        <Link href="/logout" className={styles.linkwrapper}>
+        <Link href="/logout" data-linkname={"logout"} className={styles.linkwrapper}>
           <LogoutOutlined />
           <div className={styles.iconlinktext}>Ausloggen</div>
         </Link>
@@ -162,6 +162,8 @@ const HomeSidebarLayout = ( props: {
   const isselected = (name: string) => {
     if(name == props.category.value){
       return styles.selectedcat;
+    }else{
+      return "";
     }
   }
 
@@ -255,14 +257,14 @@ const HomeSidebarLayout = ( props: {
                 </div>
                 <div className={styles.title}>Assistenten</div>
                 <List className={styles.assistantlist} split={false}>
-                  <List.Item className={`${styles.assistantlink} ${isselected("all")}`} onClick={() => {
+                  <List.Item className={`${styles.assistantlink} ${isselected("all")}`} data-function={"all"} onClick={() => {
                     props.category.setter("all");
                     setSidebarOpen(false);
                   }}>
                     <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Alle</div>
                   </List.Item>
-                  <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} onClick={() => {
+                  <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} data-function={"fav"} onClick={() => {
                     props.category.setter("favourites");
                     setSidebarOpen(false);
                   }}>
@@ -272,14 +274,14 @@ const HomeSidebarLayout = ( props: {
                       <FavouriteBadge />
                     </div>
                   </List.Item>
-                  <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
+                  <List.Item className={`${styles.assistantlink} ${isselected("content")}`} data-function={"content"} onClick={() => {
                     props.category.setter("content");
                     setSidebarOpen(false);
                   }}>
                     <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Content-Erstellung</div>  
                   </List.Item>
-                  <List.Item className={`${styles.assistantlink} ${isselected("productivity")}`} onClick={() => {
+                  <List.Item className={`${styles.assistantlink} ${isselected("productivity")}`} data-function={"productivity"} onClick={() => {
                     props.category.setter("productivity");
                     setSidebarOpen(false);
                   }}>
@@ -392,6 +394,7 @@ const HomeSidebarLayout = ( props: {
                       size={40}
                       style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
+                      data-name={"profilemenu"}
                     >
                       {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
@@ -411,13 +414,13 @@ const HomeSidebarLayout = ( props: {
                   </div>
                   <div className={styles.title}>Assistenten</div>
                   <List className={styles.assistantlist} split={false}>
-                    <List.Item className={`${styles.assistantlink} ${isselected("all")}`} onClick={() => {
+                    <List.Item className={`${styles.assistantlink} ${isselected("all")}`} data-function={"all"} onClick={() => {
                       props.category.setter("all"); 
                     }}>
                       <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Alle</div>
                     </List.Item>
-                    <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} onClick={() => {
+                    <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} data-function={"fav"} onClick={() => {
                       props.category.setter("favourites"); 
                     }}>
                       <Icon component={Heart} className={styles.assistanticon} viewBox='0 0 22 22'/>
@@ -426,13 +429,13 @@ const HomeSidebarLayout = ( props: {
                         <FavouriteBadge />
                       </div>
                     </List.Item>
-                    <List.Item className={`${styles.assistantlink} ${isselected("content")}`} onClick={() => {
+                    <List.Item className={`${styles.assistantlink} ${isselected("content")}`} data-function={"content"} onClick={() => {
                       props.category.setter("content"); 
                     }}>
                       <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Content-Erstellung</div>  
                     </List.Item>
-                    <List.Item className={`${styles.assistantlink} ${isselected("productivity")}`} onClick={() => {
+                    <List.Item className={`${styles.assistantlink} ${isselected("productivity")}`} data-function={"productivity"} onClick={() => {
                       props.category.setter("productivity");
                       setSidebarOpen(false);
                     }}>

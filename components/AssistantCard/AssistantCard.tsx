@@ -11,6 +11,7 @@ import { getAssistantImage } from "../../firebase/drive/upload_file";
 const { Paragraph } = Typography;
 
 const AssistantCard = ( props: {
+    name: string,
     image: string,
     title: string,
     description: string,
@@ -54,13 +55,25 @@ const AssistantCard = ( props: {
       <div className={styles.servicefooter}>
         <div className={styles.actions}>
           {(props.fav)?
-            <Icon component={HeartFull} onClick={props.onDeFav} className={`${styles.iconsvg} ${styles.active}`} viewBox='0 0 22 25'/>:
-            <Icon component={Heart} onClick={props.onFav} className={styles.iconsvg} viewBox='0 0 22 25'/>}
+            <Icon
+              component={HeartFull}
+              onClick={props.onDeFav}
+              data-favname={`${props.name}-fav`}
+              className={`${styles.iconsvg} ${styles.active}`}
+              viewBox='0 0 22 25'
+            />:
+            <Icon
+              component={Heart}
+              onClick={props.onFav}
+              className={styles.iconsvg}
+              data-favname={`${props.name}-fav`}
+              viewBox='0 0 22 25'
+            />}
           <div onClick={props.onVideoClick} className={styles.videobuttoncontainer}>
             <Icon component={Play} className={styles.iconsvg} viewBox='0 0 22 22'/>
           </div>
         </div>
-        <Link href={props.link}>
+        <Link href={props.link} attribute-assistantname={`${props.name}-link`}>
           <span className={styles.assistantlink}>Zum Assistenten</span>
         </Link>
       </div>

@@ -155,7 +155,7 @@
 }
 
 .agbLink{
-    color: #1478FD
+    color: #1478FD;
 }
 
 .agbCheckbox{
@@ -187,3 +187,11 @@
         stroke: black;
     }
 }
+
+.backtologin{
+    margin-bottom: 30px;
+    .loginlink {
+        color: #1478FD;
+    }
+}
+

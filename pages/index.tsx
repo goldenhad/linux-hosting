@@ -39,6 +39,7 @@ export default function Home() {
   const [ selectedCat, setSelectedCat ] = useState("all");
   const [ videoPopupVisible, setVideoPopupVisible ] = useState(false);
   const [ videoLink, setVideoLink ] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [play, setPlay] = useState(false);
 
   const videoplayer = useRef(null);
@@ -55,9 +56,9 @@ export default function Home() {
   const steps: TourProps["steps"] = [
     {
       title: "Willkommen",
-      description: "Willkommen bei Siteware.Business, dem Ort, an dem wir das E-Mail-Schreiben revolutionieren! Unser Ziel ist es, "+
+      description: "Willkommen bei Siteware.business, dem Ort, an dem wir das E-Mail-Schreiben revolutionieren! Unser Ziel ist es, "+
       "deine E-Mail-Kommunikation effizienter und angenehmer zu gestalten. Wir bieten dir innovative Funktionen, die deine E-Mail-Erfahrung "+
-      "vereinfachen und verbessern. Im folgenden wollen wir dir in diesen Tutorials die wichtigsten Funktionen näher erklären.",
+      "vereinfachen und verbessern. Im Folgenden wollen wir dir in diesen Tutorials die wichtigsten Funktionen näher erklären.",
       nextButtonProps: {
         children: (
           "Weiter"
@@ -71,7 +72,7 @@ export default function Home() {
     },
     {
       title: "Du bist kein Fan von Tutorials?",
-      description: "Dann kannst du dieses PopUp einfach wegklicken und wir nerven dich nicht weiter. Wenn du das Tutorial nochmal durchlaufen möchtest "+
+      description: "Dann kannst du dieses Pop-Up einfach wegklicken, und wir nerven dich nicht weiter. Wenn du das Tutorial nochmal durchlaufen möchtest, "+
       "kannst du es in deinen Account-Einstellungen zurücksetzen!",
       nextButtonProps: {
         children: (
@@ -85,8 +86,8 @@ export default function Home() {
       }
     },
     {
-      title: "Mail-Dialog fortsetzen",
-      description: "Die Funktion \"Mail-Dialog fortsetzen\" ermöglicht es dir, einen bestehenden E-Mail-Verlauf nahtlos fortzuführen. "+
+      title: "Mail-Dialog",
+      description: "Die Funktion \"Mail-Dialog\" ermöglicht es dir, einen bestehenden E-Mail-Verlauf nahtlos fortzuführen. "+
       "Hierbei kannst du einfach den bisherigen E-Mail-Verlauf in das System einfügen und spezifizieren, wie deine gewünschte Antwort aussehen "+
       "soll. Basierend auf deinen Vorgaben und dem Kontext des E-Mail-Verlaufs generiert Siteware.Business automatisch eine passende Antwort.",
       target: () => dialogRef.current,
@@ -123,7 +124,7 @@ export default function Home() {
       title: "Blogbeitrag erzeugen",
       description: "Die Funktion \"Blogbeitrag erzeugen\" dient dazu, voll automatisch fesselnde Blogbeiträge zu verfassen. "+
       "Nachdem du das Thema des Blogtexts sowie individuelle Parameter festgelegt hast, generiert Siteware business automatisch einen professionellen und "+
-      "ansprechenden Blogtext, ganz nach Deinen Vorstellungen.",
+      "ansprechenden Blogtext, ganz nach deinen Vorstellungen.",
       target: () => monologRef.current,
       nextButtonProps: {
         children: (

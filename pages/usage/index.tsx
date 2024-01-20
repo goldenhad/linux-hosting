@@ -123,7 +123,7 @@ export default function Usage( props ) {
     },
     {
       title: "Ihr wollt noch mehr E-Mails optimieren?",
-      description: "Solltet du den Bedarf haben, mehr E-Mails zu optimieren, kannst du zusätzliche E-Mail-Kapazitäten hier direkt erwerben.",
+      description: "Solltest du den Bedarf haben, mehr E-Mails zu optimieren, kannst du zusätzliche E-Mail-Kapazitäten hier direkt erwerben.",
       target: () => buyRef.current,
       nextButtonProps: {
         children: (
@@ -153,7 +153,7 @@ export default function Usage( props ) {
     },
     {
       title: "Deine bisherigen Einkäufe",
-      description: "In dieser Tabelle findet ihr eine Übersicht deiner bisherigen Einkäufe bei Siteware business. Hier hast du die Möglichkeit, "+
+      description: "In dieser Tabelle findest du eine Übersicht deiner bisherigen Einkäufe bei Siteware business. Hier hast du die Möglichkeit, "+
       "Rechnungen herunterzuladen und unterbrochene Einkäufe abzuschließen.",
       target: () => orderRef.current,
       nextButtonProps: {

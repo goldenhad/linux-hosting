@@ -29,7 +29,7 @@ export default function Dialogue( ) {
     {
       title: "Excel Hilfe",
       description: "Das \"Excel-Hilfe\"-Feature von Siteware business bietet dir eine persönliche und zielgerichtete Unterstützung"+
-      "für alle deine Anliegen rund um Microsoft Excel. Egal, ob du eine spezifische Frage hast, Hilfe bei komplexen Formeln benötigst"+
+      " für alle deine Anliegen rund um Microsoft Excel. Egal, ob du eine spezifische Frage hast, Hilfe bei komplexen Formeln benötigst"+
       " oder Unterstützung bei der Datenaufbereitung suchst, dieses Feature steht dir zur Seite. Du kannst deine Fragen eingeben"+
       " und erhältst maßgeschneiderte Antworten und Anleitungen, die genau auf deine Bedürfnisse und dein aktuelles Problem zugeschnitten"+
       " sind.",
@@ -65,7 +65,7 @@ export default function Dialogue( ) {
       title: "Wie lautet deine Frage?",
       description: "In diesem Eingabefeld kannst du deine Frage zu Microsoft Excel stellen."+
       " Egal ob es um Formeln, Funktionen, Tabellengestaltung oder Datenanalyse geht – gib einfach dein Anliegen"+
-      " ein und erhalte maßgeschneiderte Anleitungen und Antworten, die speziell auf dich und deine Bedürfnisse zugeschnitten sind..",
+      " ein und erhalte maßgeschneiderte Anleitungen und Antworten, die speziell auf dich und deine Bedürfnisse zugeschnitten sind.",
       target: () => questionRef.current,
       nextButtonProps: {
         children: (
@@ -81,7 +81,7 @@ export default function Dialogue( ) {
     {
       title: "Alles bereit",
       description: "Durch Klicken auf den \"Antwort Generieren\"-Button wird nach einer kurzen Wartezeit eine Antwort erzeugt. "+
-      "Bitte bedenke, dass die wir deine Eingaben noch verarbeiten müssen, wodurch es gegebenenfalls zu kurzen Wartezeiten kommen kann.",
+      "Bitte bedenke, dass wir deine Eingaben noch verarbeiten müssen, wodurch es gegebenenfalls zu kurzen Wartezeiten kommen kann.",
       target: () => generateRef.current,
       nextButtonProps: {
         children: (

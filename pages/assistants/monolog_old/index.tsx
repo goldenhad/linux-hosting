@@ -137,7 +137,7 @@ export default function Monologue( ) {
     },
     {
       title: "Alles bereit",
-      description: "Durch Klicken auf den \"Antwort Generieren\"-Button wird nach einer kurzen Wartezeit eine E-Mail erzeugt. "+
+      description: "Durch Klicken auf den \"Antwort generieren\"-Button wird nach einer kurzen Wartezeit eine E-Mail erzeugt. "+
       "Bitte bedenke, dass wir deine Eingaben noch verarbeiten müssen, wodurch es gegebenenfalls zu kurzen Wartezeiten kommen kann.",
       target: () => generateRef.current,
       nextButtonProps: {

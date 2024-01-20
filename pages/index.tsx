@@ -86,8 +86,8 @@ export default function Home() {
       }
     },
     {
-      title: "Mail-Dialog fortsetzen",
-      description: "Die Funktion \"Mail-Dialog fortsetzen\" ermöglicht es dir, einen bestehenden E-Mail-Verlauf nahtlos fortzuführen. "+
+      title: "Mail-Dialog",
+      description: "Die Funktion \"Mail-Dialog\" ermöglicht es dir, einen bestehenden E-Mail-Verlauf nahtlos fortzuführen. "+
       "Hierbei kannst du einfach den bisherigen E-Mail-Verlauf in das System einfügen und spezifizieren, wie deine gewünschte Antwort aussehen "+
       "soll. Basierend auf deinen Vorgaben und dem Kontext des E-Mail-Verlaufs generiert Siteware.Business automatisch eine passende Antwort.",
       target: () => dialogRef.current,

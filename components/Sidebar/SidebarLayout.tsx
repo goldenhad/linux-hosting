@@ -91,17 +91,21 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
 
 
   const items = [
-    getItem( <Link href={"/"}>Home</Link>, "0", () => {
+    getItem( <Link href={"/"} data-linkname={"home"}>Home</Link>, "0", () => {
       return true 
     }, <Icon component={Home} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/profiles"}>Profile</Link>, "3", () => {
+    getItem( <Link href={"/profiles"} data-linkname={"profiles"}>Profile</Link>, "3", () => {
       return true 
     }, <Icon component={Profiles} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/usage"}>Nutzung</Link>, "2", () => {
+    getItem( <Link href={"/usage"} data-linkname={"usage"}>Nutzung</Link>, "2", () => {
       return true
     }, <Icon component={Stats} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> ),
-    getItem( <Link href={"/company"}>Firma</Link>, "1", () => {
-      return props.context.role.isCompany 
+    getItem( <Link href={"/company"} data-linkname={"company"}>Firma</Link>, "1", () => {
+      if(props.context.role){
+        return props.context.role.isCompany;
+      }else{
+        return false;
+      }
     }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
   ];
 
@@ -128,7 +132,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
 
   const profilemenu = (
     <div className={styles.avatarmenu}>
-      <Link href={"/account"} className={styles.accountlink}>
+      <Link href={"/account"} className={styles.accountlink} data-linkname={"account"}>
         <div className={styles.profile}>
           <Avatar
             size={40}
@@ -142,7 +146,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
       </Link>
       <Divider className={styles.menudivider} />
       <div className={styles.iconlink}>
-        <Link href="/logout" className={styles.linkwrapper}>
+        <Link href="/logout" className={styles.linkwrapper} data-linkname={"logout"}>
           <LogoutOutlined />
           <div className={styles.iconlinktext}>Ausloggen</div>
         </Link>
@@ -225,6 +229,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                       size={40}
                       style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
+                      data-name={"profilemenu"}
                     >
                       <>{(props.context.user?.email)? props.context.user.email.charAt(0).toUpperCase():""}</>
                     </Avatar>
@@ -262,6 +267,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                       size={40}
                       style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
+                      data-name={"profilemenu"}
                     >
                       {(props.context.user?.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
@@ -333,6 +339,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
                       size={40}
                       style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
+                      data-name={"profilemenu"}
                     >
                       {(props.context.user?.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>

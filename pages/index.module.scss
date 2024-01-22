@@ -21,6 +21,48 @@
             }
         }
     }
+
+    .comingsoonrow{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .comingsoon{
+        margin-top: 100px;
+        height: 300px;
+        width: 300px;
+        opacity: 0.5;
+    }
+    
+    .builder{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        
+        .buildercontent{
+            width: 100%;
+            padding-left: 10px;
+            display: flex;
+            flex-direction: column;
+    
+            .buttonsection{
+                margin-top: 50px;
+                height: 100px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+        }
+    }
+
+    .bannersection{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+    }
 }
 
 @media (min-width: 993px) {
@@ -43,6 +85,54 @@
                 font-weight: 700;
             }
         }
+    }
+
+    .comingsoon{
+        margin-top: 100px;
+        width: 100%;
+        height: 300px;
+        opacity: 0.5;
+    }
+    
+    .builder{
+        display: flex;
+        flex-direction: row;
+        height: 500px;
+    
+        .buildercontent{
+            width: 50%;
+            padding-right: 50px;
+            padding-left: 10px;
+            display: flex;
+            flex-direction: column;
+    
+            .buttonsection{
+                margin-top: 50px;
+                height: 100px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+        }
+    
+        
+    
+        .builderteaser{
+            background-image: url("https://app.business.siteware.io/ogimage.jpg");
+            background-position: center;
+            background-size: cover;
+            height: 100%;
+            width: 50%;
+            padding-left: 50px;
+            padding-right: 10px;
+            border-radius: 20px;
+        }
+    }
+
+    .bannersection{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
     }
 }
 
@@ -79,16 +169,11 @@
             }
         }
 
-        .bannersection{
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-        }
+        
     }
 }
 
 .videoplayer{
     padding-top: 25px;
     padding-bottom: 25px;
-    height: 500px;
 }

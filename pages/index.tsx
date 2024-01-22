@@ -1,4 +1,4 @@
-import { TourProps, Tour, Divider, message, Modal } from "antd";
+import { TourProps, Tour, Divider, message, Modal, Card, Badge } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation";
 import updateData from "../firebase/data/updateData";
 import { handleUndefinedTour } from "../helper/architecture";
 import AssistantCard from "../components/AssistantCard/AssistantCard";
-import RecommendBox from "../components/RecommendBox/RecommendBox";
 import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
 import { Service } from "../firebase/types/Service";
 import ReactPlayer from "react-player/lazy"
+import FatButton from "../components/FatButton";
 
 
 
@@ -171,6 +171,14 @@ export default function Home() {
       }
     })
 
+    const getRibbonText = (uid: string) => {
+      if(uid == "excel" || uid == "dialog" || uid == "monolog"){
+        return "Neu"
+      }else{
+        return undefined;
+      }
+    }
+
     return (
       <div className={styles.servicelist}>
         {servicearr.map((singleService: Service, idx: number) => {
@@ -182,6 +190,7 @@ export default function Home() {
             description={singleService.description}
             link={singleService.link}
             fav={user.services?.favourites.includes(singleService.uid)}
+            ribbonText={getRibbonText(singleService.uid)}
             onVideoClick={() => {
               setVideoLink(singleService.video);
               setVideoPopupVisible(true);
@@ -206,7 +215,7 @@ export default function Home() {
 
 
   return (
-    <HomeSidebarLayout context={context} category={{ value: selectedCat, setter: setSelectedCat }}>
+    <HomeSidebarLayout user={user} messageApi={messageApi} context={context} category={{ value: selectedCat, setter: setSelectedCat }}>
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>
@@ -221,8 +230,33 @@ export default function Home() {
           <div className={styles.services}>
             <AssistantCardList />
           </div>
+          
+          <div className={styles.comingsoonrow}>
+            <div className={styles.comingsoon}>
+              <Badge.Ribbon text={"Coming soon"} color="red">
+                <Card title={"Assistant builder"}>
+                  <div className={styles.builder}>
+                    <div className={styles.buildercontent}>
+                      <div className={styles.buildertext}>
+                      Mit dem Siteware Business Builder kannst du ganz einfach deine eigenen digitalen Assistenten erstellen, um deine Geschäftsprozesse 
+                      zu optimieren. Nutze vordefinierte Module und Funktionen, um maßgeschneiderte Lösungen für deine spezifischen Anforderungen zu schaffen. 
+                      Profitiere auch von der Möglichkeit, Assistenten zu nutzen, die von anderen Nutzern entwickelt wurden, 
+                      und passe dein Siteware Business-Erlebnis genau nach deinen Wünschen und Bedürfnissen an.
+                      </div>
+                      <div className={styles.buttonsection}>
+                        <FatButton text="Neuen Assistenten"/>
+                        <FatButton text="Zum Marktplatz"/>
+                      </div>
+                    </div>
+                    <div className={styles.builderteaser}>
+                    </div>
+                  </div>
+                </Card>
+              </Badge.Ribbon>
+            </div>
+          </div>
 
-          <div className={styles.bannersection}><RecommendBox user={user} messageApi={messageApi} /></div>
+          <div className={styles.bannersection}></div>
         </div>
 
         <Modal className={styles.videopopup} footer={null} width={800} open={videoPopupVisible} onCancel={() => {

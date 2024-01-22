@@ -20,6 +20,7 @@ import Chat from "../../public/icons/chat.svg";
 import Zap from "../../public/icons/zap.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
 import { getImageUrl } from "../../firebase/drive/upload_file";
+import RecommendBox from "../RecommendBox/RecommendBox";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -27,8 +28,10 @@ type MenuItem = Required<MenuProps>["items"][number];
 
 const HomeSidebarLayout = ( props: { 
   children: ReactNode,
-  context: {user: User, login, role, profile}
-  category: { value: string, setter: Dispatch<SetStateAction<string>>}
+  context: {user: User, login, role, profile},
+  category: { value: string, setter: Dispatch<SetStateAction<string>>},
+  user: User,
+  messageApi,
 }) => {
   const [collapsed, setCollapsed] = useState( true );
   // eslint-disable-next-line
@@ -290,6 +293,7 @@ const HomeSidebarLayout = ( props: {
                   </List.Item>
                 </List>
               </div>
+              <RecommendBox user={props.user} messageApi={props.messageApi} />
             </div>
             <div className={styles.canclebar}>
               <div className={styles.closesidebar} onClick={() => {
@@ -444,8 +448,9 @@ const HomeSidebarLayout = ( props: {
                     </List.Item>
                   </List>
                 </div>
+                <RecommendBox user={props.user} messageApi={props.messageApi} />
               </aside>
-              <div className={styles.childrencontainer}>{props.children}</div>
+              <div className={styles.childrencontainer}>{}{props.children}</div>
             </Content>
             <FloatButton
               className='sosbutton'

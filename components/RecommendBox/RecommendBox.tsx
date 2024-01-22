@@ -1,11 +1,10 @@
 import { Button, Modal, QRCode, Spin, Typography } from "antd";
-import Icon, { LoadingOutlined, CloseOutlined } from "@ant-design/icons";
+import Icon, { LoadingOutlined } from "@ant-design/icons";
 import styles from "./recommendbox.module.scss"
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { User } from "../../firebase/types/User";
 import HeartFull from "../../public/icons/heartFull.svg";
-import cookie from "cookie-cutter";
 import { isMobile } from "react-device-detect";
 
 
@@ -61,7 +60,9 @@ const RecommendBox = (props: { user: User, messageApi }) => {
   const Banner = () => {
     if(bannerVisible){
       return(
-        <div className={styles.recommendourapp}>
+        <div className={styles.recommendourapp} onClick={() => {
+          setRecommendModalOpen(true);
+        }}>
           <div className={styles.recommendlove}>
             <Icon component={HeartFull} className={`${styles.iconsvg}`} viewBox='0 -2 20 22'/>
           </div>
@@ -72,20 +73,6 @@ const RecommendBox = (props: { user: User, messageApi }) => {
           }}
           >
             <div className={styles.catchphrase}>Du liebst Siteware business?</div>
-            <div className={styles.text}>
-              Empfehle uns weiter und sichere Dir 200 GRATIS Credits!
-            </div>
-          </div>
-          <div className={styles.openrecdrawerrow}>
-            <Button type="primary" onClick={() => {
-              setRecommendModalOpen(true);
-            }}>Jetzt empfehlen</Button>
-          </div>
-          <div className={styles.xpopup} onClick={() => {
-            cookie.set("siteware-recommend", 1);
-            setBannerVisible(false);
-          }}>
-            <CloseOutlined />
           </div>
         </div>
       );

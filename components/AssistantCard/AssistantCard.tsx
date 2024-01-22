@@ -1,4 +1,4 @@
-import { Card, Typography } from "antd";
+import { Badge, Card, Typography } from "antd";
 import styles from "./assistantcard.module.scss";
 import Icon from "@ant-design/icons";
 import Link from "next/link";
@@ -16,7 +16,8 @@ const AssistantCard = ( props: {
     title: string,
     description: string,
     link: string,
-    fav?: boolean
+    fav?: boolean,
+    ribbonText: string,
     onFav?: () => void,
     onDeFav?: () => void,
     onVideoClick?: () => void
@@ -38,47 +39,60 @@ const AssistantCard = ( props: {
   }, [image]);
 
 
-  return (
-    <div className={styles.servicebox}>
-      <Card className={styles.servicecard} style={{ width: 300 }}>
-        <div className={styles.serviceheadline}>
-          <div className={styles.servicelogo}>
-            {/* eslint-disable-next-line */}
+  const AssCard = () => {
+    return (
+      <div className={styles.servicebox}>
+        <Card className={styles.servicecard} style={{ width: 300 }}>
+          <div className={styles.serviceheadline}>
+            <div className={styles.servicelogo}>
+              {/* eslint-disable-next-line */}
             <img width={50} height={50} src={image} alt="logo" />
+            </div>
+            <div className={styles.servicetitle}>{props.title}</div>
           </div>
-          <div className={styles.servicetitle}>{props.title}</div>
-        </div>
-        <Paragraph className={styles.servicedescription} ellipsis={ { rows: 4, expandable: true, symbol: "..." }}>
-          {props.description}
-        </Paragraph>
-      </Card>
-      <div className={styles.servicefooter}>
-        <div className={styles.actions}>
-          {(props.fav)?
-            <Icon
-              component={HeartFull}
-              onClick={props.onDeFav}
-              data-favname={`${props.name}-fav`}
-              className={`${styles.iconsvg} ${styles.active}`}
-              viewBox='0 0 22 25'
-            />:
-            <Icon
-              component={Heart}
-              onClick={props.onFav}
-              className={styles.iconsvg}
-              data-favname={`${props.name}-fav`}
-              viewBox='0 0 22 25'
-            />}
-          <div onClick={props.onVideoClick} className={styles.videobuttoncontainer}>
-            <Icon component={Play} className={styles.iconsvg} viewBox='0 0 22 22'/>
+          <Paragraph className={styles.servicedescription} ellipsis={ { rows: 4, expandable: true, symbol: "..." }}>
+            {props.description}
+          </Paragraph>
+        </Card>
+        <div className={styles.servicefooter}>
+          <div className={styles.actions}>
+            {(props.fav)?
+              <Icon
+                component={HeartFull}
+                onClick={props.onDeFav}
+                data-favname={`${props.name}-fav`}
+                className={`${styles.iconsvg} ${styles.active}`}
+                viewBox='0 0 22 25'
+              />:
+              <Icon
+                component={Heart}
+                onClick={props.onFav}
+                className={styles.iconsvg}
+                data-favname={`${props.name}-fav`}
+                viewBox='0 0 22 25'
+              />}
+            <div onClick={props.onVideoClick} className={styles.videobuttoncontainer}>
+              <Icon component={Play} className={styles.iconsvg} viewBox='0 0 22 22'/>
+            </div>
           </div>
+          <Link href={props.link} attribute-assistantname={`${props.name}-link`}>
+            <span className={styles.assistantlink}>Zum Assistenten</span>
+          </Link>
         </div>
-        <Link href={props.link} attribute-assistantname={`${props.name}-link`}>
-          <span className={styles.assistantlink}>Zum Assistenten</span>
-        </Link>
       </div>
-    </div>
-  );
+    );
+  }
+
+
+  if(props.ribbonText){
+    return (
+      <Badge.Ribbon text={"Neu"} color="red">
+        <AssCard />
+      </Badge.Ribbon>
+    );
+  }else{
+    return <AssCard />
+  }
 }
 
 export default AssistantCard;

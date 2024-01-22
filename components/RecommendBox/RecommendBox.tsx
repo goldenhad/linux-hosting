@@ -28,10 +28,11 @@ const RecommendBox = (props: { user: User, messageApi }) => {
       }
     }
 
-    const swrec = cookie.get("siteware-recommend");
-    if(!swrec){
+    //const swrec = cookie.get("siteware-recommend");
+    /* if(!swrec){
       setBannerVisible(true);
-    }
+    } */
+    setBannerVisible(true);
     
     getRecommendLink();
     // eslint-disable-next-line

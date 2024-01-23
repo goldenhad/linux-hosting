@@ -1,4 +1,4 @@
-import { TourProps, Tour, Divider, message, Modal, Card, Badge } from "antd";
+import { TourProps, Tour, Divider, message, Modal, Card, Badge, Button } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -10,7 +10,6 @@ import AssistantCard from "../components/AssistantCard/AssistantCard";
 import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
 import { Service } from "../firebase/types/Service";
 import ReactPlayer from "react-player/lazy"
-import FatButton from "../components/FatButton";
 
 
 
@@ -232,28 +231,30 @@ export default function Home() {
           </div>
           
           <div className={styles.comingsoonrow}>
-            <div className={styles.comingsoon}>
-              <Badge.Ribbon text={"Coming soon"} color="red">
-                <Card title={"Assistant builder"}>
+            <Badge.Ribbon text={"Coming soon"} color="red">
+              <div className={styles.comingsoon}>
+                <Card className={styles.comingsooncard}>
                   <div className={styles.builder}>
                     <div className={styles.buildercontent}>
+                      <h2 className={styles.builderheadline}>Fragen Sie jetzt Ihren individuellen KI-Assistenten von Siteware business an.</h2>
                       <div className={styles.buildertext}>
-                      Mit dem Siteware Business Builder kannst du ganz einfach deine eigenen digitalen Assistenten erstellen, um deine Geschäftsprozesse 
-                      zu optimieren. Nutze vordefinierte Module und Funktionen, um maßgeschneiderte Lösungen für deine spezifischen Anforderungen zu schaffen. 
-                      Profitiere auch von der Möglichkeit, Assistenten zu nutzen, die von anderen Nutzern entwickelt wurden, 
-                      und passe dein Siteware Business-Erlebnis genau nach deinen Wünschen und Bedürfnissen an.
+                      Fordern Sie jetzt Ihr maßgeschneidertes Angebot an und nutzen Sie unsere innovative DMSP-Technologie für kostengünstige, 
+                      hochindividualisierte Lösungen. Einzigartig: Profitieren Sie von einer möglichen vollständigen Refinanzierung der Entwicklungskosten, 
+                      wenn Ihr Assistent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern schreiben wir Ihnen die doppelte Höhe Ihrer 
+                      Entwicklungskosten auf Ihr Konto als siteware-Credits gut. Wählen Sie schon bald aus einer Vielzahl an Assistenten im neuen 
+                      siteware business APP-Store. Mit siteware business sind Sie immer einen Schritt voraus – seien Sie dabei. Von Anfang an.
                       </div>
                       <div className={styles.buttonsection}>
-                        <FatButton text="Neuen Assistenten"/>
-                        <FatButton text="Zum Marktplatz"/>
+                        <Button type="primary" className={styles.builderbutton}>Angebot anfordern</Button>
+                        <Button type="primary" className={styles.builderbutton}>Zum App-Store</Button>
                       </div>
                     </div>
                     <div className={styles.builderteaser}>
                     </div>
                   </div>
                 </Card>
-              </Badge.Ribbon>
-            </div>
+              </div>
+            </Badge.Ribbon>
           </div>
 
           <div className={styles.bannersection}></div>

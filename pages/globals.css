@@ -95,10 +95,9 @@
     width: 40%;
   }
 
-  @media (max-width: 992px){
+  @media (max-width: 1500px){
     body{
       max-height: 100dvh;
-      overflow-y: scroll;
     }
 
     .ant-tour{

@@ -80,13 +80,16 @@ const RechargeForm = ( props: {
       props.onCustomerApprove();
     }
 
-    
+    const thresholdAsNumber = parseInt(form.getFieldValue("threshold"));
+    if(isNaN(thresholdAsNumber)){
+      return null;
+    }
 
     const newplan: Plan = {
       product: tokenstobuy,
       timestamp: Math.floor( Date.now() / 1000 ),
       state: "active",
-      threshold: form.getFieldValue("threshold")
+      threshold: thresholdAsNumber
     }
 
     console.log(newplan);

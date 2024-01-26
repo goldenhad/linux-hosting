@@ -334,7 +334,7 @@ export default function Usage( props ) {
               <div className={styles.planinfo}>
                 Das automatische Auffüllen ist aktiv.
                 Dein Konto wird automatisch um <span className={styles.creds}>
-                  {calculator.indexToCredits(company.plan?.product)}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
+                  {calculator.indexToCredits(company.plan?.product, true)}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
                 <span className={styles.creds}> {company?.plan?.threshold}</span> Credits fällt.
               </div>
               <Button type="link" className={styles.planedit} onClick={() => {

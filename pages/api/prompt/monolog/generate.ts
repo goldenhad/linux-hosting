@@ -50,15 +50,27 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           } );
           
           let text = "";
+          let closed = false;
+
+          // Abort the execution if the user cancels the request...
+          res.on("close", () => {
+            closed = true;
+          })
+
           for await (const chunk of response) {
-            //console.log(chunk.choices[0].delta.content || "");
-            const singletoken = chunk.choices[0].delta.content || "";
-            res.write(singletoken);
-            res.flushHeaders();
-            if (chunk.choices[0].finish_reason === "stop") {
-              console.log("stop!!")
+            // Check if the request was canceld
+            if(!closed){
+              //console.log(chunk.choices[0].delta.content || "");
+              const singletoken = chunk.choices[0].delta.content || "";
+              res.write(singletoken);
+              res.flushHeaders();
+              if (chunk.choices[0].finish_reason === "stop") {
+                console.log("stop!!")
+              }
+              text += singletoken;
+            }else{
+              break;
             }
-            text += singletoken;
           }
 
           const tokenCountRequest = countFunction(data.prompt);
@@ -80,4 +92,6 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
   }else{
     return res.status( 400 ).send( { errorcode: 1, message: "The request method is forbidden!", tokens: -1 } );
   }
+
+  
 }

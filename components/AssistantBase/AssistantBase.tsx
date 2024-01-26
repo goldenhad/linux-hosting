@@ -602,14 +602,18 @@ const AssistantBase = (props: {
             }
 
             // Check if the user activated automatic recharge. If charge them and add tokens
+            console.log(props.context.company.plan);
 
             if(props.context.company.plan){
+              console.log("User has plan...");
               if(props.context.company.plan?.state == "active"){
+                console.log("Plan is active...");
                 let paymentSuccesfull = false;
                 let invoiceid = "";
   
+                console.log(calculator.normalizeTokens(props.context.company.tokens), props.context.company.plan.threshold);
                 // Check if company has less tokens than the threshold
-                if(props.context.company.tokens < props.context.company.plan.threshold){
+                if(calculator.normalizeTokens(props.context.company.tokens) < props.context.company.plan.threshold){
                   // Try to charge the user with the values defined in the plan
                   try{
                     const paymentreq = await axios.post("/api/payment/issuepayment", { 

@@ -50,3 +50,7 @@ mailbuddy_priv_key.json
 
 # Sentry Config File
 .sentryclirc
+
+# Cypress Related stuff
+cypress/screenshots
+cypress/videos

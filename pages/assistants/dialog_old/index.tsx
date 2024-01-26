@@ -155,8 +155,8 @@ export default function Dialogue( ) {
     },
     {
       title: "Alles bereit",
-      description: "Durch Klicken auf den \"Antwort Generieren\"-Button wird nach einer kurzen Wartezeit eine Antwort erzeugt. "+
-      "Bitte bedenke, dass die wir deine Eingaben noch verarbeiten müssen, wodurch es gegebenenfalls zu kurzen Wartezeiten kommen kann.",
+      description: "Durch Klicken auf den \"Antwort generieren\"-Button wird nach einer kurzen Wartezeit eine Antwort erzeugt. "+
+      "Bitte bedenke, dass wir deine Eingaben noch verarbeiten müssen, wodurch es gegebenenfalls zu kurzen Wartezeiten kommen kann.",
       target: () => generateRef.current,
       nextButtonProps: {
         children: (

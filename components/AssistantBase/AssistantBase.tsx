@@ -571,7 +571,35 @@ const AssistantBase = (props: {
               if(axios.isCancel(e)){
                 // Check if we encounterd a cancle signal. E.g if the user aborted the request
                 // Show the used tokens
-                setTokens(usedTokens.toString());
+                
+                const costbeforereq = await axios.post("/api/prompt/count", { prompt: localtext });
+                if(costbeforereq){
+                  const tokensused = costbeforereq.data.tokens
+                  // Set the tokens to the sum of the input and the received answer
+                  usedTokens.in = costbefore;
+                  usedTokens.out = tokensused;
+                    
+                  if(props.context.calculations.costPerToken.in > props.context.calculations.costPerToken.out){
+                    realusedTokens = usedTokens.in * (props.context.calculations.costPerToken.in/props.context.calculations.costPerToken.out) + usedTokens.out;
+                  }else if(props.context.calculations.costPerToken.in < props.context.calculations.costPerToken.out){
+                    realusedTokens = usedTokens.in + (props.context.calculations.costPerToken.out/props.context.calculations.costPerToken.in) * usedTokens.out;
+                  }else{
+                    realusedTokens = usedTokens.in + usedTokens.out;
+                  }
+
+                  console.log(realusedTokens);
+                    
+                  // Update the used tokens and display them
+                  setTokens(realusedTokens.toString());
+                  setTokenCountVisible(true);
+                    
+                  notificationAPI.info({
+                    message: "Creditverbrauch",
+                    description: `Die Anfrage hat ${calculator.round(calculator.normalizeTokens(realusedTokens), 2)} Credits verbraucht`,
+                    duration: 10 
+                  });
+                }
+
                 // Abort the request
                 setCancleController(new AbortController);
               }else{
@@ -608,8 +636,9 @@ const AssistantBase = (props: {
                 let paymentSuccesfull = false;
                 let invoiceid = "";
   
+                console.log(calculator.normalizeTokens(props.context.company.tokens), props.context.company.plan.threshold);
                 // Check if company has less tokens than the threshold
-                if(props.context.company.tokens < props.context.company.plan.threshold){
+                if(calculator.normalizeTokens(props.context.company.tokens) < props.context.company.plan.threshold){
                   // Try to charge the user with the values defined in the plan
                   try{
                     const paymentreq = await axios.post("/api/payment/issuepayment", { 

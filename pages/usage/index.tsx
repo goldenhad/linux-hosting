@@ -1,4 +1,4 @@
-import { Button, Card, Tag, TourProps, Tour, Popover, List, Collapse, Pagination, Modal, Tabs, message, Alert } from "antd";
+import { Button, Card, Tag, TourProps, Tour, List, Collapse, Pagination, Modal, Tabs, message, Alert } from "antd";
 import styles from "./usage.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -11,8 +11,6 @@ import {
   ClockCircleOutlined,
   CloseCircleOutlined,
   FileTextOutlined,
-  InfoCircleOutlined,
-  MailOutlined,
   LeftOutlined,
   RightOutlined,
   DeleteOutlined,
@@ -123,7 +121,7 @@ export default function Usage( props ) {
     },
     {
       title: "Ihr wollt noch mehr E-Mails optimieren?",
-      description: "Solltet du den Bedarf haben, mehr E-Mails zu optimieren, kannst du zusätzliche E-Mail-Kapazitäten hier direkt erwerben.",
+      description: "Solltest du den Bedarf haben, mehr E-Mails zu optimieren, kannst du zusätzliche E-Mail-Kapazitäten hier direkt erwerben.",
       target: () => buyRef.current,
       nextButtonProps: {
         children: (
@@ -153,7 +151,7 @@ export default function Usage( props ) {
     },
     {
       title: "Deine bisherigen Einkäufe",
-      description: "In dieser Tabelle findet ihr eine Übersicht deiner bisherigen Einkäufe bei Siteware business. Hier hast du die Möglichkeit, "+
+      description: "In dieser Tabelle findest du eine Übersicht deiner bisherigen Einkäufe bei Siteware business. Hier hast du die Möglichkeit, "+
       "Rechnungen herunterzuladen und unterbrochene Einkäufe abzuschließen.",
       target: () => orderRef.current,
       nextButtonProps: {
@@ -203,10 +201,6 @@ export default function Usage( props ) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const calculateMails = () => {
-    return Math.floor( company?.tokens/(calculations.tokenProMail.in + calculations.tokenProMail.out) );
-  }
-
   const orderState = (obj) => {
     switch( obj.state ){
     case "accepted":
@@ -235,17 +229,6 @@ export default function Usage( props ) {
         </Tag>
       );
     }
-  }
-
-  const getTokenDetailInformation = () => {
-    return(
-      <div>
-        <p>Entspricht:</p>
-        <List>
-          <List.Item><span className={styles.listarrow}><MailOutlined /></span>~{calculateMails()} Mails</List.Item>
-        </List>
-      </div>
-    );
   }
 
   const PurchaseInformation = () => {
@@ -351,7 +334,7 @@ export default function Usage( props ) {
               <div className={styles.planinfo}>
                 Das automatische Auffüllen ist aktiv.
                 Dein Konto wird automatisch um <span className={styles.creds}>
-                  {calculator.indexToCredits(company.plan?.product)}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
+                  {calculator.indexToCredits(company.plan?.product, true)}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
                 <span className={styles.creds}> {company?.plan?.threshold}</span> Credits fällt.
               </div>
               <Button type="link" className={styles.planedit} onClick={() => {
@@ -495,15 +478,10 @@ export default function Usage( props ) {
       children: <>
         
         <div className={styles.tokeninfocard}>
-          <h2>
-          Dein Credit-Budget
-            <Popover content={getTokenDetailInformation} placement="bottom" title="Details">
-              <span className={styles.tokeninformationicon}><InfoCircleOutlined /></span>
-            </Popover>
-          </h2>
+          <h2>Dein Credit-Budget</h2>
           <div className={styles.quotarow}>
             <div className={styles.tokenbudget}>
-              {( company?.unlimited )? "∞" : `${calculator.round(calculator.normalizeTokens(company.tokens), 0)}`} Credits
+              {(company)? calculator.round(calculator.normalizeTokens(company.tokens), 0): 0} Credits
             </div>
           </div>
         </div>

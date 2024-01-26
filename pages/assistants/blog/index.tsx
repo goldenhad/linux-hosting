@@ -56,7 +56,7 @@ export default function Blog( ) {
     {
       title: "Thema des Blogbeitrags",
       description: "Beschreibe kurz das Thema deines Blogbeitrags. Stichpunkte reichen oft aus. Bedenke, dass präzise Formulierungen "+
-      "zu genauen Antworten führen, während mehr Freiraum dem Algorithmus für Tonalität und Formulierung gibt. Experimentiere mit verschiedenen "+
+      "zu genaueren Antworten führen, während weniger präzise Formulierungen dem Algorithmus mehr Freiraum geben. Experimentiere mit verschiedenen "+
       "Eingabestilen, um den besten Ansatz für dich zu finden.",
       target: () => continueRef.current,
       nextButtonProps: {

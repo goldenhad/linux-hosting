@@ -24,7 +24,6 @@ const AddCreditCardForm = ( props: { company: Company, user: User, reddirectURL:
 
     try{
       let companyCustomerId = props.company.customerId;
-      console.log(companyCustomerId);
       if(!props.company.customerId){        
         const { data } = await axios.post("/api/payment/createcustomer", {
           name: (props.company.name != "")? props.company.name: `${props.user.firstname} ${props.user.lastname}`,

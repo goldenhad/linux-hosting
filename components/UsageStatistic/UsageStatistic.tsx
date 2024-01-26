@@ -2,11 +2,17 @@ import { Bar } from "react-chartjs-2";
 import styles from "./usagestatistic.module.scss"
 import { User } from "../../firebase/types/User";
 import { Usage } from "../../firebase/types/Company";
+import { useEffect, useState } from "react";
 
 
 
 const UsageStatistic = (props: { visibleYear: number, users: Array<User> }) => {
   const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+  const [ users, setUsers ] = useState(props.users);
+
+  useEffect(() => {
+    setUsers(props.users);
+  }, [props.users])
 
   return(
     <div className={styles.barcontainer}>
@@ -30,11 +36,10 @@ const UsageStatistic = (props: { visibleYear: number, users: Array<User> }) => {
               label: `Credits ${props.visibleYear}`,
               data: months.map( ( label, idx ) => {
                 let sum = 0;
-                props.users.forEach( ( su: User ) => {
+                users.forEach( ( su: User ) => {
                   if(su.usedCredits){
                     su.usedCredits.forEach( ( usage: Usage ) => {
                       if( usage.month == idx+1 && usage.year == props.visibleYear ){
-                        console.log(usage.amount);
                         sum += parseFloat( ( usage.amount/1000 ).toFixed( 2 ) );
                       }
                     });

@@ -1,4 +1,4 @@
-import { TourProps, Tour, Divider, message, Modal } from "antd";
+import { TourProps, Tour, Divider, message, Modal, Card, Badge, Button } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import updateData from "../firebase/data/updateData";
 import { handleUndefinedTour } from "../helper/architecture";
 import AssistantCard from "../components/AssistantCard/AssistantCard";
-import RecommendBox from "../components/RecommendBox/RecommendBox";
 import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
 import { Service } from "../firebase/types/Service";
 import ReactPlayer from "react-player/lazy"
@@ -39,6 +38,7 @@ export default function Home() {
   const [ selectedCat, setSelectedCat ] = useState("all");
   const [ videoPopupVisible, setVideoPopupVisible ] = useState(false);
   const [ videoLink, setVideoLink ] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [play, setPlay] = useState(false);
 
   const videoplayer = useRef(null);
@@ -55,9 +55,9 @@ export default function Home() {
   const steps: TourProps["steps"] = [
     {
       title: "Willkommen",
-      description: "Willkommen bei Siteware.Business, dem Ort, an dem wir das E-Mail-Schreiben revolutionieren! Unser Ziel ist es, "+
+      description: "Willkommen bei Siteware.business, dem Ort, an dem wir das E-Mail-Schreiben revolutionieren! Unser Ziel ist es, "+
       "deine E-Mail-Kommunikation effizienter und angenehmer zu gestalten. Wir bieten dir innovative Funktionen, die deine E-Mail-Erfahrung "+
-      "vereinfachen und verbessern. Im folgenden wollen wir dir in diesen Tutorials die wichtigsten Funktionen näher erklären.",
+      "vereinfachen und verbessern. Im Folgenden wollen wir dir in diesen Tutorials die wichtigsten Funktionen näher erklären.",
       nextButtonProps: {
         children: (
           "Weiter"
@@ -71,7 +71,7 @@ export default function Home() {
     },
     {
       title: "Du bist kein Fan von Tutorials?",
-      description: "Dann kannst du dieses PopUp einfach wegklicken und wir nerven dich nicht weiter. Wenn du das Tutorial nochmal durchlaufen möchtest "+
+      description: "Dann kannst du dieses Pop-Up einfach wegklicken, und wir nerven dich nicht weiter. Wenn du das Tutorial nochmal durchlaufen möchtest, "+
       "kannst du es in deinen Account-Einstellungen zurücksetzen!",
       nextButtonProps: {
         children: (
@@ -85,8 +85,8 @@ export default function Home() {
       }
     },
     {
-      title: "Mail-Dialog fortsetzen",
-      description: "Die Funktion \"Mail-Dialog fortsetzen\" ermöglicht es dir, einen bestehenden E-Mail-Verlauf nahtlos fortzuführen. "+
+      title: "Mail-Dialog",
+      description: "Die Funktion \"Mail-Dialog\" ermöglicht es dir, einen bestehenden E-Mail-Verlauf nahtlos fortzuführen. "+
       "Hierbei kannst du einfach den bisherigen E-Mail-Verlauf in das System einfügen und spezifizieren, wie deine gewünschte Antwort aussehen "+
       "soll. Basierend auf deinen Vorgaben und dem Kontext des E-Mail-Verlaufs generiert Siteware.Business automatisch eine passende Antwort.",
       target: () => dialogRef.current,
@@ -123,7 +123,7 @@ export default function Home() {
       title: "Blogbeitrag erzeugen",
       description: "Die Funktion \"Blogbeitrag erzeugen\" dient dazu, voll automatisch fesselnde Blogbeiträge zu verfassen. "+
       "Nachdem du das Thema des Blogtexts sowie individuelle Parameter festgelegt hast, generiert Siteware business automatisch einen professionellen und "+
-      "ansprechenden Blogtext, ganz nach Deinen Vorstellungen.",
+      "ansprechenden Blogtext, ganz nach deinen Vorstellungen.",
       target: () => monologRef.current,
       nextButtonProps: {
         children: (
@@ -170,16 +170,26 @@ export default function Home() {
       }
     })
 
+    const getRibbonText = (uid: string) => {
+      if(uid == "excel" || uid == "dialog" || uid == "monolog"){
+        return "Neu"
+      }else{
+        return undefined;
+      }
+    }
+
     return (
       <div className={styles.servicelist}>
         {servicearr.map((singleService: Service, idx: number) => {
           return <AssistantCard
+            name={singleService.uid}
             key={idx}
             image={singleService.image}
             title={singleService.title}
             description={singleService.description}
             link={singleService.link}
             fav={user.services?.favourites.includes(singleService.uid)}
+            ribbonText={getRibbonText(singleService.uid)}
             onVideoClick={() => {
               setVideoLink(singleService.video);
               setVideoPopupVisible(true);
@@ -204,7 +214,7 @@ export default function Home() {
 
 
   return (
-    <HomeSidebarLayout context={context} category={{ value: selectedCat, setter: setSelectedCat }}>
+    <HomeSidebarLayout user={user} messageApi={messageApi} context={context} category={{ value: selectedCat, setter: setSelectedCat }}>
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>
@@ -219,8 +229,35 @@ export default function Home() {
           <div className={styles.services}>
             <AssistantCardList />
           </div>
+          
+          <div className={styles.comingsoonrow}>
+            <Badge.Ribbon text={"Coming soon"} color="red">
+              <div className={styles.comingsoon}>
+                <Card className={styles.comingsooncard}>
+                  <div className={styles.builder}>
+                    <div className={styles.buildercontent}>
+                      <h2 className={styles.builderheadline}>Fragen Sie jetzt Ihren individuellen KI-Assistenten von Siteware business an.</h2>
+                      <div className={styles.buildertext}>
+                      Fordern Sie jetzt Ihr maßgeschneidertes Angebot an und nutzen Sie unsere innovative DMSP-Technologie für kostengünstige, 
+                      hochindividualisierte Lösungen. Einzigartig: Profitieren Sie von einer möglichen vollständigen Refinanzierung der Entwicklungskosten, 
+                      wenn Ihr Assistent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern schreiben wir Ihnen die doppelte Höhe Ihrer 
+                      Entwicklungskosten auf Ihr Konto als siteware-Credits gut. Wählen Sie schon bald aus einer Vielzahl an Assistenten im neuen 
+                      siteware business APP-Store. Mit siteware business sind Sie immer einen Schritt voraus – seien Sie dabei. Von Anfang an.
+                      </div>
+                      <div className={styles.buttonsection}>
+                        <Button type="primary" className={styles.builderbutton}>Angebot anfordern</Button>
+                        <Button type="primary" className={styles.builderbutton}>Zum App-Store</Button>
+                      </div>
+                    </div>
+                    <div className={styles.builderteaser}>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </Badge.Ribbon>
+          </div>
 
-          <div className={styles.bannersection}><RecommendBox user={user} messageApi={messageApi} /></div>
+          <div className={styles.bannersection}></div>
         </div>
 
         <Modal className={styles.videopopup} footer={null} width={800} open={videoPopupVisible} onCancel={() => {

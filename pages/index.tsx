@@ -260,7 +260,7 @@ export default function Home() {
           <div className={styles.bannersection}></div>
         </div>
 
-        <Modal className={styles.videopopup} footer={null} width={800} open={videoPopupVisible} onCancel={() => {
+        <Modal className={styles.videopopup} footer={null} width={1000} open={videoPopupVisible} onCancel={() => {
           setPlay(false);
           setVideoPopupVisible(false);
           if(videoLink){
@@ -273,7 +273,7 @@ export default function Home() {
           }
         }}>
           <div className={styles.videoplayer}>
-            <ReactPlayer ref={videoplayer} url={videoLink} width='100%' height='100%'/>
+            <ReactPlayer ref={videoplayer} url={videoLink} width='100%' height='60vh'/>
           </div>
         </Modal>
 

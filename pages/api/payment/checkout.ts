@@ -42,7 +42,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                     unit_amount: price * 100
                   },
                   quantity: 1,
-                  tax_rates: ["txr_1OXTEAHQUxIWnEqkTPClNGtz"]
+                  tax_rates: [process.env.TAXRATE]
                 };
 
                 const paymentIntent = await stripe.checkout.sessions.create({

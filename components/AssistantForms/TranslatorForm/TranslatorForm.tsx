@@ -16,7 +16,7 @@ const LANGUAGES = ["Deutsch", "Englisch", "Spanisch", "Französisch", "Portugies
  * @param props Object containting the current state of the AuthContext and the form component used by the AssistantContext
  * @returns Form used for creating blog content
  */
-const TranslatorForm = (props: { state, form: FormInstance, refs: { profileRef, questionRef, generateRef  } }) => {
+const TranslatorForm = (props: { state, form: FormInstance, refs: { textRef, languageRef, translateRef  } }) => {
   const AssistantContextState = useContext(AssistantContext);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const TranslatorForm = (props: { state, form: FormInstance, refs: { profileRef, 
     <>
       <div className={styles.userinputform}>
         <Card title={"Übersetzung"} className={styles.userinputcardmain}>
-          <div ref={props.refs.questionRef}>
+          <div>
             <Form.Item
               name="profile"
               hidden
@@ -38,7 +38,7 @@ const TranslatorForm = (props: { state, form: FormInstance, refs: { profileRef, 
             </Form.Item>
           </div>
 
-          <div ref={props.refs.questionRef}>
+          <div ref={props.refs.textRef}>
             <Form.Item
               className={styles.formpart}
               label={<b>Zu übersetzender Text</b>}
@@ -59,7 +59,7 @@ const TranslatorForm = (props: { state, form: FormInstance, refs: { profileRef, 
             </Form.Item>
           </div>
 
-          <div>
+          <div ref={props.refs.languageRef}>
             <Form.Item
               className={styles.formpart}
               label={<b>Zielsprache</b>}
@@ -88,7 +88,7 @@ const TranslatorForm = (props: { state, form: FormInstance, refs: { profileRef, 
               : <></>
           }
         </div>
-        <div ref={props.refs.generateRef} className={styles.generatebuttonrow}>
+        <div ref={props.refs.translateRef} className={styles.generatebuttonrow}>
           <FatButton
             isSubmitButton={true}
             disabled={AssistantContextState.requestState.formDisabled || AssistantContextState.requestState.quotaOverused}

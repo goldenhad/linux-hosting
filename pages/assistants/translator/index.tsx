@@ -21,18 +21,17 @@ export default function Dialogue( ) {
   const { login, user } = context;
   const [ form ] = Form.useForm();
 
-  const profileRef = useRef( null );
-  const generateRef = useRef( null );
-  const questionRef = useRef( null );
+  const textRef = useRef( null );
+  const languageRef = useRef( null );
+  const translateRef = useRef( null );
 
   const steps: TourProps["steps"] = [
     {
-      title: "Excel Hilfe",
-      description: "Das \"Excel-Hilfe\"-Feature von Siteware business bietet dir eine persönliche und zielgerichtete Unterstützung"+
-      " für alle deine Anliegen rund um Microsoft Excel. Egal, ob du eine spezifische Frage hast, Hilfe bei komplexen Formeln benötigst"+
-      " oder Unterstützung bei der Datenaufbereitung suchst, dieses Feature steht dir zur Seite. Du kannst deine Fragen eingeben"+
-      " und erhältst maßgeschneiderte Antworten und Anleitungen, die genau auf deine Bedürfnisse und dein aktuelles Problem zugeschnitten"+
-      " sind.",
+      title: "Übersetzer",
+      description: "Das \"Übersetzer\"-Feature von Siteware-Business bietet Dir die Möglichkeit, Texte schnell und präzise in verschiedene Sprachen zu "+
+      "übersetzen. Direkt in unsere Plattform integriert, ermöglicht es eine nahtlose internationale Kommunikation, ohne dass Du Dein Arbeitsumfeld verlassen musst. "+
+      "Unser KI-gestütztes System garantiert dabei hohe Genauigkeit, indem es Kontext und Nuancen des Originaltexts berücksichtigt. Erweitere mit Siteware-Business "+
+      "Deine globale Kommunikation und Zusammenarbeit effektiv.",
       nextButtonProps: {
         children: (
           "Weiter"
@@ -45,11 +44,12 @@ export default function Dialogue( ) {
       }
     },
     {
-      title: "Wer stellt die Frage?",
-      description: "Hier hast du die Möglichkeit, ein Profil auszuwählen, das die Persönlichkeit widerspiegelt, "+
-      "die die Frage stellt. Bei deinem ersten Login habe ich bereits ein Hauptprofil für dich angelegt. "+
-      "Falls du weitere Profile anlegen oder dein Hauptprofil bearbeiten möchtest, kannst du dies direkt in der Seitenleiste unter dem Punkt \"Profil\" tun.",
-      target: () => profileRef.current,
+      title: "Was würdest du gerne übersetzen?",
+      description: "Hier kannst Du deinen Text einfügen. Nachdem Du Deinen Text in dieses Feld eingegeben hast, kümmert sich unser KI-gestütztes System "+
+      "um die Übersetzung in die von Dir gewählte Sprache. Es analysiert den Kontext und die Nuancen Deines Textes, um eine möglichst genaue und "+
+      "verständliche Übersetzung zu gewährleisten. Dieses Eingabefeld ist Dein erster Schritt, um globale Barrieren zu überwinden und Deine Nachrichten, "+
+      "Dokumente oder jegliche Textinhalte effektiv mit einem internationalen Publikum zu teilen.",
+      target: () => textRef.current,
       nextButtonProps: {
         children: (
           "Weiter"
@@ -62,11 +62,10 @@ export default function Dialogue( ) {
       }
     },
     {
-      title: "Wie lautet deine Frage?",
-      description: "In diesem Eingabefeld kannst du deine Frage zu Microsoft Excel stellen."+
-      " Egal ob es um Formeln, Funktionen, Tabellengestaltung oder Datenanalyse geht – gib einfach dein Anliegen"+
-      " ein und erhalte maßgeschneiderte Anleitungen und Antworten, die speziell auf dich und deine Bedürfnisse zugeschnitten sind.",
-      target: () => questionRef.current,
+      title: "Welche Sprache darf es sein?",
+      description: "Hier kannst Du die Ziel-Sprache festlegen, in die Dein Text übersetzt werden soll. "+
+      "Dieses Feld bietet Dir eine Auswahl an verfügbaren Sprachen, aus der Du die gewünschte Option wählen kannst. ",
+      target: () => languageRef.current,
       nextButtonProps: {
         children: (
           "Weiter"
@@ -80,9 +79,9 @@ export default function Dialogue( ) {
     },
     {
       title: "Alles bereit",
-      description: "Durch Klicken auf den \"Antwort generieren\"-Button wird nach einer kurzen Wartezeit eine Antwort erzeugt. "+
+      description: "Durch Klicken auf den \"Übersetzen\"-Button wird nach einer kurzen Wartezeit eine Übersetzung erzeugt. "+
       "Bitte bedenke, dass wir deine Eingaben noch verarbeiten müssen, wodurch es gegebenenfalls zu kurzen Wartezeiten kommen kann.",
-      target: () => generateRef.current,
+      target: () => translateRef.current,
       nextButtonProps: {
         children: (
           "Alles klar"
@@ -133,9 +132,9 @@ export default function Dialogue( ) {
 
     >
       <TranslatorForm form={form} state={context} refs={{
-        profileRef,
-        questionRef,
-        generateRef
+        textRef,
+        languageRef,
+        translateRef
       }}/>
     </AssistantBase>
   );

@@ -10,7 +10,8 @@ export type Templates = {
     ownaboutus: string,
     services: string,
     singleuser: string,
-    webcontent: string
+    webcontent: string,
+    translator: string
 }
 
 export type Parameters = {

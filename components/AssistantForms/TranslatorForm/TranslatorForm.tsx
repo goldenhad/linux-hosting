@@ -16,11 +16,12 @@ const LANGUAGES = ["Deutsch", "Englisch", "Spanisch", "Französisch", "Portugies
  * @param props Object containting the current state of the AuthContext and the form component used by the AssistantContext
  * @returns Form used for creating blog content
  */
-const TranslatorForm = (props: { state, form: FormInstance<any>, refs: { profileRef, questionRef, generateRef  } }) => {
+const TranslatorForm = (props: { state, form: FormInstance, refs: { profileRef, questionRef, generateRef  } }) => {
   const AssistantContextState = useContext(AssistantContext);
 
   useEffect(() => {
     props.form.setFieldValue("profile", "Hauptprofil");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 

@@ -73,7 +73,7 @@ const AssistantBase = (props: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     promptFunction: (values: Record<string, any>, profile: Profile, templates: Templates) => { data: Record<string, any>, prompt: string },
     routes: { count?: string, generate: string }
-    form: FormInstance<any>,
+    form: FormInstance,
     tourState: boolean
 }) => {
   const [ decryptedProfiles, setDecryptedProfiles ] = useState( [] );

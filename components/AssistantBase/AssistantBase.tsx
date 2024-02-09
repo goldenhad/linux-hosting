@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Divider, Form, List, Result, Skeleton, Tour, TourProps, message, Typography, Drawer, notification } from "antd";
+import { Alert, Button, Card, Divider, Form, List, Result, Skeleton, Tour, TourProps, message, Typography, Drawer, notification, FormInstance } from "antd";
 import axios from "axios";
 import styles from "./AssistantBase.module.scss";
 import { createContext, useEffect, useState } from "react";
@@ -73,7 +73,7 @@ const AssistantBase = (props: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     promptFunction: (values: Record<string, any>, profile: Profile, templates: Templates) => { data: Record<string, any>, prompt: string },
     routes: { count?: string, generate: string }
-    form,
+    form: FormInstance<any>,
     tourState: boolean
 }) => {
   const [ decryptedProfiles, setDecryptedProfiles ] = useState( [] );
@@ -374,6 +374,8 @@ const AssistantBase = (props: {
     const profile = decryptedProfiles.find( ( singleProfile: Profile ) => {
       return singleProfile.name == values.profile;
     } );
+
+    console.log(values);
 
     // If the given profile was found...
     if( profile ) {
@@ -757,6 +759,8 @@ const AssistantBase = (props: {
       }
   
       setFormDisabled( false );
+    }else{
+      console.log("no profile");
     }
   }
 

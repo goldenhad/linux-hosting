@@ -92,3 +92,13 @@ export function parseExcelPrompt(
       
   return parsed
 }
+
+export function parseTranslatorPrompt(
+  prompt: string, language: string, text: string
+){
+  const parsed = prompt
+    .replace( "<language>", language )
+    .replace( "<text>", text )
+      
+  return parsed
+}

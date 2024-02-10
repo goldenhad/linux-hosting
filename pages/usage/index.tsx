@@ -241,7 +241,7 @@ export default function Usage( props ) {
           <Collapse items={orderitems} /><div className={styles.orderpagination}>
             <Pagination onChange={(page: number) => {
               setOrderPage(page);
-            } } defaultCurrent={1} pageSize={ordersperpage} total={company.orders.length} />
+            } } defaultCurrent={orderpage} pageSize={ordersperpage} total={company.orders.length} />
           </div>
         </>
       );
@@ -263,15 +263,18 @@ export default function Usage( props ) {
         return 0
       }
     });
-    
-    for(let i=(orderpage - 1); i  < ordersperpage; i++){
-      if(i < company.orders.length){
-        const order = orderedorders[i];
+
+    console.log(ordersperpage, orderpage)
+    const offset = (orderpage - 1) * ordersperpage;
+
+    for(let i=0; i  < ordersperpage; i++){
+      if(i + offset < company.orders.length){
+        const order = orderedorders[i + offset];
         const orderdate = new Date( order.timestamp * 1000 );
         const datestring = moment(orderdate).format("DD.MM.YYYY");
 
         items.push({
-          key: i,
+          key: i + offset,
           label: <div className={styles.singleorder}>
             <div className={styles.ordertitle}>
               <span className={styles.orderdate}>{datestring}</span>
@@ -295,7 +298,7 @@ export default function Usage( props ) {
               </List>
             </div>
 
-            {(order.state == "successfull")? <div className={styles.orderactions}>
+            {(order.state == "accepted")? <div className={styles.orderactions}>
               <h3>Aktionen</h3>
               <List>
                 <List.Item className={styles.actiondetail}>

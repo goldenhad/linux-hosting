@@ -32,7 +32,6 @@ import moment from "moment";
 import { isMobile } from "react-device-detect";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "../../db";
-import { getPDFUrl } from "../../helper/invoice";
 import axios from "axios";
 import RechargeForm from "../../components/RechargeForm/RechargeForm";
 import { Elements } from "@stripe/react-stripe-js";
@@ -40,6 +39,7 @@ import getStripe from "../../helper/stripe";
 import AddCreditCardForm from "../../components/AddCreditCardForm/AddCreditCardForm";
 import UsageStatistic from "../../components/UsageStatistic/UsageStatistic";
 import { TokenCalculator } from "../../helper/price";
+import { useRouter } from "next/router";
 
 ChartJS.register(
   CategoryScale,
@@ -52,8 +52,8 @@ ChartJS.register(
 
 const ordersperpage = 10;
 const thisyear = new Date().getFullYear();
-const stripePromise = getStripe();
 
+const stripePromise = getStripe();
 
 export const getServerSideProps: GetServerSideProps = async () => {
     
@@ -80,6 +80,7 @@ export default function Usage( props ) {
   const [messageApi, contextHolder] = message.useMessage();
   const [ activeTab, setActiveTab ] = useState("1");
   const [ calculator ] = useState(new TokenCalculator(calculations));
+  const router = useRouter();
 
 
   const budgetRef = useRef( null );
@@ -199,7 +200,7 @@ export default function Usage( props ) {
       setLowerBound(min);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   const orderState = (obj) => {
     switch( obj.state ){
@@ -233,9 +234,11 @@ export default function Usage( props ) {
 
   const PurchaseInformation = () => {
     if(company.orders.length > 0){
+      const orderitems = getOrderItems();
+
       return(
         <>
-          <Collapse items={getOrderItems()} /><div className={styles.orderpagination}>
+          <Collapse items={orderitems} /><div className={styles.orderpagination}>
             <Pagination onChange={(page: number) => {
               setOrderPage(page);
             } } defaultCurrent={1} pageSize={ordersperpage} total={company.orders.length} />
@@ -249,6 +252,8 @@ export default function Usage( props ) {
 
   const getOrderItems = () => {
     const items = [];
+
+
     const orderedorders = company.orders.toSorted((a: Order, b: Order) => {
       if(a.timestamp < b.timestamp){
         return 1;
@@ -290,21 +295,25 @@ export default function Usage( props ) {
               </List>
             </div>
 
-            <div className={styles.orderactions}>
+            {(order.state == "successfull")? <div className={styles.orderactions}>
               <h3>Aktionen</h3>
               <List>
                 <List.Item className={styles.actiondetail}>
                   <div className={styles.description}>Rechnung herunterladen:</div>
                   <div style={{ overflow: "none" }}>
-                    <FileTextOutlined style={{ fontSize: 20 }} onClick={() => {
-                      getPDFUrl(role, user, company, order, calculations).download(`Siteware_business_invoice_${order.invoiceId}`)
-                    }}/>
+                    <Button onClick={async () => {
+                      const invoiceurlreq = await axios.get(`/api/payment/invoice?orderid=${order.id}`);
+                      if(invoiceurlreq.data.message){
+                        const invoiceurl = invoiceurlreq.data.message
+                        router.push(invoiceurl);
+                      }
+                    }}><FileTextOutlined /></Button>
                     <div style={{ display: "none", overflow: "none" }}>
                     </div>
                   </div>
                 </List.Item>
               </List>
-            </div>
+            </div>: <></>}
           </div>
         });
       }

@@ -326,6 +326,9 @@ export default function Usage( props ) {
   }
 
   const getBuyOptions = () => {
+    const userCanBuyCredits = !role.isCompany || role.canEditCompanyDetails || role.canSetupCompany;
+
+
     if(company?.paymentMethods?.length > 0){
       if(company?.plan && company?.plan.state == "active"){
         return(
@@ -336,7 +339,7 @@ export default function Usage( props ) {
                   logEvent(analytics, "buy_tokens", {
                     currentCredits: company?.tokens
                   });
-                }} type='primary'>Weitere Credits kaufen</Button> : <></>}
+                }} type='primary' disabled={!userCanBuyCredits}>Weitere Credits kaufen</Button> : <></>}
               </Link>
             </div>
             <div className={styles.planwindow}>
@@ -349,9 +352,9 @@ export default function Usage( props ) {
                   {calculator.indexToCredits(company.plan?.product, true)}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
                 <span className={styles.creds}> {company?.plan?.threshold}</span> Credits fällt.
               </div>
-              <Button type="link" className={styles.planedit} onClick={() => {
+              {(!userCanBuyCredits)? <></>: <Button type="link" className={styles.planedit} onClick={() => {
                 setRechargeModalOpen(true);
-              }}>anpassen</Button>
+              }}>anpassen</Button>}
             </div>
           </>
         );
@@ -364,7 +367,7 @@ export default function Usage( props ) {
                   logEvent(analytics, "buy_tokens", {
                     currentCredits: (company.tokens)? company.tokens: 0
                   });
-                }} type='primary'>Weitere Credits kaufen</Button> : <></>}
+                }} type='primary' disabled={!userCanBuyCredits}>Weitere Credits kaufen</Button> : <></>}
               </Link>
             </div>
             <div className={styles.planwindow}>
@@ -376,7 +379,7 @@ export default function Usage( props ) {
               </div>
               <Button type="link" className={styles.planedit} onClick={() => {
                 setRechargeModalOpen(true)
-              }}>aktivieren</Button>
+              }} disabled={!userCanBuyCredits}>aktivieren</Button>
             </div>
           </>
         );
@@ -390,7 +393,7 @@ export default function Usage( props ) {
                 logEvent(analytics, "buy_tokens", {
                   currentCredits: (company.tokens)? company.tokens: 0
                 });
-              }} type='primary'>Weitere Credits kaufen</Button> : <></>}
+              }} type='primary' disabled={!userCanBuyCredits}>Weitere Credits kaufen</Button> : <></>}
             </Link>
           </div>
           <div className={styles.planwindow}>
@@ -402,7 +405,7 @@ export default function Usage( props ) {
             </div>
             <Button type="link" className={styles.planedit} onClick={() => {
               setActiveTab("2")
-            }}>Jetzt hinzufügen</Button>
+            }} disabled={!userCanBuyCredits} >Jetzt hinzufügen</Button>
           </div>
         </>
       );
@@ -429,6 +432,8 @@ export default function Usage( props ) {
   }
 
   const getSetups = () => {
+    const userCanBuyCredits = !role.isCompany || role.canEditCompanyDetails || role.canSetupCompany;
+
     if(company?.paymentMethods){
       if(company.paymentMethods.length > 0){
         return <>
@@ -438,9 +443,9 @@ export default function Usage( props ) {
                 <div className={styles.container}>
                   <div className={styles.name}><CreditCardOutlined className={styles.cardicon}/>{method.name}</div>
                   <div className={styles.actions}>
-                    <div onClick={async () => {
+                    {(!userCanBuyCredits)? <></>: <div onClick={async () => {
                       setDeletePaymentMethod(true);
-                    }}><DeleteOutlined className={styles.trashicon} /></div>
+                    }}><DeleteOutlined className={styles.trashicon} /></div>}
                   </div>
                 </div>
               </Card>
@@ -463,7 +468,7 @@ export default function Usage( props ) {
             <div className={styles.buttonrow}>
               <Button type="primary" onClick={() => {
                 setAddPaymentOpen(true)
-              }}>Hinzufügen</Button>
+              }} disabled={!userCanBuyCredits}>Hinzufügen</Button>
             </div>
           </div>
         </div>  
@@ -475,7 +480,7 @@ export default function Usage( props ) {
           <div className={styles.buttonrow}>
             <Button type="primary" onClick={() => {
               setAddPaymentOpen(true)
-            }}>Hinzufügen</Button>
+            }} disabled={!userCanBuyCredits}>Hinzufügen</Button>
           </div>
         </div>
       </div>  

@@ -46,7 +46,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                 };
 
                 const paymentIntent = await stripe.checkout.sessions.create({
-                  payment_method_types: ["card"],
+                  payment_method_types: ["card", "paypal"],
                   line_items: [transformedItem],
                   mode: "payment",
                   customer_email: data.email,

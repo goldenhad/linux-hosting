@@ -5,7 +5,7 @@ import { Alert, Checkbox, Form, Input, MenuProps, Select, Space, Menu } from "an
 import styles from "./register.module.scss"
 import signUp, { signUpUser } from "../../firebase/auth/signup";
 import Head from "next/head";
-import userExists, { usernameExists } from "../../firebase/auth/userExists";
+import userExists, { couponExists, usernameExists } from "../../firebase/auth/userExists";
 import CookieBanner from "../../components/CookieBanner/CookieBanner";
 import { getDocWhere } from "../../firebase/data/getData";
 import Link from "next/link";
@@ -119,7 +119,6 @@ export default function Register( props ){
   const onFinishRegisterCompany = async ( values ) => {
     const isPersonal = values.usecase != "Für mein Unternehmen";
     
-
     if( isPersonal ){
       const recommendCode = props.invitedBy?.code;
 
@@ -135,22 +134,21 @@ export default function Register( props ){
         values.postalcode,
         "DE",
         true,
-        recommendCode
+        recommendCode,
+        values.coupon
       );
             
       if ( error ) {
-        //console.log(error);
+        console.log(error);
         setLoginFailed( true );
       }else{
         setLoginFailed( false );
         // else successful
-        //console.log(result)
+        console.log(error)
         return router.push( "/setup" )
       }
     }else{
       const recommendCode = props.invitedBy?.code;
-
-      console.log(values);
 
       const { error } = await signUp( 
         values.firstname,
@@ -164,7 +162,8 @@ export default function Register( props ){
         values.postalcode,
         "DE",
         false,
-        recommendCode
+        recommendCode,
+        values.coupon
       );
 
       console.log("came this far");
@@ -281,6 +280,29 @@ export default function Register( props ){
             <Input className={styles.logininput_right} />
           </Form.Item>
         </Space.Compact>
+
+        <Form.Item
+          label="Aktionscode"
+          name="coupon"
+          className={styles.loginpart}
+          rules={[
+            () => ( {
+              async validator( _, value ) {
+                if( value != "" ){
+                  if ( await couponExists( value ) ) {
+                    return Promise.resolve();         
+                  }else{
+                    return Promise.reject( new Error( "Der Coupon existiert nicht!" ) );
+                  }
+                }else{
+                  return Promise.resolve();
+                }
+              }
+            } )
+          ]}
+        >
+          <Input className={styles.logininput} />
+        </Form.Item>
       </>
     }else{
       return(

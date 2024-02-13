@@ -74,7 +74,8 @@ const AssistantBase = (props: {
     promptFunction: (values: Record<string, any>, profile: Profile, templates: Templates) => { data: Record<string, any>, prompt: string },
     routes: { count?: string, generate: string }
     form: FormInstance,
-    tourState: boolean
+    tourState: boolean,
+    dontUseProfile: boolean
 }) => {
   const [ decryptedProfiles, setDecryptedProfiles ] = useState( [] );
   const [ quotaOverused, setQuotaOverused ] =  useState( true );
@@ -375,10 +376,8 @@ const AssistantBase = (props: {
       return singleProfile.name == values.profile;
     } );
 
-    console.log(values);
-
     // If the given profile was found...
-    if( profile ) {
+    if( profile || props.dontUseProfile ) {
       try{
         // Initialize the state of the form and answer
         setFormDisabled( true );

@@ -209,6 +209,7 @@ export default function Monologue( ) {
       promptFunction={promptFunction}
       routes={ { generate: "/api/prompt/monolog/generate" } }
       tourState={!handleUndefinedTour( user.tour ).monolog}
+      dontUseProfile={false}
     >
       <MonologForm form={form} state={context} refs={{
         profileRef: profileRef,

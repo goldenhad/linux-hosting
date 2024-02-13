@@ -139,6 +139,7 @@ export default function Dialogue( ) {
       promptFunction={promptFunction}
       routes={ { generate: "/api/prompt/excel/generate" } }
       tourState={!handleUndefinedTour( user.tour ).excel}
+      dontUseProfile={false}
 
     >
       <ExcelForm form={form} state={context} refs={{

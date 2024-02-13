@@ -227,7 +227,7 @@ export default function Dialogue( ) {
       promptFunction={promptFunction}
       routes={ { generate: "/api/prompt/dialog_old/generate" } }
       tourState={!handleUndefinedTour( user.tour ).dialog}
-
+      dontUseProfile={false}
     >
       <DialogForm form={form} state={context} refs={{
         profileRef: profileRef,

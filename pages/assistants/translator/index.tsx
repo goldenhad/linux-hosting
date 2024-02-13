@@ -129,7 +129,7 @@ export default function Dialogue( ) {
       promptFunction={promptFunction}
       routes={ { generate: "/api/prompt/translator/generate" } }
       tourState={!handleUndefinedTour( user.tour ).translator}
-
+      dontUseProfile={true}
     >
       <TranslatorForm form={form} state={context} refs={{
         textRef,

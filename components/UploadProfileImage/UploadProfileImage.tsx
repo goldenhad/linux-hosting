@@ -101,7 +101,7 @@ const UploadProfileImage = ( props: {
   }
     
   const getDeleteButton = () => {
-    if( props.image ){
+    if( props.image.url ){
       return <DeleteOutlined className={styles.deleteProfilePictureButton} onClick={async () => {
         await deleteProfilePicture( props.login.uid );
         console.log( "Deleted Picture successfully!" )

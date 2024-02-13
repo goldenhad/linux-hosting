@@ -1,4 +1,5 @@
-import { getDocWhere } from "../data/getData";
+import getDocument, { getDocWhere } from "../data/getData";
+import { Calculations } from "../types/Settings";
 
 export default async function userExists( email: string ) {
   const result = null;
@@ -32,6 +33,32 @@ export async function usernameExists( username: string ) {
 
   return { result, error };
 }
+
+export async function couponExists( coupon: string ) {
+  const result = null;
+  let error = null;
+
+  try {
+    const { result } = await getDocument( "Settings", "Calculation" );
+
+    const calcs: Calculations = result.data();
+    if(calcs.coupons){
+      const findIndex  = calcs.coupons.findIndex((val) => {
+        return val.code == coupon;
+      });
+
+      return findIndex != -1;
+    }else{
+      return false;
+    }
+  } catch ( e ) {
+    error = e;
+    //console.log(e);
+  }
+
+  return { result, error };
+}
+
 
 export async function usernameExistsAtDifferentUser( username: string, userid: string ) {
   const result = null;

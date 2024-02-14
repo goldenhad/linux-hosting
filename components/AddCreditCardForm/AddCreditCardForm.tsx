@@ -7,24 +7,40 @@ import Stripe from "stripe";
 import updateData from "../../firebase/data/updateData";
 import { User } from "../../firebase/types/User";
 import { useState } from "react";
+import { MessageInstance } from "antd/es/message/interface";
 
-
-const AddCreditCardForm = ( props: { company: Company, user: User, reddirectURL: string, onSuccess, messageApi } ) => {
+/**
+ * Component for handling stripe credit card payments
+ * @param props.company Object containing the company information
+ * @param props.user Object containing the user
+ * @param props.onSuccess Function to be called if the addition of the card was successfull
+ * @param props.messageApi Object used for sending messages to the user
+ * @constructor
+ */
+const AddCreditCardForm = ( props: { company: Company, user: User, onSuccess: () => void, messageApi: MessageInstance  } ) => {
   const elements = useElements();
   const stripe = useStripe();
   const [ loading, setLoading ] = useState(false);
   const [form] = Form.useForm();
 
-
+  /**
+   * Tries to add a new payment method to the user
+   */
   const addPaymentMethod = async () => {
+    // Enable loading animation for the 'hinzufügen'-Button
     setLoading(true);
 
     const card = elements.getElement("card");
+    // If we can't find the element or stripe is undefined return directly
     if (!stripe || !card) return null;
 
     try{
       let companyCustomerId = props.company.customerId;
-      if(!props.company.customerId){        
+
+      // Check if the user has already got an ID from stripe
+      if(!props.company.customerId){     
+        // If the user does not a have an ID...
+        // Call the api and request the creation of a new stripe customer   
         const { data } = await axios.post("/api/payment/createcustomer", {
           name: (props.company.name != "")? props.company.name: `${props.user.firstname} ${props.user.lastname}`,
           email: props.user.email,
@@ -35,34 +51,39 @@ const AddCreditCardForm = ( props: { company: Company, user: User, reddirectURL:
           }
         });
 
-        console.log(data.message);
-
+        // The API will return the id of the newly created customer in the message member
         const customerid = data.message;
         companyCustomerId = customerid;
         await updateData("Company", props.user.Company , { customerId: customerid });
       }
-      console.log(companyCustomerId);
+      
+      // With the customerID of the user call the API to create a setup
       const createsetupintent = await axios.post("/api/payment/createsetup", {
         customer: companyCustomerId
       })
 
+      // We pass the client secret from the API call to stripe in order to confirm the setupintent
+      // In this step we also provide the given card details
       const confirm = await stripe.confirmCardSetup(createsetupintent.data.message, {
         payment_method: {
           card: card
         }
       });
 
+      // Check if the confirmation completed or caused an error
       if(!confirm.error){
-
+        // Call the API to finishe the previously created setupintent
         const finish = await axios.post("/api/payment/finishsetup", {
           setupintent: confirm.setupIntent.id,
           customer: companyCustomerId
         });
 
-
+        // Check the result of the finish request.
         if(finish.status == 200){
+          // Get the created setupintent from our last API call
           const setupintent: Stripe.SetupIntent = finish.data.intent;
 
+          // Create a payment method object, so we can store the users card information
           const methods: Array<PaymentMethod> = [{
             id: setupintent.id,
             name: "Kreditkarte",
@@ -72,25 +93,32 @@ const AddCreditCardForm = ( props: { company: Company, user: User, reddirectURL:
             lastState: "init"
           }]
 
+          // Add the payment method object to the users company
           const res = await updateData("Company", props.user.Company, { paymentMethods: methods })
           if(res.error){
+            // If we encounter any error during the update company request, provide an error message
             props.messageApi.error("Beim Aktualisieren deiner Zahlungsdaten ist ein Fehler aufgetreten!")
           }else{
+            // If we didn't encounter an error call the onSuccess Callback and clear the card form
             props.onSuccess();
             card.clear();
             form.resetFields();
           }
             
         }else{
-          console.log("setup not found!");
+          // If the finish request failed, provide the user an error message
+          props.messageApi.error("Beim Aktualisieren deiner Zahlungsdaten ist ein Fehler aufgetreten!")
         }
       }else{
+        // Error message if the confirmation of the card caused an error
         props.messageApi.error("Beim Aktualisieren deiner Zahlungsdaten ist ein Fehler aufgetreten!")
       }
     }catch(e){
+      // Catch any error caused by the card setup process
       props.messageApi.error("Beim Aktualisieren deiner Zahlungsdaten ist ein Fehler aufgetreten!")
     }
     
+    // disable the loading of the 'hinzufügen'-button after the prcoess
     setLoading(false);
   }
 
@@ -103,31 +131,6 @@ const AddCreditCardForm = ( props: { company: Company, user: User, reddirectURL:
         <Form.Item label={"Karteninformationen"} className={styles.formpart}>
           <CardElement />
         </Form.Item>
-
-        {/* <Form.Item label={"Interner Name"} className={styles.formpart} name={"cardname"}>
-          <Input className={styles.forminput}></Input>
-        </Form.Item> */}
-
-        {/* <p>Rechnungsadresse</p>
-
-        <Form.Item label={"Straße"} className={styles.formpart} name={"street"}>
-          <Input className={styles.forminput}></Input>
-        </Form.Item>
-
-        <Form.Item label={"PLZ"} className={styles.formpart} name={"postalcode"}>
-          <Input className={styles.forminput}></Input>
-        </Form.Item>
-
-        <Form.Item label={"Ort"} className={styles.formpart} name={"city"}>
-          <Input className={styles.forminput}></Input>
-        </Form.Item> */}
-
-        {/* <Form.Item className={styles.formswitch} name={"default"}>
-          <Switch onChange={(checked) => {
-            setIsDefault(checked)
-          }}></Switch>
-          <p>Als Standard Bezahlmethode aktivieren</p>
-        </Form.Item> */}
 
         <div className={styles.addbuttonrow}>
           <Button className={styles.addpaymentbutton} type='primary' htmlType="submit" loading={loading}>Hinzufügen</Button>

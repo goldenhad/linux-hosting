@@ -10,6 +10,19 @@ import { getAssistantImage } from "../../firebase/drive/upload_file";
 
 const { Paragraph } = Typography;
 
+/**
+ * Component using the Antd card component to present an assistant to the user
+ * @param props.name Name of the assistant, used for fav-feature
+ * @param props.image Link to the image of the assistant
+ * @param props.title Title of the assistant
+ * @param props.description Short explanatory text used to describe the assistants features
+ * @param props.link Link to the assistant
+ * @param props.fav Flag that indicates if the assistant is a favourite of the user
+ * @param props.onFav Function to be called if the user favs this assistant
+ * @param props.onDeFav Function to be called if the user defavs this assistant
+ * @param props.onVideoClick Function to be called if the user clicks on the video button
+ * @constructor
+ */
 const AssistantCard = ( props: {
     name: string,
     image: string,
@@ -24,6 +37,10 @@ const AssistantCard = ( props: {
   } ) => {
   const [image, setImage] = useState("/base.svg");
 
+  /**
+   * Effect to load the provided assistant image.
+   * If no image was provided use the base svg image
+   */
   useEffect(() => {
     const loadImage = async () => {
       if(props.image){
@@ -46,7 +63,7 @@ const AssistantCard = ( props: {
           <div className={styles.serviceheadline}>
             <div className={styles.servicelogo}>
               {/* eslint-disable-next-line */}
-            <img width={50} height={50} src={image} alt="logo" />
+              <img width={50} height={50} src={image} alt="logo" />
             </div>
             <div className={styles.servicetitle}>{props.title}</div>
           </div>

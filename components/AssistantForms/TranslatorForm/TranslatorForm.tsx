@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Alert, Card, Form, FormInstance, Input, Select } from "antd";
 import styles from "./translatorform.module.scss";
-import { useContext, useEffect } from "react";
+import { MutableRefObject, useContext, useEffect } from "react";
 import FatButton from "../../FatButton";
 import { AssistantContext } from "../../AssistantBase/AssistantBase";
 import { isMobile } from "react-device-detect";
 import { listToOptions } from "../../../helper/architecture";
+import { ctx } from "../../context/AuthContext";
 
 const { TextArea } = Input;
 
@@ -12,11 +14,20 @@ const LANGUAGES = ["Deutsch", "Englisch", "Spanisch", "Französisch", "Portugies
 
 
 /**
- * Component implementing the form used for creating blog content.
- * @param props Object containting the current state of the AuthContext and the form component used by the AssistantContext
- * @returns Form used for creating blog content
+ * Component implementing the form used for creating translated content.
+ * @param props.state Context state of the application
+ * @param props.form FormInstance used to interact with the surrounding assistant form
+ * @param props.refs Defined refs that will be used by the tutorial to highlight elements
+ * @returns Form used for creating translated content
  */
-const TranslatorForm = (props: { state, form: FormInstance, refs: { textRef, languageRef, translateRef  } }) => {
+const TranslatorForm = (props: {
+  state: ctx,
+  form: FormInstance<any>,
+  refs: { 
+    textRef: MutableRefObject<any>,
+    languageRef: MutableRefObject<any>,
+    translateRef: MutableRefObject<any>
+  } }) => {
   const AssistantContextState = useContext(AssistantContext);
 
   useEffect(() => {

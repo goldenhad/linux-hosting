@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Alert, Card, Form, FormInstance, Input, Select } from "antd";
+import { Alert, Card, Form, FormInstance, Input } from "antd";
 import styles from "./excelform.module.scss";
-import { MutableRefObject, useContext } from "react";
+import { MutableRefObject, useContext, useEffect } from "react";
 import FatButton from "../../FatButton";
 import { AssistantContext } from "../../AssistantBase/AssistantBase";
 import { isMobile } from "react-device-detect";
@@ -26,34 +26,21 @@ const ExcelForm = (props: {
     generateRef: MutableRefObject<any>  
   } }) => {
   const AssistantContextState = useContext(AssistantContext);
-
+  
+  useEffect(() => {
+    props.form.setFieldValue("profile", "Hauptprofil");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return(
     <>
       <div className={styles.userinputform}>
         <Card title={"Frage zu Excel"} className={styles.userinputcardmain}>
-          <div ref={props.refs.profileRef}>
+          <div>
             <Form.Item
-              className={styles.formpart}
-              label={<b>Profil</b>}
               name="profile"
-              rules={[
-                {
-                  required: true,
-                  message: "Bitte wähle ein Profil aus!"
-                }
-              ]}
+              hidden
             >
-              <Select
-                showSearch
-                placeholder="Wähle ein Profil aus"
-                optionFilterProp="children"
-                onSearch={undefined}
-                options={AssistantContextState.getProfiles()}
-                disabled={AssistantContextState.requestState.formDisabled || AssistantContextState.requestState.quotaOverused}
-                className={styles.formselect}
-                size='large'
-              />
             </Form.Item>
           </div>
 

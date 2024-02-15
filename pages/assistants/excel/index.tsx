@@ -18,7 +18,7 @@ const excelBasicState = {
 
 export default function Dialogue( ) {
   const context = useAuthContext();
-  const { role, login, user, company } = context;
+  const { login, user } = context;
   const [ form ] = Form.useForm();
 
   const profileRef = useRef( null );
@@ -103,25 +103,14 @@ export default function Dialogue( ) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const promptFunction = (values: Record<string, any>, profile: Profile, templates: Templates) => {
-    let companyinfo = "";
-    if( role.isCompany ){
-      companyinfo = `Ich arbeite für ${company.name}. Wir beschäftigen uns mit: ${company.settings.background}`;
-    }
-
     const cleanedQuestion = values.question.replace(/(<~).+?(~>)/gm, "");
 
     const promptdata = {
-      name: user.firstname + " " + user.lastname,
-      personal: profile.settings.personal,
-      company: companyinfo,
       question: cleanedQuestion
     }
 
     const prompt = parseExcelPrompt(
       templates.excel,
-      promptdata.name,
-      promptdata.company,
-      promptdata.personal,
       promptdata.question
     );
 

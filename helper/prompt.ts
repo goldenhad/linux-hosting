@@ -82,12 +82,9 @@ export function parseProfilePrompt(
 
 
 export function parseExcelPrompt(
-  prompt: string, name: string, company: string, personal: string, question: string
+  prompt: string, question: string
 ){
   const parsed = prompt
-    .replace( "<name>", name )
-    .replace( "<company>", company )
-    .replace( "<personal>", personal )
     .replace( "<question>", question )
       
   return parsed

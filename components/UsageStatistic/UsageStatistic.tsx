@@ -5,8 +5,16 @@ import { Usage } from "../../firebase/types/Company";
 import { useEffect, useState } from "react";
 
 
-
-const UsageStatistic = (props: { visibleYear: number, users: Array<User> }) => {
+/**
+ * Statistic representing the used credits by the user depending on the year and month
+ * @param props.visibleYear Year to show
+ * @param props.users All users of the users company
+ * @returns UsageStatistic component
+ */
+const UsageStatistic = (props: {
+  visibleYear: number,
+  users: Array<User>
+}) => {
   const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
   const [ users, setUsers ] = useState(props.users);
 

@@ -21,8 +21,21 @@ import { getImageUrl } from "../../firebase/drive/upload_file";
 type MenuItem = Required<MenuProps>["items"][number];
 
 
-
-const SidebarLayout = ( props: { children: ReactNode, context: {user: User, login, role, profile}, hist?: Dispatch<SetStateAction<boolean>>} ) => {
+/**
+ * Provides a layout with a sidebar. The sidebar implements a simple navigation
+ * @param props.children Page content
+ * @param props.context.user User object of the application
+ * @param props.context.login Firebase login object
+ * @param props.context.role Role object of the current user
+ * @param props.context.profile Profilepicture information
+ * @param props.hist Dispatcher used to display the history if we render the mobile header
+ * @returns SidebarLayout component
+ */
+const SidebarLayout = ( props: {
+  children: ReactNode,
+  context: { user: User, login, role, profile },
+  hist?: Dispatch<SetStateAction<boolean>>
+} ) => {
   const [collapsed, setCollapsed] = useState( true );
   // eslint-disable-next-line
   const [ collapseWidth, setCollapseWidth ] = useState( 80 );
@@ -38,6 +51,9 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
 
   const [ screenwidth, setScreenwidth ] = useState(window.innerWidth);
 
+  /**
+   * Effect used for getting the users profile picture 
+   */
   useEffect( () => {
     const setProfileImage = async () => {
       if(props.context.login?.uid){
@@ -50,6 +66,9 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
   }, [props.context.login] );
 
 
+  /**
+   * Effect used for responsive sizing of the sidebar
+   */
   useEffect(() => {
     if(screenwidth <= 1500 ){
       setBreakpoint("lg");
@@ -62,6 +81,11 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     }
   }, [screenwidth]);
 
+
+  /**
+   * Effect used bind a eventlistener to window resizes,
+   * so we can adapt the sidebar size accordingly without a page reload
+   */
   useEffect(() => {
     const handleResize = () => {
       setScreenwidth(window.innerWidth);
@@ -75,7 +99,16 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     };
   }, []);
 
-
+  /**
+   * Returns a MenuItem constructed from the given parameters. If the given check-function returns false, we return null
+   * if it returns true, we return the MenuItem
+   * @param label Visible label of the MenuItem
+   * @param key Internal key
+   * @param check Guardfunction. If true return item, otherwise return null
+   * @param icon Icon dispayed left of the label
+   * @param children Children of the MenuItem
+   * @returns Either the MenuItem or null
+   */
   function getItem( label: React.ReactNode, key: React.Key, check: () => boolean, icon?: React.ReactNode, children?: MenuItem[] ): MenuItem {
     if( check() ){
       return {
@@ -89,7 +122,9 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     }
   }
 
-
+  /**
+   * Links displayed in the sidebar
+   */
   const items = [
     getItem( <Link href={"/"} data-linkname={"home"}>Home</Link>, "0", () => {
       return true 
@@ -109,11 +144,17 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
   ];
 
+  // Links displayd in the sidebar footer
   const footeritems = [];
 
+  /**
+   * Get the key of the currently selected page
+   * @returns Selected key of the MenuItem. Returns -1 if the page could't be found in the keylist
+   */
   const getDefaultSelected = () => {
     let lastfound = -1;
     
+    // List of patterns to distinguish between the pages
     const patterns = [
       /(^\/$)|(\/assistants\/(a-zA-Z)*)/gm,
       /(^\/company$)/gm,
@@ -130,6 +171,9 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     return lastfound.toString();
   }
 
+  /**
+   * Subcomponent to render the overlay menu of the user profile
+   */
   const profilemenu = (
     <div className={styles.avatarmenu}>
       <Link href={"/account"} className={styles.accountlink} data-linkname={"account"}>
@@ -154,6 +198,10 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     </div>
   );
 
+  /**
+   * Subcomponent to render a header if the screenwidth is below a fixed amount
+   * @returns Header component
+   */
   const MobileHeader = () => {
     if(screenwidth <= 1500){
       return(
@@ -185,7 +233,9 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
     }
   }
   
+  // Check the current screenwidth
   if(screenwidth <= 1500){
+    // if the screenwidth is below 1500px render the mobile layout of the sidebar
     return (
       <ConfigProvider theme={{
         components: {
@@ -296,6 +346,7 @@ const SidebarLayout = ( props: { children: ReactNode, context: {user: User, logi
       </ConfigProvider>
     );
   }else{
+    // If the width of the screen is above 1500px we render the desktop variant of the component
     return (
       <ConfigProvider theme={{
         components: {

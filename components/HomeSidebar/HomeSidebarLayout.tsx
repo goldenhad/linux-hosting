@@ -20,17 +20,26 @@ import Chat from "../../public/icons/chat.svg";
 import Zap from "../../public/icons/zap.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
 import { getImageUrl } from "../../firebase/drive/upload_file";
-import RecommendBox from "../RecommendBox/RecommendBox";
+//import RecommendBox from "../RecommendBox/RecommendBox";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
 
-
+/**
+ * Provides a special sidebar layout for our homepage
+ * @param props.children Page content
+ * @param props.context.user User object of the application
+ * @param props.context.login Firebase login object
+ * @param props.context.role Role object of the current user
+ * @param props.context.profile Profilepicture information
+ * @param props.category.value Category selected by the user for the assistants
+ * @param props.category.setter Dispatcher responsible for updating the assistant category 
+ * @returns Sidebar with assistant category selector
+ */
 const HomeSidebarLayout = ( props: { 
   children: ReactNode,
   context: {user: User, login, role, profile},
   category: { value: string, setter: Dispatch<SetStateAction<string>>},
-  user: User,
   messageApi,
 }) => {
   const [collapsed, setCollapsed] = useState( true );
@@ -44,9 +53,11 @@ const HomeSidebarLayout = ( props: {
   // eslint-disable-next-line
   const [ version, setVersion ] = useState( "" );
   const [ sidebaropen, setSidebarOpen ] = useState(false);
-
   const [ screenwidth, setScreenwidth ] = useState(window.innerWidth);
 
+  /**
+   * Effect used for getting the users profile picture 
+   */
   useEffect( () => {
     const setProfileImage = async () => {
       if(props.context.login?.uid){
@@ -59,6 +70,9 @@ const HomeSidebarLayout = ( props: {
   }, [props.context.login] );
 
   
+  /**
+   * Effect used for responsive sizing of the sidebar
+   */
   useEffect(() => {
     if(screenwidth <= 1500){
       setBreakpoint("lg");
@@ -71,6 +85,10 @@ const HomeSidebarLayout = ( props: {
     }
   }, [screenwidth]);
 
+  /**
+   * Effect used bind a eventlistener to window resizes,
+   * so we can adapt the sidebar size accordingly without a page reload
+   */
   useEffect(() => {
     const handleResize = () => {
       setScreenwidth(window.innerWidth);
@@ -84,8 +102,17 @@ const HomeSidebarLayout = ( props: {
     };
   }, []);
 
-
-  function getItem( label: React.ReactNode, key: React.Key, check: () => boolean, icon?: React.ReactNode, children?: MenuItem[] ): MenuItem {
+  /**
+   * Returns a MenuItem constructed from the given parameters. If the given check-function returns false, we return null
+   * if it returns true, we return the MenuItem
+   * @param label Visible label of the MenuItem
+   * @param key Internal key
+   * @param check Guardfunction. If true return item, otherwise return null
+   * @param icon Icon dispayed left of the label
+   * @param children Children of the MenuItem
+   * @returns Either the MenuItem or null
+   */
+  const getItem = ( label: React.ReactNode, key: React.Key, check: () => boolean, icon?: React.ReactNode, children?: MenuItem[] ): MenuItem => {
     if( check() ){
       return {
         key,
@@ -98,6 +125,9 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
+  /**
+   * Links displayed in the sidebar
+   */
   const items = [
     getItem( <Link href={"/"} data-linkname={"home"}>Home</Link>, "0", () => {
       return true 
@@ -117,11 +147,17 @@ const HomeSidebarLayout = ( props: {
     }, <Icon component={Settings} className={styles.sidebariconsvg} viewBox='0 0 22 22'/> )
   ];
 
+  // Links displayd in the sidebar footer
   const footeritems = [];
 
+  /**
+   * Get the key of the currently selected page
+   * @returns Selected key of the MenuItem. Returns -1 if the page could't be found in the keylist
+   */
   const getDefaultSelected = () => {
     let lastfound = -1;
     
+    // List of patterns to distinguish between the pages
     const patterns = [
       /(^\/$)|(\/assistants\/(a-zA-Z)*)/gm,
       /(^\/company$)/gm,
@@ -138,6 +174,9 @@ const HomeSidebarLayout = ( props: {
     return lastfound.toString();
   }
 
+  /**
+   * Subcomponent to render the overlay menu of the user profile
+   */
   const profilemenu = (
     <div className={styles.avatarmenu}>
       <Link href={"/account"} data-linkname={"account"} className={styles.accountlink}>
@@ -162,6 +201,11 @@ const HomeSidebarLayout = ( props: {
     </div>
   );
   
+  /**
+   * Check if the given name is the currently selected category provided to the sidebar
+   * @param name Category to test agains
+   * @returns Either a styling object to represent the selected cat or an empty string
+   */
   const isselected = (name: string) => {
     if(name == props.category.value){
       return styles.selectedcat;
@@ -170,6 +214,10 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
+  /**
+   * Subcomponent to return a badge containing the amount of faved assistants
+   * @returns Badge with count of faved assistants
+   */
   const FavouriteBadge = () => {
     if(props.context.user.services?.favourites) {
       return(
@@ -178,6 +226,10 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
+  /**
+   * Subcomponent to render a header if the screenwidth is below a fixed amount
+   * @returns Header component
+   */
   const MobileHeader = () => {
     if(screenwidth <= 1500){
       return(
@@ -199,7 +251,9 @@ const HomeSidebarLayout = ( props: {
     }
   }
 
+  // Check the current screenwidth
   if(screenwidth <= 1500){
+    // if the screenwidth is below 1500px render the mobile layout of the sidebar
     return (
       <ConfigProvider theme={{
         components: {
@@ -293,7 +347,7 @@ const HomeSidebarLayout = ( props: {
                   </List.Item>
                 </List>
               </div>
-              <RecommendBox user={props.user} messageApi={props.messageApi} />
+              {/* <RecommendBox user={props.context.user} messageApi={props.messageApi} /> */}
             </div>
             <div className={styles.canclebar}>
               <div className={styles.closesidebar} onClick={() => {
@@ -354,6 +408,7 @@ const HomeSidebarLayout = ( props: {
       </ConfigProvider>
     );
   }else{
+    // If the width of the screen is above 1500px we render the desktop variant of the component
     return (
       <ConfigProvider theme={{
         components: {
@@ -448,7 +503,7 @@ const HomeSidebarLayout = ( props: {
                     </List.Item>
                   </List>
                 </div>
-                <RecommendBox user={props.user} messageApi={props.messageApi} />
+                {/* <RecommendBox user={props.context.user} messageApi={props.messageApi} /> */}
               </aside>
               <div className={styles.childrencontainer}>{}{props.children}</div>
             </Content>

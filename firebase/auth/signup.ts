@@ -11,7 +11,7 @@ import { TokenCalculator } from "../../helper/price";
 
 const auth = getAuth( firebase_app );
 
-export default async function signUp( firstname, lastname, email, username, password, name, street, city, postalcode, country, isPersonal, recommended ) {
+export default async function signUp( firstname, lastname, email, username, password, name, street, city, postalcode, country, isPersonal, recommended, coupon? ) {
   let result = null;
   const error = null;
         
@@ -23,6 +23,25 @@ export default async function signUp( firstname, lastname, email, username, pass
       try {
         result = await createUserWithEmailAndPassword( auth, email, password );
         try{
+          const calculationsres = await getDocument( "Settings", "Calculation");
+          const calculations: Calculations = calculationsres.result.data();
+
+          const calc = new TokenCalculator(calculations);
+
+          let credits = calculations.startCredits;
+
+          if(coupon){
+            const coupons = calculations.coupons;
+
+            const singlecouponIndex = coupons.findIndex((val) => {
+              return val.code == coupon;
+            })
+
+            if(singlecouponIndex != -1){
+              credits = coupons[singlecouponIndex].credits;
+            }
+          }
+
           const companycreationresult = await addDataWithoutId( "Company", {
             name: name,
             street: street,
@@ -31,7 +50,7 @@ export default async function signUp( firstname, lastname, email, username, pass
             country: country,
             settings: { background: "" },
             Usage: [],
-            tokens: 150000,
+            tokens: calc.denormalizeTokens(credits),
             unlimited: false,
             orders: [],
             invitedUsers: []
@@ -97,10 +116,6 @@ export default async function signUp( firstname, lastname, email, username, pass
             if( recommended ){
               const cmpny_result = await getDocument( "Company", recommended );
               const cmpny = cmpny_result.result.data();
-              const calculationsres = await getDocument( "Settings", "Calculation");
-              const calculations: Calculations = calculationsres.result;
-
-              const calc = new TokenCalculator(calculations);
 
               if( !cmpny.recommended ){
                 await updateData( "Company", recommended, {

@@ -32,7 +32,6 @@ import moment from "moment";
 import { isMobile } from "react-device-detect";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "../../db";
-import { getPDFUrl } from "../../helper/invoice";
 import axios from "axios";
 import RechargeForm from "../../components/RechargeForm/RechargeForm";
 import { Elements } from "@stripe/react-stripe-js";
@@ -40,6 +39,7 @@ import getStripe from "../../helper/stripe";
 import AddCreditCardForm from "../../components/AddCreditCardForm/AddCreditCardForm";
 import UsageStatistic from "../../components/UsageStatistic/UsageStatistic";
 import { TokenCalculator } from "../../helper/price";
+import { useRouter } from "next/router";
 
 ChartJS.register(
   CategoryScale,
@@ -52,8 +52,8 @@ ChartJS.register(
 
 const ordersperpage = 10;
 const thisyear = new Date().getFullYear();
-const stripePromise = getStripe();
 
+const stripePromise = getStripe();
 
 export const getServerSideProps: GetServerSideProps = async () => {
     
@@ -66,7 +66,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 
 
-export default function Usage( props ) {
+export default function Usage() {
   const context = useAuthContext();
   const { role, login, user, company, calculations } = context
   const [ users, setUsers ] = useState( [] );
@@ -80,6 +80,7 @@ export default function Usage( props ) {
   const [messageApi, contextHolder] = message.useMessage();
   const [ activeTab, setActiveTab ] = useState("1");
   const [ calculator ] = useState(new TokenCalculator(calculations));
+  const router = useRouter();
 
 
   const budgetRef = useRef( null );
@@ -199,7 +200,7 @@ export default function Usage( props ) {
       setLowerBound(min);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   const orderState = (obj) => {
     switch( obj.state ){
@@ -233,12 +234,14 @@ export default function Usage( props ) {
 
   const PurchaseInformation = () => {
     if(company.orders.length > 0){
+      const orderitems = getOrderItems();
+
       return(
         <>
-          <Collapse items={getOrderItems()} /><div className={styles.orderpagination}>
+          <Collapse items={orderitems} /><div className={styles.orderpagination}>
             <Pagination onChange={(page: number) => {
               setOrderPage(page);
-            } } defaultCurrent={1} pageSize={ordersperpage} total={company.orders.length} />
+            } } defaultCurrent={orderpage} pageSize={ordersperpage} total={company.orders.length} />
           </div>
         </>
       );
@@ -249,6 +252,8 @@ export default function Usage( props ) {
 
   const getOrderItems = () => {
     const items = [];
+
+
     const orderedorders = company.orders.toSorted((a: Order, b: Order) => {
       if(a.timestamp < b.timestamp){
         return 1;
@@ -258,15 +263,18 @@ export default function Usage( props ) {
         return 0
       }
     });
-    
-    for(let i=(orderpage - 1); i  < ordersperpage; i++){
-      if(i < company.orders.length){
-        const order = orderedorders[i];
+
+    console.log(ordersperpage, orderpage)
+    const offset = (orderpage - 1) * ordersperpage;
+
+    for(let i=0; i  < ordersperpage; i++){
+      if(i + offset < company.orders.length){
+        const order = orderedorders[i + offset];
         const orderdate = new Date( order.timestamp * 1000 );
         const datestring = moment(orderdate).format("DD.MM.YYYY");
 
         items.push({
-          key: i,
+          key: i + offset,
           label: <div className={styles.singleorder}>
             <div className={styles.ordertitle}>
               <span className={styles.orderdate}>{datestring}</span>
@@ -290,21 +298,25 @@ export default function Usage( props ) {
               </List>
             </div>
 
-            <div className={styles.orderactions}>
+            {(order.state == "accepted")? <div className={styles.orderactions}>
               <h3>Aktionen</h3>
               <List>
                 <List.Item className={styles.actiondetail}>
                   <div className={styles.description}>Rechnung herunterladen:</div>
                   <div style={{ overflow: "none" }}>
-                    <FileTextOutlined style={{ fontSize: 20 }} onClick={() => {
-                      getPDFUrl(role, user, company, order, calculations).download(`Siteware_business_invoice_${order.invoiceId}`)
-                    }}/>
+                    <Button onClick={async () => {
+                      const invoiceurlreq = await axios.get(`/api/payment/invoice?orderid=${order.id}`);
+                      if(invoiceurlreq.data.message){
+                        const invoiceurl = invoiceurlreq.data.message
+                        router.push(invoiceurl);
+                      }
+                    }}><FileTextOutlined /></Button>
                     <div style={{ display: "none", overflow: "none" }}>
                     </div>
                   </div>
                 </List.Item>
               </List>
-            </div>
+            </div>: <></>}
           </div>
         });
       }
@@ -314,6 +326,9 @@ export default function Usage( props ) {
   }
 
   const getBuyOptions = () => {
+    const userCanBuyCredits = !role.isCompany || role.canEditCompanyDetails || role.canSetupCompany;
+
+
     if(company?.paymentMethods?.length > 0){
       if(company?.plan && company?.plan.state == "active"){
         return(
@@ -324,7 +339,7 @@ export default function Usage( props ) {
                   logEvent(analytics, "buy_tokens", {
                     currentCredits: company?.tokens
                   });
-                }} type='primary'>Weitere Credits kaufen</Button> : <></>}
+                }} type='primary' disabled={!userCanBuyCredits}>Weitere Credits kaufen</Button> : <></>}
               </Link>
             </div>
             <div className={styles.planwindow}>
@@ -337,9 +352,9 @@ export default function Usage( props ) {
                   {calculator.indexToCredits(company.plan?.product, true)}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
                 <span className={styles.creds}> {company?.plan?.threshold}</span> Credits fällt.
               </div>
-              <Button type="link" className={styles.planedit} onClick={() => {
+              {(!userCanBuyCredits)? <></>: <Button type="link" className={styles.planedit} onClick={() => {
                 setRechargeModalOpen(true);
-              }}>anpassen</Button>
+              }}>anpassen</Button>}
             </div>
           </>
         );
@@ -352,7 +367,7 @@ export default function Usage( props ) {
                   logEvent(analytics, "buy_tokens", {
                     currentCredits: (company.tokens)? company.tokens: 0
                   });
-                }} type='primary'>Weitere Credits kaufen</Button> : <></>}
+                }} type='primary' disabled={!userCanBuyCredits}>Weitere Credits kaufen</Button> : <></>}
               </Link>
             </div>
             <div className={styles.planwindow}>
@@ -364,7 +379,7 @@ export default function Usage( props ) {
               </div>
               <Button type="link" className={styles.planedit} onClick={() => {
                 setRechargeModalOpen(true)
-              }}>aktivieren</Button>
+              }} disabled={!userCanBuyCredits}>aktivieren</Button>
             </div>
           </>
         );
@@ -378,7 +393,7 @@ export default function Usage( props ) {
                 logEvent(analytics, "buy_tokens", {
                   currentCredits: (company.tokens)? company.tokens: 0
                 });
-              }} type='primary'>Weitere Credits kaufen</Button> : <></>}
+              }} type='primary' disabled={!userCanBuyCredits}>Weitere Credits kaufen</Button> : <></>}
             </Link>
           </div>
           <div className={styles.planwindow}>
@@ -390,7 +405,7 @@ export default function Usage( props ) {
             </div>
             <Button type="link" className={styles.planedit} onClick={() => {
               setActiveTab("2")
-            }}>Jetzt hinzufügen</Button>
+            }} disabled={!userCanBuyCredits} >Jetzt hinzufügen</Button>
           </div>
         </>
       );
@@ -417,6 +432,8 @@ export default function Usage( props ) {
   }
 
   const getSetups = () => {
+    const userCanBuyCredits = !role.isCompany || role.canEditCompanyDetails || role.canSetupCompany;
+
     if(company?.paymentMethods){
       if(company.paymentMethods.length > 0){
         return <>
@@ -426,9 +443,9 @@ export default function Usage( props ) {
                 <div className={styles.container}>
                   <div className={styles.name}><CreditCardOutlined className={styles.cardicon}/>{method.name}</div>
                   <div className={styles.actions}>
-                    <div onClick={async () => {
+                    {(!userCanBuyCredits)? <></>: <div onClick={async () => {
                       setDeletePaymentMethod(true);
-                    }}><DeleteOutlined className={styles.trashicon} /></div>
+                    }}><DeleteOutlined className={styles.trashicon} /></div>}
                   </div>
                 </div>
               </Card>
@@ -451,7 +468,7 @@ export default function Usage( props ) {
             <div className={styles.buttonrow}>
               <Button type="primary" onClick={() => {
                 setAddPaymentOpen(true)
-              }}>Hinzufügen</Button>
+              }} disabled={!userCanBuyCredits}>Hinzufügen</Button>
             </div>
           </div>
         </div>  
@@ -463,7 +480,7 @@ export default function Usage( props ) {
           <div className={styles.buttonrow}>
             <Button type="primary" onClick={() => {
               setAddPaymentOpen(true)
-            }}>Hinzufügen</Button>
+            }} disabled={!userCanBuyCredits}>Hinzufügen</Button>
           </div>
         </div>
       </div>  
@@ -572,7 +589,7 @@ export default function Usage( props ) {
             Füge jetzt eine Bezahlmethode hinzu. Die Karte kann jederzeit wieder entfernt werden.
           </p>
           <Elements stripe={stripePromise}>
-            <AddCreditCardForm company={company} user={user} reddirectURL={props.redirect} messageApi={messageApi} onSuccess={() => {
+            <AddCreditCardForm company={company} user={user} messageApi={messageApi} onSuccess={() => {
               setAddPaymentOpen(false)
             }}/>
           </Elements>

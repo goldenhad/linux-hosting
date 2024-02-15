@@ -10,7 +10,8 @@ export type Templates = {
     ownaboutus: string,
     services: string,
     singleuser: string,
-    webcontent: string
+    webcontent: string,
+    translator: string
 }
 
 export type Parameters = {
@@ -46,5 +47,11 @@ export type Calculations = {
     profitPercent: number,
     startCredits: number,
     savedMinutesProMail: number,
-    autoDiscountPercent: number
+    autoDiscountPercent: number,
+    coupons: Array<Coupon>
+}
+
+export type Coupon = {
+    code: string,
+    credits: number
 }

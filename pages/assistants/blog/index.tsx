@@ -150,6 +150,7 @@ export default function Blog( ) {
       promptFunction={promptFunction}
       routes={ { generate: "/api/prompt/blog/generate" } }
       tourState={!handleUndefinedTour( user.tour ).blog}
+      dontUseProfile={false}
     >
       <BlogForm form={form} state={context} refs={{
         profileRef: profileRef,

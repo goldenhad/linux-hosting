@@ -171,7 +171,7 @@ export default function Home() {
     })
 
     const getRibbonText = (uid: string) => {
-      if(uid == "excel" || uid == "dialog" || uid == "monolog"){
+      if(uid == "excel" || uid == "dialog" || uid == "monolog" || uid == "translator"){
         return "Neu"
       }else{
         return undefined;
@@ -214,7 +214,7 @@ export default function Home() {
 
 
   return (
-    <HomeSidebarLayout user={user} messageApi={messageApi} context={context} category={{ value: selectedCat, setter: setSelectedCat }}>
+    <HomeSidebarLayout messageApi={messageApi} context={context} category={{ value: selectedCat, setter: setSelectedCat }}>
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>

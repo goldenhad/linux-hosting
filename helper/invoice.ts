@@ -136,7 +136,7 @@ export const createInvoice = (role: Role, user: User, company: Company, order: O
               { text: "Artikel", bold: true },
               { text: "Menge", bold: true },
               { text: "MwSt.", bold: true },
-              { text: "Eizelpreis.", bold: true },
+              { text: "Einzelpreis.", bold: true },
               { text: "Gesamtpreis.", bold: true }
             ],
             [

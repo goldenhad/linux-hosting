@@ -12,31 +12,64 @@ import { Calculations, InvoiceSettings } from "../../firebase/types/Settings";
 import updateData from "../../firebase/data/updateData";
 
 
-
-const Creditform = ( props: { user: User, company: Company, invoiceData: InvoiceSettings, calculation: Calculations } ) => {
+/**
+ * Component implementing a user input to select and buy tokens depending on our
+ * calculation model in the database
+ * @param props.user Object containing the user
+ * @param props.company Object containing the company
+ * @param props.invoiceData Object containing data for invoicing
+ * @param props.calculation Object containing the data used for calculation
+ * @returns 
+ */
+const Creditform = ( props: {
+   user: User,
+   company: Company,
+   invoiceData: InvoiceSettings,
+   calculation: Calculations
+  } ) => {
   const [ tokenstobuy, setTokenstobuy ] = useState( 0 );
   const [ calculator ] = useState(new TokenCalculator(props.calculation));
   const stripe = useStripe();
   const router = useRouter();
-
+  
+  /**
+   * Calculates saved amount of money for the selected tokens
+   * @returns Saved amount as number
+   */
   const calculateSavings = () => {
     const reduced = props.calculation.products[tokenstobuy].price;
     const before = props.calculation.products[tokenstobuy].price/ (1 - props.calculation.products[tokenstobuy].discount/100);
     return before - reduced;
   }
 
+  /**
+   * Calculates the mails that can be written with the selected amount of tokens
+   * @returns Amount of writeable mails as number
+   */
   const possibleMails = () => {
     return calculator.indexToCredits(tokenstobuy);
   }
 
+  /**
+   * Calculates the saved hours with the selected amount of tokens
+   * @returns Saved hours as number
+   */
   const calculateHours = () => {
     return Math.floor((possibleMails() * props.calculation.savedMinutesProMail)/60);
   }
 
+  /**
+   * Calculates the cost per mails for the selected tokens
+   * @returns The cost per mail as number
+   */
   const calculatePricePerMail = () => {
     return props.calculation.products[tokenstobuy].price / possibleMails();
   }
 
+  /**
+   * Function to be called if the user seeks to pay the select amount of tokens
+   * @returns Promise to resolve if the payment was issued
+   */
   const onPayment = async () => {
     try {
       if (!stripe) return null;
@@ -44,14 +77,20 @@ const Creditform = ( props: { user: User, company: Company, invoiceData: Invoice
       console.log(error);
     }
 
+    /**
+     * Create a new order object with the API
+     */
     const { data } = await axios.post("/api/payment/checkout", {
       price: props.calculation.products[tokenstobuy].price,
       email: props.user.email
     });
 
+    // Get the current orders of the user
     const currentOrders = props.company.orders;
+    // Calculate the next invoice number
     const nextInvoiceNumber = props.invoiceData.last_used_number+1;
 
+    // Create a new order object
     const newOrder: Order = {
       id: data.message,
       timestamp: Math.floor( Date.now() / 1000 ),
@@ -63,16 +102,19 @@ const Creditform = ( props: { user: User, company: Company, invoiceData: Invoice
       invoiceId: `SM${props.invoiceData.number_offset + nextInvoiceNumber}`
     }
 
+    // Add the created order to the customers orders
     currentOrders.push( newOrder );
 
+    // Update the users company and the settings with the used invoice number
     await updateData( "Company", props.user.Company, { orders: currentOrders } );
     await updateData( "Settings", "Invoices", { last_used_number: nextInvoiceNumber } );
 
+    // Redirect the user to the stripe checkout page
     const result = await stripe.redirectToCheckout({
       sessionId: data.message
     });
     if (result.error) {
-      alert(result.error.message);
+      console.log(result.error.message);
     }
   }
 

@@ -1,41 +1,46 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Alert, Card, Form, FormInstance, Input } from "antd";
-import styles from "./excelform.module.scss";
+import { Alert, Card, Form, FormInstance, Input, Select } from "antd";
+import styles from "./translatorform.module.scss";
 import { MutableRefObject, useContext, useEffect } from "react";
 import FatButton from "../../FatButton";
 import { AssistantContext } from "../../AssistantBase/AssistantBase";
 import { isMobile } from "react-device-detect";
+import { listToOptions } from "../../../helper/architecture";
 import { ctx } from "../../context/AuthContext";
 
 const { TextArea } = Input;
 
+const LANGUAGES = ["Deutsch", "Englisch", "Spanisch", "Französisch", "Portugiesisch", "Russisch"];
+
 
 /**
- * Form used for excel questions
+ * Component implementing the form used for creating translated content.
  * @param props.state Context state of the application
  * @param props.form FormInstance used to interact with the surrounding assistant form
  * @param props.refs Defined refs that will be used by the tutorial to highlight elements
- * @returns Form used for creating reponses to excel questions
+ * @returns Form used for creating translated content
  */
-const ExcelForm = (props: { 
-  state: ctx, 
-  form: FormInstance<any>, 
+const TranslatorForm = (props: {
+  state: ctx,
+  form: FormInstance<any>,
   refs: { 
-    profileRef: MutableRefObject<any>, 
-    questionRef: MutableRefObject<any>, 
-    generateRef: MutableRefObject<any>  
+    textRef: MutableRefObject<any>,
+    languageRef: MutableRefObject<any>,
+    translateRef: MutableRefObject<any>
   } }) => {
   const AssistantContextState = useContext(AssistantContext);
-  
+
   useEffect(() => {
     props.form.setFieldValue("profile", "Hauptprofil");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+
+
   return(
     <>
       <div className={styles.userinputform}>
-        <Card title={"Frage zu Excel"} className={styles.userinputcardmain}>
+        <Card title={"Übersetzung"} className={styles.userinputcardmain}>
           <div>
             <Form.Item
               name="profile"
@@ -44,22 +49,42 @@ const ExcelForm = (props: {
             </Form.Item>
           </div>
 
-          <div ref={props.refs.questionRef}>
+          <div ref={props.refs.textRef}>
             <Form.Item
               className={styles.formpart}
-              label={<b>Wie lautet deine Frage?</b>}
-              name="question"
+              label={<b>Zu übersetzender Text</b>}
+              name="text"
               rules={[
                 {
                   required: true,
-                  message: "Wie kann ich dir bei Excel helfen?"
+                  message: "Bitte gib einen Text ein"
                 }
               ]}
             >
               <TextArea
                 className={styles.forminput}
                 rows={(isMobile)? 5: 10}
-                placeholder="Formuliere kurz deine Frage?"
+                placeholder="Welchen Text soll ich übersetzen?"
+                disabled={AssistantContextState.requestState.formDisabled || AssistantContextState.requestState.quotaOverused}
+              />
+            </Form.Item>
+          </div>
+
+          <div ref={props.refs.languageRef}>
+            <Form.Item
+              className={styles.formpart}
+              label={<b>Zielsprache</b>}
+              name="language"
+              rules={[
+                {
+                  required: true,
+                  message: "Bitte lege eine Sprache fest!"
+                }
+              ]}
+            >
+              <Select placeholder="Zielsprache" options={listToOptions( LANGUAGES )}
+                className={styles.formselect}
+                size='large'
                 disabled={AssistantContextState.requestState.formDisabled || AssistantContextState.requestState.quotaOverused}
               />
             </Form.Item>
@@ -74,11 +99,11 @@ const ExcelForm = (props: {
               : <></>
           }
         </div>
-        <div ref={props.refs.generateRef} className={styles.generatebuttonrow}>
+        <div ref={props.refs.translateRef} className={styles.generatebuttonrow}>
           <FatButton
             isSubmitButton={true}
             disabled={AssistantContextState.requestState.formDisabled || AssistantContextState.requestState.quotaOverused}
-            text="Antwort generieren"
+            text="Übersetzen"
           />
         </div>
             
@@ -87,4 +112,4 @@ const ExcelForm = (props: {
   );
 }
 
-export default ExcelForm;
+export default TranslatorForm;

@@ -48,6 +48,7 @@ export type TourState = {
     profiles: boolean,
     company: boolean,
     excel: boolean,
+    translator: boolean
 }
 
 export type History = {
@@ -108,7 +109,8 @@ export const basicUser: User = {
     usage: false,
     profiles: false,
     company: false,
-    excel: false
+    excel: false,
+    translator: false
   },
   services: {
     favourites: []

@@ -1,20 +1,36 @@
-import { Alert, Card, Form, Input, Select } from "antd";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Alert, Card, Form, FormInstance, Input, Select } from "antd";
 import { listToOptions } from "../../../helper/architecture";
 import styles from "./monologform.module.scss";
-import { useContext } from "react";
+import { MutableRefObject, useContext } from "react";
 import FatButton from "../../FatButton";
 import { AssistantContext } from "../../AssistantBase/AssistantBase";
 import { isMobile } from "react-device-detect";
+import { ctx } from "../../context/AuthContext";
 
 const { TextArea } = Input;
 
 
 /**
- * Component implementing the form used for creating blog content.
- * @param props Object containting the current state of the AuthContext and the form component used by the AssistantContext
- * @returns Form used for creating blog content
+ * Component implementing the form used for creating email content.
+ * @param props.state Context state of the application
+ * @param props.form FormInstance used to interact with the surrounding assistant form
+ * @param props.refs Defined refs that will be used by the tutorial to highlight elements
+ * @returns Form used for creating email content
  */
-const MonologForm = (props: { state, form, refs: { profileRef, continueRef, classificationRef, lengthRef, generateRef, addressRef, styleref, emotionsref  } }) => {
+const MonologForm = (props: {
+  state: ctx,
+  form: FormInstance<any>,
+  refs: { 
+    profileRef: MutableRefObject<any>,
+    continueRef: MutableRefObject<any>,
+    classificationRef: MutableRefObject<any>,
+    lengthRef: MutableRefObject<any>,
+    generateRef: MutableRefObject<any>,
+    addressRef: MutableRefObject<any>,
+    styleref: MutableRefObject<any>,
+    emotionsref: MutableRefObject<any>  
+  } }) => {
   const AssistantContextState = useContext(AssistantContext);
   const form = props.form;
 

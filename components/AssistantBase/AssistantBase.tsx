@@ -332,7 +332,7 @@ const AssistantBase = (props: {
         return(
           <div className={styles.tokeninfo}>
             <Icon component={Info} className={styles.infoicon} viewBox='0 0 22 22' />
-            Dieses Ergebnis wurde von eine KI generiert. Trotz der hohen Text- und Analysequalität können wir die Richtigkeit der Ergebnisse nicht garantieren.
+            Dieses Ergebnis wurde von einer KI generiert. Trotz der hohen Text- und Analysequalität können wir die Richtigkeit der Ergebnisse nicht garantieren.
           </div>
         );
       }

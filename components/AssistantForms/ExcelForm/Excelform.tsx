@@ -1,19 +1,30 @@
-import { Alert, Card, Form, Input, Select } from "antd";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Alert, Card, Form, FormInstance, Input, Select } from "antd";
 import styles from "./excelform.module.scss";
-import { useContext } from "react";
+import { MutableRefObject, useContext } from "react";
 import FatButton from "../../FatButton";
 import { AssistantContext } from "../../AssistantBase/AssistantBase";
 import { isMobile } from "react-device-detect";
+import { ctx } from "../../context/AuthContext";
 
 const { TextArea } = Input;
 
 
 /**
- * Component implementing the form used for creating blog content.
- * @param props Object containting the current state of the AuthContext and the form component used by the AssistantContext
- * @returns Form used for creating blog content
+ * Form used for excel questions
+ * @param props.state Context state of the application
+ * @param props.form FormInstance used to interact with the surrounding assistant form
+ * @param props.refs Defined refs that will be used by the tutorial to highlight elements
+ * @returns Form used for creating reponses to excel questions
  */
-const ExcelForm = (props: { state, form, refs: { profileRef, questionRef, generateRef  } }) => {
+const ExcelForm = (props: { 
+  state: ctx, 
+  form: FormInstance<any>, 
+  refs: { 
+    profileRef: MutableRefObject<any>, 
+    questionRef: MutableRefObject<any>, 
+    generateRef: MutableRefObject<any>  
+  } }) => {
   const AssistantContextState = useContext(AssistantContext);
 
 

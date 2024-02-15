@@ -17,7 +17,7 @@ import { getImageUrl } from "../../firebase/drive/upload_file";
 import { Service } from "../../firebase/types/Service";
 
 
-interface ctx {
+export interface ctx {
     // eslint-disable-next-line
     login: any,
     user: User,

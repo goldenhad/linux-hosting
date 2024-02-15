@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Form, FormInstance, Input } from "antd";
 import React, { useEffect, useState } from "react";
 import styles from "./edituserform.module.scss"
@@ -9,12 +10,19 @@ import { MessageInstance } from "antd/es/message/interface";
 import { User } from "../../../firebase/types/User";
 
 
+/**
+ * Form used to edit the users information
+ * @param props.singleUser Flag to determine if we have a singleuser or a company user
+ * @param props.form Surrounding form component
+ * @param props.login Login of the user
+ * @param props.user Object of the user
+ * @param props.messageApi Message object to send messages to the user
+ * @returns 
+ */
 const EditUserForm = (
   props: {
         singleUser: boolean,
-        // eslint-disable-next-line
         form: FormInstance<any>,
-        // eslint-disable-next-line
         login: any,
         user: User,
         messageApi: MessageInstance
@@ -26,6 +34,9 @@ const EditUserForm = (
 
   const [ buttonDisabled, setButtonDisabled ] = useState(false);
 
+  /**
+   * Effect to disable the save button if the user did not change their information 
+   */
   useEffect(() => {
     setButtonDisabled(!(username || firsname || lastname));
   }, [firsname, lastname, username])

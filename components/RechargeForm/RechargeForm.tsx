@@ -16,33 +16,60 @@ import { Calculations } from "../../firebase/types/Settings";
 import FatButton from "../FatButton";
 
 
+/**
+ * Auto recharge form. User can use this component to add an automatic credit recharge if the credits of the company reach a certain threshold
+ * @param props.defaultstate.treshold Predefined threshold after which the recharge kicks in
+ * @param props.defaultstate.product Index of the predefined recharge credit package
+ * @param props.company Company object of the user
+ * @param props.user User object
+ * @param props.role Role object of the user
+ * @param props.calculations Calculation Object
+ * @param props.onCustomerApprove Function to be called if the customer establishes the auto recharge
+ * @returns RechargeForm
+ */
 const RechargeForm = ( props: { 
   defaultstate: { threshold: number, product: number },
   company: Company,
   user: User,
   role: Role,
-  onCustomerApprove,
-  calculations: Calculations 
+  calculations: Calculations,
+  onCustomerApprove: () => void
 } ) => {
   const [ tokenstobuy, setTokenstobuy ] = useState( 0 );
   const stripe = useStripe();
   const [form] = Form.useForm();
   const [ calculator ] = useState(new TokenCalculator(props.calculations));
 
+  /**
+   * Calculate the saved amount of money for the selected credit package
+   * @returns Saved amount of money as number
+   */
   const calculateSavings = () => {
     const reduced = props.calculations.products[tokenstobuy].price;
     const before = props.calculations.products[tokenstobuy].price/ (1 - (props.calculations.products[tokenstobuy].discount + props.calculations.autoDiscountPercent)/100);
     return before - reduced;
   }
 
+  /**
+   * Calculate the amount of writeable mails for the selected credit package
+   * @returns Amount of writeable mails as number
+   */
   const possibleMails = () => {
     return calculator.indexToCredits(tokenstobuy, true);
   }
 
+  /**
+   * Calculates the cost per email in the given credit package
+   * @returns Price per mail as number
+   */
   const calculatePricePerMail = () => {
     return props.calculations.products[tokenstobuy].price / possibleMails();
   }
 
+  /**
+   * Effect used to set the default state of the form with the previous selected plan
+   * of the customer
+   */
   useEffect(() => {
     if(props.company.plan && props.company.plan.state == "active"){
       form.setFieldValue("threshold", props.defaultstate.threshold);
@@ -53,19 +80,29 @@ const RechargeForm = ( props: {
   }, [props, props.company, props .defaultstate]);
 
 
+  /**
+   * Helper function to reset the form to it's default state
+   */
   const resetForm = () => {
     form.setFieldValue("threshold", 10);
     form.setFieldValue("tokenamount", 0);
   }
 
-  const onPayment = async () => {
+  /**
+   * Function to be called after the customer tries to create the recharge plan
+   * @returns Promise to resolve after the plan is activated
+   */
+  const onCreatePlan = async () => {
     try {
+      // Evaluate if stripe is defined, if not stop right here
       if (!stripe) return null;
     } catch (error) {
       console.log(error);
     }
 
+    // Check if the users company already has a stripe customer id
     if(!props.company.customerId){
+      // Create a stripe customer
       const { data } = await axios.post("/api/payment/createcustomer", {
         name: (props.role.isCompany)? props.company.name: `${props.user.firstname} ${props.user.lastname}`,
         email: props.user.email,
@@ -76,15 +113,18 @@ const RechargeForm = ( props: {
         }
       });
 
+      // Update the users company with the customer id returned by the API
       await updateData( "Company", props.user.Company, { customerId: data.message } );
-      props.onCustomerApprove();
+      
+      //props.onCustomerApprove();
     }
-
+    // Parse the user input threshold
     const thresholdAsNumber = parseInt(form.getFieldValue("threshold"));
     if(isNaN(thresholdAsNumber)){
       return null;
     }
 
+    // Create a plan object with the user input
     const newplan: Plan = {
       product: tokenstobuy,
       timestamp: Math.floor( Date.now() / 1000 ),
@@ -92,22 +132,28 @@ const RechargeForm = ( props: {
       threshold: thresholdAsNumber
     }
 
-    console.log(newplan);
-
-
+    // Update the users company with the new plan
     await updateData( "Company", props.user.Company, { plan: newplan } );
+    // Call the given onCustomerApprove function afterwards
     props.onCustomerApprove();
+    // Reset the form to the default state
     resetForm();
   }
 
+  /**
+   * Function to be called if the user deactivates their plan
+   */
   const onDeactivate = async () => {
-    console.log("deactivating");
+    // Check if users company has a defined plan
     if(props.company.plan && props.company.plan.state == "active"){
+      // Set the plan inactive
       const newplan = props.company.plan;
       newplan.state = "inactive";
-
+      // Update the users company with the inactive plan
       await updateData( "Company", props.user.Company, { plan: newplan } );
+      // Call onCustomerApprove callback
       props.onCustomerApprove();
+      // Reset the form
       setTokenstobuy(0);
       resetForm();
     }
@@ -121,7 +167,7 @@ const RechargeForm = ( props: {
         "threshold": 10 
       }
     } form={form} onFinish={async () => {
-      onPayment();
+      onCreatePlan();
     }}>
       <div className={styles.cardrow}>
         <Form.Item className={styles.formpart} label={

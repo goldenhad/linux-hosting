@@ -4,11 +4,17 @@ import styles from "./cookiebanner.module.scss";
 import cookieCutter from "cookie-cutter"
 import { isMobile } from "react-device-detect";
 
-
+/**
+ * Cookie banner used to resolve user cookie options 
+ * @returns CookieBanner Component
+ */
 const CookieBanner = (  ) => {
   const [ active, setActive ] = useState( false );
   const [ activateAnalytics, SetActivateAnalyctics ] = useState(true);
 
+  /**
+   * Effect to check if the user has provided their consent already
+   */
   useEffect( () => {
     if( cookieCutter.get( "mailbuddy-opt-consent" ) && cookieCutter.get( "mailbuddy-opt-analytics-consent" ) ){
       setActive( false );
@@ -17,6 +23,9 @@ const CookieBanner = (  ) => {
     }
   }, [] )
 
+  /**
+   * Set the cookie options depending on the user preferences
+   */
   const setOptIn = () => {
     const aYearFromNow = new Date();
     aYearFromNow.setFullYear( aYearFromNow.getFullYear() + 1 );

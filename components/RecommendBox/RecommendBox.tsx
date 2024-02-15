@@ -6,11 +6,18 @@ import axios from "axios";
 import { User } from "../../firebase/types/User";
 import HeartFull from "../../public/icons/heartFull.svg";
 import { isMobile } from "react-device-detect";
-
+import { MessageInstance } from "antd/es/message/interface";
 
 const Paragraph = Typography;
 
-const RecommendBox = (props: { user: User, messageApi }) => {
+
+/**
+ * Component used so users can recommend siteware to their friends
+ * @param props.user User object
+ * @param props.messageApi MessageInstance used for communicating with the user 
+ * @returns 
+ */
+const RecommendBox = (props: { user: User, messageApi: MessageInstance }) => {
   const [recommendModalOpen, setRecommendModalOpen] = useState(false);
   const [ recommendLink, setRecommendLink ] = useState( "" );
   const [ bannerVisible, setBannerVisible ] = useState(false);
@@ -27,23 +34,25 @@ const RecommendBox = (props: { user: User, messageApi }) => {
       }
     }
 
-    //const swrec = cookie.get("siteware-recommend");
-    /* if(!swrec){
-      setBannerVisible(true);
-    } */
     setBannerVisible(true);
     
     getRecommendLink();
     // eslint-disable-next-line
   }, [] );
 
+  /**
+   * Copies the generated shareable link to the clipboard of the user
+   */
   const copyLink = () => {
     if( recommendLink != "" ){
       navigator.clipboard.writeText( recommendLink );
       props.messageApi.success( "Link in die Zwischenablage kopiert." );
     }
   }
-    
+  
+  /**
+   * Downloads the QR code of the shareable link
+   */
   const downloadQRCode = () => {
     const canvas = document.getElementById( "recommendqrcode" )?.querySelector<HTMLCanvasElement>( "canvas" );
     if ( canvas ) {
@@ -57,6 +66,10 @@ const RecommendBox = (props: { user: User, messageApi }) => {
     }
   };
 
+  /**
+   * Helper function to get the banner wrapper of the component
+   * @returns Banner or empty component
+   */
   const Banner = () => {
     if(bannerVisible){
       return(
@@ -85,7 +98,6 @@ const RecommendBox = (props: { user: User, messageApi }) => {
   return (
     <>
       <Banner />
-
       <Modal title="Lade deine Freunde ein!" open={recommendModalOpen} width={800} footer={null} onCancel={() => {
         setRecommendModalOpen(false);
       }}>

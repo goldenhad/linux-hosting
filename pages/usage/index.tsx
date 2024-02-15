@@ -66,7 +66,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 
 
-export default function Usage( props ) {
+export default function Usage() {
   const context = useAuthContext();
   const { role, login, user, company, calculations } = context
   const [ users, setUsers ] = useState( [] );
@@ -589,7 +589,7 @@ export default function Usage( props ) {
             Füge jetzt eine Bezahlmethode hinzu. Die Karte kann jederzeit wieder entfernt werden.
           </p>
           <Elements stripe={stripePromise}>
-            <AddCreditCardForm company={company} user={user} reddirectURL={props.redirect} messageApi={messageApi} onSuccess={() => {
+            <AddCreditCardForm company={company} user={user} messageApi={messageApi} onSuccess={() => {
               setAddPaymentOpen(false)
             }}/>
           </Elements>

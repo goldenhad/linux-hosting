@@ -117,7 +117,7 @@ export default function Company( props: InitialProps ) {
   }, [backgroundBlocker, cityBlocker, countryBlocker, nameblocker, postalcodeBlocker, streetBlocker])
 
 
-  let steps: TourProps["steps"] = [];
+  let steps: TourProps["steps"];
 
   if( role.canEditCompanyDetails ){
     steps = [
@@ -907,8 +907,7 @@ export default function Company( props: InitialProps ) {
     if( memberToEdit != undefined ){
       const obj = userTableData[memberToEdit];
 
-      let rolename = "Mailagent";
-      rolename = getRoleName( obj.Role );
+      const rolename = getRoleName( obj.Role );
 
       if( obj.username ){
         if( obj.Role != "Company-Admin" &&
@@ -1096,7 +1095,7 @@ export default function Company( props: InitialProps ) {
         <Tour open={open} onClose={async () => {
           const currstate = user.tour;
           currstate.company = true;
-          updateData( "User", login.uid, { tour: currstate } );
+          await updateData("User", login.uid, { tour: currstate });
           setOpen( false );
         }} steps={steps} />
       </div>

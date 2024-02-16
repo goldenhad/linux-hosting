@@ -1,36 +1,36 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { auth } from "../../../firebase/admin";
-import Stripe from "stripe";
+import { stripe } from "../../../stripe/api";
+
 
 type ResponseData = {
     errorcode: number,
     message: string,
 }
 
-const stripe = new Stripe(process.env.STRIPEPRIV, {
-  typescript: true,
-  apiVersion: "2023-10-16"
-});
 
-
+/**
+ * Route to detach an automatic payment method from a customer at stripe
+ * @param req Request object
+ * @param res Reponse obbject
+ */
 export default async function handler( req: NextApiRequest, res: NextApiResponse<ResponseData> ) {
   if( req.cookies.token ){
     const token = await auth.verifyIdToken( req.cookies.token );
-        
 
     if( req.method == "POST" ){
-            
       if( token ){
         const data = req.body;
-                
-        if( data.method != undefined ){
 
+        // Check if the caller provided the id of a stripe payment method
+        if( data.method != undefined ){
           try {
 
+            // Call stripe and detach the payment method
             const detachedMethod = await stripe.paymentMethods.detach(data.method)
-                
+
+            // If stripe returns a method id the detaching worked correctly
             if(detachedMethod.id){
-                
               return res.status( 200 ).send( { errorcode: 0, message: "OK" } );
             }else{
               return res.status( 400 ).send( { errorcode: 0, message: "Payment Method not found!" } );

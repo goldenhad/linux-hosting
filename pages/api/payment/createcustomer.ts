@@ -1,32 +1,32 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { auth } from "../../../firebase/admin";
-import Stripe from "stripe";
+import { stripe } from "../../../stripe/api";
+
 
 type ResponseData = {
     errorcode: number,
     message: string,
 }
 
-const stripe = new Stripe(process.env.STRIPEPRIV, {
-  typescript: true,
-  apiVersion: "2023-10-16"
-});
 
-
+/**
+ * Route to be called to create a new stripe customer
+ * @param req Request object
+ * @param res Response object
+ */
 export default async function handler( req: NextApiRequest, res: NextApiResponse<ResponseData> ) {
   if( req.cookies.token ){
     const token = await auth.verifyIdToken( req.cookies.token );
         
-
     if( req.method == "POST" ){
-            
       if( token ){
         const data = req.body;
-                
+
+        // Validate that all needed data was provided
         if( data.name != undefined && data.email != undefined ){
 
           try {
-                
+            // Create a new stripe customer object with the provided data
             const customer = await stripe.customers.create({
               name: data.name,
               email: data.email,
@@ -37,7 +37,8 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                 postal_code: data.address.postalcode
               }
             })
-                
+
+            // Return the id of the created customer
             return res.status( 200 ).send( { errorcode: 0, message: customer.id } );
           } catch (error) {
             console.log(error);

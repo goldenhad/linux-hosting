@@ -1,20 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import OpenAI from "openai";
 import { auth } from "../../../../firebase/admin"
-import { countFunction } from "../count";
-
-const openai = new OpenAI( {
-  apiKey: process.env.OPENAIAPIKEY
-} );
-
-type ResponseData = {
-    errorcode: number,
-    message: string,
-    tokens: number
-}
+import { AIMessage, AssistantResponse, generateAIResponse, Model } from "../../../../helper/prompt/generation";
 
 
-export default async function handler( req: NextApiRequest, res: NextApiResponse<ResponseData | string> ) {
+/**
+ * Route for generating single email response to user input. USES GPT 3.5
+ * @param req Request object
+ * @param res Response object
+ */
+export default async function handler( req: NextApiRequest, res: NextApiResponse<AssistantResponse | string> ) {
   const token = await auth.verifyIdToken( req.cookies.token );
 
   if( req.method == "POST" ){
@@ -24,60 +18,23 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       const data = req.body;
 
       if( data.prompt != undefined ){
-        
-        res.writeHead(200, {
-          Connection: "keep-alive",
-          "Content-Encoding": "none",
-          "Cache-Control": "no-cache",
-          "Content-Type": "text/event-stream"
-        });
-
         try{
-          
-          const response = await openai.chat.completions.create( {
-            model: "gpt-4-1106-preview",
-            messages: [
-              {
-                role: "system",
-                content: "Du bist ein Assistent zum Erstellen von Mails. Nutzer geben dir Informationen zu sich und ihrem Schreibstil, du erzeugst daraus eine E-Mail."+
-                "Der Stil sollte sich am Nutzer orientieren. Daten, Fakten und Zahlen sollten immer unverändert wiedergegeben werden."
-              },
-              { 
-                role: "user",
-                content: data.prompt
-              }],
-            stream: true
-          } );
-          
-          let text = "";
-          let closed = false;
-
-          // Abort the execution if the user cancels the request...
-          res.on("close", () => {
-            closed = true;
-          })
-
-          for await (const chunk of response) {
-            // Check if the request was canceld
-            if(!closed){
-              //console.log(chunk.choices[0].delta.content || "");
-              const singletoken = chunk.choices[0].delta.content || "";
-              res.write(singletoken);
-              res.flushHeaders();
-              if (chunk.choices[0].finish_reason === "stop") {
-                console.log("stop!!")
-              }
-              text += singletoken;
-            }else{
-              break;
+          const messages: Array<AIMessage>  = [
+            {
+              role: "system",
+              content: "Du bist ein Assistent zum Erstellen von Mails. Nutzer geben dir Informationen zu sich und ihrem Schreibstil, du erzeugst daraus eine E-Mail."+
+                  "Der Stil sollte sich am Nutzer orientieren. Daten, Fakten und Zahlen sollten immer unverändert wiedergegeben werden."
+            },
+            {
+              role: "user",
+              content: data.prompt
             }
-          }
+          ];
 
-          const tokenCountRequest = countFunction(data.prompt);
-          const tokenCountResult = countFunction(text);
-          
-          return res.status(200).send(`<~${tokenCountResult + tokenCountRequest}~>`);
-                    
+          const { count } = await generateAIResponse(Model.GPT4, messages, res, data )
+
+          // Send a response with token counts
+          return res.status(200).send(`<~${count.response + count.request}~>`);
         }catch( E ){
           console.log(E);
           return res.status( 400 ).send( { errorcode: -2, message: "Error generating answer", tokens: -1 } );

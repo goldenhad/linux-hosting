@@ -610,14 +610,6 @@ const AssistantBase = (props: {
               }
             }
 
-
-            try{
-              await axios.post( "/api/stats", { tokens: { in: usedTokens.in, out: usedTokens.out }, time: -1, type: props.name } );
-            }catch( e ){
-              //console.log(e);
-              //console.log("Timing logging failed!");
-            }
-
             console.log("IN: ", usedTokens.in, " OUT: ", usedTokens.out);
 
             

@@ -10,21 +10,30 @@ type ResponseData = {
     message: string,
 }
 
-
+/**
+ * Create an invitation and send it to the given mail
+ * @param req Request object
+ * @param res Response object
+ */
 export default async function handler( req: NextApiRequest, res: NextApiResponse<ResponseData> ) {
   const token = await auth.verifyIdToken( req.cookies.token );
 
+  // Check if the request was sent using POST
   if( req.method == "POST" ){
-        
+    // Validate the token
     if( token ){
-
+      // Parse the data
       const data = req.body;
 
+      // Validate the input data
       if( data.email && data.companyId && data.companyname && data.firstname && data.lastname && data.role && data.invitedbyname ){
-        console.log( data.role );
+        // Check if the invited email already has an account
         const exists = await userExists( data.email );
 
         if( !exists ){
+          // If we didn't find the email in our database proceed with the invite
+          // Create an invitation object
+
           const inviteobj = {
             company: data.companyId,
             email: data.email,
@@ -34,13 +43,15 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             timestamp: Math.floor( Date.now() / 1000 ),
             code: crypto.randomBytes( 8 ).toString( "hex" )
           };
+
+          // Convert the invite a base64 string, so we can append it to a link
           const json = JSON.stringify( inviteobj );
           const invitedata =  Buffer.from( json ).toString( "base64" );
           const invitecode = Buffer.from( CryptoJS.AES.encrypt( invitedata, process.env.MAILENC ).toString() ).toString( "base64" );
-
           const baseurl = process.env.BASEURL;
 
           try {
+            // Create the email text and fill it with data
             const text = `Hallo ${data.firstname} ${data.lastname},\n\ndu wurdest von ${data.invitedbyname} von ${data.companyname} 
             zu Siteware business eingeladen, unserem innovativen Tool, 
             das das E-Mail-Schreiben revolutioniert.\n\nKlicke hier, um dich zu registrieren: ${baseurl}/register?invite=${invitecode}\n\nMit Siteware.Business 
@@ -65,20 +76,23 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                             <p>Beste Grüße,<br>
                             dein Siteware business Team</p>
                         `;
+
+            // Send the invite to the given mail
             await sendMail( data.email, "Deine Einladung zu Siteware business", text, html );
 
             return res.status( 200 ).send( { errorcode: 0, message: "OK" } );
 
           }catch( e ){
-            return res.status( 400 ).send( { errorcode: 1, message: "The provided Data has the wrong format" } );
+            // If we encounter any error during the email generation and sending
+            return res.status( 400 ).send( { errorcode: 1, message: "The email could not be send" } );
           }
         }else{
-          return res.status( 400 ).send( { errorcode: 4, message: "A User with this E-Mail already exists!" } );
+          // If the email already exists in the database
+          return res.status( 400 ).send( { errorcode: 4, message: "A user with this email already exists!" } );
         }      
       }else{
         return res.status( 400 ).send( { errorcode: 3, message: "Missing Input!" } );
       }
-
     }else{
       return res.status( 400 ).send( { errorcode: 2, message: "Authentication required!" } );
     }

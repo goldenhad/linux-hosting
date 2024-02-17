@@ -7,7 +7,7 @@ import AssistantBase from "../../../components/AssistantBase/AssistantBase";
 import { handleUndefinedTour } from "../../../helper/architecture";
 import ExcelForm from "../../../components/AssistantForms/ExcelForm/Excelform";
 import { Templates } from "../../../firebase/types/Settings";
-import { parseExcelPrompt } from "../../../helper/prompt";
+import { parseExcelPrompt } from "../../../helper/prompt/templating";
 
 
 const excelBasicState = {

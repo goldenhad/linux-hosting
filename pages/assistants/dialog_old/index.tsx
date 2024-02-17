@@ -7,7 +7,7 @@ import AssistantBase from "../../../components/AssistantBase/AssistantBase";
 import DialogForm from "../../../components/AssistantForms/Dialogform/Dialogform";
 import { handleUndefinedTour } from "../../../helper/architecture";
 import { Templates } from "../../../firebase/types/Settings";
-import { parseDialogPrompt } from "../../../helper/prompt";
+import { parseDialogPrompt } from "../../../helper/prompt/templating";
 
 
 const dialogBasicState = {

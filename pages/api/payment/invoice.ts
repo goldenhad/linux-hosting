@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { auth } from "../../../firebase/admin";
 import { stripe } from "../../../stripe/api";
 import getDocument from "../../../firebase/data/getData";
+import Stripe from "stripe";
 
 type ResponseData = {
     errorcode: number,

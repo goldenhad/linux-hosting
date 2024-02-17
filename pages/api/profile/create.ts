@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import { auth } from "../../../firebase/admin"
-import { parseProfilePrompt } from "../../../helper/prompt";
+import { parseProfilePrompt } from "../../../helper/prompt/templating";
 import getDocument from "../../../firebase/data/getData";
 
 const openai = new OpenAI( {

@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { auth } from "../../../firebase/admin";
 import { stripe } from "../../../stripe/api";
+import Stripe from "stripe";
 
 
 type ResponseData = {

@@ -1,23 +1,16 @@
 // Import necessary modules and types
 import type { NextApiRequest, NextApiResponse } from "next";
-import OpenAI from "openai";
 import { auth } from "../../../../firebase/admin";
-import { countFunction } from "../count";
+import { AIMessage, AssistantResponse, generateAIResponse, Model } from "../../../../helper/prompt/generation";
 
-// Create an instance of the OpenAI class with the API key
-const openai = new OpenAI({
-  apiKey: process.env.OPENAIAPIKEY
-});
 
-// Define the response data type
-type ResponseData = {
-  errorcode: number,
-  message: string,
-  tokens: number
-}
 
-// Define the request handler function
-export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData | string>) {
+/**
+ * Route for creating content for the blog assistant
+ * @param req request Object
+ * @param res reponse Object
+ */
+export default async function handler(req: NextApiRequest, res: NextApiResponse<AssistantResponse | string>) {
   // Verify the user's authentication token
   const token = await auth.verifyIdToken(req.cookies.token);
 
@@ -30,51 +23,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
       // Check if required data fields are present in the request
       if (data.prompt) {
-        // Set response headers for Server-Sent Events
-        res.writeHead(200, {
-          Connection: "keep-alive",
-          "Content-Encoding": "none",
-          "Cache-Control": "no-cache",
-          "Content-Type": "text/event-stream"
-        });
-
-        try {
-          // Request completion from OpenAI GPT-4 model
-          const response = await openai.chat.completions.create({
-            model: "gpt-4-1106-preview",
-            messages: [
-              {
-                role: "system",
-                content: "Du bist ein Assistent zum Erstellen von Blog Beiträgen. Nutzer geben dir Informationen zu sich und ihrem Schreibstil,"+
-                "du erzeugst daraus einen Blockbeitrag."
-              },
-              {
-                role: "user",
-                content: data.prompt
-              }
-            ],
-            stream: true
-          });
-
-          // Process and send chunks of response
-          let text = "";
-          for await (const chunk of response) {
-            const singletoken = chunk.choices[0].delta.content || "";
-            res.write(singletoken);
-            res.flushHeaders();
-            if (chunk.choices[0].finish_reason === "stop") {
-              console.log("stop!!");
+        try{
+          const messages: Array<AIMessage>  = [
+            {
+              role: "system",
+              content: "Du bist ein Assistent zum Erstellen von Blog Beiträgen. Nutzer geben dir Informationen zu sich und ihrem Schreibstil,"+
+                  "du erzeugst daraus einen Blockbeitrag."
+            },
+            {
+              role: "user",
+              content: data.prompt as string
             }
-            text += singletoken;
-          }
+          ]
 
-          // Calculate token counts for prompt and response
-          
-          const tokenCountRequest = countFunction(data.prompt);
-          const tokenCountResult = countFunction(text);
+          const { count } = await generateAIResponse(Model.GPT4, messages, res, data )
 
           // Send a response with token counts
-          return res.status(200).send(`<~${tokenCountResult + tokenCountRequest}~>`);
+          return res.status(200).send(`<~${count.response + count.request}~>`);
         } catch (E) {
           // Handle errors during the OpenAI request
           console.log(E);

@@ -7,7 +7,7 @@ import MonologForm from "../../../components/AssistantForms/Monologform/Monologf
 import { useRef } from "react";
 import { handleUndefinedTour } from "../../../helper/architecture";
 import { Templates } from "../../../firebase/types/Settings";
-import { parseMonologPrompt } from "../../../helper/prompt";
+import { parseMonologPrompt } from "../../../helper/prompt/templating";
 
 
 const monologBasicState = {

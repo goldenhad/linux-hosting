@@ -6,7 +6,7 @@ import updateData from "../../../firebase/data/updateData";
 import AssistantBase from "../../../components/AssistantBase/AssistantBase";
 import BlogForm from "../../../components/AssistantForms/Blogform/Blogform";
 import { handleUndefinedTour } from "../../../helper/architecture";
-import { parseBlogPrompt } from "../../../helper/prompt";
+import { parseBlogPrompt } from "../../../helper/prompt/templating";
 
 
 const blogBasicState = {

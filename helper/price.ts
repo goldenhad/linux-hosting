@@ -74,10 +74,13 @@ export class TokenCalculator{
       }
 
       const nomalizer = 1/(this.parameter.tokenProMail.in + this.parameter.tokenProMail.out);
-      const cost = (this.parameter.costPerToken.in)/1000 + (this.parameter.costPerToken.out)/1000;
+      const cost = (this.parameter.costPerToken.in)/1000 * this.parameter.tokenProMail.in + (this.parameter.costPerToken.out)/1000 * this.parameter.tokenProMail.out;
       const profit = this.parameter.profitPercent/100;
 
-      return parseFloat((nomalizer * price/(cost * profit) * (1 + discount/100)).toFixed(0));
+      console.log(price, nomalizer, cost, profit);
+      console.log(nomalizer * price/(cost * profit))
+
+      return parseFloat((price/(cost * profit) * (1 + discount/100)).toFixed(0));
     }else{
       throw Error("Price undefined");
     }

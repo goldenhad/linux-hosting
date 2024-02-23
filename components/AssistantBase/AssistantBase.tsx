@@ -20,7 +20,7 @@ import { isMobile } from "react-device-detect";
 import Markdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import React from "react";
-import { TokenCalculator } from "../../helper/price";
+import { TokenCalculator, toGermanCurrencyString } from "../../helper/price";
 import { Calculations, InvoiceSettings, Templates } from "../../firebase/types/Settings";
 import getDocument from "../../firebase/data/getData";
 
@@ -85,7 +85,6 @@ const AssistantBase = (props: {
   const [ isLoaderVisible, setIsLoaderVisible ] = useState( false );
   const [ isAnswerCardVisible, setIsAnswerCardvisible ] = useState( false );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [ tokens, setTokens ] = useState( "" );
   const [ answer, setAnswer ] = useState( "" );
   const [ formDisabled, setFormDisabled ] = useState( false );
   const [messageApi, contextHolder] = message.useMessage();
@@ -386,7 +385,6 @@ const AssistantBase = (props: {
         setShowAnswer( true );
         setIsAnswerVisible( false );
         setPromptError( false );
-        setTokens( "" );
 
         // Set the state of the prompt with the input value
         const cookieobject = props.basicState;
@@ -427,7 +425,7 @@ const AssistantBase = (props: {
 
         let isFreed = false;
         const usedTokens = { in: 0, out: 0 };
-        let realusedTokens = 0;
+        let cost = 0;
 
         // Retrieve the template for prompts from the database
         const templatereq = await getDocument("Settings", "Prompts");
@@ -485,24 +483,62 @@ const AssistantBase = (props: {
                       // Set the tokens to the sum of the input and the received answer
                       usedTokens.in = costbefore;
                       usedTokens.out = tokensused;
-                      
-                      if(props.context.calculations.costPerToken.in > props.context.calculations.costPerToken.out){
-                        realusedTokens = usedTokens.in * (props.context.calculations.costPerToken.in/props.context.calculations.costPerToken.out) + usedTokens.out;
-                      }else if(props.context.calculations.costPerToken.in < props.context.calculations.costPerToken.out){
-                        realusedTokens = usedTokens.in + (props.context.calculations.costPerToken.out/props.context.calculations.costPerToken.in) * usedTokens.out;
-                      }else{
-                        realusedTokens = usedTokens.in + usedTokens.out;
-                      }
-  
-                      console.log(realusedTokens);
-                      
+                        
                       // Update the used tokens and display them
-                      setTokens(realusedTokens.toString());
                       setTokenCountVisible(true);
-                      
+
+                      cost = calculator.cost(usedTokens);
+
+                      // Add the generated answer to the history state
+                      // Validate that the answer is not empty
+                      if(localAnswer != ""){
+                        // We need to check if the user already has 10 saved states
+                        if(historyState.length >= 10){
+                          // If so remove last Element from array
+                          historyState.pop();
+                        }
+  
+                        console.log(usedTokens, cost, toGermanCurrencyString(cost));
+    
+                        // Add the answer with the current time and the used tokens to the front of the history array
+                        historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: toGermanCurrencyString(cost) });
+    
+                        // Encrypt the history array
+                        const encHistObj = await axios.post( "/api/prompt/encrypt", {
+                          content: JSON.stringify(historyState),
+                          salt: props.context.user.salt
+                        } );
+      
+                        const encHist = encHistObj.data.message;
+  
+                        // Check if the user previously had a history
+                        if(props.context.user.history){
+                          // If so get the history
+                          const userhist = props.context.user.history;
+                          // Set the history to the encoded string and update the user
+                          userhist[props.laststate] = encHist;
+                          await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
+                        }else{
+                          // If the user previously didn't have a history
+                          // Init the history
+                          const hist: History = {
+                            monolog: "",
+                            dialog: "",
+                            monolog_old: "",
+                            dialog_old: "",
+                            blog: "",
+                            excel: ""
+                          };
+                          // Update the history state of the assistant and update the user
+                          const encHist = encHistObj.data.message;
+                          hist[props.laststate] = encHist;
+                          await updateDoc( doc( db, "User", props.context.login.uid ), { history: hist } );
+                        }
+                      }
+
                       notificationAPI.info({
                         message: "Creditverbrauch",
-                        description: `Die Anfrage hat ${calculator.round(calculator.normalizeTokens(realusedTokens), 2)} Credits verbraucht`,
+                        description: `Die Anfrage hat ${toGermanCurrencyString(cost)} verbraucht`,
                         duration: 10 
                       });
                       
@@ -522,51 +558,6 @@ const AssistantBase = (props: {
                   
                 }, signal: cancleController.signal
                 });
-
-              // Add the generated answer to the history state
-              // Validate that the answer is not empty
-              if(localAnswer != ""){
-              // We need to check if the user already has 10 saved states
-                if(historyState.length >= 10){
-                  // If so remove last Element from array
-                  historyState.pop();
-                }
-  
-                // Add the answer with the current time and the used tokens to the front of the history array
-                historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: realusedTokens });
-  
-                // Encrypt the history array
-                const encHistObj = await axios.post( "/api/prompt/encrypt", {
-                  content: JSON.stringify(historyState),
-                  salt: props.context.user.salt
-                } );
-    
-                const encHist = encHistObj.data.message;
-
-                // Check if the user previously had a history
-                if(props.context.user.history){
-                // If so get the history
-                  const userhist = props.context.user.history;
-                  // Set the history to the encoded string and update the user
-                  userhist[props.laststate] = encHist;
-                  await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
-                }else{
-                // If the user previously didn't have a history
-                // Init the history
-                  const hist: History = {
-                    monolog: "",
-                    dialog: "",
-                    monolog_old: "",
-                    dialog_old: "",
-                    blog: "",
-                    excel: ""
-                  };
-                  // Update the history state of the assistant and update the user
-                  const encHist = encHistObj.data.message;
-                  hist[props.laststate] = encHist;
-                  await updateDoc( doc( db, "User", props.context.login.uid ), { history: hist } );
-                }
-              }
             }catch(e){
               // If we encounter an error
               if(axios.isCancel(e)){
@@ -580,23 +571,14 @@ const AssistantBase = (props: {
                   usedTokens.in = costbefore;
                   usedTokens.out = tokensused;
                     
-                  if(props.context.calculations.costPerToken.in > props.context.calculations.costPerToken.out){
-                    realusedTokens = usedTokens.in * (props.context.calculations.costPerToken.in/props.context.calculations.costPerToken.out) + usedTokens.out;
-                  }else if(props.context.calculations.costPerToken.in < props.context.calculations.costPerToken.out){
-                    realusedTokens = usedTokens.in + (props.context.calculations.costPerToken.out/props.context.calculations.costPerToken.in) * usedTokens.out;
-                  }else{
-                    realusedTokens = usedTokens.in + usedTokens.out;
-                  }
-
-                  console.log(realusedTokens);
+                  cost = calculator.cost(usedTokens);
                     
                   // Update the used tokens and display them
-                  setTokens(realusedTokens.toString());
                   setTokenCountVisible(true);
                     
                   notificationAPI.info({
                     message: "Creditverbrauch",
-                    description: `Die Anfrage hat ${calculator.round(calculator.normalizeTokens(realusedTokens), 2)} Credits verbraucht`,
+                    description: `Die Anfrage hat  ${toGermanCurrencyString(cost)} Credits verbraucht`,
                     duration: 10 
                   });
                 }
@@ -606,19 +588,16 @@ const AssistantBase = (props: {
               }else{
                 setAnswer("");
                 setPromptError(true);
-                setTokens( "" );
               }
             }
 
-            console.log("IN: ", usedTokens.in, " OUT: ", usedTokens.out);
-
             
             // Reduce the token balance by the used token
-            if( props.context.company.tokens - realusedTokens <= 0 ){
+            if( props.context.company.tokens - cost <= 0 ){
               props.context.company.tokens = 0;
             }else{
               console.log(props.context.company.tokens);
-              props.context.company.tokens -= realusedTokens
+              props.context.company.tokens -= cost
               console.log(props.context.company.tokens);
             }
 
@@ -631,7 +610,7 @@ const AssistantBase = (props: {
   
                 console.log(calculator.normalizeTokens(props.context.company.tokens), props.context.company.plan.threshold);
                 // Check if company has less tokens than the threshold
-                if(calculator.normalizeTokens(props.context.company.tokens) < props.context.company.plan.threshold){
+                if(props.context.company.tokens < props.context.company.plan.threshold){
                   // Try to charge the user with the values defined in the plan
                   try{
                     const paymentreq = await axios.post("/api/payment/issuepayment", { 
@@ -651,7 +630,7 @@ const AssistantBase = (props: {
                   // If the payment was successfull
                   if(paymentSuccesfull){
                   // Get the tokens that will be added according to the plan
-                    const amountToAdd = calculator.indexToTokens(props.context.company.plan?.product, true);
+                    const amountToAdd = calculator.indexToPrice(props.context.company.plan?.product);
                     // Add the totkens to the tokens of the company
                     const updatedTokenValue = props.context.company.tokens + amountToAdd;
   
@@ -689,7 +668,7 @@ const AssistantBase = (props: {
   
                     notificationAPI.info({
                       message: "Automatisches Nachfüllen",
-                      description: `Dein Credit-Budget wurde automatisch um ${calculator.round(calculator.normalizeTokens(amountToAdd), 0)} Tokens aufgefüllt!`,
+                      description: `Dein Credit-Budget wurde automatisch um ${toGermanCurrencyString(amountToAdd)} Tokens aufgefüllt!`,
                       duration: 10 
                     });
                   }else{
@@ -728,12 +707,12 @@ const AssistantBase = (props: {
             if( userusageidx != -1 ){
               // If so just update the usage with the used tokens
               const usageupdates = props.context.user.usedCredits;
-              usageupdates[userusageidx].amount += realusedTokens;
+              usageupdates[userusageidx].amount += cost;
               await updateDoc( doc( db, "User", props.context.login.uid ), { usedCredits: usageupdates } );
             }else{
               // Otherwise create a new usage object and write it to the user
               const usageupdates = props.context.user.usedCredits;
-              usageupdates.push( { month: currentMonth, year: currentYear, amount: realusedTokens } );
+              usageupdates.push( { month: currentMonth, year: currentYear, amount: cost } );
               await updateDoc( doc( db, "User", props.context.login.uid ), { usedCredits: usageupdates } );
             }
           }else{
@@ -744,7 +723,6 @@ const AssistantBase = (props: {
         }
       }catch( e ){
         console.log(e);
-        setTokens( "" );
         setIsLoaderVisible( false );
         setPromptError( true );
       }
@@ -810,14 +788,13 @@ const AssistantBase = (props: {
                 <Paragraph className={styles.histitem}>{item.content.slice(0, 100)}...</Paragraph>
                 <div className={styles.subcontent}>
                   <span>{item.time}</span>
-                  <span>Credits: {calculator.round(calculator.normalizeTokens(parseFloat(item.tokens)), 2)}</span>
+                  <span>{(typeof item.tokens == "string")? item.tokens: 0}</span>
                   <Button icon={<EyeOutlined />} onClick={() => {
                     setHistOpen(false);
                     setIsAnswerCardvisible( true );
                     setShowAnswer( true );
                     setIsAnswerVisible( true );
                     setPromptError( false );
-                    setTokens( "" );
                     setAnswer(item.content);
                   }}></Button>
                   <Button icon={<CloseOutlined />} onClick={async () => {

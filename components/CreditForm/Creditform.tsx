@@ -1,15 +1,15 @@
-import { Button, Card, Divider, Form, Slider } from "antd";
+import { Card, Form, Slider } from "antd";
 import styles from "./creditform.module.scss";
-import { TokenCalculator } from "../../helper/price";
+import { TokenCalculator, toGermanCurrencyString } from "../../helper/price";
 import { useState } from "react";
-import { convertToCurrency } from "../../helper/architecture";
 import { useStripe } from "@stripe/react-stripe-js";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { User } from "../../firebase/types/User";
 import { Company, Order } from "../../firebase/types/Company";
-import { Calculations, InvoiceSettings } from "../../firebase/types/Settings";
+import { AssistantCost, Calculations, InvoiceSettings } from "../../firebase/types/Settings";
 import updateData from "../../firebase/data/updateData";
+import FatButton from "../FatButton";
 
 
 /**
@@ -59,11 +59,28 @@ const Creditform = ( props: {
   }
 
   /**
-   * Calculates the cost per mails for the selected tokens
-   * @returns The cost per mail as number
+   * Get an AssistantCost Object by the given id from the calculation object
+   * @param id Id des AssistantCost objects
+   * @returns Assistantobject
    */
-  const calculatePricePerMail = () => {
-    return props.calculation.products[tokenstobuy].price / possibleMails();
+  const assistantCostById = (id: string): AssistantCost => {
+    const indx = props.calculation.assistantcost.findIndex((obj) => {
+      return obj.id == id;
+    })
+
+    if(indx != -1){
+      return props.calculation.assistantcost[indx];
+    }else{
+      return {
+        id: "UNDEFINED",
+        perUnit: 0
+      }
+    }
+  }
+
+
+  const toPossibleUnits = (cost: AssistantCost) => {
+    return Math.round(calculator.indexToPrice(tokenstobuy) / cost.perUnit);
   }
 
   /**
@@ -120,73 +137,92 @@ const Creditform = ( props: {
 
   return (
     <div className={styles.cardrow}>
-      <div className={styles.headline}>
-        <h1 className={styles.mainheadline}>Credits Kaufen</h1>
-        <div className={styles.subheadline}>Bis zu 35% sparen!</div>
-      </div>
-      <Card className={styles.quoatacard} bordered={true}>
-        <div className={styles.tokenrow}>
-          <div className={styles.tokens}>{calculator.indexToCredits(tokenstobuy)}</div>
-          <div className={styles.tokeninfo}>Anzahl Credits</div>
+      <div className={styles.cardcol}>
+        <div className={styles.headline}>
+          <h1 className={styles.mainheadline}>Konto aufladen</h1>
+          <div className={styles.subheadline}>Bis zu 35% sparen!</div>
         </div>
-        <Form>
-          <Form.Item className={styles.tokenslideritem} name={"tokenamount"}>
-            <Slider
-              className={styles.tokenslider}
-              defaultValue={0}
-              max={props.calculation.products.length-1}
-              step={1}
-              tooltip={{ formatter: null }}
-              onChange={
-                ( val ) => {
-                  setTokenstobuy( val )
-                }
-              }/>
-          </Form.Item>
-        </Form>
-        <div className={styles.details}>
-          <div className={styles.singledetail}>Entspricht: <span className={styles.detailhighlight}>{
-            possibleMails()
-          } Mails</span></div>
-          <div className={styles.singledetail}>Preis je Mail: <span className={styles.detailhighlight}>{convertToCurrency( calculatePricePerMail() )}</span></div>
-          <div className={styles.singledetail}>
-                Deine Ersparnis:
-            <span className={`${styles.detailhighlight} ${(tokenstobuy > 0)? styles.savingsamount: ""}`}>
-              {convertToCurrency( calculateSavings() )} ({props.calculation.products[tokenstobuy].discount} %)
-            </span>
-          </div>
+        <div className={styles.cards}>
+          <Card className={styles.quoatacard} bordered={true}>
+            <div className={styles.tokenrow}>
+              <div className={styles.tokens}>{toGermanCurrencyString(calculator.indexToPrice(tokenstobuy))}</div>
+              <div className={styles.tokeninfo}>Dein ausgewähltes Volumen</div>
+            </div>
+            <Form>
+              <Form.Item className={styles.tokenslideritem} name={"tokenamount"}>
+                <Slider
+                  className={styles.tokenslider}
+                  defaultValue={0}
+                  max={props.calculation.products.length-1}
+                  step={1}
+                  tooltip={{ formatter: null }}
+                  onChange={
+                    ( val ) => {
+                      setTokenstobuy( val )
+                    }
+                  }/>
+              </Form.Item>
+            </Form>
+            <div className={styles.details}>
+              <div className={styles.specialdetail}>Deine Ersparnis: <span className={styles.detailhighlight}>
+                {toGermanCurrencyString( calculateSavings() )} ({props.calculation.products[tokenstobuy].discount} %)
+              </span></div>
+              <div className={styles.singledetail}>Zeitersparnis: <span className={styles.detailunhighlighted}>{calculateHours()} Stunden</span></div>
+              <div className={styles.singledetail}>
+                Arbeitskosten bei 45,00 € je Std. 
+                <span className={`${styles.detailunhighlighted}`}>
+                  {toGermanCurrencyString(calculateHours() * 45)}
+                </span>
+              </div>
+            </div>
+          </Card>
+
+          <Card className={styles.equalscard}>
+            <div className={styles.equalstext}>Das entspricht...</div>
+            <div className={styles.equalssubheadline}>Das bekommst Du für Dein Budget</div>
+            <table className={styles.costtable}>
+              <thead>
+                <tr>
+                  <td className={styles.assistanttext}></td>
+                  <td className={styles.assistantprice}>Einzelpreis</td>
+                  <td className={styles.assistantprice}>Anzahl</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className={styles.assistanttext}>E-Mail Textvorschläge</td>
+                  <td className={styles.assistantprice}>{toGermanCurrencyString(assistantCostById("monolog").perUnit)}</td>
+                  <td className={styles.assistantprice}>{toPossibleUnits(assistantCostById("monolog"))}</td>
+                </tr>
+                <tr>
+                  <td className={styles.assistanttext}>E-Mail Antworten</td>
+                  <td className={styles.assistantprice}>{toGermanCurrencyString(assistantCostById("dialog").perUnit)}</td>
+                  <td className={styles.assistantprice}>{toPossibleUnits(assistantCostById("dialog"))}</td>
+                </tr>
+                <tr>
+                  <td className={styles.assistanttext}>Supportanfragen Excel</td>
+                  <td className={styles.assistantprice}>{toGermanCurrencyString(assistantCostById("excel").perUnit)}</td>
+                  <td className={styles.assistantprice}>{toPossibleUnits(assistantCostById("excel"))}</td>
+                </tr>
+              </tbody>
+            </table>
+          </Card>
         </div>
 
-        <Divider className={styles.tokendivider} />
-
-        <div className={styles.summary}>
-          <div className={styles.summarytext}>Gesamtpreis</div>
-          <div className={styles.summarysum}>{convertToCurrency( props.calculation.products[tokenstobuy].price )}</div>
-        </div>
-      </Card>
-
-      <div className={styles.buyrow}>
-        <div className={styles.checkout}>
-          <Divider className={styles.tokendivider} />
-          <div className={styles.checkoutheadline}>Deine Ersparnis</div>
-          <div className={styles.savings}>
-            <div className={styles.singlesaving}>Zeitersparnis im Monat: <span className={styles.savinghighlight}>{calculateHours()} Stunden</span></div>
-            <div className={styles.singlesaving}>Arbeitskosten: {convertToCurrency( calculateHours() * 45 )} (Bei 45,- EUR je Std.)</div>
-          </div>
-        </div>
-
-        <div className={styles.buybuttonrow}>
-          <div className={styles.buybutton}>
-            <Button onClick={async () => {
-              onPayment()
-            }}>Bezahlen</Button>
+        <div className={styles.buyrow}>
+          <div className={styles.buybuttonrow}>
+            <div className={styles.buybutton}>
+              <FatButton onClick={async () => {
+                onPayment()
+              }} text="Bezahlen"></FatButton>
                 
-          </div>
+            </div>
 
-          <div className={styles.buybutton}>
-            <Button onClick={() => {
-              router.push( "usage" )
-            }} className={styles.buynow}>Zurück zur Übersicht</Button>
+            <div className={styles.buybutton}>
+              <FatButton onClick={() => {
+                router.push( "usage" )
+              }} type="default" text="Zurück zur Übersicht"></FatButton>
+            </div>
           </div>
         </div>
       </div>

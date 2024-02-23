@@ -38,7 +38,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import getStripe from "../../helper/stripe";
 import AddCreditCardForm from "../../components/AddCreditCardForm/AddCreditCardForm";
 import UsageStatistic from "../../components/UsageStatistic/UsageStatistic";
-import { TokenCalculator } from "../../helper/price";
+import { TokenCalculator, toGermanCurrencyString } from "../../helper/price";
 import { useRouter } from "next/router";
 
 ChartJS.register(
@@ -90,9 +90,9 @@ export default function Usage() {
 
   const steps: TourProps["steps"] = [
     {
-      title: "Nutzung und Credit-Budget",
-      description: "Willkommen in den Nutzungsinformationen. Hier kannst du dein Credit-Budget überprüfen und Statistiken zur "+
-      "Nutzung unseres Tools einsehen. Außerdem hast du die Möglichkeit, weitere Credits zu kaufen und deine bisherigen Bestellungen einzusehen.",
+      title: "Nutzung und Budget",
+      description: "Willkommen in den Nutzungsinformationen. Hier kannst du dein Budget überprüfen und Statistiken zur "+
+      "Nutzung unseres Tools einsehen. Außerdem hast du die Möglichkeit, weiteres Budget nachzubuchen und deine bisherigen Bestellungen einzusehen.",
       nextButtonProps: {
         children: (
           "Weiter"
@@ -105,8 +105,8 @@ export default function Usage() {
       }
     },
     {
-      title: "Credit-Budget",
-      description: "Hier wird dein aktuelles Credit-Budget angezeigt. Die angegebene Zahl gibt dir einen Überblick darüber, wie viele Credits"+
+      title: "Budget",
+      description: "Hier wird dein aktuelles Budget angezeigt. Die angegebene Zahl gibt dir einen Überblick darüber, wie viel Budget"+
       " du noch zur Verfügung hast.",
       target: () => budgetRef.current,
       nextButtonProps: {
@@ -137,7 +137,7 @@ export default function Usage() {
     },
     {
       title: "Statistik",
-      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Credits du über das aktuelle Jahr mit Siteware business bereits verbraucht hast.",
+      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Budget du über das aktuelle Jahr mit Siteware business bereits verbraucht hast.",
       target: () => statRef.current,
       nextButtonProps: {
         children: (
@@ -292,9 +292,6 @@ export default function Usage() {
                   <div>{(order.type == "recharge")? "Automatisches Nachfüllen": "Bestellung"}</div></List.Item>
                 <List.Item className={styles.singledetail}><div className={styles.description}>Bezahlmethode:</div> <div>{order.method}</div></List.Item>
                 <List.Item className={styles.singledetail}><div className={styles.description}>Betrag:</div> <div>{convertToCurrency(order.amount)}</div></List.Item>
-                <List.Item className={styles.singledetail}>
-                  <div className={styles.description}>Credits:</div> <div>{calculator.round(calculator.normalizeTokens(order?.tokens), 0)}</div>
-                </List.Item>
               </List>
             </div>
 
@@ -339,7 +336,7 @@ export default function Usage() {
                   logEvent(analytics, "buy_tokens", {
                     currentCredits: company?.tokens
                   });
-                }} type='primary' disabled={!userCanBuyCredits}>Weitere Credits kaufen</Button> : <></>}
+                }} type='primary' disabled={!userCanBuyCredits}>Weiteres Budget dazubuchen</Button> : <></>}
               </Link>
             </div>
             <div className={styles.planwindow}>
@@ -349,8 +346,8 @@ export default function Usage() {
               <div className={styles.planinfo}>
                 Das automatische Auffüllen ist aktiv.
                 Dein Konto wird automatisch um <span className={styles.creds}>
-                  {calculator.indexToCredits(company.plan?.product, true)}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
-                <span className={styles.creds}> {company?.plan?.threshold}</span> Credits fällt.
+                  {toGermanCurrencyString(calculator.indexToPrice(company.plan?.product))}</span> aufgestockt, wenn dein Budget unter 
+                <span className={styles.creds}> {toGermanCurrencyString(company?.plan?.threshold)}</span> fällt.
               </div>
               {(!userCanBuyCredits)? <></>: <Button type="link" className={styles.planedit} onClick={() => {
                 setRechargeModalOpen(true);
@@ -367,7 +364,7 @@ export default function Usage() {
                   logEvent(analytics, "buy_tokens", {
                     currentCredits: (company.tokens)? company.tokens: 0
                   });
-                }} type='primary' disabled={!userCanBuyCredits}>Weitere Credits kaufen</Button> : <></>}
+                }} type='primary' disabled={!userCanBuyCredits}>Weiteres Budget dazubuchen</Button> : <></>}
               </Link>
             </div>
             <div className={styles.planwindow}>
@@ -375,7 +372,7 @@ export default function Usage() {
               Automatisches Nachladen aktivieren
               </div>
               <div className={styles.planinfo}>
-                Schalte die automatische Aufladung ein, damit dein Credit-Konto immer gefüllt bleibt.
+                Schalte die automatische Aufladung ein, damit dein Konto immer gefüllt bleibt.
               </div>
               <Button type="link" className={styles.planedit} onClick={() => {
                 setRechargeModalOpen(true)
@@ -393,7 +390,7 @@ export default function Usage() {
                 logEvent(analytics, "buy_tokens", {
                   currentCredits: (company.tokens)? company.tokens: 0
                 });
-              }} type='primary' disabled={!userCanBuyCredits}>Weitere Credits kaufen</Button> : <></>}
+              }} type='primary' disabled={!userCanBuyCredits}>Weiteres Budget dazubuchen</Button> : <></>}
             </Link>
           </div>
           <div className={styles.planwindow}>
@@ -491,14 +488,14 @@ export default function Usage() {
   const credittabsitems = [
     {
       key: "1",
-      label: "Credit-Budget",
+      label: "Budget",
       children: <>
         
         <div className={styles.tokeninfocard}>
-          <h2>Dein Credit-Budget</h2>
+          <h2>Dein Budget</h2>
           <div className={styles.quotarow}>
             <div className={styles.tokenbudget}>
-              {(company)? calculator.round(calculator.normalizeTokens(company.tokens), 0): 0} Credits
+              {(company)? toGermanCurrencyString(company.tokens): toGermanCurrencyString(0)}
             </div>
           </div>
         </div>
@@ -526,16 +523,16 @@ export default function Usage() {
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.companyoverview}>
-          <Card ref={budgetRef} className={styles.tokeninformation} title={"Credits"} bordered={true}>
+          <Card ref={budgetRef} className={styles.tokeninformation} title={"Budget"} bordered={true}>
             <Tabs items={credittabsitems} activeKey={activeTab} onChange={(key) => {
               setActiveTab(key)
             }}/>
             
           </Card>
-          <Card ref={statRef} className={styles.tokenusage} title={"Credit-Verbrauch"} bordered={true}>
+          <Card ref={statRef} className={styles.tokenusage} title={"Budgetnutzung"} bordered={true}>
             <div className={styles.tokeninfocard}>
               <div className={styles.stattitlerow}>
-                <h2>Verbrauch</h2>
+                <h2>Nutzung</h2>
                 <div className={styles.switchyearrow}>
                   <Button className={`${styles.yearswitchbutton} ${styles.left}`} disabled={visibleYear <= lowerBound} onClick={() => {
                     if(visibleYear > lowerBound){
@@ -564,9 +561,9 @@ export default function Usage() {
           setRechargeModalOpen(false)
         }}>
           <p className={styles.rechargeinformation}>
-            Das automatische Nachladen sorgt dafür, dass dein Credit-Konto immer ausreichend gedeckt ist. 
-            Du kannst einen bestimmten Wert festlegen, und sobald dein Credit-Budget unter diesen Wert fällt, bucht das System automatisch 
-            neue Credits nach. So stellst du sicher, dass du immer genügend Credits zur Verfügung hast, ohne manuell nachladen zu müssen.
+            Das automatische Nachladen sorgt dafür, dass dein Konto immer ausreichend gedeckt ist. 
+            Du kannst einen bestimmten Wert festlegen, und sobald dein Budget unter diesen Wert fällt, bucht das System automatisch 
+            einen Betrag nach. So stellst du sicher, dass du immer genügend Budget zur Verfügung hast, ohne manuell nachladen zu müssen.
           </p>
           <Elements stripe={stripePromise}>
             <RechargeForm

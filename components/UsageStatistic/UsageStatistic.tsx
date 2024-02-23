@@ -41,14 +41,14 @@ const UsageStatistic = (props: {
           labels:  months,
           datasets: [
             {
-              label: `Credits ${props.visibleYear}`,
+              label: `Nutzung ${props.visibleYear}`,
               data: months.map( ( label, idx ) => {
                 let sum = 0;
                 users.forEach( ( su: User ) => {
                   if(su.usedCredits){
                     su.usedCredits.forEach( ( usage: Usage ) => {
                       if( usage.month == idx+1 && usage.year == props.visibleYear ){
-                        sum += parseFloat( ( usage.amount/1000 ).toFixed( 2 ) );
+                        sum += parseFloat( ( usage.amount ).toFixed( 2 ) );
                       }
                     });
                   }

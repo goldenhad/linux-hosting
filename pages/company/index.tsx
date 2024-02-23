@@ -46,6 +46,7 @@ import { User } from "../../firebase/types/User";
 import { InvitedUser } from "../../firebase/types/Company";
 import { getImageUrl } from "../../firebase/drive/upload_file";
 import FatButton from "../../components/FatButton";
+import { toGermanCurrencyString } from "../../helper/price";
 const { TextArea } = Input;
 
 ChartJS.register(
@@ -677,11 +678,10 @@ export default function Company( props: InitialProps ) {
     
               return (
                 <Statistic
-                  value={creditusage}
+                  value={toGermanCurrencyString(creditusage)}
                   precision={2}
                   valueStyle={{ color: colorToDisplay, fontSize: 14 }}
                   prefix={iconToDisplay}
-                  suffix="Credits"
                   groupSeparator="."
                   decimalSeparator=","
                 />
@@ -689,11 +689,10 @@ export default function Company( props: InitialProps ) {
             }else{          
               return (
                 <Statistic
-                  value={0.00}
+                  value={toGermanCurrencyString(0)}
                   precision={2}
                   valueStyle={{ color: colorToDisplay, fontSize: 14 }}
                   prefix={iconToDisplay}
-                  suffix="Credits"
                   groupSeparator="."
                   decimalSeparator=","
                 />
@@ -773,7 +772,7 @@ export default function Company( props: InitialProps ) {
         }
       },
       {
-        title: "Credits diesen Monat",
+        title: "Kosten diesen Monat",
         dataIndex: "usedCredits",
         key: "usedCredits",
         render: ( _, obj ) => {
@@ -819,11 +818,10 @@ export default function Company( props: InitialProps ) {
   
             return (
               <Statistic
-                value={creditusage}
+                value={toGermanCurrencyString(creditusage)}
                 precision={2}
                 valueStyle={{ color: colorToDisplay, fontSize: 14 }}
                 prefix={iconToDisplay}
-                suffix="Credits"
                 groupSeparator="."
                 decimalSeparator=","
               />
@@ -831,11 +829,10 @@ export default function Company( props: InitialProps ) {
           }else{          
             return (
               <Statistic
-                value={0}
+                value={toGermanCurrencyString(0)}
                 precision={2}
                 valueStyle={{ color: colorToDisplay, fontSize: 14 }}
                 prefix={iconToDisplay}
-                suffix="Credits"
                 groupSeparator="."
                 decimalSeparator=","
               />

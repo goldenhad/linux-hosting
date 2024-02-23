@@ -1,11 +1,10 @@
-import { Card, Divider, Form, Input, Popover, Slider } from "antd";
+import { Card, Form, Input, Popover, Slider } from "antd";
 import {
   InfoCircleOutlined
 } from "@ant-design/icons";
 import styles from "./rechargeform.module.scss"
 import { useEffect, useState } from "react";
-import { convertToCurrency } from "../../helper/architecture";
-import { TokenCalculator } from "../../helper/price";
+import { TokenCalculator, toGermanCurrencyString } from "../../helper/price";
 import { useStripe } from "@stripe/react-stripe-js";
 import axios from "axios";
 import { Company, Plan } from "../../firebase/types/Company";
@@ -59,11 +58,11 @@ const RechargeForm = ( props: {
   }
 
   /**
-   * Calculates the cost per email in the given credit package
-   * @returns Price per mail as number
+   * Calculates the saved hours with the selected amount of tokens
+   * @returns Saved hours as number
    */
-  const calculatePricePerMail = () => {
-    return props.calculations.products[tokenstobuy].price / possibleMails();
+  const calculateHours = () => {
+    return Math.floor((possibleMails() * props.calculations.savedMinutesProMail)/60);
   }
 
   /**
@@ -119,7 +118,7 @@ const RechargeForm = ( props: {
       //props.onCustomerApprove();
     }
     // Parse the user input threshold
-    const thresholdAsNumber = parseInt(form.getFieldValue("threshold"));
+    const thresholdAsNumber = parseFloat(form.getFieldValue("threshold"));
     if(isNaN(thresholdAsNumber)){
       return null;
     }
@@ -195,8 +194,8 @@ const RechargeForm = ( props: {
         </Form.Item>
         <Card className={styles.quoatacard} bordered={true}>
           <div className={styles.tokenrow}>
-            <div className={styles.tokens}>{calculator.indexToCredits(tokenstobuy, true)}</div>
-            <div className={styles.tokeninfo}>Anzahl Credits</div>
+            <div className={styles.tokens}>{toGermanCurrencyString(calculator.indexToPrice(tokenstobuy))}</div>
+            <div className={styles.tokeninfo}>Dein ausgewähltes Volumen</div>
           </div>
         
           <Form.Item className={styles.tokenslideritem} name={"tokenamount"}>
@@ -213,23 +212,16 @@ const RechargeForm = ( props: {
               }/>
           </Form.Item>
           <div className={styles.details}>
-            <div className={styles.singledetail}>Entspricht: <span className={styles.detailhighlight}>{
-              possibleMails()
-            } Mails</span></div>
-            <div className={styles.singledetail}>Preis je Mail: <span className={styles.detailhighlight}>{convertToCurrency( calculatePricePerMail() )}</span></div>
+            <div className={styles.specialdetail}>Deine Ersparnis: <span className={styles.detailhighlight}>
+              {toGermanCurrencyString( calculateSavings() )} ({props.calculations.products[tokenstobuy].discount} %)
+            </span></div>
+            <div className={styles.singledetail}>Zeitersparnis: <span className={styles.detailunhighlighted}>{calculateHours()} Stunden</span></div>
             <div className={styles.singledetail}>
-                Deine Ersparnis:
-              <span className={`${styles.detailhighlight} ${(tokenstobuy >= 0)? styles.savingsamount: ""}`}>
-                {convertToCurrency( calculateSavings() )} ({Number(props.calculations.products[tokenstobuy].discount) + 5} %)
+                Arbeitskosten bei 45,00 € je Std. 
+              <span className={`${styles.detailunhighlighted}`}>
+                {toGermanCurrencyString(calculateHours() * 45)}
               </span>
             </div>
-          </div>
-
-          <Divider className={styles.tokendivider} />
-
-          <div className={styles.summary}>
-            <div className={styles.summarytext}>Gesamtpreis</div>
-            <div className={styles.summarysum}>{convertToCurrency( props.calculations.products[tokenstobuy].price )}</div>
           </div>
         </Card>
 

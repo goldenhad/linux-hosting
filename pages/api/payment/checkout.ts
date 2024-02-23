@@ -38,7 +38,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                   price_data: {
                     currency: "EUR",
                     product_data: {
-                      name: "Siteware business Credits"
+                      name: "Siteware business Aufladung"
                     },
                     // Unit amount has to be in cents
                     unit_amount: price * 100

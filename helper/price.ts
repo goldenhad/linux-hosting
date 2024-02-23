@@ -121,4 +121,29 @@ export class TokenCalculator{
     return parseFloat((numberToRound).toFixed(digits));
   }
 
+
+  indexToPrice(index: number): number {
+    const priceObj = this.parameter.products.find((obj: Product) => {
+      return obj.id === index;
+    });
+
+    if(priceObj){
+      const price = priceObj.price;
+      return price;
+    }else{
+      throw Error("Price undefined");
+    }
+  }
+
+  cost(tokens: { in: number, out: number }): number {
+    return ((tokens.in * this.parameter.costPerToken.in) + (tokens.out * this.parameter.costPerToken.out)) * this.parameter.profitPercent/100
+  }
+}
+
+/**
+ * Converts the given number to a string in german currency format
+ * @param value Number to convert
+ */
+export const toGermanCurrencyString = (value: number): string => {
+  return value.toLocaleString("de-DE", { style: "currency", currency: "EUR" });
 }

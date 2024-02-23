@@ -48,10 +48,16 @@ export type Calculations = {
     startCredits: number,
     savedMinutesProMail: number,
     autoDiscountPercent: number,
-    coupons: Array<Coupon>
+    coupons: Array<Coupon>,
+    assistantcost: Array<AssistantCost>
 }
 
 export type Coupon = {
     code: string,
     credits: number
+}
+
+export type AssistantCost = {
+    id: string,
+    perUnit: number
 }

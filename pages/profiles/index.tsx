@@ -2,7 +2,6 @@ import { Alert, Button, Card, Form, Input, Modal, Select, Steps, Tag, Tour, Tour
 import { SettingOutlined, DeleteOutlined } from "@ant-design/icons";
 import styles from "./list.profiles.module.scss"
 import { useEffect, useRef, useState } from "react";
-import { GetServerSideProps } from "next";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
 const { Paragraph } = Typography;
@@ -18,28 +17,9 @@ import { isMobile } from "react-device-detect";
 import FatButton from "../../components/FatButton";
 environment.config();
 
+// Define a maximum amount of profiles as constant
+// We should move this value to the database settings...
 const MAXPROFILES = 12;
-
-
-export interface InitialProps {
-  Data: { Profiles: Array<Profile & {parsedSettings: ProfileSettings}> };
-}
-
-export const getServerSideProps: GetServerSideProps = async () => {
-  const datum = new Date();
-
-  return {
-    props: {
-      Data: {
-        currentMonth: datum.getMonth() + 1,
-        currentYear: datum.getFullYear()
-      }
-    }
-  };
-
-  
-};
-
 
 
 export default function Profiles() {
@@ -64,12 +44,12 @@ export default function Profiles() {
   const [ communicationstyle, setCommunicationstyle ] = useState(false);
   const [ promptProcesing, setPromptProcessing ] = useState(false);
 
+  // Define the refs to use in the tutorial
   const addRef = useRef( null );
   const profileRef = useRef( null );
-
   const router = useRouter();
 
-
+  // Define the steps of the tutorial
   const toursteps: TourProps["steps"] = [
     {
       title: "Profile",
@@ -123,48 +103,69 @@ export default function Profiles() {
     }
   ];
 
-  
+  /**
+   * Refreshes the page by replacing the route with the current route
+   */
   const refreshData = () => {
     router.replace( router.asPath );
   }
 
+  /**
+   * Effect to redirect the user if they are not logged in
+   */
   useEffect( () => {
-
     if ( login == null ) router.push( "/login" );
-        
   }, [login, router] );
 
-
+  /**
+   * Effect to decode the user profiles, as they are saved encrypted in the database
+   */
   useEffect( () => {
+    /**
+     * Decode function. Iterates over the profiles and decodes them iteratively after another
+     * NOTICE: This could have a negative impact on the apps performance, as we engage the encryption sequential.
+     * But a parallelized version has proven to be less controllable in this context
+     */
     const decodeProfiles = async () => {
       const profilearr: Array<Profile> = [];
 
+      // Iterate over the encoded user profiles
       for( let i = 0; i < user.profiles.length; i++ ){
+        // Define the decoded profile variable were we sage the stringified version of the decoded profile
         let profilejson = "";
         try{
+          // Call the API to decode the profile
           const decoded = await axios.post( "/api/prompt/decrypt", { 
             ciphertext: user.profiles[i],
             salt: user.salt
           } );
           profilejson = decoded.data.message;
         }catch( e ){
+          // If we encounter an error during decoding, reset the json string
           profilejson = "";
         }
-          
+
+        // Parse the decoded profile string
         const singleProfile: Profile = JSON.parse( profilejson );
+        // Push the decoded profile object to the profile array
         profilearr.push( singleProfile );
       }
 
+      // After we decoded all profiles, set the profile states to the array of decoded profiles
       setDecodedProfiles( profilearr );
     }
 
+    // Check if the user has any profile. If so call the decode functions
     if( user.profiles ){
       decodeProfiles();
     }
   }, [user.profiles, user.salt] );
-    
 
-  
+
+  /**
+   * If called set the edit profile fields with the given values
+   * @param obj Object containing the name and the settings of the profile
+   */
   const setEditFields = ( obj: {name: string, settings: ProfileSettings} ) => {
     editForm.setFieldValue( "name", obj.name );
     editForm.setFieldValue( "personal", obj.settings.personal );
@@ -174,49 +175,72 @@ export default function Profiles() {
     editForm.setFieldValue( "user.knowledge.edit", obj.settings.parameters?.knowledge );
     editForm.setFieldValue( "user.communicationstyle.edit", obj.settings.parameters?.communicationstyle );
 
+    // If the user defined tags set the tags count to the length of the array
+    // So we can check that the user does not exceed the tag limit
     if( obj.settings.tags ){
       setTokenCount( obj.settings.tags.length );
     }
   }
-  
+
+  /**
+   * Deletes the profile previously set in the profileToDelete state
+   */
   const deleteProfile = async () => {
+    // close the delete modal
     setIsDeleteModalOpen( false );
     try{
+      // Check if the profileToDelete state does contain a valid index to the profiles array
       if ( profileToDelete != -1 ){
+        // Get the profiles
         const profiles = user.profiles;
+        // Splice the profile at the index saved in the state
         profiles.splice( profileToDelete, 1 );
-
+        // Update the profile with the spliced array
         await updateData( "User", login.uid, { profiles: profiles } )
+        // Reset the editform
         editForm.setFieldsValue( [] );
       }else{
+        // If the index was not valid throw an error
         throw( "Profile not defined" );
       }
     }catch( e ){
       //console.log(e);
+      // If we encounter any error inform the user about the problem
       setErrMsg( "Beim Löschen ist etwas fehlgeschlagen bitte versuche es später erneut." );
       setIsErrVisible( true );
     }
-  
+
     setErrMsg( "" );
     setIsErrVisible( false );
       
     setProfileToDelete( -1 );
     refreshData();
-  } 
-  
+  }
+
+  /**
+   * Edit a selected profile. Use the given values
+   * @param values Input values of the edit form
+   */
   const editProfile = async ( values ) => {
+    // Get special editform values
     const positioninfo = editForm.getFieldValue( "user.position.edit");
     const tasksinfo = editForm.getFieldValue( "user.tasks.edit");
     const knowledgeinfo = editForm.getFieldValue( "user.knowledge.edit");
     const communicationstyleinfo = editForm.getFieldValue( "user.communicationstyle.edit");
 
+    // Check if the name of the profile is still valid (in this case not false)
     if ( values.name ){
+      // Check if the profiletoEdit state points to a valid array element
       if ( profileToEdit != -1 ){
+        // Get the profiles
         const profiles = user.profiles;
         let encdata = "";
 
+        // Indicate that we are processing a request, so the user does not get nervous
         setPromptProcessing(true);
+
         try{
+          // Call the API to create a profile using the AI
           const aiinfo = await axios.post("/api/profile/create", {
             name: `${user.firstname} ${user.lastname}`,
             company: company.name,
@@ -227,6 +251,7 @@ export default function Profiles() {
             isSingleUser: !role.isCompany
           });
 
+          // Stringify the information of the profile using the form values and the AI generated profile details
           const profiletoupload = JSON.stringify(
             {
               name: values.name,
@@ -240,21 +265,24 @@ export default function Profiles() {
                   communicationstyle: communicationstyleinfo
                 }
               } 
-            } );
+            });
 
+          // Encode the profile
           try{
+            // Call the API encode endpoint with the newly generated profile
             const encreq = await axios.post( "/api/prompt/encrypt", { 
               content: profiletoupload,
               salt: user.salt
             } )
-
             encdata = encreq.data.message;
           }catch( e ){
             encdata = "";
           }
 
+          // Update the profile at the index by overriding it with the newly generated profile
           profiles[profileToEdit] = encdata;
-            
+
+          // Update the user object
           await updateData( "User", login.uid, { profiles: profiles } )
           form.resetFields( [] );
         }catch(e){
@@ -270,11 +298,13 @@ export default function Profiles() {
       }else{
         message.error("Beim Speichern ist etwas fehlgeschlagen. Bitte versuche es erneut!");
       }
-
-      
     }
   }
-  
+
+  /**
+   * Create a profile with the given values
+   * @param values Create profile form input form
+   */
   const createProfile = async ( values ) => {
     // Get the user realated input from the form
     const positioninfo = form.getFieldValue( "user.position" );
@@ -282,20 +312,10 @@ export default function Profiles() {
     const knowledgeinfo = form.getFieldValue( "user.knowledge" );
     const communicationstyleinfo = form.getFieldValue( "user.communicationstyle" );
 
-    // Create a sample text containing the user information
-    /* let userinfo = "";
-    if(!role.isCompany){
-      userinfo = `Mein Name ist ${user.firstname} ${user.lastname}. Ich würde mich beschreiben als: "${positioninfo}". 
-    Bei der Kommunikation lege ich besonders Wert auf ${communicationstyleinfo}.`;
-    }else{
-      userinfo = `Mein Name ist ${user.firstname} ${user.lastname}. Ich arbeite bei ${company.name}. Meine Position im Unternehmen ist "${positioninfo}."
-    In der Firma beschäftige ich mich mit "${tasksinfo.join(", ")}". Mich zeichnet besonders aus: "${knowledgeinfo.join(", ")}".
-    Bei der Kommunikation lege ich besonders Wert auf ${communicationstyleinfo}.`;
-    } */
-
     setPromptProcessing(true);
 
     try{
+      // Query the API to generate a profile with the AI
       const aiinfo = await axios.post("/api/profile/create", {
         name: `${user.firstname} ${user.lastname}`,
         company: company.name,
@@ -307,9 +327,11 @@ export default function Profiles() {
       });
   
       setPromptProcessing(false);
-  
+
+      // Check that the user entered a profile
       if( values.name ){
         try{
+          // Construct the profile object
           const profileObj = {
             name: values.name,
             settings: {
@@ -323,11 +345,13 @@ export default function Profiles() {
               }
             }
           }
-  
+
+          // Stringify the profile object
           const stringified = JSON.stringify( profileObj );
           let encdata = "";
   
           try{
+            // Encrypt the stringified profile object using the API
             const encreq = await axios.post( "/api/prompt/encrypt", { 
               content: stringified,
               salt: user.salt
@@ -337,7 +361,8 @@ export default function Profiles() {
             //console.log(e);
             encdata = "";
           }
-  
+
+          // Update the user object with newly generated profile
           await updateData( "User", login.uid, { profiles: arrayUnion( encdata ) } )
           
           setIsCreateModalOpen( false );
@@ -359,11 +384,16 @@ export default function Profiles() {
         setCommunicationstyle(false);
       }
     }catch(e){
+      // Catch any error during generation
       message.error("Bei der Erstellung des Profils ist etwas schiefgelaufen bitte versuche es erneut!");
       setPromptProcessing(false);
     }
   }
 
+  /**
+   * Generate Antd tags from a given array
+   * @param tags String array containing tags input
+   */
   const getTags = ( tags: Array<string> ) => {
     if( tags ){
       return tags.map( ( element, tagid ) => {
@@ -373,8 +403,13 @@ export default function Profiles() {
       } );
     }
   }
-    
-  const getProfileDisplay = () => {
+
+  /**
+   * Component to display the profiles in seperate cards if there are any defined profiles.
+   * Displays a text if the user has not created a profile
+   * @constructor
+   */
+  const ProfileDisplay = () => {
     if( user.profiles && user.profiles.length > 0 ){
 
       return (
@@ -434,7 +469,10 @@ export default function Profiles() {
   }
 
 
-  function getSteps(){
+  /**
+   * Get the steps used to guide the user during the creation of the profile
+   */
+  const getSteps = () => {
     if(role.isCompany){
       return [
         {
@@ -640,6 +678,10 @@ export default function Profiles() {
     }
   }
 
+  /**
+   * Component to render the form used for editing a profile
+   * @constructor
+   */
   const EditForm = () => {
     if(role.isCompany){
       return(
@@ -785,19 +827,15 @@ export default function Profiles() {
     }
   }
 
-  //const items = steps.map( ( item ) => ( { key: item.title, title: item.title } ) );
-
   return (
     <SidebarLayout context={context}>
       <div className={styles.main}>
         <div className={styles.interactionrow}>
-          
         </div>
         <div className={styles.projecttable}>
-          { getProfileDisplay() }
+          <ProfileDisplay />
         </div>
-  
-          
+
         <Modal
           title={"Ein neues Profil anlegen"}
           open={isCreateModalOpen}
@@ -809,18 +847,13 @@ export default function Profiles() {
         >
           <div className={styles.stepcontainer}>
             <Steps className={styles.stepbanner} current={current} items={getSteps()} />
-
             <div className={styles.stepformcontent}>
               <Form
                 layout='vertical'
                 onFinish={createProfile}
                 form={form}
               >
-  
-      
                 {getSteps()[current].content}
-
-
                 <div className={styles.continue}>
                   {current == 0 && (
                     <Button
@@ -842,19 +875,14 @@ export default function Profiles() {
                     Zurück
                     </Button>
                   )}
-                </div>                
-
-      
+                </div>
                 <div className={styles.errorrow} style={{ display: ( isErrVisible )? "block": "none" }}>
                   <Alert type='error' message={errMsg} />
                 </div>
-
               </Form>
             </div>
           </div>
-          
         </Modal>
-          
 
         <Modal
           title="Profil bearbeiten"
@@ -911,7 +939,6 @@ export default function Profiles() {
           }}
           footer = {[]}
           width={800}
-
         >
           <div className={styles.deletecontainer}>
             <Paragraph>Willst du das Profil wirklich löschen?</Paragraph>

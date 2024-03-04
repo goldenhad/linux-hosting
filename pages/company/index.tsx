@@ -58,10 +58,16 @@ ChartJS.register(
   Legend
 );
 
+/**
+ * Type of the props to be passed to the client from the server
+ */
 export interface InitialProps {
   Data: { currentMonth: number, currentYear: number; };
 }
 
+/**
+ * Serverside code to execute before pageload
+ */
 export const getServerSideProps: GetServerSideProps = async () => {
   const datum = new Date();
   
@@ -95,6 +101,7 @@ export default function Company( props: InitialProps ) {
   const router = useRouter();
   const [open, setOpen] = useState<boolean>( !handleUndefinedTour( user.tour ).company );
 
+  // Define references so we can point to them in the tutorial
   const companyRef = useRef( null );
   const backgroundRef = useRef( null );
   const budgetRef = useRef( null );
@@ -103,6 +110,8 @@ export default function Company( props: InitialProps ) {
   const userRef = useRef( null );
   const inviteRef = useRef( null );
 
+  // We define a range of blocker states. We use these states to check for changes on the company input
+  // These states will be false, if the input was not changed
   const [ nameblocker, setNameblocker ] = useState(false);
   const [ streetBlocker, setStreetBlocker ] = useState(false);
   const [ cityBlocker, setCityBlocker ] = useState(false);
@@ -110,16 +119,13 @@ export default function Company( props: InitialProps ) {
   const [ countryBlocker, setCountryBlocker ] = useState(false);
   const [ backgroundBlocker, setBackgroundBlocker ] = useState(false);
 
+  // State to control the button used for saving changed company data
   const [ buttonDisabled, setButtonDisabled ] = useState(false);
 
-
-  useEffect(() => {
-    setButtonDisabled(!( nameblocker || streetBlocker || cityBlocker || postalcodeBlocker || countryBlocker || backgroundBlocker));
-  }, [backgroundBlocker, cityBlocker, countryBlocker, nameblocker, postalcodeBlocker, streetBlocker])
-
-
+  // Define the tutorial steps
   let steps: TourProps["steps"];
 
+  // Choose the tutorial depending on the capabilities of the users role
   if( role.canEditCompanyDetails ){
     steps = [
       {
@@ -303,12 +309,19 @@ export default function Company( props: InitialProps ) {
     ];
   }
 
+  // Effect used to disable the save company button if none of the depending states has been updated
+  useEffect(() => {
+    setButtonDisabled(!( nameblocker || streetBlocker || cityBlocker || postalcodeBlocker || countryBlocker || backgroundBlocker));
+  }, [backgroundBlocker, cityBlocker, countryBlocker, nameblocker, postalcodeBlocker, streetBlocker])
+
+  // Redirect users if they are not a company
   useEffect( () => {
     if( !role.isCompany ) {
       router.push( "/" );
     }
   }, [role.isCompany, router] );
 
+  // Redirect the user to login, if they don't have a valid login state. Init the company edit form otherweise
   useEffect( () => {
     if ( login == null ) router.push( "/login" );
 
@@ -320,32 +333,42 @@ export default function Company( props: InitialProps ) {
     form.setFieldValue( "companybackground", company.settings.background );
   }, [company.city, company.country, company.name, company.postalcode, company.settings.background, company.street, form, login, router] );
 
+  // Load the list of invited users to the company
   useEffect( () => {
+    /**
+     * Async function to load users belonging to the company
+     */
     const load = async () => {
+      // Query the users from the database that belong to the same company as the user
       const { result, error } = await getDocWhere( "User", "Company", "==", user.Company );
       // eslint-disable-next-line
       let users: Array<any> = [];
       users = result;
 
+      // Check if the company has invited users
       if( company.invitedUsers ){
         company.invitedUsers.forEach( ( inv: InvitedUser ) => {
           if( users ){
+            // Add the invited user to the list of users belonging to the company
             const invUser = inv;
             invUser.wasInvited = true;
             users.push( invUser );
           }
-        } );
+        });
       }
 
+      // If we did not encounter an error during the querying of the database update the user table to the generated data
       if( !error ){
         setUserTableData( users );
         setUserTableLoading( false );
       }else{
+        // Otherwise define the default state of the user table
         setUserTableData( [] );
         setUserTableLoading( false );
       }      
     }
 
+    // Call the async function to load the user table
     load();
   }, [company, user.Company, deleteCounter] );
 

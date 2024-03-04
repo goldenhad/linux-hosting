@@ -50,13 +50,17 @@ ChartJS.register(
   Legend
 );
 
+// Defines the visible orders per page
 const ordersperpage = 10;
+// Gets the current year
 const thisyear = new Date().getFullYear();
 
 const stripePromise = getStripe();
 
+/**
+ * Get the url of the application
+ */
 export const getServerSideProps: GetServerSideProps = async () => {
-    
   return {
     props: {
       redirect: process.env.BASEURL
@@ -65,7 +69,10 @@ export const getServerSideProps: GetServerSideProps = async () => {
 };
 
 
-
+/**
+ * Displays the orders, the credit account and the usage statistic of the company
+ * @constructor
+ */
 export default function Usage() {
   const context = useAuthContext();
   const { role, login, user, company, calculations } = context
@@ -88,6 +95,7 @@ export default function Usage() {
   const buyRef = useRef( null );
   const orderRef = useRef( null );
 
+  // Define the tutorial tour
   const steps: TourProps["steps"] = [
     {
       title: "Nutzung und Credit-Budget",
@@ -173,6 +181,9 @@ export default function Usage() {
     }
   ];
 
+  /**
+   * Load the users belonging to the company
+   */
   useEffect( () => {
     const load = async () => {
       const { result, error } = await getDocWhere( "User", "Company", "==", user.Company );
@@ -187,6 +198,9 @@ export default function Usage() {
     load();
   }, [company, user.Company] );
 
+  /**
+   * Sets the earliest year of credit usage over all users
+   */
   useEffect( () => {
     if(user && user.usedCredits){
       let min = Number.MAX_SAFE_INTEGER;
@@ -200,9 +214,13 @@ export default function Usage() {
       setLowerBound(min);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
-  const orderState = (obj) => {
+  /**
+   * Resolve the tag display of the given Order
+   * @param obj Order object
+   */
+  const orderState = (obj: Order) => {
     switch( obj.state ){
     case "accepted":
       return(
@@ -232,7 +250,11 @@ export default function Usage() {
     }
   }
 
-  const PurchaseInformation = () => {
+  /**
+   * Subcomponent to display a paginated collapse of orders, or a message if the company has no recorded orders
+   * @constructor
+   */
+  const OrderList = () => {
     if(company.orders.length > 0){
       const orderitems = getOrderItems();
 
@@ -250,10 +272,13 @@ export default function Usage() {
     }
   }
 
+  /**
+   * Returns a collapsible compatible array of entries
+   */
   const getOrderItems = () => {
     const items = [];
 
-
+    // Sorts the list of orders by timestamp
     const orderedorders = company.orders.toSorted((a: Order, b: Order) => {
       if(a.timestamp < b.timestamp){
         return 1;
@@ -264,15 +289,21 @@ export default function Usage() {
       }
     });
 
-    console.log(ordersperpage, orderpage)
+    // Calculate the offset of the order pagination
     const offset = (orderpage - 1) * ordersperpage;
 
+    // Iterate over the orders currently visible in the page
     for(let i=0; i  < ordersperpage; i++){
+      // Validate the index
       if(i + offset < company.orders.length){
+        // Ge the order
         const order = orderedorders[i + offset];
+        // Calculate the date from the timestamp
         const orderdate = new Date( order.timestamp * 1000 );
+        // Convert the calculated date to a string
         const datestring = moment(orderdate).format("DD.MM.YYYY");
 
+        // Add the JSX of the collapsible item to the array
         items.push({
           key: i + offset,
           label: <div className={styles.singleorder}>
@@ -325,9 +356,12 @@ export default function Usage() {
     return items;
   }
 
+  /**
+   * Display an information box depending on the state of the automatic reload feature
+   */
   const getBuyOptions = () => {
+    // Check wether the user is allowed to buy credits
     const userCanBuyCredits = !role.isCompany || role.canEditCompanyDetails || role.canSetupCompany;
-
 
     if(company?.paymentMethods?.length > 0){
       if(company?.plan && company?.plan.state == "active"){
@@ -412,17 +446,26 @@ export default function Usage() {
     }
   }
 
+  /**
+   * Function to call if the user requests to remove the saved payment method
+   * @param method Id of the method to be removed
+   */
   const removePaymentMethod = async (method: string) => {
+    // Call the API and detach the payment method at stripe
     const detachoperation = await axios.post("/api/payment/detachPaymentMethod", {
       method: method
     });
 
+    // If the API call to stripe was successfull...
     if(detachoperation.status == 200){
       const currentplan = company.plan;
+      // check if a plan is in use by the company
       if(currentplan){
+        // Set the plan of the company to inactive
         currentplan.state = "inactive";
         await updateData("Company", user.Company, { paymentMethods: [], plan: currentplan });
       }else{
+        // If no plan is defined, just clear the payment methods
         await updateData("Company", user.Company, { paymentMethods: [] });
       }
       messageApi.success("Bezahlmethode erfolgreich entfernt!")
@@ -431,7 +474,11 @@ export default function Usage() {
     }
   }
 
+  /**
+   * Display the defined payment methods of the company
+   */
   const getSetups = () => {
+    // Check the capabilities of the user
     const userCanBuyCredits = !role.isCompany || role.canEditCompanyDetails || role.canSetupCompany;
 
     if(company?.paymentMethods){
@@ -487,6 +534,7 @@ export default function Usage() {
       );
     }
   }
+
 
   const credittabsitems = [
     {
@@ -558,7 +606,7 @@ export default function Usage() {
           </Card>
         </div>
         <Card ref={orderRef} title={"Einkäufe"} bordered={true}>
-          <PurchaseInformation />
+          <OrderList />
         </Card>
         <Modal mask={true} title="Automatisches Aufladen aktivieren" open={rechargeModalOpen} footer={null} onCancel={() => {
           setRechargeModalOpen(false)

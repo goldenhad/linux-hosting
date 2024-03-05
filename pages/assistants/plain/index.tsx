@@ -25,7 +25,7 @@ export default function Plain( ) {
   const steps: TourProps["steps"] = [
     {
       title: "GPT-4",
-      description: "Mit dem \" GPT-4 \" Assistanten haben Sie direkten Zugriff auf GPT-4. Es werden nur die"+
+      description: "Mit dem \" GPT-4 \" Assistanten hast du direkten Zugriff auf GPT-4. Es werden nur die"+
       "eingegebenen Informationen übermittelt",
       nextButtonProps: {
         children: (
@@ -55,7 +55,7 @@ export default function Plain( ) {
     },
     {
       title: "Alles bereit",
-      description: "Durch Klicken auf den \"Antwort generieren\"-Button wird nach einer kurzen Wartezeit eine Antwort zu ihrer Anfrage erzeugt. "+
+      description: "Durch Klicken auf den \"Antwort generieren\"-Button wird nach einer kurzen Wartezeit eine Antwort zu deiner Anfrage erzeugt. "+
       "Bitte bedenke, dass wir deine Eingaben noch verarbeiten müssen, wodurch es gegebenenfalls zu kurzen Wartezeiten kommen kann.",
       target: () => generateRef.current,
       nextButtonProps: {

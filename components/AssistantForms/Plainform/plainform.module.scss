@@ -1,0 +1,100 @@
+@media (max-width: 992px) {
+    .userinputform{
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      width: 100%;
+
+      .userinputcardmain{
+        width: 100%;
+        border-radius: 12px;
+        border-color: #EAECF0;
+      }
+
+      .userinputcardsub{
+        width: 100%;
+        border-left-width: 0px;
+        border-radius: 12px;
+        border-color: #EAECF0;
+      }
+    }
+
+    .formfootercontainer{
+      min-height: 100px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      .generatebuttonrow{
+        margin-bottom: 44px;
+        margin-top: 44px;
+        
+        button {
+            .buttonicon > svg{
+              transform: translate(-1px, 4px);
+              fill: transparent;
+              color: inherit;
+          }
+        }
+      }
+    }
+
+    .answercard{
+      border-radius: 12px;
+    }
+  }
+
+@media (min-width: 993px) {
+.userinputform{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+
+    .userinputcardmain{
+      width: 100%;
+      border-radius: 12px 0px 0px 0px;
+      border-color: #EAECF0;
+    }
+
+    .userinputcardsub{
+    width: 40%;
+    border-left-width: 0px;
+    border-radius: 0px 12px 0px 0px;
+    border-color: #EAECF0;
+    }
+}
+
+.formfootercontainer{
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #EAECF0;
+    min-height: 100px;
+    border-radius: 0px 0px 12px 12px;
+    background-color: white;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .generatebuttonrow{
+    margin-bottom: 44px;
+    margin-top: 44px;
+    
+    button {
+
+        .buttonicon > svg{
+            transform: translate(-1px, 4px);
+            fill: transparent;
+            color: inherit;
+        }
+    }
+    }
+}
+
+.answercard{
+    border-radius: 12px 12px 0px 0px;
+}
+}

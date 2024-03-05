@@ -171,7 +171,7 @@ export default function Home() {
     })
 
     const getRibbonText = (uid: string) => {
-      if(uid == "excel" || uid == "dialog" || uid == "monolog" || uid == "translator"){
+      if(uid == "excel" || uid == "dialog" || uid == "monolog" || uid == "translator" || uid == "plain"){
         return "Neu"
       }else{
         return undefined;

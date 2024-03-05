@@ -128,8 +128,7 @@ export class TokenCalculator{
     });
 
     if(priceObj){
-      const price = priceObj.price;
-      return price;
+      return priceObj.price;
     }else{
       throw Error("Price undefined");
     }
@@ -145,7 +144,7 @@ export class TokenCalculator{
  * @param value Number to convert
  */
 export const toGermanCurrencyString = (value: number): string => {
-  if(value >= 0.01){
+  if(value >= 0.01 || value == 0){
     return value.toLocaleString("de-DE", { style: "currency", currency: "EUR" });
   }else{
     return `< ${value.toLocaleString("de-DE", { style: "currency", currency: "EUR" })}`;

@@ -95,7 +95,8 @@ export const handleUndefinedTour = ( tour: TourState ) => {
       profiles: true,
       company: true,
       excel: true,
-      translator: true
+      translator: true,
+      plain: true
     };
   }
 }

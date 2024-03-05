@@ -21,12 +21,6 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           // Create the messages to send to the AI model
           const messages: Array<AIMessage>  = [
             {
-              role: "system",
-              content: "Du bist ein Assistent und übersetzt Texte in eine Zielsprache die durch den Nutzer spezifiziert wird."+
-                  "Die Antwort sollte den Inhalt des Originaltextes erhalten und so genau wie möglich übersetzen."+
-                  "Daten, Fakten und Zahlen sollten immer unverändert wiedergegeben werden."
-            },
-            {
               role: "user",
               content: data.prompt
             }];

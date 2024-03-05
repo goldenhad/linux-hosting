@@ -23,6 +23,12 @@ import React from "react";
 import { TokenCalculator, toGermanCurrencyString } from "../../helper/price";
 import { Calculations, InvoiceSettings, Templates } from "../../firebase/types/Settings";
 import getDocument from "../../firebase/data/getData";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import {
+  oneLight
+} from "react-syntax-highlighter/dist/cjs/styles/prism"
+import remarkGfm from 'remark-gfm'
+
 
 const { Paragraph } = Typography;
 
@@ -343,8 +349,27 @@ const AssistantBase = (props: {
       return (
         <>
           <div className={styles.answer} style={{ transition: "all 0.5s ease" }} >
-            <Markdown skipHtml={true} remarkPlugins={[ remarkBreaks ]}>
-              {answer.replace(/\n/gi, "&nbsp; \n")}
+            <Markdown
+              skipHtml={true}
+              remarkPlugins={[ remarkBreaks, remarkGfm ]}
+              components={{
+                code({ node, className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || "")
+                  return match ? (
+                    <SyntaxHighlighter
+                      language={match[1]}
+                      style={oneLight}
+                      {...props}
+                    >{String(children).replace(/\n$/, "")}</SyntaxHighlighter>
+                  ) : (
+                    <code className={className} {...props}>
+                      {children}
+                    </code>
+                  )
+                }
+              }}
+            >
+              {answer}
             </Markdown>
           </div>
           <Disclaimer />

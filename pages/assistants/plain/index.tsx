@@ -10,7 +10,7 @@ import { Templates } from "../../../firebase/types/Settings";
 
 
 const plainBasicState = {
-  query: ""
+  content: ""
 }
 
 export default function Plain( ) {

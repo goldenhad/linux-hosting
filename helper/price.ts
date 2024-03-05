@@ -145,5 +145,9 @@ export class TokenCalculator{
  * @param value Number to convert
  */
 export const toGermanCurrencyString = (value: number): string => {
-  return value.toLocaleString("de-DE", { style: "currency", currency: "EUR" });
+  if(value >= 0.01){
+    return value.toLocaleString("de-DE", { style: "currency", currency: "EUR" });
+  }else{
+    return `< ${value.toLocaleString("de-DE", { style: "currency", currency: "EUR" })}`;
+  }
 }

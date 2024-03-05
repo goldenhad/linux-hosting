@@ -15,7 +15,7 @@ const plainBasicState = {
 
 export default function Plain( ) {
   const context = useAuthContext();
-  const { role, login, user, company } = context;
+  const { login, user } = context;
   const [ form ] = Form.useForm();
 
   const queryRef = useRef( null );
@@ -76,7 +76,7 @@ export default function Plain( ) {
     }
   ];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
   const promptFunction = (values: Record<string, any>, profile: Profile, templates: Templates) => {
     // Remove any resemblance of our token parse chars from the user input
     const cleanedContent = values.content.replace(/(<~).+?(~>)/gm, "");
@@ -86,9 +86,7 @@ export default function Plain( ) {
       content: cleanedContent
     }
 
-    const prompt = cleanedContent;
-
-    return { data: promptdata, prompt: prompt };
+    return { data: promptdata, prompt: cleanedContent };
   }
 
 

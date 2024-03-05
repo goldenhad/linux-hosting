@@ -41,15 +41,13 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 };
 
 /**
- * Display a thank you message page after the user did a purchase
+ * Display a thank-you message page after the user did a purchase
  * @param props
  * @constructor
  */
 export default function Thankyou( props: InitialProps ) {
   const context = useAuthContext();
-  const { role, user, company, calculations } = context;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [seed, setSeed] = useState( 1 );
+  const { user, company } = context;
   const [order, setOrder] = useState({
     id: "",
     timestamp: Math.floor( Date.now() / 1000 ),

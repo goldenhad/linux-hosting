@@ -46,17 +46,17 @@ const Creditform = ( props: {
    * Calculates the mails that can be written with the selected amount of tokens
    * @returns Amount of writeable mails as number
    */
-  const possibleMails = () => {
+  /*const possibleMails = () => {
     return calculator.indexToCredits(tokenstobuy);
-  }
+  }*/
 
   /**
    * Calculates the saved hours with the selected amount of tokens
    * @returns Saved hours as number
    */
-  const calculateHours = () => {
+  /*const calculateHours = () => {
     return Math.floor((possibleMails() * props.calculation.savedMinutesProMail)/60);
-  }
+  }*/
 
   /**
    * Get an AssistantCost Object by the given id from the calculation object
@@ -167,13 +167,13 @@ const Creditform = ( props: {
               <div className={styles.specialdetail}>Deine Ersparnis: <span className={styles.detailhighlight}>
                 {toGermanCurrencyString( calculateSavings() )} ({props.calculation.products[tokenstobuy].discount} %)
               </span></div>
-              <div className={styles.singledetail}>Zeitersparnis: <span className={styles.detailunhighlighted}>{calculateHours()} Stunden</span></div>
+              {/*<div className={styles.singledetail}>Zeitersparnis: <span className={styles.detailunhighlighted}>{calculateHours()} Stunden</span></div>
               <div className={styles.singledetail}>
                 Arbeitskosten bei 45,00 € je Std. 
                 <span className={`${styles.detailunhighlighted}`}>
                   {toGermanCurrencyString(calculateHours() * 45)}
                 </span>
-              </div>
+              </div>*/}
             </div>
           </Card>
 

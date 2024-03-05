@@ -1,14 +1,30 @@
-import { Alert, Button, Card, Divider, Form, List, Result, Skeleton, Tour, TourProps, message, Typography, Drawer, notification, FormInstance } from "antd";
+import {
+  Alert,
+  Button,
+  Card,
+  Divider,
+  Drawer,
+  Form,
+  FormInstance,
+  List,
+  message,
+  notification,
+  Result,
+  Skeleton,
+  Tour,
+  TourProps,
+  Typography
+} from "antd";
 import axios from "axios";
 import styles from "./AssistantBase.module.scss";
-import { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { History, User } from "../../firebase/types/User";
 import { Company, Order } from "../../firebase/types/Company";
 import { Profile } from "../../firebase/types/Profile";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../db";
 import Info from "../../public/icons/info.svg";
-import Icon, { ArrowLeftOutlined, EyeOutlined, HistoryOutlined, CloseOutlined } from "@ant-design/icons";
+import Icon, { ArrowLeftOutlined, CloseOutlined, EyeOutlined, HistoryOutlined } from "@ant-design/icons";
 import SidebarLayout from "../Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
 import { handleEmptyString } from "../../helper/architecture";
@@ -19,10 +35,13 @@ import moment from "moment";
 import { isMobile } from "react-device-detect";
 import Markdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
-import React from "react";
-import { TokenCalculator, toGermanCurrencyString } from "../../helper/price";
+import { toGermanCurrencyString, TokenCalculator } from "../../helper/price";
 import { Calculations, InvoiceSettings, Templates } from "../../firebase/types/Settings";
 import getDocument from "../../firebase/data/getData";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism"
+import remarkGfm from "remark-gfm"
+
 
 const { Paragraph } = Typography;
 
@@ -102,6 +121,134 @@ const AssistantBase = (props: {
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
+
+  const reduceCost = (cost: number) => {
+    // Reduce the token balance by the used token
+    if( props.context.company.tokens - cost <= 0 ){
+      props.context.company.tokens = 0;
+    }else{
+      console.log(props.context.company.tokens);
+      props.context.company.tokens -= cost
+      console.log(props.context.company.tokens);
+    }
+  }
+
+  const updateCompanyTokens = async (cost) => {
+    if(props.context.company.plan){
+      if(props.context.company.plan?.state == "active"){
+        let paymentSuccesfull = false;
+        let invoiceid = "";
+
+        console.log(props.context.company.tokens < props.context.company.plan.threshold);
+
+        // Check if company has less tokens than the threshold
+        if(props.context.company.tokens < props.context.company.plan.threshold){
+          // Try to charge the user with the values defined in the plan
+          try{
+            const paymentreq = await axios.post("/api/payment/issuepayment", {
+              price: props.context.calculations.products[props.context.company.plan?.product].price,
+              customer: props.context.company.customerId,
+              method: props.context.company.paymentMethods[0].methodId
+            });
+
+            invoiceid = paymentreq.data.message;
+
+            paymentSuccesfull = true;
+          }catch{
+            paymentSuccesfull = false;
+          }
+
+
+          // If the payment was successfull
+          if(paymentSuccesfull){
+            // Get the tokens that will be added according to the plan
+            const amountToAdd = calculator.indexToPrice(props.context.company.plan?.product);
+            // Add the totkens to the tokens of the company
+            const updatedTokenValue = props.context.company.tokens + amountToAdd;
+
+            // Update paymentmethod
+            const newState = props.context.company.paymentMethods[0];
+            newState.lastState = "successfull"
+            const updatedMethods = [newState]
+
+            // Create an order for the charged amount
+            const currentOrders = props.context.company.orders;
+            const nextInvoiceNumber = props.context.invoice_data.last_used_number+1;
+
+            const newOrder: Order = {
+              id: invoiceid,
+              timestamp: Math.floor( Date.now() / 1000 ),
+              tokens: amountToAdd,
+              amount: props.context.calculations.products[props.context.company.plan?.product].price,
+              method: "Stripe",
+              state: "accepted",
+              type: "recharge",
+              invoiceId: `SM${props.context.invoice_data.number_offset + nextInvoiceNumber}`
+            }
+
+            // Added the new order to the company orders
+            currentOrders.push( newOrder );
+            // Update the last used invoice id
+            await updateData( "Settings", "Invoices", { last_used_number: nextInvoiceNumber } );
+
+            // Update the tokens of the company
+            await updateData("Company", props.context.user.Company, {
+              tokens: updatedTokenValue,
+              paymentMethods: updatedMethods,
+              orders: currentOrders
+            });
+
+            notificationAPI.info({
+              message: "Automatisches Nachfüllen",
+              description: `Dein Credit-Budget wurde automatisch um ${toGermanCurrencyString(amountToAdd)} Tokens aufgefüllt!`,
+              duration: 10
+            });
+          }else{
+            const newState = props.context.company.paymentMethods[0];
+            newState.lastState = "error"
+            const updatedMethods = [newState]
+
+            await updateData("Company", props.context.user.Company, { tokens: props.context.company.tokens, paymentMethods: updatedMethods })
+
+            notificationAPI.error({
+              message: "Automatisches Nafüllen",
+              description: "Es ist ein Fehler beim automatischen Auffüllen deines Credit-Budgets aufgetreten.",
+              duration: 10
+            });
+          }
+        }else{
+          // Update the balance of the company
+          console.log("Value to update ", props.context.company.tokens);
+          await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
+        }
+
+      }else{
+        // Update the balance of the company
+        await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
+      }
+    }else{
+      // Update the balance of the company
+      await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
+    }
+
+    // Get the usage of the current month and year from the user
+    const userusageidx = props.context.user.usedCredits.findIndex( ( val ) => {
+      return val.month == currentMonth && val.year == currentYear
+    } );
+
+    // Check if the user used the tool in the current month and year
+    if( userusageidx != -1 ){
+      // If so just update the usage with the used tokens
+      const usageupdates = props.context.user.usedCredits;
+      usageupdates[userusageidx].amount += cost;
+      await updateDoc( doc( db, "User", props.context.login.uid ), { usedCredits: usageupdates } );
+    }else{
+      // Otherwise create a new usage object and write it to the user
+      const usageupdates = props.context.user.usedCredits;
+      usageupdates.push( { month: currentMonth, year: currentYear, amount: cost } );
+      await updateDoc( doc( db, "User", props.context.login.uid ), { usedCredits: usageupdates } );
+    }
+  }
 
 
   /**
@@ -306,14 +453,12 @@ const AssistantBase = (props: {
    * @returns Array of antd select options
    */
   const getProfiles = () => {
-    const profileOptions =  decryptedProfiles.map( ( singleProfile: Profile, idx: number ) => {
+    return decryptedProfiles.map((singleProfile: Profile, idx: number) => {
       return {
         key: idx,
         value: singleProfile.name
       }
-    } );
-  
-    return profileOptions;
+    });
   }
 
 
@@ -343,8 +488,28 @@ const AssistantBase = (props: {
       return (
         <>
           <div className={styles.answer} style={{ transition: "all 0.5s ease" }} >
-            <Markdown skipHtml={true} remarkPlugins={[ remarkBreaks ]}>
-              {answer.replace(/\n/gi, "&nbsp; \n")}
+            <Markdown
+              skipHtml={true}
+              remarkPlugins={[ remarkBreaks, remarkGfm ]}
+              components={{
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                code({ node, className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || "")
+                  return match ? (
+                    <SyntaxHighlighter
+                      language={match[1]}
+                      style={oneLight}
+                      {...props}
+                    >{String(children).replace(/\n$/, "")}</SyntaxHighlighter>
+                  ) : (
+                    <code className={className} {...props}>
+                      {children}
+                    </code>
+                  )
+                }
+              }}
+            >
+              {answer}
             </Markdown>
           </div>
           <Disclaimer />
@@ -536,6 +701,9 @@ const AssistantBase = (props: {
                         }
                       }
 
+                      reduceCost(cost);
+                      await updateCompanyTokens(cost);
+
                       notificationAPI.info({
                         message: "Creditverbrauch",
                         description: `Die Anfrage hat ${toGermanCurrencyString(cost)} verbraucht`,
@@ -561,7 +729,7 @@ const AssistantBase = (props: {
             }catch(e){
               // If we encounter an error
               if(axios.isCancel(e)){
-                // Check if we encounterd a cancle signal. E.g if the user aborted the request
+                // Check if we encounterd a cancle signal. e.g if the user aborted the request
                 // Show the used tokens
                 
                 const costbeforereq = await axios.post("/api/prompt/count", { prompt: localtext });
@@ -572,6 +740,9 @@ const AssistantBase = (props: {
                   usedTokens.out = tokensused;
                     
                   cost = calculator.cost(usedTokens);
+
+                  reduceCost(cost);
+                  await updateCompanyTokens(cost);
                     
                   // Update the used tokens and display them
                   setTokenCountVisible(true);
@@ -591,130 +762,14 @@ const AssistantBase = (props: {
               }
             }
 
+            console.log("hier", props.context.company.tokens);
             
-            // Reduce the token balance by the used token
-            if( props.context.company.tokens - cost <= 0 ){
-              props.context.company.tokens = 0;
-            }else{
-              console.log(props.context.company.tokens);
-              props.context.company.tokens -= cost
-              console.log(props.context.company.tokens);
-            }
+
 
             // Check if the user activated automatic recharge. If charge them and add tokens
-
-            if(props.context.company.plan){
-              if(props.context.company.plan?.state == "active"){
-                let paymentSuccesfull = false;
-                let invoiceid = "";
-  
-                console.log(calculator.normalizeTokens(props.context.company.tokens), props.context.company.plan.threshold);
-                // Check if company has less tokens than the threshold
-                if(props.context.company.tokens < props.context.company.plan.threshold){
-                  // Try to charge the user with the values defined in the plan
-                  try{
-                    const paymentreq = await axios.post("/api/payment/issuepayment", { 
-                      price: props.context.calculations.products[props.context.company.plan?.product].price,
-                      customer: props.context.company.customerId,
-                      method: props.context.company.paymentMethods[0].methodId
-                    });
-  
-                    invoiceid = paymentreq.data.message;
-  
-                    paymentSuccesfull = true;
-                  }catch{
-                    paymentSuccesfull = false;
-                  }
-  
-              
-                  // If the payment was successfull
-                  if(paymentSuccesfull){
-                  // Get the tokens that will be added according to the plan
-                    const amountToAdd = calculator.indexToPrice(props.context.company.plan?.product);
-                    // Add the totkens to the tokens of the company
-                    const updatedTokenValue = props.context.company.tokens + amountToAdd;
-  
-                    // Update paymentmethod
-                    const newState = props.context.company.paymentMethods[0];
-                    newState.lastState = "successfull"
-                    const updatedMethods = [newState]
-  
-                    // Create an order for the charged amount
-                    const currentOrders = props.context.company.orders;
-                    const nextInvoiceNumber = props.context.invoice_data.last_used_number+1;
-  
-                    const newOrder: Order = {
-                      id: invoiceid,
-                      timestamp: Math.floor( Date.now() / 1000 ),
-                      tokens: amountToAdd,
-                      amount: props.context.calculations.products[props.context.company.plan?.product].price,
-                      method: "Stripe",
-                      state: "accepted",
-                      type: "recharge",
-                      invoiceId: `SM${props.context.invoice_data.number_offset + nextInvoiceNumber}`
-                    }
-  
-                    // Added the new order to the company orders
-                    currentOrders.push( newOrder );
-                    // Update the last used invoice id
-                    await updateData( "Settings", "Invoices", { last_used_number: nextInvoiceNumber } );
-  
-                    // Update the tokens of the company
-                    await updateData("Company", props.context.user.Company, { 
-                      tokens: updatedTokenValue,
-                      paymentMethods: updatedMethods,
-                      orders: currentOrders 
-                    });
-  
-                    notificationAPI.info({
-                      message: "Automatisches Nachfüllen",
-                      description: `Dein Credit-Budget wurde automatisch um ${toGermanCurrencyString(amountToAdd)} Tokens aufgefüllt!`,
-                      duration: 10 
-                    });
-                  }else{
-                    const newState = props.context.company.paymentMethods[0];
-                    newState.lastState = "error"
-                    const updatedMethods = [newState]
-  
-                    await updateData("Company", props.context.user.Company, { tokens: props.context.company.tokens, paymentMethods: updatedMethods })
-  
-                    notificationAPI.error({
-                      message: "Automatisches Nafüllen",
-                      description: "Es ist ein Fehler beim automatischen Auffüllen deines Credit-Budgets aufgetreten.",
-                      duration: 10 
-                    });
-                  }
-                }else{
-                  // Update the balance of the company
-                  await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
-                }
-  
-              }else{
-                // Update the balance of the company
-                await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
-              }
-            }
+            console.log(props.context.company);
 
 
-            
-
-            // Get the usage of the current month and year from the user
-            const userusageidx = props.context.user.usedCredits.findIndex( ( val ) => {
-              return val.month == currentMonth && val.year == currentYear
-            } );
-
-            // Check if the user used the tool in the current month and year
-            if( userusageidx != -1 ){
-              // If so just update the usage with the used tokens
-              const usageupdates = props.context.user.usedCredits;
-              usageupdates[userusageidx].amount += cost;
-              await updateDoc( doc( db, "User", props.context.login.uid ), { usedCredits: usageupdates } );
-            }else{
-              // Otherwise create a new usage object and write it to the user
-              const usageupdates = props.context.user.usedCredits;
-              usageupdates.push( { month: currentMonth, year: currentYear, amount: cost } );
-              await updateDoc( doc( db, "User", props.context.login.uid ), { usedCredits: usageupdates } );
-            }
           }else{
             throw("Costbefore undefined");
           }

@@ -46,7 +46,7 @@ const PlainForm = (props: {
               <TextArea
                 className={styles.forminput}
                 rows={(isMobile)? 5: 10}
-                placeholder="Anfrage"
+                placeholder="Wie kann ich Dir heute helfen?"
                 disabled={AssistantContextState.requestState.formDisabled || AssistantContextState.requestState.quotaOverused}
               />
             </Form.Item>

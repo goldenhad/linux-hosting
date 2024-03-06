@@ -42,6 +42,11 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism"
 import remarkGfm from "remark-gfm"
 
+// Defines how long antd messages will be visible
+const MSGDURATION = 3;
+
+// Defines the max amount of history states saved per user
+const MAXHISTITEMS = 10;
 
 const { Paragraph } = Typography;
 
@@ -127,9 +132,7 @@ const AssistantBase = (props: {
     if( props.context.company.tokens - cost <= 0 ){
       props.context.company.tokens = 0;
     }else{
-      console.log(props.context.company.tokens);
       props.context.company.tokens -= cost
-      console.log(props.context.company.tokens);
     }
   }
 
@@ -201,7 +204,7 @@ const AssistantBase = (props: {
             notificationAPI.info({
               message: "Automatisches Nachfüllen",
               description: `Dein Credit-Budget wurde automatisch um ${toGermanCurrencyString(amountToAdd)} Tokens aufgefüllt!`,
-              duration: 10
+              duration: MSGDURATION
             });
           }else{
             const newState = props.context.company.paymentMethods[0];
@@ -213,7 +216,7 @@ const AssistantBase = (props: {
             notificationAPI.error({
               message: "Automatisches Nafüllen",
               description: "Es ist ein Fehler beim automatischen Auffüllen deines Credit-Budgets aufgetreten.",
-              duration: 10
+              duration: MSGDURATION
             });
           }
         }else{
@@ -617,7 +620,7 @@ const AssistantBase = (props: {
             let localAnswer = "";
 
             try{
-              // Query the api for a answer to the input
+              // Query the api for an answer to the input
               await axios.post( props.routes.generate, { prompt: prompt },
                 { onDownloadProgress: async (progressEvent) => {
                   // Disable the loading of the answer if we have recieved a chunk of data
@@ -634,7 +637,7 @@ const AssistantBase = (props: {
                   const parseRegEx = /(?<=<~).+?(?=~>)/g;
                   const parsedval = dataChunk.match(parseRegEx);
                   
-                  // Check if we encounterd an control char.
+                  // Check if we encounterd a control char.
                   if(parsedval && parsedval.length == 1){
                     // If we found the control sequence, we reached the end of the response
                     // Remove the control sequence
@@ -658,13 +661,11 @@ const AssistantBase = (props: {
                       // Validate that the answer is not empty
                       if(localAnswer != ""){
                         // We need to check if the user already has 10 saved states
-                        if(historyState.length >= 10){
+                        if(historyState.length >= MAXHISTITEMS){
                           // If so remove last Element from array
                           historyState.pop();
                         }
-  
-                        console.log(usedTokens, cost, toGermanCurrencyString(cost));
-    
+
                         // Add the answer with the current time and the used tokens to the front of the history array
                         historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: toGermanCurrencyString(cost) });
     
@@ -707,7 +708,7 @@ const AssistantBase = (props: {
                       notificationAPI.info({
                         message: "Creditverbrauch",
                         description: `Die Anfrage hat ${toGermanCurrencyString(cost)} verbraucht`,
-                        duration: 10 
+                        duration: MSGDURATION
                       });
                       
                       // Set the answer to the recieved data without the control sequence
@@ -750,7 +751,7 @@ const AssistantBase = (props: {
                   notificationAPI.info({
                     message: "Creditverbrauch",
                     description: `Die Anfrage hat  ${toGermanCurrencyString(cost)} Credits verbraucht`,
-                    duration: 10 
+                    duration: MSGDURATION
                   });
                 }
 
@@ -898,7 +899,7 @@ const AssistantBase = (props: {
               {(!isMobile && window.innerWidth >= 992)? 
                 <Button className={styles.histbutton} onClick={() => {
                   setHistOpen(true)
-                }} icon={<HistoryOutlined />}>Bisherige Anfragen</Button>: <></>  
+                }} icon={<HistoryOutlined />}>{`Bisherige Anfragen ${historyState.length}/${MAXHISTITEMS}`}</Button>: <></>
               }
             </div>
             <Divider className={styles.welcomeseperator} />
@@ -918,7 +919,8 @@ const AssistantBase = (props: {
               style={{ display: ( isAnswerCardVisible )? "block": "none" }}
               extra={
                 <div className={styles.clipboardextra} onClick={() => {
-                  navigator.clipboard.writeText( answer ); messageApi.success( "Antwort in die Zwischenablage kopiert." );
+                  navigator.clipboard.writeText( answer );
+                  messageApi.success( "Antwort in die Zwischenablage kopiert." );
                 }}
                 >
                   <Icon component={Clipboard} className={styles.clipboardicon} viewBox='0 0 22 22' />
@@ -937,25 +939,26 @@ const AssistantBase = (props: {
               <div className={styles.generatebuttonrow}>
                 <FatButton onClick={() => {
                   cancleController.abort();
-                  setShowAnswer( false );
+                  setShowAnswer(false);
                   setTokenCountVisible(false);
                   setCancleController(new AbortController);
-                }} text="Zurück" />
+                }} text="Zurück"/>
+                <FatButton type={"default"} onClick={() => {
+                  props.form.submit();
+                }} text="Neu generieren"/>
               </div>
             </div>
           </div>
           <Tour open={open} onClose={async () => {
             const currstate = props.context.user.tour;
             currstate[props.laststate] = true;
-            updateData( "User", props.context.login.uid, { tour: currstate } );
-            setOpen( false );
-          }} steps={props.Tour} />
-          <style>
-            {"span.ant-select-selection-placeholder{font-size: 14px !important; font-weight: normal !important}"}
-          </style>
+            updateData("User", props.context.login.uid, { tour: currstate });
+            setOpen(false);
+          }} steps={props.Tour}/>
+          <style>{"span.ant-select-selection-placeholder{font-size: 14px !important; font-weight: normal !important}"}</style>
         </div>
         <Drawer
-          title="Bisherige Anfragen"
+          title={`Bisherige Anfragen ${historyState.length}/${MAXHISTITEMS}`}
           placement={"right"}
           closable={true}
           onClose={() => {

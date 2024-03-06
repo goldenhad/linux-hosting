@@ -836,9 +836,9 @@ export default function Company( props: InitialProps ) {
   
             let creditusage = 0;
             if(obj.usedCredits[usageidx]){
-              creditusage = parseFloat((obj.usedCredits[usageidx].amount / 1000).toFixed(2));
+              creditusage = parseFloat((obj.usedCredits[usageidx].amount).toFixed(2));
             }
-  
+
             return (
               <Statistic
                 value={toGermanCurrencyString(creditusage)}

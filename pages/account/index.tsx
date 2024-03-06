@@ -16,33 +16,6 @@ import { deleteProfilePicture } from "../../firebase/drive/delete";
 import FatButton from "../../components/FatButton";
 import EditUserForm from "../../components/Forms/EditUserForm/EditUserForm";
 import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
-import { GetServerSideProps } from "next";
-import * as child_process from "child_process";
-
-
-
-/**
- * Serverside code to execute before pageload
- */
-export const getServerSideProps: GetServerSideProps = async () => {
-
-  let lastCommitHash = "";
-  try {
-    lastCommitHash = child_process
-      .execSync("git rev-parse --short HEAD")
-      .toString()
-      .trim();
-  } catch (e) {
-    console.error(e);
-  }
-
-  return {
-    props: {
-      version: lastCommitHash
-    }
-  };
-};
-
 
 /**
  * Account-Page
@@ -50,7 +23,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
  * Page resolving around everything user account related
  * 
  */
-export default function Account(props: { version: string }) {
+export default function Account() {
   const context = useAuthContext();
   const { login, user, company, role, profile } = context;
   const [ personalForm ] = Form.useForm();
@@ -285,10 +258,6 @@ export default function Account(props: { version: string }) {
                 </div>
               </div>
             </Modal>
-          </div>
-
-          <div className={styles.version}>
-            Version {props.version}
           </div>
         </div>
       </SidebarLayout>

@@ -378,7 +378,7 @@ export default function Usage() {
               Automatisches Nachladen ist aktiv
               </div>
               <div className={styles.planinfo}>
-                Das automatische Auffüllen ist aktiv.
+                Das automatische Nachladen ist aktiv.
                 Dein Konto wird automatisch um <span className={styles.creds}>
                   {toGermanCurrencyString(calculator.indexToPrice(company.plan?.product))}</span> aufgestockt, wenn dein Budget unter 
                 <span className={styles.creds}> {toGermanCurrencyString(company?.plan?.threshold)}</span> fällt.

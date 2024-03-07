@@ -25,7 +25,7 @@ export default function Plain( ) {
   const steps: TourProps["steps"] = [
     {
       title: "GPT-4",
-      description: "Mit dem \" GPT-4 \" Assistanten hast du direkten Zugriff auf GPT-4. Es werden nur die"+
+      description: "Mit dem \" GPT-4 \" Assistanten hast du direkten Zugriff auf GPT-4. Es werden nur die "+
       "eingegebenen Informationen übermittelt",
       nextButtonProps: {
         children: (

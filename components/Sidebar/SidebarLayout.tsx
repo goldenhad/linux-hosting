@@ -277,11 +277,14 @@ const SidebarLayout = ( props: {
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
+                      style={(props.context.profile.picture) ? { color: "#474747" } : {
+                        color: "#474747",
+                        backgroundColor: "#F2F4F7"
+                      }}
                       src={props.context.profile.picture}
                       data-name={"profilemenu"}
                     >
-                      <>{(props.context.user?.email)? props.context.user.email.charAt(0).toUpperCase():""}</>
+                      <>{(props.context.user?.email) ? props.context.user.email.charAt(0).toUpperCase() : ""}</>
                     </Avatar>
                   </Popover>
                 </div>
@@ -315,11 +318,14 @@ const SidebarLayout = ( props: {
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
+                      style={(props.context.profile.picture) ? { color: "#474747" } : {
+                        color: "#474747",
+                        backgroundColor: "#F2F4F7"
+                      }}
                       src={props.context.profile.picture}
                       data-name={"profilemenu"}
                     >
-                      {(props.context.user?.email)? props.context.user.email.charAt(0).toUpperCase():""}
+                      {(props.context.user?.email) ? props.context.user.email.charAt(0).toUpperCase() : ""}
                     </Avatar>
                   </Popover>
                 </div>

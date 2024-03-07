@@ -1,4 +1,3 @@
-import { GetServerSideProps } from "next";
 import { Typography, Menu, MenuProps, FloatButton } from "antd";
 import Icon from "@ant-design/icons";
 import styles from "./legal.module.scss"
@@ -8,26 +7,11 @@ import Help from "../../public/icons/help.svg";
 import Link from "next/link";
 import Nav from "../../public/icons/nav.svg";
 
-
-
 const { Paragraph } = Typography;
 
-export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
-  //Get the context of the request
-  const { req, res } = ctx
-  //Get the cookies from the current request
-  const { cookies } = req
-    
-  //Check if the login cookie is set
-  if( cookies.login ){
-    //Redirect if the cookie is not set
-    res.writeHead( 302, { Location: "/" } );
-    res.end();
-  }
-
-  return { props: { InitialState: {} } }
-}
-
+/**
+ * Define the legal page navigation layout
+ */
 const frontendnav: MenuProps["items"] = [
   {
     label: <Link href={"privacy"}>Datenschutz</Link>,
@@ -43,6 +27,10 @@ const frontendnav: MenuProps["items"] = [
   }
 ]
 
+/**
+ * Legal Page displaying the "impressum"
+ * @constructor
+ */
 export default function Legal(){
 
   return(
@@ -137,6 +125,10 @@ export default function Legal(){
   );
 }
 
+/**
+ * Legal layout out of the regular context flow
+ * @param page
+ */
 Legal.getLayout = ( page ) => {
   return(
     <>

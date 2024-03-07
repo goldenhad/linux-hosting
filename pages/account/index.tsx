@@ -17,8 +17,6 @@ import FatButton from "../../components/FatButton";
 import EditUserForm from "../../components/Forms/EditUserForm/EditUserForm";
 import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
 
-
-
 /**
  * Account-Page
  * 
@@ -88,7 +86,8 @@ export default function Account() {
       profiles: false,
       company: false,
       excel: false,
-      translator: false
+      translator: false,
+      plain: false
     }
     const { error } = await updateData( "User", login.uid, { tour: resetTutObj } );
     if( error ){

@@ -6,11 +6,12 @@ import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useAuthContext } from "../../components/context/AuthContext";
 import Link from "next/link";
 import { Order } from "../../firebase/types/Company";
-import { getPDFUrl } from "../../helper/invoice";
 import updateData from "../../firebase/data/updateData";
+import axios from "axios";
+import { useRouter } from "next/router";
 
 
-
+// Define the page props
 export interface InitialProps {
   Data: {
     sessionid: string,
@@ -18,6 +19,10 @@ export interface InitialProps {
   };
 }
 
+/**
+ * Parse the query params
+ * @param ctx
+ */
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
   if( ctx.query.sessionid != undefined && ctx.query.status != undefined ){
     //console.log(ctx.query.token);
@@ -30,16 +35,19 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
       }
     };
   }else{
+    // If some data of the order is missing redirect the user
     return{ redirect: "/", props: { Data: {} } };
   }
 };
 
-
+/**
+ * Display a thank-you message page after the user did a purchase
+ * @param props
+ * @constructor
+ */
 export default function Thankyou( props: InitialProps ) {
   const context = useAuthContext();
-  const { role, user, company, calculations } = context;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [seed, setSeed] = useState( 1 );
+  const { user, company } = context;
   const [order, setOrder] = useState({
     id: "",
     timestamp: Math.floor( Date.now() / 1000 ),
@@ -49,44 +57,67 @@ export default function Thankyou( props: InitialProps ) {
     state: "undefined",
     type: "undefined",
     invoiceId: "undefined"
-  })
+  });
+  const router = useRouter();
 
+  /**
+   * Execute the order
+   */
   useEffect(() => {
+    /**
+     * Update the orders of the company with the local object
+     */
     const updateOrder = async () => {
       await updateData( "Company", user.Company, { orders: company.orders } );
     }
 
+    /**
+     * Update the tokens of the company with the local value
+     */
     const updateTokens = async () => {
       await updateData( "Company", user.Company, { tokens: company.tokens } );
     }
 
-
+    // Check if a stripe session id was provided
     if(props.Data.sessionid){
+      // Filter the orders by the given session id
       const orderid = company.orders.findIndex( ( order: Order ) => {
         return order.id == props.Data.sessionid
       } );
-  
+
+      // If the filtered order id is valid
       if(company.orders[orderid]){
+        // Get the order by the filtered id
         setOrder(company.orders[orderid]);
-  
+
+        // Check the state of the order loaded through the page
         if(props.Data.status == "success"){
+          // Check the state of the filtered order
           if(company.orders[orderid].state == "awaiting_payment"){
+            // If the user is not yet accepted, add the amount of the order to the company account
             company.orders[orderid].state = "accepted";
             company.tokens += company.orders[orderid].tokens;
-            
+
+            // Update the tokens of the company with the local value
             updateTokens();
           }
         }else{
-          company.orders[orderid].state = "cancled";
+          // If the page was called with any other state set the order state to "canceled"
+          company.orders[orderid].state = "canceled";
         }
 
+        // Update the state of the order
         updateOrder();
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * Display the result page according to the state of the purchase
+   */
   const getResult = () => {
+    // Determine the displayed message depending on the state returned from stripe
     if(props.Data.sessionid){
       if( props.Data.status == "success" ){
         return(
@@ -118,14 +149,20 @@ export default function Thankyou( props: InitialProps ) {
     }
   }
 
+  /**
+   * Display a button depending on the order state
+   */
   const getButton = () => {
     if(props.Data.sessionid){
-  
       if( props.Data.status == "success" ) {
         return (
           <div className={styles.buttongroup}>
-            <Button className={styles.backnow} onClick={() => {
-              getPDFUrl(role, user, company, order, calculations).download(`Siteware_business_invoice_${order.invoiceId}`)
+            <Button className={styles.backnow} onClick={async () => {
+              const invoiceurlreq = await axios.get(`/api/payment/invoice?orderid=${props.Data.sessionid}`);
+              if(invoiceurlreq.data.message){
+                const invoiceurl = invoiceurlreq.data.message
+                router.push(invoiceurl);
+              }
             }}>Rechnung herunterladen</Button>
   
             <Link href={"/usage"}>
@@ -148,6 +185,9 @@ export default function Thankyou( props: InitialProps ) {
       );
     }
   }
+
+
+
   return (
     <SidebarLayout context={context}>
       <div className={styles.main}>

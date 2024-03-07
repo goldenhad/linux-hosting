@@ -1,17 +1,21 @@
 import { GetServerSideProps } from "next";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Alert, Button, Form, Input, Result } from "antd";
 import styles from "./reset.module.scss"
 import Head from "next/head";
 import resetpassword from "../../firebase/auth/reset";
 
+// Props given by firebase to this page trough redirection
 interface restprops {
     mode: string,
     oobCode: string,
     apiKey: string,
 }
 
-
+/**
+ * Parse the request to the page from firebase
+ * @param ctx
+ */
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
   const mode = ctx.query.mode;
   const code = ctx.query.oobCode;
@@ -26,18 +30,25 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
   }
 }
 
-export default function Forgot_Password( props: restprops ){
+/**
+ * Reset page. Lets users reset their password.
+ * @param props Props of the firebase request to this page
+ * @constructor
+ */
+export default function Reset( props: restprops ){
   const [ resetFailed, setResetFailed ] = useState( false );
   const [ wasReset, setWasReset ] = useState( false );
   const [ resetState ] = useState( props as restprops );
 
-  useEffect( () => {
-    //console.log(resetState);
-  }, [] )
-
+  /**
+   * Function be called if the user issues a reset password request
+   * @param values
+   */
   const onFinish = async ( values ) => {
+    // Call firebase to reset the password with the provided new password
     const { error } = await resetpassword( resetState.oobCode, values.password );
 
+    // React to errors
     if ( error ) {
       //console.log(error);
       setResetFailed( true );
@@ -50,13 +61,18 @@ export default function Forgot_Password( props: restprops ){
         
   };
 
+  /**
+   * Resolve form failed errors
+   */
   const onFinishFailed = () => {
     //console.log('Failed:', errorInfo);
     setResetFailed( true );
   };
 
 
-
+  /**
+   * Defines the layout of the ResetForm according to the state of the reset process
+   */
   const getResetForm = () => {
     if( wasReset ){
       return(
@@ -176,7 +192,11 @@ export default function Forgot_Password( props: restprops ){
   );
 }
 
-Forgot_Password.getLayout = ( page ) => {
+/**
+ * Exclusive Layout of the reset page
+ * @param page
+ */
+Reset.getLayout = ( page ) => {
   return(
     <>
       <Head>

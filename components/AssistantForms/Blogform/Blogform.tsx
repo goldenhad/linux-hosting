@@ -134,7 +134,7 @@ const BlogForm = (props: {
       </div><div className={styles.formfootercontainer}>
         <div className={styles.tokenalert}>
           {(AssistantContextState.requestState.quotaOverused) ?
-            <Alert message={"Das Creditbudget ist ausgeschöpft. Weitere Credits, kannst du in der Kontoübersicht dazubuchen."} type="error" />
+            <Alert message={"Das Budget ist ausgeschöpft. In der Kontoübersicht kannst du weiteres Budget dazubuchen."} type="error" />
             : <></>}
         </div>
         <div ref={props.refs.generateRef} className={styles.generatebuttonrow}>

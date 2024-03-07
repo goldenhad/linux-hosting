@@ -38,7 +38,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import getStripe from "../../helper/stripe";
 import AddCreditCardForm from "../../components/AddCreditCardForm/AddCreditCardForm";
 import UsageStatistic from "../../components/UsageStatistic/UsageStatistic";
-import { TokenCalculator } from "../../helper/price";
+import { TokenCalculator, toGermanCurrencyString } from "../../helper/price";
 import { useRouter } from "next/router";
 
 ChartJS.register(
@@ -50,13 +50,17 @@ ChartJS.register(
   Legend
 );
 
+// Defines the visible orders per page
 const ordersperpage = 10;
+// Gets the current year
 const thisyear = new Date().getFullYear();
 
 const stripePromise = getStripe();
 
+/**
+ * Get the url of the application
+ */
 export const getServerSideProps: GetServerSideProps = async () => {
-    
   return {
     props: {
       redirect: process.env.BASEURL
@@ -65,7 +69,10 @@ export const getServerSideProps: GetServerSideProps = async () => {
 };
 
 
-
+/**
+ * Displays the orders, the credit account and the usage statistic of the company
+ * @constructor
+ */
 export default function Usage() {
   const context = useAuthContext();
   const { role, login, user, company, calculations } = context
@@ -88,11 +95,12 @@ export default function Usage() {
   const buyRef = useRef( null );
   const orderRef = useRef( null );
 
+  // Define the tutorial tour
   const steps: TourProps["steps"] = [
     {
-      title: "Nutzung und Credit-Budget",
-      description: "Willkommen in den Nutzungsinformationen. Hier kannst du dein Credit-Budget überprüfen und Statistiken zur "+
-      "Nutzung unseres Tools einsehen. Außerdem hast du die Möglichkeit, weitere Credits zu kaufen und deine bisherigen Bestellungen einzusehen.",
+      title: "Nutzung und Budget",
+      description: "Willkommen in den Nutzungsinformationen. Hier kannst du dein Budget überprüfen und Statistiken zur "+
+      "Nutzung unseres Tools einsehen. Außerdem hast du die Möglichkeit, weiteres Budget nachzubuchen und deine bisherigen Bestellungen einzusehen.",
       nextButtonProps: {
         children: (
           "Weiter"
@@ -105,8 +113,8 @@ export default function Usage() {
       }
     },
     {
-      title: "Credit-Budget",
-      description: "Hier wird dein aktuelles Credit-Budget angezeigt. Die angegebene Zahl gibt dir einen Überblick darüber, wie viele Credits"+
+      title: "Budget",
+      description: "Hier wird dein aktuelles Budget angezeigt. Die angegebene Zahl gibt dir einen Überblick darüber, wie viel Budget"+
       " du noch zur Verfügung hast.",
       target: () => budgetRef.current,
       nextButtonProps: {
@@ -137,7 +145,7 @@ export default function Usage() {
     },
     {
       title: "Statistik",
-      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Credits du über das aktuelle Jahr mit Siteware business bereits verbraucht hast.",
+      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Budget du über das aktuelle Jahr mit Siteware business bereits verbraucht hast.",
       target: () => statRef.current,
       nextButtonProps: {
         children: (
@@ -173,6 +181,9 @@ export default function Usage() {
     }
   ];
 
+  /**
+   * Load the users belonging to the company
+   */
   useEffect( () => {
     const load = async () => {
       const { result, error } = await getDocWhere( "User", "Company", "==", user.Company );
@@ -187,6 +198,9 @@ export default function Usage() {
     load();
   }, [company, user.Company] );
 
+  /**
+   * Sets the earliest year of credit usage over all users
+   */
   useEffect( () => {
     if(user && user.usedCredits){
       let min = Number.MAX_SAFE_INTEGER;
@@ -200,9 +214,13 @@ export default function Usage() {
       setLowerBound(min);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
-  const orderState = (obj) => {
+  /**
+   * Resolve the tag display of the given Order
+   * @param obj Order object
+   */
+  const orderState = (obj: Order) => {
     switch( obj.state ){
     case "accepted":
       return(
@@ -232,7 +250,11 @@ export default function Usage() {
     }
   }
 
-  const PurchaseInformation = () => {
+  /**
+   * Subcomponent to display a paginated collapse of orders, or a message if the company has no recorded orders
+   * @constructor
+   */
+  const OrderList = () => {
     if(company.orders.length > 0){
       const orderitems = getOrderItems();
 
@@ -250,10 +272,13 @@ export default function Usage() {
     }
   }
 
+  /**
+   * Returns a collapsible compatible array of entries
+   */
   const getOrderItems = () => {
     const items = [];
 
-
+    // Sorts the list of orders by timestamp
     const orderedorders = company.orders.toSorted((a: Order, b: Order) => {
       if(a.timestamp < b.timestamp){
         return 1;
@@ -264,15 +289,21 @@ export default function Usage() {
       }
     });
 
-    console.log(ordersperpage, orderpage)
+    // Calculate the offset of the order pagination
     const offset = (orderpage - 1) * ordersperpage;
 
+    // Iterate over the orders currently visible in the page
     for(let i=0; i  < ordersperpage; i++){
+      // Validate the index
       if(i + offset < company.orders.length){
+        // Ge the order
         const order = orderedorders[i + offset];
+        // Calculate the date from the timestamp
         const orderdate = new Date( order.timestamp * 1000 );
+        // Convert the calculated date to a string
         const datestring = moment(orderdate).format("DD.MM.YYYY");
 
+        // Add the JSX of the collapsible item to the array
         items.push({
           key: i + offset,
           label: <div className={styles.singleorder}>
@@ -292,9 +323,6 @@ export default function Usage() {
                   <div>{(order.type == "recharge")? "Automatisches Nachfüllen": "Bestellung"}</div></List.Item>
                 <List.Item className={styles.singledetail}><div className={styles.description}>Bezahlmethode:</div> <div>{order.method}</div></List.Item>
                 <List.Item className={styles.singledetail}><div className={styles.description}>Betrag:</div> <div>{convertToCurrency(order.amount)}</div></List.Item>
-                <List.Item className={styles.singledetail}>
-                  <div className={styles.description}>Credits:</div> <div>{calculator.round(calculator.normalizeTokens(order?.tokens), 0)}</div>
-                </List.Item>
               </List>
             </div>
 
@@ -325,9 +353,12 @@ export default function Usage() {
     return items;
   }
 
+  /**
+   * Display an information box depending on the state of the automatic reload feature
+   */
   const getBuyOptions = () => {
+    // Check wether the user is allowed to buy credits
     const userCanBuyCredits = !role.isCompany || role.canEditCompanyDetails || role.canSetupCompany;
-
 
     if(company?.paymentMethods?.length > 0){
       if(company?.plan && company?.plan.state == "active"){
@@ -339,7 +370,7 @@ export default function Usage() {
                   logEvent(analytics, "buy_tokens", {
                     currentCredits: company?.tokens
                   });
-                }} type='primary' disabled={!userCanBuyCredits}>Weitere Credits kaufen</Button> : <></>}
+                }} type='primary' disabled={!userCanBuyCredits}>Weiteres Budget dazubuchen</Button> : <></>}
               </Link>
             </div>
             <div className={styles.planwindow}>
@@ -349,8 +380,8 @@ export default function Usage() {
               <div className={styles.planinfo}>
                 Das automatische Auffüllen ist aktiv.
                 Dein Konto wird automatisch um <span className={styles.creds}>
-                  {calculator.indexToCredits(company.plan?.product, true)}</span> Credits aufgestockt, wenn dein Credit-Budget unter 
-                <span className={styles.creds}> {company?.plan?.threshold}</span> Credits fällt.
+                  {toGermanCurrencyString(calculator.indexToPrice(company.plan?.product))}</span> aufgestockt, wenn dein Budget unter 
+                <span className={styles.creds}> {toGermanCurrencyString(company?.plan?.threshold)}</span> fällt.
               </div>
               {(!userCanBuyCredits)? <></>: <Button type="link" className={styles.planedit} onClick={() => {
                 setRechargeModalOpen(true);
@@ -367,7 +398,7 @@ export default function Usage() {
                   logEvent(analytics, "buy_tokens", {
                     currentCredits: (company.tokens)? company.tokens: 0
                   });
-                }} type='primary' disabled={!userCanBuyCredits}>Weitere Credits kaufen</Button> : <></>}
+                }} type='primary' disabled={!userCanBuyCredits}>Weiteres Budget dazubuchen</Button> : <></>}
               </Link>
             </div>
             <div className={styles.planwindow}>
@@ -375,7 +406,7 @@ export default function Usage() {
               Automatisches Nachladen aktivieren
               </div>
               <div className={styles.planinfo}>
-                Schalte die automatische Aufladung ein, damit dein Credit-Konto immer gefüllt bleibt.
+                Schalte die automatische Aufladung ein, damit dein Konto immer gefüllt bleibt.
               </div>
               <Button type="link" className={styles.planedit} onClick={() => {
                 setRechargeModalOpen(true)
@@ -393,7 +424,7 @@ export default function Usage() {
                 logEvent(analytics, "buy_tokens", {
                   currentCredits: (company.tokens)? company.tokens: 0
                 });
-              }} type='primary' disabled={!userCanBuyCredits}>Weitere Credits kaufen</Button> : <></>}
+              }} type='primary' disabled={!userCanBuyCredits}>Weiteres Budget dazubuchen</Button> : <></>}
             </Link>
           </div>
           <div className={styles.planwindow}>
@@ -412,17 +443,26 @@ export default function Usage() {
     }
   }
 
+  /**
+   * Function to call if the user requests to remove the saved payment method
+   * @param method Id of the method to be removed
+   */
   const removePaymentMethod = async (method: string) => {
+    // Call the API and detach the payment method at stripe
     const detachoperation = await axios.post("/api/payment/detachPaymentMethod", {
       method: method
     });
 
+    // If the API call to stripe was successfull...
     if(detachoperation.status == 200){
       const currentplan = company.plan;
+      // check if a plan is in use by the company
       if(currentplan){
+        // Set the plan of the company to inactive
         currentplan.state = "inactive";
         await updateData("Company", user.Company, { paymentMethods: [], plan: currentplan });
       }else{
+        // If no plan is defined, just clear the payment methods
         await updateData("Company", user.Company, { paymentMethods: [] });
       }
       messageApi.success("Bezahlmethode erfolgreich entfernt!")
@@ -431,7 +471,11 @@ export default function Usage() {
     }
   }
 
+  /**
+   * Display the defined payment methods of the company
+   */
   const getSetups = () => {
+    // Check the capabilities of the user
     const userCanBuyCredits = !role.isCompany || role.canEditCompanyDetails || role.canSetupCompany;
 
     if(company?.paymentMethods){
@@ -488,17 +532,18 @@ export default function Usage() {
     }
   }
 
+
   const credittabsitems = [
     {
       key: "1",
-      label: "Credit-Budget",
+      label: "Budget",
       children: <>
         
         <div className={styles.tokeninfocard}>
-          <h2>Dein Credit-Budget</h2>
+          <h2>Dein Budget</h2>
           <div className={styles.quotarow}>
             <div className={styles.tokenbudget}>
-              {(company)? calculator.round(calculator.normalizeTokens(company.tokens), 0): 0} Credits
+              {(company)? toGermanCurrencyString(company.tokens): toGermanCurrencyString(0)}
             </div>
           </div>
         </div>
@@ -526,16 +571,16 @@ export default function Usage() {
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.companyoverview}>
-          <Card ref={budgetRef} className={styles.tokeninformation} title={"Credits"} bordered={true}>
+          <Card ref={budgetRef} className={styles.tokeninformation} title={"Budget"} bordered={true}>
             <Tabs items={credittabsitems} activeKey={activeTab} onChange={(key) => {
               setActiveTab(key)
             }}/>
             
           </Card>
-          <Card ref={statRef} className={styles.tokenusage} title={"Credit-Verbrauch"} bordered={true}>
+          <Card ref={statRef} className={styles.tokenusage} title={"Budgetnutzung"} bordered={true}>
             <div className={styles.tokeninfocard}>
               <div className={styles.stattitlerow}>
-                <h2>Verbrauch</h2>
+                <h2>Nutzung</h2>
                 <div className={styles.switchyearrow}>
                   <Button className={`${styles.yearswitchbutton} ${styles.left}`} disabled={visibleYear <= lowerBound} onClick={() => {
                     if(visibleYear > lowerBound){
@@ -558,15 +603,15 @@ export default function Usage() {
           </Card>
         </div>
         <Card ref={orderRef} title={"Einkäufe"} bordered={true}>
-          <PurchaseInformation />
+          <OrderList />
         </Card>
         <Modal mask={true} title="Automatisches Aufladen aktivieren" open={rechargeModalOpen} footer={null} onCancel={() => {
           setRechargeModalOpen(false)
         }}>
           <p className={styles.rechargeinformation}>
-            Das automatische Nachladen sorgt dafür, dass dein Credit-Konto immer ausreichend gedeckt ist. 
-            Du kannst einen bestimmten Wert festlegen, und sobald dein Credit-Budget unter diesen Wert fällt, bucht das System automatisch 
-            neue Credits nach. So stellst du sicher, dass du immer genügend Credits zur Verfügung hast, ohne manuell nachladen zu müssen.
+            Das automatische Nachladen sorgt dafür, dass dein Konto immer ausreichend gedeckt ist. 
+            Du kannst einen bestimmten Wert festlegen, und sobald dein Budget unter diesen Wert fällt, bucht das System automatisch 
+            einen Betrag nach. So stellst du sicher, dass du immer genügend Budget zur Verfügung hast, ohne manuell nachladen zu müssen.
           </p>
           <Elements stripe={stripePromise}>
             <RechargeForm

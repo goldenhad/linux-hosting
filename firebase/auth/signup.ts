@@ -119,7 +119,7 @@ export default async function signUp( firstname, lastname, email, username, pass
 
               if( !cmpny.recommended ){
                 await updateData( "Company", recommended, {
-                  tokens: cmpny.tokens +  calc.denormalizeTokens(calculations.startCredits),
+                  tokens: calculations.startCredits,
                   recommended: true 
                 } );
               }

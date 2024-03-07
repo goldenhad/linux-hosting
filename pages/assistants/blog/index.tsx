@@ -6,9 +6,11 @@ import updateData from "../../../firebase/data/updateData";
 import AssistantBase from "../../../components/AssistantBase/AssistantBase";
 import BlogForm from "../../../components/AssistantForms/Blogform/Blogform";
 import { handleUndefinedTour } from "../../../helper/architecture";
-import { parseBlogPrompt } from "../../../helper/prompt";
+import { parseBlogPrompt } from "../../../helper/prompt/templating";
 
-
+/**
+ * Define the basic state of the blog form
+ */
 const blogBasicState = {
   profile: "",
   content: "",
@@ -16,19 +18,23 @@ const blogBasicState = {
   length: ""
 }
 
+/**
+ * Blog Assistant page. Provides the page to issue blog assistant requests
+ * @constructor
+ */
 export default function Blog( ) {
   const context = useAuthContext();
   const { role, login, user, company } = context;
   const [ form ] = Form.useForm();
 
-
+  // Define the references used for the tutorial
   const profileRef = useRef( null );
   const continueRef = useRef( null );
   const classificationRef = useRef( null );
   const lengthRef = useRef( null );
   const generateRef = useRef( null );
 
-
+  // Define the steps of the tutorial
   const steps: TourProps["steps"] = [
     {
       title: "Ein neuer Blogbeitrag",
@@ -108,8 +114,15 @@ export default function Blog( ) {
     }
   ];
 
+  /**
+   * Define the prompt function, that parses the form input
+   * @param values Input values from the form
+   * @param profile Choosen profile of the user
+   * @param templates Prompt templates
+   */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const promptFunction = (values: Record<string, any>, profile: Profile, templates: any) => {
+    // If the user is part of a company, construct a string containing information about the company
     let companyinfo = "";
     if( role.isCompany ){
       companyinfo = `Ich arbeite für ${company.name}. Wir beschäftigen uns mit: ${company.settings.background}`;
@@ -128,6 +141,7 @@ export default function Blog( ) {
       length: values.length
     }
 
+    // Fill the blog template with the input values
     const prompt = parseBlogPrompt(
       templates.blog,
       promptdata.company,
@@ -136,6 +150,7 @@ export default function Blog( ) {
       promptdata.length
     );
 
+    // Return the input data and the filled template
     return { data: promptdata, prompt: prompt };
   }
 

@@ -1,5 +1,4 @@
 import router from "next/router";
-import { GetServerSideProps } from "next";
 import { useState } from "react";
 import { Alert, Checkbox, Form, Input, Menu, MenuProps } from "antd";
 import styles from "./login.module.scss"
@@ -16,22 +15,9 @@ import getDocument from "../../firebase/data/getData";
 import { User } from "../../firebase/types/User";
 
 
-export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
-  //Get the context of the request
-  const { req, res } = ctx
-  //Get the cookies from the current request
-  const { cookies } = req
-    
-  //Check if the login cookie is set
-  if( cookies.login ){
-    //Redirect if the cookie is not set
-    res.writeHead( 302, { Location: "/" } );
-    res.end();
-  }
-
-  return { props: { InitialState: {} } }
-}
-
+/**
+ * Define the login page navigation
+ */
 const frontendnav: MenuProps["items"] = [
   {
     label: <Link href={"privacy"}>Datenschutz</Link>,
@@ -47,13 +33,23 @@ const frontendnav: MenuProps["items"] = [
   }
 ]
 
+/**
+ * Page users can use to log in into the application
+ * @constructor
+ */
 export default function Login(){
+  // State to indicate login failures
   const [ loginFailed, setLoginFailed ] = useState( false );
 
-
+  /**
+   * Function to call on form finish -> form send
+   * @param values Input values
+   */
   const onFinish = async ( values ) => {
+    // Call the firebase sign in routine
     const { result, error } = await signIn( values.email, values.password );
 
+    // Check if we ecounter a sign in error
     if ( error ) {
       //console.log(error);
       setLoginFailed( true );
@@ -64,12 +60,15 @@ export default function Login(){
         email: values.email
       });
 
-      console.log(result.user);
-
+      // If the login was successfull query the database for the resulting user id
       const usereq = await getDocument("Users", result.user?.uid);
+
+      // Check if the query request was successfull
       if(usereq.result){
+        // Cast the query result as User object
         const userobj = usereq.result.data() as User;
         if(userobj){
+          // Choose where to redirect the user to after the login
           if(userobj.setupDone){
             return router.push( "/" )
           }else{
@@ -79,11 +78,15 @@ export default function Login(){
           return router.push( "/" )
         }
       }else{
+        // If we encounter an error set the failed flga
         setLoginFailed( true );
       }
     }
   };
 
+  /**
+   * Function to resolve form send errors
+   */
   const onFinishFailed = () => {
     //console.log('Failed:', errorInfo);
     setLoginFailed( true );
@@ -170,6 +173,10 @@ export default function Login(){
   );
 }
 
+/**
+ * Login page layout seperate from the normal login flow
+ * @param page
+ */
 Login.getLayout = ( page ) => {
   return(
     <>

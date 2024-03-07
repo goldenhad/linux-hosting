@@ -1,4 +1,3 @@
-import { GetServerSideProps } from "next";
 import { useState } from "react";
 import { Alert, Button, Form, Input, Result } from "antd";
 import styles from "./password.forgot.module.scss"
@@ -6,29 +5,24 @@ import Head from "next/head";
 import forgotpassword from "../../../firebase/auth/forgot";
 
 
-export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
-  //Get the context of the request
-  const { req, res } = ctx
-  //Get the cookies from the current request
-  const { cookies } = req
-    
-  //Check if the login cookie is set
-  if( cookies.login ){
-    //Redirect if the cookie is not set
-    res.writeHead( 302, { Location: "/" } );
-    res.end();
-  }
-
-  return { props: { InitialState: {} } }
-}
-
+/**
+ * Password forgot page. Users can reset their password here
+ * @constructor
+ */
 export default function Forgot_Password(){
+  // Issue some states to detect a password reset and a login failure
   const [ loginFailed, setLoginFailed ] = useState( false );
   const [ wasReset, setWasReset ] = useState( false );
 
+  /**
+    * Function to execute if the user enters their mail
+    * @param values input values
+    */
   const onFinish = async ( values ) => {
+    // Call the forgot password function and execute the reset process at firebase
     const { error } = await forgotpassword( values.email );
 
+    // Check if we encountered an error
     if ( error ) {
       //console.log(error);
       setLoginFailed( true );
@@ -39,14 +33,22 @@ export default function Forgot_Password(){
     }
   };
 
+  /**
+     * Function to execute if the form input failed
+     * DO WE NEED THIS???
+     */
   const onFinishFailed = () => {
     //console.log('Failed:', errorInfo);
     setLoginFailed( true );
   };
 
 
-
-  const getResetForm = () => {
+  /**
+     * Subcomponent to create the password reset form
+     * @constructor
+     */
+  const ResetForm = () => {
+    // Switch the component content if the reset process succeeds
     if( wasReset ){
       return(
         <>
@@ -119,7 +121,7 @@ export default function Forgot_Password(){
         </div>
 
         <div className={styles.formContainer}>
-          {getResetForm()}
+          <ResetForm />
         </div>
       </div>
       <div className={styles.copyrightfooter}>© Siteware business 2024</div>
@@ -127,6 +129,10 @@ export default function Forgot_Password(){
   );
 }
 
+/**
+ * We use a special layout here as we are not in the default layout with context
+ * @param page
+ */
 Forgot_Password.getLayout = ( page ) => {
   return(
     <>

@@ -8,14 +8,12 @@ import getStripe from "../../helper/stripe";
 import { Elements } from "@stripe/react-stripe-js";
 
 
-export interface InitialProps {
-  Data: {
-    token: string,
-  };
-}
-
 const stripePromise = getStripe();
 
+/**
+ * Parse the query string to resolve a given amount of token
+ * @param ctx
+ */
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
   const { token } = ctx.query;
 
@@ -29,7 +27,10 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
 };
 
 
-
+/**
+ * Implements a page where users can buy account tokens with stripe and a custom form
+ * @constructor
+ */
 export default function Upgrade( ) {
   const context = useAuthContext();
   const { user, company, invoice_data, calculations } = context;

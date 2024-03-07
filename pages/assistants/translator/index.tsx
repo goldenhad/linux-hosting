@@ -6,7 +6,7 @@ import updateData from "../../../firebase/data/updateData";
 import AssistantBase from "../../../components/AssistantBase/AssistantBase";
 import { handleUndefinedTour } from "../../../helper/architecture";
 import { Templates } from "../../../firebase/types/Settings";
-import { parseTranslatorPrompt } from "../../../helper/prompt";
+import { parseTranslatorPrompt } from "../../../helper/prompt/templating";
 import TranslatorForm from "../../../components/AssistantForms/TranslatorForm/TranslatorForm";
 
 

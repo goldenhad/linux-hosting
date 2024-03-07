@@ -11,9 +11,18 @@ import { getDocWhere } from "../../firebase/data/getData";
 import Link from "next/link";
 import CryptoJS from "crypto-js";
 import Nav from "../../public/icons/nav.svg";
-import Icon from "@ant-design/icons";
+import Icon, { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import FatButton from "../../components/FatButton";
 
+enum CouponState {
+  "VALID",
+  "INVALID",
+  "NOCOUPON"
+}
+
+/**
+ * Defne the navigation used in the frontend, to access the legal pages
+ */
 const frontendnav: MenuProps["items"] = [
   {
     label: <Link href={"privacy"}>Datenschutz</Link>,
@@ -29,6 +38,10 @@ const frontendnav: MenuProps["items"] = [
   }
 ]
 
+/**
+ * Get some serverside props, e.g invite parameters
+ * @param ctx
+ */
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
   //Get the context of the request
   const { req, res, query } = ctx
@@ -42,21 +55,29 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
     res.end();
   }
 
+  // Get the invite query obj
   const invite = query.invite;
   if( invite ){
     try{
+      // Get the invite parameter as base64 string
       const readableCipher = Buffer.from( invite as string, "base64" ).toString();
+      // Decrypt the invite string with our password
       const deciphered = CryptoJS.AES.decrypt( readableCipher, process.env.MAILENC ).toString( CryptoJS.enc.Utf8 );
+      // Cast it as JSON-string
       const json = Buffer.from( deciphered as string, "base64" ).toString();
+      // Parse the JSON-String
       const invitiparams = JSON.parse( json );
-      console.log( invitiparams );
 
+      // Get the current time and calculate the difference between the creation of the invite and now
       const currTime = Math.floor( Date.now() / 1000 );
       const timeDifference =  currTime - invitiparams.timestamp;
 
+      // Get the users with the given invite code
       const { result } = await getDocWhere( "User", "inviteCode", "==", invitiparams.code );
 
+      // Check if the invite code belongs to some user
       if( result.length == 0 ){
+        // Check that the invite is not older than 24 hours
         if( ( timeDifference / 60 ) / 60 <= 24 ){
           return { 
             props: { 
@@ -85,13 +106,15 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
       return { props: {  } };
     }
   }else if( query.recommend ){
+    // Special path, if the recommend param was set.
+    // Decode the given recommend base64 string and parse the included JSON
     const readableCipher = Buffer.from( query.recommend as string, "base64" ).toString();
     const deciphered = CryptoJS.AES.decrypt( readableCipher, process.env.MAILENC ).toString( CryptoJS.enc.Utf8 );
     const json = Buffer.from( deciphered as string, "base64" ).toString();
     const recommendparams = JSON.parse( json );
-    
-    if( recommendparams.from ){
 
+    // Set the recommend params
+    if( recommendparams.from ){
       return { props: { 
         invitedBy: {
           code: recommendparams.from
@@ -108,6 +131,11 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
     
 }
 
+/**
+ * Register page
+ * @param props Page props
+ * @constructor
+ */
 export default function Register( props ){
   const [ loginFailed, setLoginFailed ] = useState( false );
   {/*eslint-disable-next-line */}
@@ -115,13 +143,49 @@ export default function Register( props ){
   const [ registerUserForm ] = Form.useForm();
   const [ registerForm ] = Form.useForm();
   const [ registeringCompany, setRegisteringCompany ] = useState( false );
+  const [ couponValid, setCouponValid ] = useState(CouponState.NOCOUPON);
 
+  /**
+   * Effect to set some fields of the form depending on the invite used by the user
+   */
+  useEffect( () => {
+    if( props.invite ){
+      registerUserForm.setFieldValue( "firstname", props.invite.firstname );
+      registerUserForm.setFieldValue( "lastname", props.invite.lastname );
+      registerUserForm.setFieldValue( "email", props.invite.email );
+    }
+  }, [props.invite, registerUserForm] );
+
+
+  /**
+   * Returns an icon depending on the validity of the user input coupon
+   */
+  const getCouponIcon = () => {
+    switch(couponValid){       
+    case CouponState.INVALID:
+      return <Icon component={CloseOutlined} style={{ "color": "red" }} />;
+    case CouponState.VALID:
+      return <Icon component={CheckOutlined} style={{ "color": "green" }} />;
+    default:
+      return <></>;
+    }
+  }
+
+
+  /**
+   * Function to be called if the user sends the form to register a company
+   * @param values Form-Values
+   */
   const onFinishRegisterCompany = async ( values ) => {
+    // Test if the users tries to register a company or a singleuser
     const isPersonal = values.usecase != "Für mein Unternehmen";
-    
+
     if( isPersonal ){
+      // Case to be executed if the user tries to register a singleuser
+      // Get the recommended by code from the page props
       const recommendCode = props.invitedBy?.code;
 
+      // Call the Firebase signup function with the given form values
       const { error } = await signUp(
         values.firstname,
         values.lastname,
@@ -137,7 +201,8 @@ export default function Register( props ){
         recommendCode,
         values.coupon
       );
-            
+
+      // Check for errors during the firebase call
       if ( error ) {
         console.log(error);
         setLoginFailed( true );
@@ -148,8 +213,10 @@ export default function Register( props ){
         return router.push( "/setup" )
       }
     }else{
+      // Case to be executed if the users registers a company
       const recommendCode = props.invitedBy?.code;
 
+      // Call the firebase signup function
       const { error } = await signUp( 
         values.firstname,
         values.lastname,
@@ -166,8 +233,7 @@ export default function Register( props ){
         values.coupon
       );
 
-      console.log("came this far");
-            
+      // Check for possible errors during firebase signup
       if ( error ) {
         console.log(error);
         setLoginFailed( true );
@@ -181,7 +247,12 @@ export default function Register( props ){
   };
 
 
+  /**
+   * Function to be called if the user tries to register a mailagent
+   * @param values Form-values
+   */
   const onFinishRegisterUser = async ( values ) => {
+    // Call the firebase signup function to register a mailagent
     const { error } = await signUpUser( 
       values.firstname,
       values.lastname,
@@ -193,6 +264,7 @@ export default function Register( props ){
       props.invite.code
     );
 
+    // Check for errors
     if ( error ) {
       //console.log(error);
       setLoginFailed( true );
@@ -204,19 +276,10 @@ export default function Register( props ){
     }
   }
 
-  useEffect( () => {
-    if( props.invite ){
-      registerUserForm.setFieldValue( "firstname", props.invite.firstname );
-      registerUserForm.setFieldValue( "lastname", props.invite.lastname );
-      registerUserForm.setFieldValue( "email", props.invite.email );
-    }
-  }, [props.invite, registerUserForm] );
 
-  const onFinishFailed = () => {
-    //console.log('Failed:', errorInfo);
-    //setLoginFailed( true );
-  };
-
+  /**
+   * Function to resolve the layout of the form depending on the selected usecase
+   */
   const evalUseCase = () => {
     if( registeringCompany ){
       return <>
@@ -290,18 +353,21 @@ export default function Register( props ){
               async validator( _, value ) {
                 if( value != "" ){
                   if ( await couponExists( value ) ) {
+                    setCouponValid(CouponState.VALID);
                     return Promise.resolve();         
                   }else{
+                    setCouponValid(CouponState.INVALID);
                     return Promise.reject( new Error( "Der Coupon existiert nicht!" ) );
                   }
                 }else{
+                  setCouponValid(CouponState.NOCOUPON);
                   return Promise.resolve();
                 }
               }
             } )
           ]}
         >
-          <Input className={styles.logininput} />
+          <Input className={styles.logininput} suffix={getCouponIcon()}/>
         </Form.Item>
       </>
     }else{
@@ -356,7 +422,9 @@ export default function Register( props ){
     }
   }
 
-
+  /**
+   * Resolve the layout of the page depending on the state of the registration process
+   */
   const getForm = () => {
     if( props.inviteExpired ){
       return (
@@ -377,7 +445,6 @@ export default function Register( props ){
             remember: true
           }}
           onFinish={onFinishRegisterUser}
-          onFinishFailed={onFinishFailed}
           autoComplete="off"
           layout="vertical"
           onChange={() => {
@@ -464,7 +531,6 @@ export default function Register( props ){
                   }else{
                     return Promise.reject( new Error( "Der Benutzername darf nicht leer sein!" ) );
                   }
-                  return Promise.resolve();
                 }
               } )
             ]}
@@ -547,7 +613,6 @@ export default function Register( props ){
           name="basic"
           className={styles.loginform}
           onFinish={onFinishRegisterCompany}
-          onFinishFailed={onFinishFailed}
           autoComplete="off"
           layout="vertical"
           onChange={() => {
@@ -761,6 +826,7 @@ export default function Register( props ){
   );
 }
 
+// Exclusive layout the registration page
 Register.getLayout = ( page ) => {
   return(
     <>

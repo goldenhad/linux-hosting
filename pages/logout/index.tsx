@@ -1,6 +1,4 @@
-import type { GetServerSideProps } from "next"
 import { LoadingOutlined } from "@ant-design/icons";
-import Cookies from "cookies";
 import { useEffect } from "react";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -8,38 +6,27 @@ import signUserOut from "../../firebase/auth/signout";
 import { Spin } from "antd";
 
 
-
-export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
-  //Get the context of the request
-  const { req, res } = ctx
-  //Get the cookies from the current request
-    
-  const currCookies = new Cookies( req, res );
-  currCookies.set( "login", "", {
-    httpOnly: true,
-    maxAge: 0 //Used for deletion
-  } );
-
-  return {
-    props: {}
-  };
-}
-
+/**
+ * Page executing an automatic logout if visited by a auser
+ * @constructor
+ */
 export default function Logout(){
   const { login } = useAuthContext();
   const router = useRouter();
 
+  /**
+   * Function executing the logout from firebase
+   */
   const handleLogOut = async () => {
     await signUserOut();
   }
 
+  /**
+   * Execute logout on page logout
+   */
   useEffect( () => {
     if( login == null ) router.push( "/login" );
-
-    
     handleLogOut();
-
-    //router.push('/login');
   }, [login, router] );
 
   return (

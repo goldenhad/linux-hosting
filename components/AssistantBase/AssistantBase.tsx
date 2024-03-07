@@ -1,14 +1,30 @@
-import { Alert, Button, Card, Divider, Form, List, Result, Skeleton, Tour, TourProps, message, Typography, Drawer, notification, FormInstance } from "antd";
+import {
+  Alert,
+  Button,
+  Card,
+  Divider,
+  Drawer,
+  Form,
+  FormInstance,
+  List,
+  message,
+  notification,
+  Result,
+  Skeleton,
+  Tour,
+  TourProps,
+  Typography
+} from "antd";
 import axios from "axios";
 import styles from "./AssistantBase.module.scss";
-import { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { History, User } from "../../firebase/types/User";
 import { Company, Order } from "../../firebase/types/Company";
 import { Profile } from "../../firebase/types/Profile";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../db";
 import Info from "../../public/icons/info.svg";
-import Icon, { ArrowLeftOutlined, EyeOutlined, HistoryOutlined, CloseOutlined } from "@ant-design/icons";
+import Icon, { ArrowLeftOutlined, CloseOutlined, EyeOutlined, HistoryOutlined } from "@ant-design/icons";
 import SidebarLayout from "../Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
 import { handleEmptyString } from "../../helper/architecture";
@@ -19,10 +35,18 @@ import moment from "moment";
 import { isMobile } from "react-device-detect";
 import Markdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
-import React from "react";
-import { TokenCalculator } from "../../helper/price";
+import { toGermanCurrencyString, TokenCalculator } from "../../helper/price";
 import { Calculations, InvoiceSettings, Templates } from "../../firebase/types/Settings";
 import getDocument from "../../firebase/data/getData";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism"
+import remarkGfm from "remark-gfm"
+
+// Defines how long antd messages will be visible
+const MSGDURATION = 3;
+
+// Defines the max amount of history states saved per user
+const MAXHISTITEMS = 10;
 
 const { Paragraph } = Typography;
 
@@ -85,7 +109,6 @@ const AssistantBase = (props: {
   const [ isLoaderVisible, setIsLoaderVisible ] = useState( false );
   const [ isAnswerCardVisible, setIsAnswerCardvisible ] = useState( false );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [ tokens, setTokens ] = useState( "" );
   const [ answer, setAnswer ] = useState( "" );
   const [ formDisabled, setFormDisabled ] = useState( false );
   const [messageApi, contextHolder] = message.useMessage();
@@ -103,6 +126,132 @@ const AssistantBase = (props: {
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
+
+  const reduceCost = (cost: number) => {
+    // Reduce the token balance by the used token
+    if( props.context.company.tokens - cost <= 0 ){
+      props.context.company.tokens = 0;
+    }else{
+      props.context.company.tokens -= cost
+    }
+  }
+
+  const updateCompanyTokens = async (cost) => {
+    if(props.context.company.plan){
+      if(props.context.company.plan?.state == "active"){
+        let paymentSuccesfull = false;
+        let invoiceid = "";
+
+        console.log(props.context.company.tokens < props.context.company.plan.threshold);
+
+        // Check if company has less tokens than the threshold
+        if(props.context.company.tokens < props.context.company.plan.threshold){
+          // Try to charge the user with the values defined in the plan
+          try{
+            const paymentreq = await axios.post("/api/payment/issuepayment", {
+              price: props.context.calculations.products[props.context.company.plan?.product].price,
+              customer: props.context.company.customerId,
+              method: props.context.company.paymentMethods[0].methodId
+            });
+
+            invoiceid = paymentreq.data.message;
+
+            paymentSuccesfull = true;
+          }catch{
+            paymentSuccesfull = false;
+          }
+
+
+          // If the payment was successfull
+          if(paymentSuccesfull){
+            // Get the tokens that will be added according to the plan
+            const amountToAdd = calculator.indexToPrice(props.context.company.plan?.product);
+            // Add the totkens to the tokens of the company
+            const updatedTokenValue = props.context.company.tokens + amountToAdd;
+
+            // Update paymentmethod
+            const newState = props.context.company.paymentMethods[0];
+            newState.lastState = "successfull"
+            const updatedMethods = [newState]
+
+            // Create an order for the charged amount
+            const currentOrders = props.context.company.orders;
+            const nextInvoiceNumber = props.context.invoice_data.last_used_number+1;
+
+            const newOrder: Order = {
+              id: invoiceid,
+              timestamp: Math.floor( Date.now() / 1000 ),
+              tokens: amountToAdd,
+              amount: props.context.calculations.products[props.context.company.plan?.product].price,
+              method: "Stripe",
+              state: "accepted",
+              type: "recharge",
+              invoiceId: `SM${props.context.invoice_data.number_offset + nextInvoiceNumber}`
+            }
+
+            // Added the new order to the company orders
+            currentOrders.push( newOrder );
+            // Update the last used invoice id
+            await updateData( "Settings", "Invoices", { last_used_number: nextInvoiceNumber } );
+
+            // Update the tokens of the company
+            await updateData("Company", props.context.user.Company, {
+              tokens: updatedTokenValue,
+              paymentMethods: updatedMethods,
+              orders: currentOrders
+            });
+
+            notificationAPI.info({
+              message: "Automatisches Nachfüllen",
+              description: `Dein Credit-Budget wurde automatisch um ${toGermanCurrencyString(amountToAdd)} Tokens aufgefüllt!`,
+              duration: MSGDURATION
+            });
+          }else{
+            const newState = props.context.company.paymentMethods[0];
+            newState.lastState = "error"
+            const updatedMethods = [newState]
+
+            await updateData("Company", props.context.user.Company, { tokens: props.context.company.tokens, paymentMethods: updatedMethods })
+
+            notificationAPI.error({
+              message: "Automatisches Nafüllen",
+              description: "Es ist ein Fehler beim automatischen Auffüllen deines Credit-Budgets aufgetreten.",
+              duration: MSGDURATION
+            });
+          }
+        }else{
+          // Update the balance of the company
+          console.log("Value to update ", props.context.company.tokens);
+          await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
+        }
+
+      }else{
+        // Update the balance of the company
+        await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
+      }
+    }else{
+      // Update the balance of the company
+      await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
+    }
+
+    // Get the usage of the current month and year from the user
+    const userusageidx = props.context.user.usedCredits.findIndex( ( val ) => {
+      return val.month == currentMonth && val.year == currentYear
+    } );
+
+    // Check if the user used the tool in the current month and year
+    if( userusageidx != -1 ){
+      // If so just update the usage with the used tokens
+      const usageupdates = props.context.user.usedCredits;
+      usageupdates[userusageidx].amount += cost;
+      await updateDoc( doc( db, "User", props.context.login.uid ), { usedCredits: usageupdates } );
+    }else{
+      // Otherwise create a new usage object and write it to the user
+      const usageupdates = props.context.user.usedCredits;
+      usageupdates.push( { month: currentMonth, year: currentYear, amount: cost } );
+      await updateDoc( doc( db, "User", props.context.login.uid ), { usedCredits: usageupdates } );
+    }
+  }
 
 
   /**
@@ -307,14 +456,12 @@ const AssistantBase = (props: {
    * @returns Array of antd select options
    */
   const getProfiles = () => {
-    const profileOptions =  decryptedProfiles.map( ( singleProfile: Profile, idx: number ) => {
+    return decryptedProfiles.map((singleProfile: Profile, idx: number) => {
       return {
         key: idx,
         value: singleProfile.name
       }
-    } );
-  
-    return profileOptions;
+    });
   }
 
 
@@ -344,8 +491,28 @@ const AssistantBase = (props: {
       return (
         <>
           <div className={styles.answer} style={{ transition: "all 0.5s ease" }} >
-            <Markdown skipHtml={true} remarkPlugins={[ remarkBreaks ]}>
-              {answer.replace(/\n/gi, "&nbsp; \n")}
+            <Markdown
+              skipHtml={true}
+              remarkPlugins={[ remarkBreaks, remarkGfm ]}
+              components={{
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                code({ node, className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || "")
+                  return match ? (
+                    <SyntaxHighlighter
+                      language={match[1]}
+                      style={oneLight}
+                      {...props}
+                    >{String(children).replace(/\n$/, "")}</SyntaxHighlighter>
+                  ) : (
+                    <code className={className} {...props}>
+                      {children}
+                    </code>
+                  )
+                }
+              }}
+            >
+              {answer}
             </Markdown>
           </div>
           <Disclaimer />
@@ -386,7 +553,6 @@ const AssistantBase = (props: {
         setShowAnswer( true );
         setIsAnswerVisible( false );
         setPromptError( false );
-        setTokens( "" );
 
         // Set the state of the prompt with the input value
         const cookieobject = props.basicState;
@@ -427,7 +593,7 @@ const AssistantBase = (props: {
 
         let isFreed = false;
         const usedTokens = { in: 0, out: 0 };
-        let realusedTokens = 0;
+        let cost = 0;
 
         // Retrieve the template for prompts from the database
         const templatereq = await getDocument("Settings", "Prompts");
@@ -454,7 +620,7 @@ const AssistantBase = (props: {
             let localAnswer = "";
 
             try{
-              // Query the api for a answer to the input
+              // Query the api for an answer to the input
               await axios.post( props.routes.generate, { prompt: prompt },
                 { onDownloadProgress: async (progressEvent) => {
                   // Disable the loading of the answer if we have recieved a chunk of data
@@ -471,7 +637,7 @@ const AssistantBase = (props: {
                   const parseRegEx = /(?<=<~).+?(?=~>)/g;
                   const parsedval = dataChunk.match(parseRegEx);
                   
-                  // Check if we encounterd an control char.
+                  // Check if we encounterd a control char.
                   if(parsedval && parsedval.length == 1){
                     // If we found the control sequence, we reached the end of the response
                     // Remove the control sequence
@@ -485,25 +651,64 @@ const AssistantBase = (props: {
                       // Set the tokens to the sum of the input and the received answer
                       usedTokens.in = costbefore;
                       usedTokens.out = tokensused;
-                      
-                      if(props.context.calculations.costPerToken.in > props.context.calculations.costPerToken.out){
-                        realusedTokens = usedTokens.in * (props.context.calculations.costPerToken.in/props.context.calculations.costPerToken.out) + usedTokens.out;
-                      }else if(props.context.calculations.costPerToken.in < props.context.calculations.costPerToken.out){
-                        realusedTokens = usedTokens.in + (props.context.calculations.costPerToken.out/props.context.calculations.costPerToken.in) * usedTokens.out;
-                      }else{
-                        realusedTokens = usedTokens.in + usedTokens.out;
-                      }
-  
-                      console.log(realusedTokens);
-                      
+                        
                       // Update the used tokens and display them
-                      setTokens(realusedTokens.toString());
                       setTokenCountVisible(true);
-                      
+
+                      cost = calculator.cost(usedTokens);
+
+                      // Add the generated answer to the history state
+                      // Validate that the answer is not empty
+                      if(localAnswer != ""){
+                        // We need to check if the user already has 10 saved states
+                        if(historyState.length >= MAXHISTITEMS){
+                          // If so remove last Element from array
+                          historyState.pop();
+                        }
+
+                        // Add the answer with the current time and the used tokens to the front of the history array
+                        historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: toGermanCurrencyString(cost) });
+    
+                        // Encrypt the history array
+                        const encHistObj = await axios.post( "/api/prompt/encrypt", {
+                          content: JSON.stringify(historyState),
+                          salt: props.context.user.salt
+                        } );
+      
+                        const encHist = encHistObj.data.message;
+  
+                        // Check if the user previously had a history
+                        if(props.context.user.history){
+                          // If so get the history
+                          const userhist = props.context.user.history;
+                          // Set the history to the encoded string and update the user
+                          userhist[props.laststate] = encHist;
+                          await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
+                        }else{
+                          // If the user previously didn't have a history
+                          // Init the history
+                          const hist: History = {
+                            monolog: "",
+                            dialog: "",
+                            monolog_old: "",
+                            dialog_old: "",
+                            blog: "",
+                            excel: ""
+                          };
+                          // Update the history state of the assistant and update the user
+                          const encHist = encHistObj.data.message;
+                          hist[props.laststate] = encHist;
+                          await updateDoc( doc( db, "User", props.context.login.uid ), { history: hist } );
+                        }
+                      }
+
+                      reduceCost(cost);
+                      await updateCompanyTokens(cost);
+
                       notificationAPI.info({
                         message: "Creditverbrauch",
-                        description: `Die Anfrage hat ${calculator.round(calculator.normalizeTokens(realusedTokens), 2)} Credits verbraucht`,
-                        duration: 10 
+                        description: `Die Anfrage hat ${toGermanCurrencyString(cost)} verbraucht`,
+                        duration: MSGDURATION
                       });
                       
                       // Set the answer to the recieved data without the control sequence
@@ -522,55 +727,10 @@ const AssistantBase = (props: {
                   
                 }, signal: cancleController.signal
                 });
-
-              // Add the generated answer to the history state
-              // Validate that the answer is not empty
-              if(localAnswer != ""){
-              // We need to check if the user already has 10 saved states
-                if(historyState.length >= 10){
-                  // If so remove last Element from array
-                  historyState.pop();
-                }
-  
-                // Add the answer with the current time and the used tokens to the front of the history array
-                historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: realusedTokens });
-  
-                // Encrypt the history array
-                const encHistObj = await axios.post( "/api/prompt/encrypt", {
-                  content: JSON.stringify(historyState),
-                  salt: props.context.user.salt
-                } );
-    
-                const encHist = encHistObj.data.message;
-
-                // Check if the user previously had a history
-                if(props.context.user.history){
-                // If so get the history
-                  const userhist = props.context.user.history;
-                  // Set the history to the encoded string and update the user
-                  userhist[props.laststate] = encHist;
-                  await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
-                }else{
-                // If the user previously didn't have a history
-                // Init the history
-                  const hist: History = {
-                    monolog: "",
-                    dialog: "",
-                    monolog_old: "",
-                    dialog_old: "",
-                    blog: "",
-                    excel: ""
-                  };
-                  // Update the history state of the assistant and update the user
-                  const encHist = encHistObj.data.message;
-                  hist[props.laststate] = encHist;
-                  await updateDoc( doc( db, "User", props.context.login.uid ), { history: hist } );
-                }
-              }
             }catch(e){
               // If we encounter an error
               if(axios.isCancel(e)){
-                // Check if we encounterd a cancle signal. E.g if the user aborted the request
+                // Check if we encounterd a cancle signal. e.g if the user aborted the request
                 // Show the used tokens
                 
                 const costbeforereq = await axios.post("/api/prompt/count", { prompt: localtext });
@@ -580,24 +740,18 @@ const AssistantBase = (props: {
                   usedTokens.in = costbefore;
                   usedTokens.out = tokensused;
                     
-                  if(props.context.calculations.costPerToken.in > props.context.calculations.costPerToken.out){
-                    realusedTokens = usedTokens.in * (props.context.calculations.costPerToken.in/props.context.calculations.costPerToken.out) + usedTokens.out;
-                  }else if(props.context.calculations.costPerToken.in < props.context.calculations.costPerToken.out){
-                    realusedTokens = usedTokens.in + (props.context.calculations.costPerToken.out/props.context.calculations.costPerToken.in) * usedTokens.out;
-                  }else{
-                    realusedTokens = usedTokens.in + usedTokens.out;
-                  }
+                  cost = calculator.cost(usedTokens);
 
-                  console.log(realusedTokens);
+                  reduceCost(cost);
+                  await updateCompanyTokens(cost);
                     
                   // Update the used tokens and display them
-                  setTokens(realusedTokens.toString());
                   setTokenCountVisible(true);
                     
                   notificationAPI.info({
                     message: "Creditverbrauch",
-                    description: `Die Anfrage hat ${calculator.round(calculator.normalizeTokens(realusedTokens), 2)} Credits verbraucht`,
-                    duration: 10 
+                    description: `Die Anfrage hat  ${toGermanCurrencyString(cost)} Credits verbraucht`,
+                    duration: MSGDURATION
                   });
                 }
 
@@ -606,144 +760,17 @@ const AssistantBase = (props: {
               }else{
                 setAnswer("");
                 setPromptError(true);
-                setTokens( "" );
               }
             }
 
-
-            try{
-              await axios.post( "/api/stats", { tokens: { in: usedTokens.in, out: usedTokens.out }, time: -1, type: props.name } );
-            }catch( e ){
-              //console.log(e);
-              //console.log("Timing logging failed!");
-            }
-
-            console.log("IN: ", usedTokens.in, " OUT: ", usedTokens.out);
-
+            console.log("hier", props.context.company.tokens);
             
-            // Reduce the token balance by the used token
-            if( props.context.company.tokens - realusedTokens <= 0 ){
-              props.context.company.tokens = 0;
-            }else{
-              console.log(props.context.company.tokens);
-              props.context.company.tokens -= realusedTokens
-              console.log(props.context.company.tokens);
-            }
+
 
             // Check if the user activated automatic recharge. If charge them and add tokens
-
-            if(props.context.company.plan){
-              if(props.context.company.plan?.state == "active"){
-                let paymentSuccesfull = false;
-                let invoiceid = "";
-  
-                console.log(calculator.normalizeTokens(props.context.company.tokens), props.context.company.plan.threshold);
-                // Check if company has less tokens than the threshold
-                if(calculator.normalizeTokens(props.context.company.tokens) < props.context.company.plan.threshold){
-                  // Try to charge the user with the values defined in the plan
-                  try{
-                    const paymentreq = await axios.post("/api/payment/issuepayment", { 
-                      price: props.context.calculations.products[props.context.company.plan?.product].price,
-                      customer: props.context.company.customerId,
-                      method: props.context.company.paymentMethods[0].methodId
-                    });
-  
-                    invoiceid = paymentreq.data.message;
-  
-                    paymentSuccesfull = true;
-                  }catch{
-                    paymentSuccesfull = false;
-                  }
-  
-              
-                  // If the payment was successfull
-                  if(paymentSuccesfull){
-                  // Get the tokens that will be added according to the plan
-                    const amountToAdd = calculator.indexToTokens(props.context.company.plan?.product, true);
-                    // Add the totkens to the tokens of the company
-                    const updatedTokenValue = props.context.company.tokens + amountToAdd;
-  
-                    // Update paymentmethod
-                    const newState = props.context.company.paymentMethods[0];
-                    newState.lastState = "successfull"
-                    const updatedMethods = [newState]
-  
-                    // Create an order for the charged amount
-                    const currentOrders = props.context.company.orders;
-                    const nextInvoiceNumber = props.context.invoice_data.last_used_number+1;
-  
-                    const newOrder: Order = {
-                      id: invoiceid,
-                      timestamp: Math.floor( Date.now() / 1000 ),
-                      tokens: amountToAdd,
-                      amount: props.context.calculations.products[props.context.company.plan?.product].price,
-                      method: "Stripe",
-                      state: "accepted",
-                      type: "recharge",
-                      invoiceId: `SM${props.context.invoice_data.number_offset + nextInvoiceNumber}`
-                    }
-  
-                    // Added the new order to the company orders
-                    currentOrders.push( newOrder );
-                    // Update the last used invoice id
-                    await updateData( "Settings", "Invoices", { last_used_number: nextInvoiceNumber } );
-  
-                    // Update the tokens of the company
-                    await updateData("Company", props.context.user.Company, { 
-                      tokens: updatedTokenValue,
-                      paymentMethods: updatedMethods,
-                      orders: currentOrders 
-                    });
-  
-                    notificationAPI.info({
-                      message: "Automatisches Nachfüllen",
-                      description: `Dein Credit-Budget wurde automatisch um ${calculator.round(calculator.normalizeTokens(amountToAdd), 0)} Tokens aufgefüllt!`,
-                      duration: 10 
-                    });
-                  }else{
-                    const newState = props.context.company.paymentMethods[0];
-                    newState.lastState = "error"
-                    const updatedMethods = [newState]
-  
-                    await updateData("Company", props.context.user.Company, { tokens: props.context.company.tokens, paymentMethods: updatedMethods })
-  
-                    notificationAPI.error({
-                      message: "Automatisches Nafüllen",
-                      description: "Es ist ein Fehler beim automatischen Auffüllen deines Credit-Budgets aufgetreten.",
-                      duration: 10 
-                    });
-                  }
-                }else{
-                  // Update the balance of the company
-                  await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
-                }
-  
-              }else{
-                // Update the balance of the company
-                await updateDoc( doc( db, "Company", props.context.user.Company ), { tokens: props.context.company.tokens } );
-              }
-            }
+            console.log(props.context.company);
 
 
-            
-
-            // Get the usage of the current month and year from the user
-            const userusageidx = props.context.user.usedCredits.findIndex( ( val ) => {
-              return val.month == currentMonth && val.year == currentYear
-            } );
-
-            // Check if the user used the tool in the current month and year
-            if( userusageidx != -1 ){
-              // If so just update the usage with the used tokens
-              const usageupdates = props.context.user.usedCredits;
-              usageupdates[userusageidx].amount += realusedTokens;
-              await updateDoc( doc( db, "User", props.context.login.uid ), { usedCredits: usageupdates } );
-            }else{
-              // Otherwise create a new usage object and write it to the user
-              const usageupdates = props.context.user.usedCredits;
-              usageupdates.push( { month: currentMonth, year: currentYear, amount: realusedTokens } );
-              await updateDoc( doc( db, "User", props.context.login.uid ), { usedCredits: usageupdates } );
-            }
           }else{
             throw("Costbefore undefined");
           }
@@ -752,7 +779,6 @@ const AssistantBase = (props: {
         }
       }catch( e ){
         console.log(e);
-        setTokens( "" );
         setIsLoaderVisible( false );
         setPromptError( true );
       }
@@ -818,14 +844,13 @@ const AssistantBase = (props: {
                 <Paragraph className={styles.histitem}>{item.content.slice(0, 100)}...</Paragraph>
                 <div className={styles.subcontent}>
                   <span>{item.time}</span>
-                  <span>Credits: {calculator.round(calculator.normalizeTokens(parseFloat(item.tokens)), 2)}</span>
+                  <span>{(typeof item.tokens == "string")? item.tokens: 0}</span>
                   <Button icon={<EyeOutlined />} onClick={() => {
                     setHistOpen(false);
                     setIsAnswerCardvisible( true );
                     setShowAnswer( true );
                     setIsAnswerVisible( true );
                     setPromptError( false );
-                    setTokens( "" );
                     setAnswer(item.content);
                   }}></Button>
                   <Button icon={<CloseOutlined />} onClick={async () => {
@@ -874,7 +899,7 @@ const AssistantBase = (props: {
               {(!isMobile && window.innerWidth >= 992)? 
                 <Button className={styles.histbutton} onClick={() => {
                   setHistOpen(true)
-                }} icon={<HistoryOutlined />}>Bisherige Anfragen</Button>: <></>  
+                }} icon={<HistoryOutlined />}>{`Bisherige Anfragen ${historyState.length}/${MAXHISTITEMS}`}</Button>: <></>
               }
             </div>
             <Divider className={styles.welcomeseperator} />
@@ -894,7 +919,8 @@ const AssistantBase = (props: {
               style={{ display: ( isAnswerCardVisible )? "block": "none" }}
               extra={
                 <div className={styles.clipboardextra} onClick={() => {
-                  navigator.clipboard.writeText( answer ); messageApi.success( "Antwort in die Zwischenablage kopiert." );
+                  navigator.clipboard.writeText( answer );
+                  messageApi.success( "Antwort in die Zwischenablage kopiert." );
                 }}
                 >
                   <Icon component={Clipboard} className={styles.clipboardicon} viewBox='0 0 22 22' />
@@ -913,25 +939,26 @@ const AssistantBase = (props: {
               <div className={styles.generatebuttonrow}>
                 <FatButton onClick={() => {
                   cancleController.abort();
-                  setShowAnswer( false );
+                  setShowAnswer(false);
                   setTokenCountVisible(false);
                   setCancleController(new AbortController);
-                }} text="Zurück" />
+                }} text="Zurück"/>
+                <FatButton type={"default"} onClick={() => {
+                  props.form.submit();
+                }} text="Neu generieren"/>
               </div>
             </div>
           </div>
           <Tour open={open} onClose={async () => {
             const currstate = props.context.user.tour;
             currstate[props.laststate] = true;
-            updateData( "User", props.context.login.uid, { tour: currstate } );
-            setOpen( false );
-          }} steps={props.Tour} />
-          <style>
-            {"span.ant-select-selection-placeholder{font-size: 14px !important; font-weight: normal !important}"}
-          </style>
+            updateData("User", props.context.login.uid, { tour: currstate });
+            setOpen(false);
+          }} steps={props.Tour}/>
+          <style>{"span.ant-select-selection-placeholder{font-size: 14px !important; font-weight: normal !important}"}</style>
         </div>
         <Drawer
-          title="Bisherige Anfragen"
+          title={`Bisherige Anfragen ${historyState.length}/${MAXHISTITEMS}`}
           placement={"right"}
           closable={true}
           onClose={() => {

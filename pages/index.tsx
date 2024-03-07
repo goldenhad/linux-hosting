@@ -37,6 +37,7 @@ export default function Home() {
   const [messageApi, contextHolder] = message.useMessage();
   const [ selectedCat, setSelectedCat ] = useState("all");
   const [ videoPopupVisible, setVideoPopupVisible ] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [ videoLink, setVideoLink ] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [play, setPlay] = useState(false);
@@ -191,9 +192,10 @@ export default function Home() {
             fav={user.services?.favourites.includes(singleService.uid)}
             ribbonText={getRibbonText(singleService.uid)}
             onVideoClick={() => {
-              setVideoLink(singleService.video);
-              setVideoPopupVisible(true);
-              setPlay(true);
+              // setVideoLink(singleService.video);
+              // setVideoPopupVisible(true);
+              // setPlay(true);
+              window.open(singleService.video, "_blank", "noreferrer");
             }}
             onFav={async () => {
               const currentfavs = (user.services?.favourites)? user.services.favourites: [];

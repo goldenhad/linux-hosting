@@ -11,8 +11,14 @@ import { getDocWhere } from "../../firebase/data/getData";
 import Link from "next/link";
 import CryptoJS from "crypto-js";
 import Nav from "../../public/icons/nav.svg";
-import Icon from "@ant-design/icons";
+import Icon, { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import FatButton from "../../components/FatButton";
+
+enum CouponState {
+  "VALID",
+  "INVALID",
+  "NOCOUPON"
+}
 
 /**
  * Defne the navigation used in the frontend, to access the legal pages
@@ -137,6 +143,7 @@ export default function Register( props ){
   const [ registerUserForm ] = Form.useForm();
   const [ registerForm ] = Form.useForm();
   const [ registeringCompany, setRegisteringCompany ] = useState( false );
+  const [ couponValid, setCouponValid ] = useState(CouponState.NOCOUPON);
 
   /**
    * Effect to set some fields of the form depending on the invite used by the user
@@ -148,6 +155,21 @@ export default function Register( props ){
       registerUserForm.setFieldValue( "email", props.invite.email );
     }
   }, [props.invite, registerUserForm] );
+
+
+  /**
+   * Returns an icon depending on the validity of the user input coupon
+   */
+  const getCouponIcon = () => {
+    switch(couponValid){       
+    case CouponState.INVALID:
+      return <Icon component={CloseOutlined} style={{ "color": "red" }} />;
+    case CouponState.VALID:
+      return <Icon component={CheckOutlined} style={{ "color": "green" }} />;
+    default:
+      return <></>;
+    }
+  }
 
 
   /**
@@ -331,18 +353,21 @@ export default function Register( props ){
               async validator( _, value ) {
                 if( value != "" ){
                   if ( await couponExists( value ) ) {
+                    setCouponValid(CouponState.VALID);
                     return Promise.resolve();         
                   }else{
+                    setCouponValid(CouponState.INVALID);
                     return Promise.reject( new Error( "Der Coupon existiert nicht!" ) );
                   }
                 }else{
+                  setCouponValid(CouponState.NOCOUPON);
                   return Promise.resolve();
                 }
               }
             } )
           ]}
         >
-          <Input className={styles.logininput} />
+          <Input className={styles.logininput} suffix={getCouponIcon()}/>
         </Form.Item>
       </>
     }else{

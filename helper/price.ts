@@ -147,6 +147,10 @@ export const toGermanCurrencyString = (value: number): string => {
   if(value >= 0.01 || value == 0){
     return value.toLocaleString("de-DE", { style: "currency", currency: "EUR" });
   }else{
-    return `< ${value.toLocaleString("de-DE", { style: "currency", currency: "EUR" })}`;
+    if(value < 0.01){
+      return "< 0.01";
+    }else{
+      return `< ${value.toLocaleString("de-DE", { style: "currency", currency: "EUR" })}`;
+    }
   }
 }

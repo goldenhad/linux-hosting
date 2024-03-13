@@ -1,0 +1,36 @@
+
+.cardsection{
+  margin-bottom: 30px;
+}
+
+.company {
+  .details {
+    .name{
+      font-weight: bold;
+    }
+
+    .metrics{
+      color: lightgrey;
+      display: flex;
+      flex-direction: row;
+    }
+
+    .email{
+      color: lightgrey;
+      display: flex;
+      flex-direction: row;
+    }
+  }
+}
+
+.actionrow{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+
+  .singleaction {
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}

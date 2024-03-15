@@ -50,7 +50,7 @@ export default async function signUp( firstname, lastname, email, username, pass
             country: country,
             settings: { background: "" },
             Usage: [],
-            tokens: calc.denormalizeTokens(credits),
+            tokens: credits,
             unlimited: false,
             orders: [],
             invitedUsers: []

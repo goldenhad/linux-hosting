@@ -9,6 +9,10 @@
       font-weight: bold;
     }
 
+    .debug{
+      margin-left: 10px;
+    }
+
     .metrics{
       color: lightgrey;
       display: flex;
@@ -33,4 +37,9 @@
       cursor: pointer;
     }
   }
+}
+
+.usagechart{
+  width: 100px;
+  height: 50px;
 }

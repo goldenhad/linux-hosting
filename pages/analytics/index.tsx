@@ -1,7 +1,4 @@
-import {
-  Card, Modal, Popover,
-  Table, Tag
-} from "antd";
+import { Card, Input, Modal, Popover, Table, Tag } from "antd";
 import styles from "./analytics.module.scss"
 import { useEffect, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -12,23 +9,23 @@ import { getAllDocs, getDocWhere } from "../../firebase/data/getData";
 
 
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
   BarElement,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip as ChartTooltip,
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
   Legend,
-  Filler
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip as ChartTooltip
 } from "chart.js";
 import { User } from "../../firebase/types/User";
 import { toGermanCurrencyString } from "../../helper/price";
 import { CodeOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { Line } from "react-chartjs-2";
-import axios from "axios";
 import moment from "moment";
+import { auth } from "../../firebase/admin";
 
 ChartJS.register(
   CategoryScale,
@@ -46,7 +43,7 @@ ChartJS.register(
  * Type of the props to be passed to the client from the server
  */
 export interface InitialProps {
-    Data: { currentMonth: number, currentYear: number; };
+  Data: { currentMonth: number, currentYear: number; companies: any[], userCompanies: any[] };
 }
 
 /**
@@ -55,28 +52,90 @@ export interface InitialProps {
 export const getServerSideProps: GetServerSideProps = async () => {
   const datum = new Date();
 
+  // Load Companies
+
+  const { result, error } = await getAllDocs("Company");
+  // eslint-disable-next-line
+  const companies: Array<any> = [];
+  const userComps: Array<any> = [];
+
+  for (const obj of result) {
+    if(obj.name != ""){
+      const { result, error } = await getDocWhere("User", "Company", "==", obj.uid);
+      const adminrecIdx = result.findIndex((user) => {
+        return user.Role == "Company-Admin";
+      });
+
+      if(adminrecIdx != -1){
+        //const metadata = await axios.post("/api/account/metadata", { uid: result[adminrecIdx].id });
+
+        const metadata = await auth.getUser(result[adminrecIdx].id);
+
+        obj.created = metadata.metadata.creationTime;
+      }
+
+      obj.members = result.length;
+      companies.push(obj);
+
+    }else{
+      const { result, error } = await getDocWhere("User", "Company", "==", obj.uid);
+      if(result.length > 0){
+        if(result[0]){
+          obj.user = result[0];
+          userComps.push(obj);
+        }
+      }
+    }
+  }
+  
+  const withDate = companies.filter((comp) => {
+    return comp.created
+  });
+  const withoutDate = companies.filter((comp) => {
+    return !comp.created
+  });
+  
+
+  withDate.sort((a, b) => {
+    if(moment(a.created).isAfter(b.created)){
+      return -1;
+    }else if(moment(a.created).isBefore(b.created)){
+      return 1;
+    }else{
+      return 0;
+    }
+  });
+
+  console.log(withoutDate);
+
   return {
     props: {
       Data: {
         currentMonth: datum.getMonth() + 1,
-        currentYear: datum.getFullYear()
+        currentYear: datum.getFullYear(),
+        companies: withDate.concat(withoutDate),
+        userCompanies: userComps
       }
     }
   };
 };
 
-
 export default function Company( props: InitialProps ) {
   const context = useAuthContext();
   const { login, user, company, role } = context;
-  const [ companies, setCompanies ] = useState([]);
-  const [ userCompanies, setUserCompanies ] = useState([]);
+  const [ companies, setCompanies ] = useState(props.Data.companies);
+  const [ userCompanies, setUserCompanies ] = useState(props.Data.userCompanies);
+
   const [ members, setMembers ] = useState([]);
   const [ memberModalOpen, setMemberModalOpen ] = useState(false);
   const [ companyToLoadMembersFrom, setCompanyToLoadMembersFrom ] = useState(-1);
   const [ membersLoading, setMembersLoading ] = useState(true);
+  const [ companyLoading, setCompanyLoading ] = useState(false);
 
   const router = useRouter();
+
+  const { Search } = Input;
+
 
   // Redirect users if they are not a company
   useEffect( () => {
@@ -85,50 +144,6 @@ export default function Company( props: InitialProps ) {
     }
   }, [role.isCompany, router] );
 
-  // Load the list of users belonging to the company
-  useEffect( () => {
-    /**
-         * Async function to load users belonging to the company
-         */
-    const load = async () => {
-      // Query the users from the database that belong to the same company as the user
-      const { result, error } = await getAllDocs("Company");
-      // eslint-disable-next-line
-      const companies: Array<any> = [];
-      const userComps: Array<any> = [];
-
-      for (const obj of result) {
-        if(obj.name != ""){
-          const { result, error } = await getDocWhere("User", "Company", "==", obj.uid);
-          const adminrecIdx = result.findIndex((user) => {
-            return user.Role == "Company-Admin";
-          });
-
-          if(adminrecIdx != -1){
-            const metadata = await axios.post("/api/account/metadata", { uid: result[adminrecIdx].id });
-            obj.created = metadata.data.message.creationTime;
-          }
-
-          obj.members = result.length;
-          companies.push(obj);
-        }else{
-          const { result, error } = await getDocWhere("User", "Company", "==", obj.uid);
-          if(result.length > 0){
-            if(result[0]){
-              obj.user = result[0];
-              userComps.push(obj);
-            }
-          }
-        }
-      }
-
-      setCompanies(companies);
-      setUserCompanies(userComps);
-    }
-
-    // Call the async function to load the user table
-    load();
-  }, [company, user.Company] );
 
   useEffect(() => {
     const load = async () => {
@@ -414,9 +429,43 @@ export default function Company( props: InitialProps ) {
         </div>
 
         <div className={styles.cardsection}>
-          <Card className={styles.companies} title={"Firmen"} bordered={true}>
+          <Card
+            className={styles.companies}
+            title={"Firmen"}
+            bordered={true}
+            extra={
+              <Search placeholder="Suchbegriff..." onSearch={(keyword) => {
+                let filtered = [];
+
+                const lowerkeyword = keyword.toLowerCase();
+                if(keyword != "") {
+                  filtered = companies.filter((company) => {
+                    return company.name.toLowerCase().includes(lowerkeyword);
+                  });
+                }else {
+                  filtered = props.Data.companies;
+                }
+
+                filtered.sort((a, b) => {
+                  if(!a.created){
+                    return 1;
+                  }else{
+                    if(moment(a.created).isAfter(b.created)){
+                      return -1;
+                    }else if(moment(a.created).isBefore(b.created)){
+                      return 1;
+                    }else{
+                      return 0;
+                    }
+                  }
+                });
+                setCompanies(filtered);
+
+              }} style={{ width: 200 }} />
+            }
+          >
             <Table
-              loading={false}
+              loading={companyLoading}
               dataSource={[...companies]}
               columns={companyCols}
               rowKey={( record: User & { id: string } ) => {
@@ -442,9 +491,32 @@ export default function Company( props: InitialProps ) {
         </div>
 
         <div className={styles.cardsection}>
-          <Card className={styles.singleusers} title={"Einfache Nutzer"} bordered={true}>
+          <Card
+            className={styles.singleusers}
+            title={"Einfache Nutzer"}
+            bordered={true}
+            extra={
+              <Search placeholder="Suchbegriff..." onSearch={(keyword) => {
+
+                let filtered = [];
+                const lowerkeyword = keyword.toLowerCase();
+                if(keyword != "") {
+                  filtered = userCompanies.filter((usercomp) => {
+                    return usercomp.user.firstname.toLowerCase().includes(lowerkeyword) ||
+                        usercomp.user.lastname.toLowerCase().includes(lowerkeyword) ||
+                        usercomp.user.email.toLowerCase().includes(lowerkeyword);
+                  });
+                }else {
+                  filtered = props.Data.userCompanies;
+                }
+
+                setUserCompanies(filtered);
+
+              }} style={{ width: 200 }} />
+            }
+          >
             <Table
-              loading={false}
+              loading={companyLoading}
               dataSource={[...userCompanies]}
               columns={singleUserCols}
               rowKey={( record: User & { id: string } ) => {

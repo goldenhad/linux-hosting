@@ -9,6 +9,7 @@ import { getAllDocs, getDocWhere } from "../../firebase/data/getData";
 
 
 import {
+  ArcElement,
   BarElement,
   CategoryScale,
   Chart as ChartJS,
@@ -23,7 +24,7 @@ import {
 import { User } from "../../firebase/types/User";
 import { toGermanCurrencyString } from "../../helper/price";
 import { CodeOutlined, UnorderedListOutlined } from "@ant-design/icons";
-import { Line } from "react-chartjs-2";
+import { Line, Pie } from "react-chartjs-2";
 import moment from "moment";
 import { auth } from "../../firebase/admin";
 
@@ -32,6 +33,7 @@ ChartJS.register(
   LinearScale,
   BarElement,
   PointElement,
+  ArcElement,
   LineElement,
   Title,
   ChartTooltip,
@@ -82,6 +84,11 @@ export const getServerSideProps: GetServerSideProps = async () => {
       if(result.length > 0){
         if(result[0]){
           obj.user = result[0];
+
+          const metadata = await auth.getUser(obj.user.id);
+
+          obj.created = metadata.metadata.creationTime;
+
           userComps.push(obj);
         }
       }
@@ -106,7 +113,6 @@ export const getServerSideProps: GetServerSideProps = async () => {
     }
   });
 
-  console.log(withoutDate);
 
   return {
     props: {
@@ -131,6 +137,8 @@ export default function Company( props: InitialProps ) {
   const [ companyToLoadMembersFrom, setCompanyToLoadMembersFrom ] = useState(-1);
   const [ membersLoading, setMembersLoading ] = useState(true);
   const [ companyLoading, setCompanyLoading ] = useState(false);
+  const [ newestRegister, setNewestRegister ] = useState(null);
+  const [ registersThisMonth, setRegistersThisMonth ] = useState(0);
 
   const router = useRouter();
 
@@ -143,6 +151,31 @@ export default function Company( props: InitialProps ) {
       router.push( "/" );
     }
   }, [role.isCompany, router] );
+
+  useEffect(() => {
+    let min = moment("1970-01-01");
+    const combinedComps = companies.concat(userCompanies);
+    let thismonthcounter = 0;
+    const today = moment();
+
+    combinedComps.forEach((comp) => {
+      if(comp.created){
+        if(moment(comp.created).isAfter(min)){
+          min = comp.created;
+        }
+
+
+
+        if(moment(comp.created).isSame(today, "month")){
+          thismonthcounter++;
+        }
+      }
+    });
+
+    setNewestRegister(min);
+    setRegistersThisMonth(thismonthcounter);
+
+  }, [companies, userCompanies]);
 
 
   useEffect(() => {
@@ -321,6 +354,11 @@ export default function Company( props: InitialProps ) {
           );
         }
 
+        let creationDate = "Nicht ermittelbar";
+        if(obj.created){
+          creationDate = moment(obj.created  ).format("DD.MM.YYYY");
+        }
+
         if(obj.user != undefined){
           return(
             <div key={idx} className={styles.company}>
@@ -333,6 +371,9 @@ export default function Company( props: InitialProps ) {
                 </div>
                 <div className={styles.email}>
                   {obj.user.email}
+                </div>
+                <div className={styles.metrics}>
+                  <span className={styles.members}>Erstellt {creationDate}</span>
                 </div>
               </div>
             </div>
@@ -425,6 +466,37 @@ export default function Company( props: InitialProps ) {
       <div className={styles.main}>
         <div className={styles.cardsection}>
           <Card className={styles.stats} title={"Statistiken"} bordered={true}>
+            <div className={styles.statsrow}>
+              <div className={styles.statbox}>
+                <span className={styles.lastregister}>Letzte Registrierung: {(newestRegister) ? moment(newestRegister).format("DD.MM.YYYY") : "Undefinierbar"}</span>
+              </div>
+              <div className={styles.statbox}>
+                {/* eslint-disable-next-line react/jsx-no-undef */}
+                <Pie data={
+                  {
+                    labels: ["Firmenkonten", "Einfache Nutzer"],
+                    datasets: [
+                      {
+                        label: "Konten",
+                        data: [companies.length, userCompanies.length],
+                        backgroundColor: [
+                          "rgba(255, 99, 132, 0.2)",
+                          "rgba(54, 162, 235, 0.2)"
+                        ],
+                        borderColor: [
+                          "rgba(255, 99, 132, 1)",
+                          "rgba(54, 162, 235, 1)"
+                        ],
+                        borderWidth: 1
+                      }
+                    ]
+                  }
+                }/>
+              </div>
+              <div className={styles.statbox}>
+                <span className={styles.amountofregisters}>Registrierungen diesen Monat: {registersThisMonth}</span>
+              </div>
+            </div>
           </Card>
         </div>
 
@@ -438,23 +510,23 @@ export default function Company( props: InitialProps ) {
                 let filtered = [];
 
                 const lowerkeyword = keyword.toLowerCase();
-                if(keyword != "") {
+                if (keyword != "") {
                   filtered = companies.filter((company) => {
                     return company.name.toLowerCase().includes(lowerkeyword);
                   });
-                }else {
+                } else {
                   filtered = props.Data.companies;
                 }
 
                 filtered.sort((a, b) => {
-                  if(!a.created){
+                  if (!a.created) {
                     return 1;
-                  }else{
-                    if(moment(a.created).isAfter(b.created)){
+                  } else {
+                    if (moment(a.created).isAfter(b.created)) {
                       return -1;
-                    }else if(moment(a.created).isBefore(b.created)){
+                    } else if (moment(a.created).isBefore(b.created)) {
                       return 1;
-                    }else{
+                    } else {
                       return 0;
                     }
                   }

@@ -49,14 +49,30 @@ export default function Account() {
   }, [] );
 
 
+  const AnalyticsCard = () => {
+    if( role.canViewAnalytics ){
+      return (
+        <div className={styles.password}>
+          <Card className={styles.passwordcard} title="Analytics" bordered={true}>
+            <FatButton type={"default"} onClick={() => {
+              router.push("/analytics");
+            }} text={"Zu den Analytics"}/>
+          </Card>
+        </div>
+      );
+    }else{
+      return <></>;
+    }
+  }
+
 
   /**
    * Local Component regarding the resetting of the users password
    * @returns JSX regarding the password reset
    */
   function PasswordResetButton() {
-    if( wasReset ){
-      return(
+    if (wasReset) {
+      return (
         <Result
           status="success"
           title={<div className={styles.passwordresetnotice}>Neues Passwort, Neues Glück – Dein Reset-Link ist Unterwegs!</div>}
@@ -173,7 +189,7 @@ export default function Account() {
       {contextHolder}
       <SidebarLayout context={context}>
         <div className={styles.main}>
-          <UploadProfileImage 
+          <UploadProfileImage
             login={login}
             image={{ url: imageUrl, set: setImageUrl }}
             loading={{ state: loading, set: setLoading }}
@@ -182,79 +198,86 @@ export default function Account() {
           />
           <div className={styles.personal}>
             <Card className={styles.personalcard} title="Persönliche Informationen" bordered={true}>
-              <EditUserForm form={personalForm} singleUser={!role.isCompany} user={user} login={login} messageApi={messageApi} />
+              <EditUserForm form={personalForm} singleUser={!role.isCompany} user={user} login={login}
+                messageApi={messageApi}/>
             </Card>
           </div>
+
           <div className={styles.password}>
             <Card className={styles.passwordcard} title="Passwort" bordered={true}>
-              <PasswordResetButton />
+              <PasswordResetButton/>
             </Card>
           </div>
+
+          <AnalyticsCard />
 
           <div className={styles.password}>
             <Card className={styles.passwordcard} title="Einstellungen" bordered={true}>
               <FatButton onClick={() => {
                 resetTutorial()
-              }} text="Tutorial zurücksetzen" />
+              }} text="Tutorial zurücksetzen"/>
             </Card>
           </div>
 
           <div className={styles.deleteRow}>
             <FatButton danger={true} onClick={() => {
-              setDeleteAccountModal( true )
-            }} text="Konto löschen" />
+              setDeleteAccountModal(true)
+            }} text="Konto löschen"/>
 
             <Modal
               open={deleteAccountModal}
               title="Account wirklich löschen?"
               onCancel={() => {
-                setDeleteAccountModal( false )
+                setDeleteAccountModal(false)
               }}
               footer={null}
             >
               <div>
                 <p>
-                    Achtung: Du bist dabei, dein Konto zu löschen. Beachte, dass nach der Löschung alle Daten endgültig entfernt werden und nicht wiederhergestellt
-                    werden können. Bitte logge dich noch einmal ein, um die Löschung abzuschließen.</p>
-                {( role.isCompany && role.canSetupCompany )?
+                  Achtung: Du bist dabei, dein Konto zu löschen. Beachte, dass nach der Löschung alle Daten endgültig
+                  entfernt werden und nicht wiederhergestellt
+                  werden können. Bitte logge dich noch einmal ein, um die Löschung abzuschließen.</p>
+                {(role.isCompany && role.canSetupCompany) ?
                   <>
                     <br/>
                     <p>
-                      <b>Wenn du dein Konto löschst, werden alle Konten deiner Firma gelöscht. Deine Mitarbeiter können sich dann nicht mehr einloggen!</b>
+                      <b>Wenn du dein Konto löschst, werden alle Konten deiner Firma gelöscht. Deine Mitarbeiter
+                          können sich dann nicht mehr einloggen!</b>
                     </p>
                   </> : <></>}
                 <div className={styles.reauthform}>
-                  {( !reauthSuccessfull )? <Form name="reauth" className={styles.loginform} layout='vertical' onFinish={async ( values ) => {
-                    const { error } = await reauthUser( values.email, values.password );
-                    if( error ){
-                      setReauthSuccessfull( false );
-                      messageApi.error("Fehler bei der Authentifizierung")
+                  {(!reauthSuccessfull) ?
+                    <Form name="reauth" className={styles.loginform} layout='vertical' onFinish={async (values) => {
+                      const { error } = await reauthUser(values.email, values.password);
+                      if (error) {
+                        setReauthSuccessfull(false);
+                        messageApi.error("Fehler bei der Authentifizierung")
 
-                    }else{
-                      setReauthSuccessfull( true );
-                    }
-                  }}>
-                    <Form.Item
-                      label="E-Mail"
-                      name="email"
-                      className={styles.loginpart}
-                    >
-                      <Input className={styles.logininput} />
-                    </Form.Item>
+                      } else {
+                        setReauthSuccessfull(true);
+                      }
+                    }}>
+                      <Form.Item
+                        label="E-Mail"
+                        name="email"
+                        className={styles.loginpart}
+                      >
+                        <Input className={styles.logininput}/>
+                      </Form.Item>
 
-                    <Form.Item
-                      label="Passwort"
-                      name="password"
-                      className={styles.loginpart}
-                    >
-                      <Input.Password className={styles.logininput} />
-                    </Form.Item>
+                      <Form.Item
+                        label="Passwort"
+                        name="password"
+                        className={styles.loginpart}
+                      >
+                        <Input.Password className={styles.logininput}/>
+                      </Form.Item>
 
 
-                    <FatButton isSubmitButton={true} text="Login" />
-                  </Form>: <div className={styles.deletefinaly}><Button danger onClick={() => {
-                    deleteUser();
-                  }}>Konto entgültig löschen!</Button></div>}
+                      <FatButton isSubmitButton={true} text="Login"/>
+                    </Form> : <div className={styles.deletefinaly}><Button danger onClick={() => {
+                      deleteUser();
+                    }}>Konto entgültig löschen!</Button></div>}
                 </div>
               </div>
             </Modal>

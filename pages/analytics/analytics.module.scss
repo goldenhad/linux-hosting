@@ -1,0 +1,73 @@
+
+.cardsection{
+  margin-bottom: 30px;
+
+  .stats{
+
+    .statsrow{
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      max-height: 200px;
+
+      .statbox{
+        width: 33%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        .lastregister{
+          font-weight: 800;
+          font-size: 24px;
+        }
+
+        .amountofregisters{
+          font-weight: 800;
+          font-size: 24px;
+        }
+      }
+    }
+  }
+}
+
+.company {
+  .details {
+    .name{
+      font-weight: bold;
+    }
+
+    .debug{
+      margin-left: 10px;
+    }
+
+    .metrics{
+      color: lightgrey;
+      display: flex;
+      flex-direction: row;
+    }
+
+    .email{
+      color: lightgrey;
+      display: flex;
+      flex-direction: row;
+    }
+  }
+}
+
+.actionrow{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+
+  .singleaction {
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
+
+.usagechart{
+  width: 100px;
+  height: 50px;
+}

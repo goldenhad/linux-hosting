@@ -164,7 +164,7 @@ export default function Login(){
           
                     
           <div className={styles.signupnotice}>
-            <div>Noch keinen Account?</div><Link className={styles.signuplink} href={"/register"}>Jetzt registrieren</Link>
+            <div>Noch keinen Account?</div><Link className={styles.signuplink} href={"/register"}>Jetzt kostenlos registrieren</Link>
           </div>
         </div>
       </div>

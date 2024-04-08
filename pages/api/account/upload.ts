@@ -59,3 +59,10 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     return res.status( 400 ).send( { errorcode: 2, message: "Authentication required!" } );
   }
 }
+
+// VV important VV
+export const config = {
+  api: {
+    bodyParser: false
+  }
+};

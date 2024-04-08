@@ -426,6 +426,16 @@ export default function Setup(){
 
 
             <div className={styles.continue}>
+              {current > 0 && (
+                <Button style={{ margin: "0 8px" }} onClick={() => setCurrent( current - 1 )}>
+                    Zurück
+                </Button>
+              )}
+              {current === getFormSteps().length - 1 && (
+                <Button type="primary" onClick={() => setupUser()} loading={promptProcesing}>
+                  Zu Siteware business
+                </Button>
+              )}
               {current < getFormSteps().length - 1 && (
                 <Button
                   disabled={( !position || !tasks || !knowledge || !communicationstyle )}
@@ -434,17 +444,7 @@ export default function Setup(){
                     () => setCurrent( current + 1 )
                   }
                 >
-                      Weiter
-                </Button>
-              )}
-              {current === getFormSteps().length - 1 && (
-                <Button type="primary" onClick={() => setupUser()} loading={promptProcesing}>
-                  Zu Siteware business
-                </Button>
-              )}
-              {current > 0 && (
-                <Button style={{ margin: "0 8px" }} onClick={() => setCurrent( current - 1 )}>
-                  Zurück
+                    Weiter
                 </Button>
               )}
             </div>

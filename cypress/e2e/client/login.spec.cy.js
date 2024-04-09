@@ -27,9 +27,9 @@ describe("Login-Page tests", () => {
   });
 
   /**
-   * Test if users can reach the reset password page
+   * Test if users can reach the action password page
    */
-  it("Password reset reachable", () => {
+  it("Password action reachable", () => {
     cy.get("a:contains('Passwort vergessen')").should("have.length", 1);
     cy.contains("Passwort vergessen").click();
     cy.url().should("eq", "http://localhost:3000/forgot/password");

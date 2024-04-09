@@ -1,52 +1,19 @@
-import { GetServerSideProps } from "next";
 import { useState } from "react";
+import resetpassword from "../../../firebase/auth/reset";
 import { Alert, Button, Form, Input, Result } from "antd";
-import styles from "./reset.module.scss"
-import Head from "next/head";
-import resetpassword from "../../firebase/auth/reset";
+import styles from "../../../pages/action/action.module.scss";
 
-// Props given by firebase to this page trough redirection
-interface restprops {
-    mode: string,
-    oobCode: string,
-    apiKey: string,
-}
-
-/**
- * Parse the request to the page from firebase
- * @param ctx
- */
-export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
-  const mode = ctx.query.mode;
-  const code = ctx.query.oobCode;
-  const apikey = ctx.query.apiKey;
-
-  //console.log(mode, code, apikey);
-
-  if( mode && code && apikey ){
-    return { props: { mode: mode, oobCode: code, apiKey: apikey  } } 
-  }else{
-    return { props: {  } }
-  }
-}
-
-/**
- * Reset page. Lets users reset their password.
- * @param props Props of the firebase request to this page
- * @constructor
- */
-export default function Reset( props: restprops ){
+export function ResetPassword(props: { oobCode: string }){
   const [ resetFailed, setResetFailed ] = useState( false );
   const [ wasReset, setWasReset ] = useState( false );
-  const [ resetState ] = useState( props as restprops );
 
   /**
-   * Function be called if the user issues a reset password request
-   * @param values
-   */
+     * Function be called if the user issues a action password request
+     * @param values
+     */
   const onFinish = async ( values ) => {
-    // Call firebase to reset the password with the provided new password
-    const { error } = await resetpassword( resetState.oobCode, values.password );
+    // Call firebase to action the password with the provided new password
+    const { error } = await resetpassword( props.oobCode, values.password );
 
     // React to errors
     if ( error ) {
@@ -58,12 +25,12 @@ export default function Reset( props: restprops ){
       setWasReset( true );
     }
 
-        
+
   };
 
   /**
-   * Resolve form failed errors
-   */
+     * Resolve form failed errors
+     */
   const onFinishFailed = () => {
     //console.log('Failed:', errorInfo);
     setResetFailed( true );
@@ -71,8 +38,8 @@ export default function Reset( props: restprops ){
 
 
   /**
-   * Defines the layout of the ResetForm according to the state of the reset process
-   */
+     * Defines the layout of the ResetForm according to the state of the action process
+     */
   const getResetForm = () => {
     if( wasReset ){
       return(
@@ -82,12 +49,12 @@ export default function Reset( props: restprops ){
             title={<div className={styles.passwordresetnotice}>Passwort-Update Erfolgreich - Willkommen Zurück an Bord!</div>}
             subTitle={
               <div className={styles.passwordresetsubtitle}>
-                    Fantastisch! Dein Passwort wurde neu gesetzt. Du kannst dich jetzt mit deinem neuen Passwort einloggen
+                                Fantastisch! Dein Passwort wurde neu gesetzt. Du kannst dich jetzt mit deinem neuen Passwort einloggen
               </div>}
             extra={[
               <div key={0} className={styles.backlink}>
                 <Button type="primary" key="console" href={"/login"}>
-                  Zurück zum Login
+                                    Zurück zum Login
                 </Button>
               </div>
             ]}
@@ -110,7 +77,7 @@ export default function Reset( props: restprops ){
             autoComplete="off"
             layout="vertical"
             onChange={() => {
-              setResetFailed( false ) 
+              setResetFailed( false )
             }}
           >
             <Form.Item
@@ -165,7 +132,7 @@ export default function Reset( props: restprops ){
 
             <Form.Item className={styles.loginbutton}>
               <Button type="primary" htmlType="submit">
-                Passwort zurücksetzen
+                                Passwort zurücksetzen
               </Button>
             </Form.Item>
           </Form>
@@ -180,7 +147,7 @@ export default function Reset( props: restprops ){
         <div className={styles.logorow}>
           <div className={styles.logobox}>
             {/* eslint-disable-next-line */}
-            <img src={"/logo.svg"} alt="Logo" width={100}/>
+                        <img src={"/logo.svg"} alt="Logo" width={100}/>
           </div>
         </div>
 
@@ -189,24 +156,5 @@ export default function Reset( props: restprops ){
         </div>
       </div>
     </div>
-  );
-}
-
-/**
- * Exclusive Layout of the reset page
- * @param page
- */
-Reset.getLayout = ( page ) => {
-  return(
-    <>
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware business | ai assistant</title>
-      </Head>
-      <main>
-        {page}
-      </main>
-    </>
   );
 }

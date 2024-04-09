@@ -22,7 +22,7 @@ To setup the project you need to add an environment file `.env`, the following c
 | `MAILUSER`                                | Username of the account used for sending emails                               |
 | `MAILPASS`                                | Password of the account used for sending emails                               |
 | `MAILENC`                                 | Salt used for encoding the user data in the database                          |
-| `BASEURL`                                 | Url on which this app is reacheable. (Used for link construction)             |
+| `NEXT_PUBLIC_BASEURL`                                 | Url on which this app is reacheable. (Used for link construction)             |
 | `NEXT_PUBLIC_STRIPEPUB`                   | Stripe public key. Used for all invoicing and checkout related user interaction |
 | `STRIPEPRIV`                              | Stripe private key.                                                           |
 | `CHATRAPUBKEY`                            | Chatra API key used for integration of the chatra tool                        |

@@ -137,7 +137,7 @@ Legal.getLayout = ( page ) => {
         <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/ogimage.jpg" />
-        <meta property="og:url" content={`${process.env.BASEURL}`} />
+        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASEURL}`} />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
         <title>Siteware business | ai assistant</title>
       </Head>

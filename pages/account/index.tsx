@@ -16,6 +16,8 @@ import { deleteProfilePicture } from "../../firebase/drive/delete";
 import FatButton from "../../components/FatButton";
 import EditUserForm from "../../components/Forms/EditUserForm/EditUserForm";
 import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
+import { getAuth } from "firebase/auth";
+import { firebase_app } from "../../db";
 
 /**
  * Account-Page
@@ -68,7 +70,7 @@ export default function Account() {
 
   /**
    * Local Component regarding the resetting of the users password
-   * @returns JSX regarding the password reset
+   * @returns JSX regarding the password action
    */
   function PasswordResetButton() {
     if (wasReset) {
@@ -209,7 +211,10 @@ export default function Account() {
             </Card>
           </div>
 
-          <AnalyticsCard />
+          <AnalyticsCard/>
+
+          <h1>{(getAuth(firebase_app).currentUser.emailVerified) ? "verifiziert" : "nicht verifiziert"}</h1>
+
 
           <div className={styles.password}>
             <Card className={styles.passwordcard} title="Einstellungen" bordered={true}>
@@ -278,6 +283,7 @@ export default function Account() {
                     </Form> : <div className={styles.deletefinaly}><Button danger onClick={() => {
                       deleteUser();
                     }}>Konto entgültig löschen!</Button></div>}
+
                 </div>
               </div>
             </Modal>

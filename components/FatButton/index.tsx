@@ -18,19 +18,26 @@ const FatButton = ( props: {
   isSubmitButton?: boolean,
   danger?: boolean,
   disabled?: boolean,
+  loading?: boolean,
   type?: "link" | "text" | "primary" | "default" | "dashed"
 } ) => {
 
   if(props.isSubmitButton){
     return (
       <div className={styles.buttonrow}>
-        <Button type={(props.type)? props.type: "primary"} htmlType='submit' danger={props.danger} >{props.text}</Button>
+        <Button type={(props.type)? props.type: "primary"} loading={props.loading} htmlType='submit' danger={props.danger} >{props.text}</Button>
       </div>
     );
   }else{
     return (
       <div className={styles.buttonrow}>
-        <Button type={(props.type)? props.type: "primary"} onClick={props.onClick} danger={props.danger} disabled={props.disabled}>{props.text}</Button>
+        <Button
+          type={(props.type)? props.type: "primary"}
+          loading={props.loading}
+          onClick={props.onClick}
+          danger={props.danger}
+          disabled={props.disabled}
+        >{props.text}</Button>
       </div>
     );
   }

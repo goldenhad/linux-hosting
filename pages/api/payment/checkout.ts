@@ -31,7 +31,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             if( price > 0 && price < Number.MAX_SAFE_INTEGER ){
               try {
                 // Define the url the user gets redirected after the purchase
-                const redirectURL = `${process.env.BASEURL}/thankyou`
+                const redirectURL = `${process.env.NEXT_PUBLIC_BASEURL}/thankyou`
 
                 // Create a stripe line item
                 const transformedItem = {

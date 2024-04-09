@@ -6,11 +6,11 @@ import forgotpassword from "../../../firebase/auth/forgot";
 
 
 /**
- * Password forgot page. Users can reset their password here
+ * Password forgot page. Users can action their password here
  * @constructor
  */
 export default function Forgot_Password(){
-  // Issue some states to detect a password reset and a login failure
+  // Issue some states to detect a password action and a login failure
   const [ loginFailed, setLoginFailed ] = useState( false );
   const [ wasReset, setWasReset ] = useState( false );
 
@@ -19,7 +19,7 @@ export default function Forgot_Password(){
     * @param values input values
     */
   const onFinish = async ( values ) => {
-    // Call the forgot password function and execute the reset process at firebase
+    // Call the forgot password function and execute the action process at firebase
     const { error } = await forgotpassword( values.email );
 
     // Check if we encountered an error
@@ -44,11 +44,11 @@ export default function Forgot_Password(){
 
 
   /**
-     * Subcomponent to create the password reset form
+     * Subcomponent to create the password action form
      * @constructor
      */
   const ResetForm = () => {
-    // Switch the component content if the reset process succeeds
+    // Switch the component content if the action process succeeds
     if( wasReset ){
       return(
         <>

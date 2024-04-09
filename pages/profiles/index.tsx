@@ -141,7 +141,7 @@ export default function Profiles() {
           } );
           profilejson = decoded.data.message;
         }catch( e ){
-          // If we encounter an error during decoding, reset the json string
+          // If we encounter an error during decoding, action the json string
           profilejson = "";
         }
 

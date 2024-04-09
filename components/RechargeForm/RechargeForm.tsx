@@ -80,7 +80,7 @@ const RechargeForm = ( props: {
 
 
   /**
-   * Helper function to reset the form to it's default state
+   * Helper function to action the form to it's default state
    */
   const resetForm = () => {
     form.setFieldValue("threshold", 10);

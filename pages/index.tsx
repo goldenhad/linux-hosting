@@ -10,11 +10,51 @@ import AssistantCard from "../components/AssistantCard/AssistantCard";
 import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
 import { Service } from "../firebase/types/Service";
 import ReactPlayer from "react-player/lazy"
+import getDocument from "../firebase/data/getData";
+import { User } from "../firebase/types/User";
+import { auth } from "../firebase/admin";
 
 
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   const datum = new Date();
+  /*try{
+    const token = await auth.verifyIdToken( context.req.cookies.token );
+
+    const userObj = await getDocument("User", token.uid);
+
+    if(userObj.result){
+      const user = userObj.result.data() as User;
+
+      if(!user.setupDone){
+        return {
+          redirect: {
+            destination: "/setup",
+            permanent: true
+          },
+          props: {}
+        }
+      }else{
+
+      }
+    }else{
+      return {
+        redirect: {
+          destination: "/login",
+          permanent: true
+        },
+        props: {}
+      }
+    }
+  }catch (e){
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: true
+      },
+      props: {}
+    }
+  }*/
 
   return {
     props: {

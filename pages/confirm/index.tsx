@@ -6,14 +6,14 @@ import Head from "next/head";
 import { getAuth } from "firebase/auth";
 import { firebase_app } from "../../db";
 import { useRouter } from "next/router";
+import { AuthContextProvider } from "../../components/context/AuthContext";
+import FatButton from "../../components/FatButton";
 
 const auth = getAuth(firebase_app);
 
 // Props given by firebase to this page trough redirection
 interface restprops {
-    mode: string,
-    oobCode: string,
-    apiKey: string,
+    valid: boolean
 }
 
 /**
@@ -21,17 +21,11 @@ interface restprops {
  * @param ctx
  */
 export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
-  const mode = ctx.query.mode;
-  const code = ctx.query.oobCode;
-  const apikey = ctx.query.apiKey;
+  const valid = ctx.query.valid;
 
   //console.log(mode, code, apikey);
 
-  if( mode && code && apikey ){
-    return { props: { mode: mode, oobCode: code, apiKey: apikey  } }
-  }else{
-    return { props: {  } }
-  }
+  return { props: { valid: valid == "1"  } }
 }
 
 /**
@@ -41,12 +35,25 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
  */
 export default function Confirm( props: restprops ){
   const router = useRouter();
+  const [ valid, setValid ] = useState(props.valid);
 
-  useEffect(() => {
-    if(auth.currentUser.emailVerified){
-      router.push("/");
+  const validDescription = () => {
+    if(valid){
+      return(
+        <>
+          <div>
+              Die Bestätigung Ihrer E-Mail war erfolgreich. Sie können das Fenster nun schließen!
+            <FatButton onClick={() => {
+              router.replace("/")
+            }} text={"Zu Siteware"} />
+          </div>
+        </>
+      );
+    }else{
+      return "Bevor wir fortfahren können, benötigen wir eine Bestätigung Ihrer E-Mail-Adresse.\n" +
+              "              Zu diesem Zweck haben wir Ihnen einen entsprechenden Link zugesendet.";
     }
-  }, []);
+  }
 
   return(
     <div>
@@ -59,10 +66,9 @@ export default function Confirm( props: restprops ){
         </div>
 
         <div className={styles.formContainer}>
-          <div className={styles.formtitle}>Bestätigen Sie Ihre E-Mail</div>
+          <div className={styles.formtitle}>{(valid)? "Verifikation erfolgreich": "Bestätigen Sie Ihre E-Mail"}</div>
           <div className={styles.formexplanation}>
-              Bevor wir fortfahren können, benötigen wir eine Bestätigung Ihrer E-Mail-Adresse.
-              Zu diesem Zweck haben wir Ihnen einen entsprechenden Link zugesendet.
+            {validDescription()}
           </div>
         </div>
       </div>

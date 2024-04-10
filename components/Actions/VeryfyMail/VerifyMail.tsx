@@ -1,35 +1,38 @@
 import { useEffect, useState } from "react";
-import resetpassword from "../../../firebase/auth/reset";
-import { Alert, Button, Card, Form, Input, message, Result } from "antd";
+import { message } from "antd";
 import { getAuth } from "firebase/auth";
 import { firebase_app } from "../../../db";
 import { useRouter } from "next/router";
-import verifyEmail from "../../../firebase/auth/verify";
 import styles from "./verify.action.module.scss";
 import axios from "axios";
 import FatButton from "../../FatButton";
 import { sendEmailVerification } from "@firebase/auth";
+import { useAuthContext } from "../../context/AuthContext";
 
 const auth = getAuth( firebase_app );
 
 
 export function VerifyMail(props: { oobCode: string }){
   const router = useRouter();
+  const context = useAuthContext();
+  const { login, user } = context;
   const [ verifyFailed, setVerifyFailed ] = useState(false);
+  const [ worked, setWorked ] = useState(false);
   const [ emailSend, setEmailSend ] = useState(false);
   const [ sending, setSending ] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect( () => {
     const takeAction = async () => {
-      if(auth.currentUser != null){
+      if(login.uid){
         if(props.oobCode != "") {
-          if (!auth.currentUser.emailVerified || true) {
-            const verreq = await axios.post("/api/account/verify", { uid: auth.currentUser.uid });
-            if (verreq.status != 200) {
+          if (!login.emailVerified || true) {
+            const verreq = await axios.post("/api/account/verify", { uid: login.uid });
+            if (verreq.status == 200) {
               console.log("VERIFIED");
-              setVerifyFailed(true);
-              router.push("/confirm");
+              setVerifyFailed(false);
+              //router.push("/confirm?valid=1");
+              setWorked(true);
             } else {
               console.log("VERIFICATION FAILED!!!");
               setVerifyFailed(true);
@@ -70,19 +73,37 @@ export function VerifyMail(props: { oobCode: string }){
     );
   }
 
-  return(
+  const WorkedNotice = () => {
+    return (
+      <div className={styles.notice}>
+        <div className={styles.title}>Verifizierung erfolgreich!</div>
+
+        <div className={styles.info}>
+            Die Bestätigung Ihrer E-Mail war erfolgreich. Sie können das Fenster nun schließen!
+        </div>
+        <FatButton onClick={async () => {
+          console.log(login.emailVerified);
+          await axios.get("/api/logout");
+          router.push("/login");
+        }} text={"Zu Siteware"}/>
+      </div>
+    );
+  }
+
+  return (
     <>
       {contextHolder}
       <div className={styles.container}>
         <div className={styles.logorow}>
           <div className={styles.logobox}>
             {/* eslint-disable-next-line */}
-            <img src={"/logo.svg"} alt="Logo" width={100}/>
+              <img src={"/logo.svg"} alt="Logo" width={100}/>
           </div>
         </div>
 
         <div className={styles.wrapper}>
           {(verifyFailed) ? <FailedNotice/> : <></>}
+          {(worked) ? <WorkedNotice/> : <></>}
         </div>
       </div>
 

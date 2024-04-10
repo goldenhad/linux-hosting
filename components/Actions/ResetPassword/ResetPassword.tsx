@@ -2,6 +2,8 @@ import { useState } from "react";
 import resetpassword from "../../../firebase/auth/reset";
 import { Alert, Button, Form, Input, Result } from "antd";
 import styles from "../../../pages/action/action.module.scss";
+import axios from "axios";
+import router from "next/router";
 
 export function ResetPassword(props: { oobCode: string }){
   const [ resetFailed, setResetFailed ] = useState( false );
@@ -53,7 +55,10 @@ export function ResetPassword(props: { oobCode: string }){
               </div>}
             extra={[
               <div key={0} className={styles.backlink}>
-                <Button type="primary" key="console" href={"/login"}>
+                <Button type="primary" key="console" onClick={async () => {
+                  await axios.get("/api/logout");
+                  router.replace("/login");
+                }}>
                                     Zurück zum Login
                 </Button>
               </div>

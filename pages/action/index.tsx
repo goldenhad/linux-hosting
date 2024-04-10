@@ -6,6 +6,7 @@ import Head from "next/head";
 import resetpassword from "../../firebase/auth/reset";
 import { ResetPassword } from "../../components/Actions/ResetPassword/ResetPassword";
 import { VerifyMail } from "../../components/Actions/VeryfyMail/VerifyMail";
+import { AuthContextProvider } from "../../components/context/AuthContext";
 
 // Props given by firebase to this page trough redirection
 export interface restprops {
@@ -65,9 +66,12 @@ Action.getLayout = ( page ) => {
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
         <title>Siteware business | ai assistant</title>
       </Head>
-      <main>
-        {page}
-      </main>
+      <AuthContextProvider>
+        <main>
+          {page}
+        </main>
+      </AuthContextProvider>
+
     </>
   );
 }

@@ -18,6 +18,8 @@ import EditUserForm from "../../components/Forms/EditUserForm/EditUserForm";
 import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
 import { getAuth } from "firebase/auth";
 import { firebase_app } from "../../db";
+import { auth } from "../../firebase/admin";
+
 
 /**
  * Account-Page
@@ -182,7 +184,7 @@ export default function Account() {
       break;
     }
 
-    router.push( "/login" );
+    router.push( "/logout" );
   }
 
 
@@ -212,9 +214,6 @@ export default function Account() {
           </div>
 
           <AnalyticsCard/>
-
-          <h1>{(getAuth(firebase_app).currentUser.emailVerified) ? "verifiziert" : "nicht verifiziert"}</h1>
-
 
           <div className={styles.password}>
             <Card className={styles.passwordcard} title="Einstellungen" bordered={true}>

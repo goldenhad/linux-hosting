@@ -238,7 +238,7 @@ export default function Home() {
                 <Card className={styles.comingsooncard}>
                   <div className={styles.builder}>
                     <div className={styles.buildercontent}>
-                      <h2 className={styles.builderheadline}>Fragen Sie jetzt Ihren individuellen KI-Assistenten von Siteware business an.</h2>
+                      <h2 className={styles.builderheadline}>Frag jetzt deinen individuellen KI-Assistenten von Siteware an.</h2>
                       <div className={styles.buildertext}>
                         Fordere jetzt dein maßgeschneidertes Angebot an und nutze unsere innovative DMSP-Technologie für kostengünstige,
                         hochindividualisierte Lösungen. Einzigartig: Profitiere von einer möglichen vollständigen Refinanzierung der Entwicklungskosten,

@@ -10,51 +10,11 @@ import AssistantCard from "../components/AssistantCard/AssistantCard";
 import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
 import { Service } from "../firebase/types/Service";
 import ReactPlayer from "react-player/lazy"
-import getDocument from "../firebase/data/getData";
-import { User } from "../firebase/types/User";
-import { auth } from "../firebase/admin";
 
 
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async () => {
   const datum = new Date();
-  /*try{
-    const token = await auth.verifyIdToken( context.req.cookies.token );
-
-    const userObj = await getDocument("User", token.uid);
-
-    if(userObj.result){
-      const user = userObj.result.data() as User;
-
-      if(!user.setupDone){
-        return {
-          redirect: {
-            destination: "/setup",
-            permanent: true
-          },
-          props: {}
-        }
-      }else{
-
-      }
-    }else{
-      return {
-        redirect: {
-          destination: "/login",
-          permanent: true
-        },
-        props: {}
-      }
-    }
-  }catch (e){
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: true
-      },
-      props: {}
-    }
-  }*/
 
   return {
     props: {
@@ -280,11 +240,12 @@ export default function Home() {
                     <div className={styles.buildercontent}>
                       <h2 className={styles.builderheadline}>Fragen Sie jetzt Ihren individuellen KI-Assistenten von Siteware business an.</h2>
                       <div className={styles.buildertext}>
-                      Fordern Sie jetzt Ihr maßgeschneidertes Angebot an und nutzen Sie unsere innovative DMSP-Technologie für kostengünstige, 
-                      hochindividualisierte Lösungen. Einzigartig: Profitieren Sie von einer möglichen vollständigen Refinanzierung der Entwicklungskosten, 
-                      wenn Ihr Assistent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern schreiben wir Ihnen die doppelte Höhe Ihrer 
-                      Entwicklungskosten auf Ihr Konto als siteware-Credits gut. Wählen Sie schon bald aus einer Vielzahl an Assistenten im neuen 
-                      siteware business APP-Store. Mit siteware business sind Sie immer einen Schritt voraus – seien Sie dabei. Von Anfang an.
+                        Fordere jetzt dein maßgeschneidertes Angebot an und nutze unsere innovative DMSP-Technologie für kostengünstige,
+                        hochindividualisierte Lösungen. Einzigartig: Profitiere von einer möglichen vollständigen Refinanzierung der Entwicklungskosten,
+                        wenn dein Assistent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern schreiben wir dir die doppelte Höhe deiner
+                        Entwicklungskosten auf dein Konto als siteware-Credits gut.
+                        Wähle schon bald aus einer Vielzahl an Assistenten im neuen siteware business APP-Store.
+                        Mit siteware business bist du immer einen Schritt voraus – sei dabei. Von Anfang an.
                       </div>
                       <div className={styles.buttonsection}>
                         <Button type="primary" className={styles.builderbutton}>Angebot anfordern</Button>

@@ -10,7 +10,7 @@ import { ctx } from "../../context/AuthContext";
 
 const { TextArea } = Input;
 
-const LANGUAGES = ["Deutsch", "Englisch", "Spanisch", "Französisch", "Portugiesisch", "Russisch"];
+const LANGUAGES = ["Deutsch", "Englisch", "Spanisch", "Französisch", "Portugiesisch", "Russisch", "Türkisch", "Arabisch", "Ukrainisch", "Italienisch", "Niederländisch"];
 
 
 /**
@@ -36,6 +36,8 @@ const TranslatorForm = (props: {
   }, []);
 
 
+  const filterOption = (input: string, option?: { label: string; value: string }) =>
+    (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   return(
     <>
@@ -82,7 +84,12 @@ const TranslatorForm = (props: {
                 }
               ]}
             >
-              <Select placeholder="Zielsprache" options={listToOptions( LANGUAGES )}
+              <Select
+                placeholder="Zielsprache"
+                showSearch
+                optionFilterProp="children"
+                filterOption={filterOption}
+                options={listToOptions( LANGUAGES )}
                 className={styles.formselect}
                 size='large'
                 disabled={AssistantContextState.requestState.formDisabled || AssistantContextState.requestState.quotaOverused}

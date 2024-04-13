@@ -8,8 +8,9 @@ import type { NextComponentType } from "next";
 import Chatra from "@chatra/chatra";
 import { useRouter } from "next/router";
 import { logEvent, setAnalyticsCollectionEnabled } from "firebase/analytics";
-import { analytics } from "../db";
+import { analytics, firebase_app } from "../db";
 import cookieCutter from "cookie-cutter"
+import { getAuth } from "firebase/auth";
 
 
 const roboto = Roboto( {
@@ -17,6 +18,7 @@ const roboto = Roboto( {
   subsets: ["latin"]
 } )
 
+const auth = getAuth(firebase_app);
 
 const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( {
   Component,
@@ -61,6 +63,47 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
     });
   }, [router]);
 
+  /*useEffect(() => {
+    const checkRoute = async () => {
+      const routeRGX = "/((?!login|register|legal|privacy|logout|api|_next/static|_next/image|favicon.ico|logo.svg|small_logo.svg|small_logo.ico|monitoring).*)";
+
+      if(router.pathname.match(routeRGX)){
+        // If we encounter a route that does not match the regex, i.e /, /confirm, /account etc.
+        const curruser = auth.currentUser;
+        console.log(curruser);
+
+        if(curruser){
+          // in this case the user is logged in
+
+          console.log(curruser);
+
+          try {
+            const userreq = await getDocument("User", curruser.uid);
+            const userobj = userreq.result.data() as User;
+
+            if(!curruser.emailVerified){
+              await router.replace("/confirm");
+            }else{
+              if(!userobj.setupDone){
+                await router.replace("/setup");
+              }
+            }
+          }catch (e){
+            console.log(e);
+            await router.replace("/login");
+          }
+
+        }else{
+          await router.replace("/login");
+        }
+      }else{
+        console.log("NO MATCH", router.pathname);
+      }
+    }
+
+    checkRoute();
+  }, [router.pathname]);*/
+
 
   if( Component.getLayout ){
     return Component.getLayout(
@@ -71,7 +114,7 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/ogimage.jpg" />
           <meta name="viewport" content="initial-scale=1, maximum-scale=1" />
-          <meta property="og:url" content={`${process.env.BASEURL}`} />
+          <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASEURL}`} />
           <link rel="icon" type="image/x-icon" href="/small_logo.ico" />
           <title>Siteware business | ai assistant</title>
         </Head>
@@ -88,7 +131,7 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
           <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/ogimage.jpg" />
-          <meta property="og:url" content={`${process.env.BASEURL}`} />
+          <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASEURL}`} />
           <link rel="icon" type="image/x-icon" href="/small_logo.ico" />
           <title>Siteware business | ai assistant</title>
         </Head>

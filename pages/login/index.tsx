@@ -61,21 +61,24 @@ export default function Login(){
       });
 
       // If the login was successfull query the database for the resulting user id
-      const usereq = await getDocument("Users", result.user?.uid);
+      const usereq = await getDocument("User", result.user?.uid);
 
       // Check if the query request was successfull
       if(usereq.result){
         // Cast the query result as User object
         const userobj = usereq.result.data() as User;
+
         if(userobj){
-          // Choose where to redirect the user to after the login
+          /*// Choose where to redirect the user to after the login
           if(userobj.setupDone){
-            return router.push( "/" )
+
           }else{
             return router.push( "/setup" )
-          }
-        }else{
+          }*/
+
           return router.push( "/" )
+        }else{
+          return router.push( "/login" )
         }
       }else{
         // If we encounter an error set the failed flga
@@ -185,7 +188,7 @@ Login.getLayout = ( page ) => {
         <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/ogimage.jpg" />
-        <meta property="og:url" content={`${process.env.BASEURL}`} />
+        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASEURL}`} />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
         <title>Siteware business | ai assistant</title>
       </Head>

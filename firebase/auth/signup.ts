@@ -8,6 +8,7 @@ import updateData from "../data/updateData";
 import { InvitedUser } from "../types/Company";
 import { Calculations } from "../types/Settings";
 import { TokenCalculator } from "../../helper/price";
+import { sendEmailVerification } from "@firebase/auth";
 
 const auth = getAuth( firebase_app );
 
@@ -125,9 +126,11 @@ export default async function signUp( firstname, lastname, email, username, pass
               }
             }
 
-            //console.log(companycreationresult);
+            console.log(process.env.NEXT_PUBLIC_BASEURL);
 
-            //console.log(usercreationresult);
+            await sendEmailVerification(auth.currentUser);
+            console.log("EMAIL VERSENDET");
+
           } catch( e ) {
             console.log(e);
           }
@@ -213,6 +216,7 @@ export async function signUpUser( firstname, lastname, email, username, password
                 console.log( cleaned );
   
                 await updateData( "Company", companyid, { invitedUsers: cleaned } );
+
               }else{
                 error = true;
               }

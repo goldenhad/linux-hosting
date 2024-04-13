@@ -30,7 +30,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           const json = JSON.stringify( recommendobj );
           const recommenddata =  Buffer.from( json ).toString( "base64" );
           const recommendcode = Buffer.from( CryptoJS.AES.encrypt( recommenddata, process.env.MAILENC ).toString() ).toString( "base64" );
-          const baseurl = process.env.BASEURL;
+          const baseurl = process.env.NEXT_PUBLIC_BASEURL;
 
           // Create the invitation link by appending it to our baseurl
           const invitelink = `${baseurl}/register?recommend=${recommendcode}`;

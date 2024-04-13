@@ -11,6 +11,16 @@ export default async function signIn( email, password ) {
     result = await signInWithEmailAndPassword( auth, email, password );
     //console.log("Logged in...");
     //console.log(result);
+
+    const idToken = await result.user.getIdToken();
+
+    // Sets authenticated browser cookies
+    await fetch("/api/login", {
+      headers: {
+        Authorization: `Bearer ${idToken}`
+      }
+    });
+    
   } catch ( e ) {
     error = e;
   }

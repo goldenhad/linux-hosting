@@ -4,6 +4,7 @@ import { useAuthContext } from "../../components/context/AuthContext";
 import { useRouter } from "next/navigation";
 import signUserOut from "../../firebase/auth/signout";
 import { Spin } from "antd";
+import axios from "axios";
 
 
 /**
@@ -25,8 +26,12 @@ export default function Logout(){
    * Execute logout on page logout
    */
   useEffect( () => {
-    if( login == null ) router.push( "/login" );
-    handleLogOut();
+    const logout = async () => {
+      await axios.get("/api/logout");
+      router.replace("/login");
+    }
+
+    logout();
   }, [login, router] );
 
   return (

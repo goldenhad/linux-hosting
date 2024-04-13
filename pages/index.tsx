@@ -238,13 +238,14 @@ export default function Home() {
                 <Card className={styles.comingsooncard}>
                   <div className={styles.builder}>
                     <div className={styles.buildercontent}>
-                      <h2 className={styles.builderheadline}>Fragen Sie jetzt Ihren individuellen KI-Assistenten von Siteware business an.</h2>
+                      <h2 className={styles.builderheadline}>Frag jetzt deinen individuellen KI-Assistenten von Siteware an.</h2>
                       <div className={styles.buildertext}>
-                      Fordern Sie jetzt Ihr maßgeschneidertes Angebot an und nutzen Sie unsere innovative DMSP-Technologie für kostengünstige, 
-                      hochindividualisierte Lösungen. Einzigartig: Profitieren Sie von einer möglichen vollständigen Refinanzierung der Entwicklungskosten, 
-                      wenn Ihr Assistent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern schreiben wir Ihnen die doppelte Höhe Ihrer 
-                      Entwicklungskosten auf Ihr Konto als siteware-Credits gut. Wählen Sie schon bald aus einer Vielzahl an Assistenten im neuen 
-                      siteware business APP-Store. Mit siteware business sind Sie immer einen Schritt voraus – seien Sie dabei. Von Anfang an.
+                        Fordere jetzt dein maßgeschneidertes Angebot an und nutze unsere innovative DMSP-Technologie für kostengünstige,
+                        hochindividualisierte Lösungen. Einzigartig: Profitiere von einer möglichen vollständigen Refinanzierung der Entwicklungskosten,
+                        wenn dein Assistent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern schreiben wir dir die doppelte Höhe deiner
+                        Entwicklungskosten auf dein Konto als siteware-Credits gut.
+                        Wähle schon bald aus einer Vielzahl an Assistenten im neuen siteware business APP-Store.
+                        Mit siteware business bist du immer einen Schritt voraus – sei dabei. Von Anfang an.
                       </div>
                       <div className={styles.buttonsection}>
                         <Button type="primary" className={styles.builderbutton}>Angebot anfordern</Button>

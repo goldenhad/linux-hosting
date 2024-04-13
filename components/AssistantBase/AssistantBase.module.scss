@@ -356,24 +356,27 @@
     }
 
     .clipboardextra{
-      color: #667085;
+      color: white;
       padding: 6px 12px 6px 12px;
       border-radius: 8px;
+      background-color: #1677ff;
 
       .clipboardicon {
         font-size: 18px;
         margin-right: 2px;
+        color: white;
       }
 
       .clipboardicon > svg{
         transform: translate(-1px, 0px);
         fill: transparent;
-        color: inherit;
+        stroke: white;
+        color: white;
       }
 
       &:hover{
         cursor: pointer;
-        background-color: #F2F4F7;
+        background-color: #4096ff;
       }
     }
 

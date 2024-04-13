@@ -63,7 +63,7 @@ const stripePromise = getStripe();
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
     props: {
-      redirect: process.env.BASEURL
+      redirect: process.env.NEXT_PUBLIC_BASEURL
     }
   };
 };

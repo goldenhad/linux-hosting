@@ -35,7 +35,7 @@ export default function Setup(){
       router.push( "/" );
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [] )
+  }, [] );
 
   /**
    * Returns the steps used for the setup depentend on the role of the current user

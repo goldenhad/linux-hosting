@@ -48,7 +48,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           const json = JSON.stringify( inviteobj );
           const invitedata =  Buffer.from( json ).toString( "base64" );
           const invitecode = Buffer.from( CryptoJS.AES.encrypt( invitedata, process.env.MAILENC ).toString() ).toString( "base64" );
-          const baseurl = process.env.BASEURL;
+          const baseurl = process.env.NEXT_PUBLIC_BASEURL;
 
           try {
             // Create the email text and fill it with data

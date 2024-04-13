@@ -416,7 +416,7 @@ const AssistantBase = (props: {
   }, [props.context.company, props.context.user.Company, quotaOverused] );
 
   /**
-   * Effect to check if the user was reset through firebase reloading
+   * Effect to check if the user was action through firebase reloading
    * Set the render allowed state to true if the user is reloading to
    * prevent flickering
    */

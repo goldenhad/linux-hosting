@@ -1,0 +1,22 @@
+.formfootercontainer{
+  min-height: 100px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .generatebuttonrow{
+    margin-bottom: 44px;
+    margin-top: 44px;
+
+    button {
+      .buttonicon > svg{
+        transform: translate(-1px, 4px);
+        fill: transparent;
+        color: inherit;
+        stroke: inherit;
+      }
+    }
+  }
+}

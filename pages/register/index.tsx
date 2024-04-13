@@ -352,7 +352,7 @@ export default function Register( props ){
           rules={[
             () => ( {
               async validator( _, value ) {
-                if( value != "" ){
+                if( value != "" && value != undefined ){
                   if ( await couponExists( value ) ) {
                     setCouponValid(CouponState.VALID);
                     return Promise.resolve();         

@@ -39,7 +39,7 @@ export default interface Assistant {
     name: string;
     type: AssistantType;
     prompt: string;
-    inputColumns: AssistantInputColumn;
+    inputColumns: Array<AssistantInputColumn>;
     uid: string;
     personality: string;
 }

@@ -64,6 +64,43 @@ export async function generateAIResponse(
   return { count: { request: tokenCountRequest, response: tokenCountResult } }
 }
 
+export async function generateChatResponse(
+  model: Model,
+  messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+  apiResponse: NextApiResponse<AssistantResponse | string>
+){
+
+  apiResponse.writeHead(200, {
+    Connection: "keep-alive",
+    "Content-Encoding": "none",
+    "Cache-Control": "no-cache",
+    "Content-Type": "text/event-stream"
+  });
+
+  const response = await openai.chat.completions.create({
+    model: model,
+    messages: messages,
+    stream: true
+  });
+
+  // Process and send chunks of response
+  let text = "";
+  for await (const chunk of response) {
+    const singletoken = chunk.choices[0].delta.content || "";
+    apiResponse.write(singletoken);
+    apiResponse.flushHeaders();
+    if (chunk.choices[0].finish_reason === "stop") {
+      console.log("stop!!");
+    }
+    text += singletoken;
+  }
+
+  const tokenCountRequest = countFunction(messages[messages.length-1].content);
+  const tokenCountResult = countFunction(text);
+
+  return { count: { request: tokenCountRequest, response: tokenCountResult } }
+}
+
 export function countFunction(input: string){
   return encode(input).length;
 }

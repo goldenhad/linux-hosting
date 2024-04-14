@@ -1,41 +1,19 @@
-import { Alert, Button, Card, Divider, Drawer, Form, message, notification, Result, Skeleton, Typography } from "antd";
+import { Button, Drawer, Form, List, message, notification, Typography } from "antd";
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { GetServerSideProps } from "next";
-import getDocument, { getAllDocs } from "../../firebase/data/getData";
-import Assistant, {
-  AssistantInput,
-  AssistantInputColumn,
-  AssistantInputType,
-  AssistantType
-} from "../../firebase/types/Assistant";
+import { getAllDocs } from "../../firebase/data/getData";
+import Assistant, { AssistantType } from "../../firebase/types/Assistant";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import styles from "../../components/AssistantBase/AssistantBase.module.scss";
-import Icon, { ArrowLeftOutlined, HistoryOutlined } from "@ant-design/icons";
-import { handleEmptyString } from "../../helper/architecture";
-import { isMobile } from "react-device-detect";
-import Clipboard from "../../public/icons/clipboard.svg";
-import FatButton from "../../components/FatButton";
-import updateData from "../../firebase/data/updateData";
 import { useRouter } from "next/router";
 import axios from "axios";
-import { toGermanCurrencyString, TokenCalculator } from "../../helper/price";
-import AssistantForm from "../../components/AssistantForm/AssistantForm";
-import Info from "../../public/icons/info.svg";
-import Markdown from "react-markdown";
-import remarkBreaks from "remark-breaks";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism"
-import remarkGfm from "remark-gfm"
+import { TokenCalculator } from "../../helper/price";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../db";
-import { Profile } from "../../firebase/types/Profile";
-import { Templates } from "../../firebase/types/Settings";
-import moment from "moment/moment";
-import { History } from "../../firebase/types/User";
-import { Order } from "../../firebase/types/Company";
 import QaAAssistant from "../../components/Assistants/QaAAssistant/QaAAssistant";
-import ChatAssistant from "../../components/Assistants/ChatAssistant/ChatAssistant";
+import ChatAssistant, { MsgType } from "../../components/Assistants/ChatAssistant/ChatAssistant";
+import { CloseOutlined, EyeOutlined } from "@ant-design/icons";
 
 // Defines how long antd messages will be visible
 const MSGDURATION = 3;
@@ -118,6 +96,8 @@ export default function Assistant(props: { assistant: Assistant }) {
   const [ calculator ] = useState(new TokenCalculator(context.calculations))
   const router = useRouter();
   const [ form ] = Form.useForm();
+  const [ prefState, setPrefState ] = useState([]);
+  const [ prefStateIdx, setPrefStateIdx ] = useState(-1);
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -183,52 +163,124 @@ export default function Assistant(props: { assistant: Assistant }) {
   }, [] );
 
 
-  /*  const HistoryCard = () => {
+  const updateHist = async () => {
+    try{
+      const encHistObj = await axios.post( "/api/prompt/encrypt", {
+        content: JSON.stringify(historyState),
+        salt: context.user.salt
+      } );
+
+      const encHist = encHistObj.data.message;
+
+      // Check if the user previously had a history
+      if(context.user.history){
+        // If so get the history
+        const userhist = context.user.history;
+        // Set the history to the encoded string and update the user
+        userhist[props.assistant.uid] = encHist;
+        await updateDoc( doc( db, "User", context.login.uid ), { history: userhist } );
+      }else{
+        // If the user previously didn't have a history
+        // Init the history
+        const hist = {};
+        // Update the history state of the assistant and update the user
+        const encHist = encHistObj.data.message;
+        hist[props.assistant.uid] = encHist;
+        await updateDoc( doc( db, "User", context.login.uid ), { history: hist } );
+      }
+    }catch(e){
+      console.log(e);
+    }
+  }
+
+  const HistoryCard = () => {
     if(historyState.length > 0){
-      return(
-        <List
-          bordered
-          loading={histLoading}
-          dataSource={historyState}
-          locale={{ emptyText: "Noch keine Anfragen" }}
-          renderItem={(item: { content: string, time: string, tokens: string }, id) => {
-            return(<List.Item>
-              <div className={styles.singlehistitem}>
-                <Paragraph className={styles.histitem}>{item.content.slice(0, 100)}...</Paragraph>
-                <div className={styles.subcontent}>
-                  <span>{item.time}</span>
-                  <span>{(typeof item.tokens == "string")? item.tokens: 0}</span>
-                  <Button icon={<EyeOutlined />} onClick={() => {
-                    setHistOpen(false);
-                    setIsAnswerCardvisible( true );
-                    setShowAnswer( true );
-                    setIsAnswerVisible( true );
-                    setPromptError( false );
-                    setAnswer(item.content);
-                  }}></Button>
-                  <Button icon={<CloseOutlined />} onClick={async () => {
-                    setHistloading(true);
-                    const locHistState= historyState;
-                    locHistState.splice(id, 1);
-                    setHistoryState(locHistState);
+      if(props.assistant.type == AssistantType.QAA){
+        return(
+          <List
+            bordered
+            loading={histloading}
+            dataSource={historyState}
+            locale={{ emptyText: "Noch keine Anfragen" }}
+            renderItem={(item: { content: string, time: string, tokens: string }, id) => {
+              return(<List.Item>
+                <div className={styles.singlehistitem}>
+                  <Paragraph className={styles.histitem}>{item.content.slice(0, 100)}...</Paragraph>
+                  <div className={styles.subcontent}>
+                    <span>{item.time}</span>
+                    <span>{(typeof item.tokens == "string")? item.tokens: 0}</span>
+                    <Button icon={<EyeOutlined />} onClick={() => {
+                      setHistOpen(false);
+                      setIsAnswerCardvisible( true );
+                      setShowAnswer( true );
+                      setIsAnswerVisible( true );
+                      setPromptError( false );
+                      setAnswer(item.content);
+                    }}></Button>
+                    <Button icon={<CloseOutlined />} onClick={async () => {
+                      setHistloading(true);
+                      const locHistState= historyState;
+                      locHistState.splice(id, 1);
+                      setHistoryState(locHistState);
 
-                    await updateHist();
+                      await updateHist();
 
-                    setHistloading(false);
-                  }}></Button>
+                      setHistloading(false);
+                    }}></Button>
+                  </div>
                 </div>
-              </div>
-            </List.Item>
-            );
-          }}
-        />
-      );
+              </List.Item>
+              );
+            }}
+          />
+        );
+      }else if(props.assistant.type == AssistantType.CHAT){
+        console.log(historyState);
+        return(
+          <List
+            bordered
+            loading={histloading}
+            dataSource={historyState}
+            locale={{ emptyText: "Noch keine Anfragen" }}
+            renderItem={(item: { content: Array<{content: string, type: MsgType}>, time: string }, id) => {
+              return(<List.Item>
+                <div className={styles.singlehistitem}>
+                  <Paragraph className={styles.histitem}>
+                    {(item.content.length > 1)? item.content[1].content.slice(0, 100): item.content[0].content.slice(0, 100)}...
+                  </Paragraph>
+                  <div className={styles.subcontent}>
+                    <span>{item.time}</span>
+                    <Button icon={<EyeOutlined />} onClick={() => {
+                      setHistOpen(false);
+                      setPrefState(item.content);
+                      setPrefStateIdx(id);
+                    }}></Button>
+                    <Button icon={<CloseOutlined />} onClick={async () => {
+                      setHistloading(true);
+                      const locHistState= historyState;
+                      locHistState.splice(id, 1);
+                      setHistoryState(locHistState);
+
+                      await updateHist();
+
+                      setHistloading(false);
+                    }}></Button>
+                  </div>
+                </div>
+              </List.Item>
+              );
+            }}
+          />
+        );
+      }else{
+        console.log(props.assistant.type);
+      }
     }else{
       return (<div className={styles.emptyhistory}>
         <h3>Noch keine Anfragen</h3>
       </div>);
     }
-  }*/
+  }
   
   
   const getAssistantForm = () => {
@@ -244,6 +296,8 @@ export default function Assistant(props: { assistant: Assistant }) {
         setHistoryOpen={setHistOpen} 
         messageApi={messageApi}
         notificationApi={notificationAPI}
+        history={{ state: historyState, set: setHistoryState }}
+        predefinedState={{ state: prefState, idx: prefStateIdx }}
       />;
     case AssistantType.CHAT:
       return <ChatAssistant
@@ -254,6 +308,8 @@ export default function Assistant(props: { assistant: Assistant }) {
         setHistoryOpen={setHistOpen}
         messageApi={messageApi}
         notificationApi={notificationAPI}
+        history={{ state: historyState, set: setHistoryState }}
+        predefinedState={{ state: prefState, idx: prefStateIdx }}
       />;
     }
   }
@@ -275,7 +331,7 @@ export default function Assistant(props: { assistant: Assistant }) {
         }}
         open={histOpen}
       >
-
+        <HistoryCard />
       </Drawer>
     </SidebarLayout>
   );

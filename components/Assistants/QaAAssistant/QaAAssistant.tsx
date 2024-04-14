@@ -21,7 +21,7 @@ import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import SidebarLayout from "../../Sidebar/SidebarLayout";
-import { handleEmptyString } from "../../../helper/architecture";
+import {handleEmptyString, reduceCost, updateCompanyTokens} from "../../../helper/architecture";
 import { isMobile } from "react-device-detect";
 import AssistantForm from "../../AssistantForm/AssistantForm";
 import FatButton from "../../FatButton";
@@ -59,6 +59,8 @@ export default function QaAAssistant(props: {
     setHistoryOpen: Dispatch<SetStateAction<boolean>>,
     messageApi: MessageInstance,
     notificationApi: NotificationInstance
+    history: { state: any[], set: React.Dispatch<React.SetStateAction<any[]>> }
+    predefinedState: { state: Array<any>, idx: number };
 }) {
   const context = props.context;
   const { user } = context;
@@ -247,7 +249,7 @@ export default function QaAAssistant(props: {
     return obj;
   }
 
-  const updateCompanyTokens = async (cost) => {
+  /*const updateCompanyTokens = async (cost) => {
     if(context.company.plan){
       if(context.company.plan?.state == "active"){
         let paymentSuccesfull = false;
@@ -361,16 +363,7 @@ export default function QaAAssistant(props: {
       await updateDoc( doc( db, "User", context.login.uid ), { usedCredits: usageupdates } );
     }
   }
-
-  const reduceCost = (cost: number) => {
-    // Reduce the token balance by the used token
-    if( context.company.tokens - cost <= 0 ){
-      context.company.tokens = 0;
-    }else{
-      context.company.tokens -= cost
-    }
-  }
-
+*/
 
   const generateAnswer = async ( values ) => {
     // Serach the decrypted profiles for the given profile in the values object
@@ -534,9 +527,8 @@ export default function QaAAssistant(props: {
                       await updateDoc( doc( db, "User", context.login.uid ), { history: userhist } );
                     }
 
-                    reduceCost(cost)
-
-                    await updateCompanyTokens(cost);
+                    reduceCost(props.context.company.tokens, cost);
+                    await updateCompanyTokens(props.context, calculator, props.notificationApi, cost);
 
                     props.notificationApi.info({
                       message: "Creditverbrauch",
@@ -575,8 +567,8 @@ export default function QaAAssistant(props: {
 
                 cost = calculator.cost(usedTokens);
 
-                reduceCost(cost);
-                await updateCompanyTokens(cost);
+                reduceCost(props.context.company.tokens, cost);
+                await updateCompanyTokens(props.context, calculator, props.notificationApi, cost);
 
                 // Update the used tokens and display them
                 setTokenCountVisible(true);

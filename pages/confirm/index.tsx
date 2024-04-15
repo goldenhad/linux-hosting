@@ -8,6 +8,7 @@ import { firebase_app } from "../../db";
 import { useRouter } from "next/router";
 import { AuthContextProvider } from "../../components/context/AuthContext";
 import FatButton from "../../components/FatButton";
+import axios from "axios";
 
 const auth = getAuth(firebase_app);
 
@@ -54,6 +55,11 @@ export default function Confirm( props: restprops ){
               "              Zu diesem Zweck haben wir Ihnen einen entsprechenden Link zugesendet.";
     }
   }
+  
+  const loggout = async () => {
+    await axios.get("/api/logout");
+    router.replace("/login");
+  }
 
   return(
     <div>
@@ -70,6 +76,9 @@ export default function Confirm( props: restprops ){
           <div className={styles.formexplanation}>
             {validDescription()}
           </div>
+          <FatButton onClick={() => {
+            loggout() 
+          }} text={"Zurück zum Login"}></FatButton>
         </div>
       </div>
     </div>

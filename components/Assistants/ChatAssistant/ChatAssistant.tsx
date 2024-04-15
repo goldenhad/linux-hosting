@@ -54,7 +54,9 @@ export default function ChatAssistant(props: {
     predefinedState: { state: Array<any>, idx: number };
 }) {
   const router = useRouter();
-  const [ chatMsgs, setChatMsgs ] = useState<Array<ChatMsg>>([{ content: "Wie kann ich dir heute helfen?", type: MsgType.MODEL }]);
+  const [ chatMsgs, setChatMsgs ] = useState<Array<ChatMsg>>([
+    { content: (props.assistant.initialMessage)? props.assistant.initialMessage: "Wie kann ich dir heute helfen?", type: MsgType.MODEL 
+    }]);
   const [ formDisabled, setFormDisabled ] = useState(props.formDisabled);
   const lastMsgRef = useRef<null | HTMLDivElement>(null);
   const [msgContext, setMsgContext ] = useState<Array<MsgContext>>([

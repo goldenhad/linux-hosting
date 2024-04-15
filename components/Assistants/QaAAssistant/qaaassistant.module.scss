@@ -295,117 +295,119 @@
   flex-direction: column;
   width: 100%;
 
-  .welcomemessage {
-    margin-bottom: 25px;
 
-    .messagcnt{
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 16px;
+}
 
-      .histbutton{
-        margin-left: auto;
-      }
+.welcomemessage {
+  margin-bottom: 25px;
 
+  .messagcnt{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+
+    .histbutton{
+      margin-left: auto;
     }
 
-    .welcomeseperator{
-      margin-top: 25px;
-      margin-bottom: 0px;
-      border-color: #D0D5DD;
-      color: #D0D5DD;
-      background-color: #D0D5DD;
-    }
   }
 
-  .userinputformcontainer{
+  .welcomeseperator{
+    margin-top: 25px;
+    margin-bottom: 0px;
+    border-color: #D0D5DD;
+    color: #D0D5DD;
+    background-color: #D0D5DD;
+  }
+}
 
-    .userinputform{
-      .formpart{
-        font-weight: 700;
-        line-height: 20px;
-        size: 14px;
+.userinputformcontainer{
 
-        .forminput{
-          background-color: white;
-          padding: 10px 14px 10px 14px;
-          border-radius: 8px;
-          box-shadow: 0px 1px 2px 0px #1018280D;
-          border-color: #D0D5DD;
-        }
-
-        .formselect{
-          background-color: white;
-          border-radius: 8px;
-          box-shadow: 0px 1px 2px 0px #1018280D;
-          border-color: #D0D5DD;
-        }
-      }
-    }
-
-    .historycard{
-      margin-top: 32px;
-    }
-
-    .answer{
-      //white-space: pre-line;
-      > ol {
-        margin-left: 20px;
-      }
-    }
-
-    .clipboardextra{
-      color: white;
-      padding: 6px 12px 6px 12px;
-      border-radius: 8px;
-      background-color: #1677ff;
-
-      .clipboardicon {
-        font-size: 18px;
-        margin-right: 2px;
-        color: white;
-      }
-
-      .clipboardicon > svg{
-        transform: translate(-1px, 0px);
-        fill: transparent;
-        stroke: white;
-        color: white;
-      }
-
-      &:hover{
-        cursor: pointer;
-        background-color: #4096ff;
-      }
-    }
-
-    .tokeninfo{
-      background-color: #F2F4F7;
-      padding: 12px;
-      width: 100%;
-      border-radius: 8px;
-      margin-top: 30px;
+  .userinputform{
+    .formpart{
       font-weight: 700;
-      color: #344054;
+      line-height: 20px;
+      size: 14px;
 
-      .infoicon {
-        width: 22px;
-        height: 22px;
-        font-size: 18px;
+      .forminput{
+        background-color: white;
+        padding: 10px 14px 10px 14px;
+        border-radius: 8px;
+        box-shadow: 0px 1px 2px 0px #1018280D;
+        border-color: #D0D5DD;
       }
 
-      .infoicon > svg{
-        transform: translate(-1px, 2px);
-        fill: transparent;
-        color: inherit;
+      .formselect{
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0px 1px 2px 0px #1018280D;
+        border-color: #D0D5DD;
       }
     }
   }
 
-  .hiddencontainer{
-    display: none;
+  .historycard{
+    margin-top: 32px;
   }
+
+  .answer{
+    //white-space: pre-line;
+    > ol {
+      margin-left: 20px;
+    }
+  }
+
+  .clipboardextra{
+    color: white;
+    padding: 6px 12px 6px 12px;
+    border-radius: 8px;
+    background-color: #1677ff;
+
+    .clipboardicon {
+      font-size: 18px;
+      margin-right: 2px;
+      color: white;
+    }
+
+    .clipboardicon > svg{
+      transform: translate(-1px, 0px);
+      fill: transparent;
+      stroke: white;
+      color: white;
+    }
+
+    &:hover{
+      cursor: pointer;
+      background-color: #4096ff;
+    }
+  }
+
+  .tokeninfo{
+    background-color: #F2F4F7;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 30px;
+    font-weight: 700;
+    color: #344054;
+
+    .infoicon {
+      width: 22px;
+      height: 22px;
+      font-size: 18px;
+    }
+
+    .infoicon > svg{
+      transform: translate(-1px, 2px);
+      fill: transparent;
+      color: inherit;
+    }
+  }
+}
+
+.hiddencontainer{
+  display: none;
 }
 
 .emptyhistory{

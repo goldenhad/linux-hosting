@@ -7,8 +7,6 @@ import {
 import styles from "./assistantform.module.scss";
 import { Card, Form, Input, Select } from "antd";
 import { isMobile } from "react-device-detect";
-import { listToOptions } from "../../helper/architecture";
-import {useState} from "react";
 const { TextArea } = Input;
 
 function optionsToAntdObjects (options: Array<AssistantOption>) {
@@ -61,6 +59,7 @@ export default function AssistantForm(props: { title: string, inputColumns: Arra
                     </div>
                   );
                 case AssistantInputType.SELECT:
+
                   return (
                     <div key={idx}>
                       <Form.Item
@@ -82,6 +81,8 @@ export default function AssistantForm(props: { title: string, inputColumns: Arra
                           options={optionsToAntdObjects(inputobj.options)}
                           className={styles.formselect}
                           size='large'
+                          mode={(inputobj.multiple)? "multiple": null}
+                          maxCount={(inputobj.maxSelected)? inputobj.maxSelected: 1024}
                           disabled={props.formDisabled || props.quotaOverused}
                         />
                       </Form.Item>

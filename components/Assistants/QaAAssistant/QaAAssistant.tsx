@@ -1,6 +1,5 @@
-import { useAuthContext } from "../../context/AuthContext";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { Alert, Button, Card, Divider, Drawer, Form, message, notification, Result, Skeleton, Typography } from "antd";
+import { Alert, Button, Card, Divider, Form, Result, Skeleton } from "antd";
 import { toGermanCurrencyString, TokenCalculator } from "../../../helper/price";
 import { useRouter } from "next/router";
 import { doc, updateDoc } from "firebase/firestore";
@@ -8,7 +7,6 @@ import { db } from "../../../db";
 import { Profile } from "../../../firebase/types/Profile";
 import axios from "axios";
 import Assistant, { AssistantInputColumn, AssistantInputType } from "../../../firebase/types/Assistant";
-import { Order } from "../../../firebase/types/Company";
 import updateData from "../../../firebase/data/updateData";
 import getDocument from "../../../firebase/data/getData";
 import { Templates } from "../../../firebase/types/Settings";
@@ -20,8 +18,7 @@ import Markdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import SidebarLayout from "../../Sidebar/SidebarLayout";
-import {handleEmptyString, reduceCost, updateCompanyTokens} from "../../../helper/architecture";
+import { handleEmptyString, reduceCost, updateCompanyTokens } from "../../../helper/architecture";
 import { isMobile } from "react-device-detect";
 import AssistantForm from "../../AssistantForm/AssistantForm";
 import FatButton from "../../FatButton";
@@ -29,14 +26,8 @@ import Clipboard from "../../../public/icons/clipboard.svg";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { MessageInstance } from "antd/es/message/interface";
 import { NotificationInstance } from "antd/es/notification/interface";
+import { MAXHISTITEMS, MSGDURATION } from "../../../pages/assistant";
 
-
-// Defines how long antd messages will be visible
-const MSGDURATION = 3;
-
-const MAXHISTITEMS = 10;
-
-const { Paragraph } = Typography;
 
 
 /**
@@ -76,17 +67,22 @@ export default function QaAAssistant(props: {
   const [ formDisabled, setFormDisabled ] = useState( props.formDisabled );
   const [ promptError, setPromptError ] = useState( false );
   const [ showAnswer, setShowAnswer ] = useState( false );
-  const [ historyState, setHistoryState ] = useState([]);
   const [ cancleController, setCancleController ] = useState(new AbortController());
-  //const [open, setOpen] = useState<boolean>( tourState  );
   const [ calculator ] = useState(new TokenCalculator(context.calculations))
   const router = useRouter();
   const [ form ] = Form.useForm();
 
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1;
 
+  useEffect(() => {
+    console.log(props.predefinedState.state);
+    if(props.predefinedState.state && props.predefinedState.state.length > 0){
+      setIsAnswerCardvisible( true );
+      setShowAnswer( true );
+      setIsAnswerVisible( true );
+      setPromptError( false );
+      setAnswer(props.predefinedState.state[0]);
+    }
+  }, [props.predefinedState]);
 
   /**
      * Effect to encrypt the user profiles
@@ -158,7 +154,6 @@ export default function QaAAssistant(props: {
         const decryptedText = decRequest.data.message;
         // Parse decrypted string as JSON
         parsed = JSON.parse( decryptedText );
-        console.log(parsed);
       }catch( e ){
         console.log(e);
       }
@@ -177,7 +172,6 @@ export default function QaAAssistant(props: {
 
             // If the profile can't be found set the profile to the first profile in the list
             if(profIndex == -1){
-              console.log(decryptedProfiles);
               fieldvalue = decryptedProfiles[0].name
             }
           }
@@ -197,7 +191,10 @@ export default function QaAAssistant(props: {
     console.log(prompt)
     props.assistant.inputColumns.forEach((column: AssistantInputColumn) => {
       column.inputs.forEach((inputobj) => {
-        const cleanedValued = values[inputobj.key].replace(/(<~).+?(~>)/gm, "");
+        console.log(values);
+        console.log(inputobj.key);
+        //const cleanedValued = values[inputobj.key].replace(/(<~).+?(~>)/gm, "");
+        const cleanedValued = values[inputobj.key];
 
         if(inputobj.type == AssistantInputType.PROFILE){
           const profile: Profile = decryptedProfiles.find( ( singleProfile: Profile ) => {
@@ -214,13 +211,16 @@ export default function QaAAssistant(props: {
             replaced = replaced.replace(`<${inputobj.key}>`, profileInformation);
           }
         }else{
-          replaced = replaced.replace(`<${inputobj.key}>`, cleanedValued);
+          if(inputobj.multiple){
+            replaced = replaced.replace(`<${inputobj.key}>`, cleanedValued);
+          }else{
+            replaced = replaced.replace(`<${inputobj.key}>`, cleanedValued.toString());
+          }
         }
       })
     })
 
     console.log(replaced);
-
     return { prompt: replaced };
   }
 
@@ -249,121 +249,6 @@ export default function QaAAssistant(props: {
     return obj;
   }
 
-  /*const updateCompanyTokens = async (cost) => {
-    if(context.company.plan){
-      if(context.company.plan?.state == "active"){
-        let paymentSuccesfull = false;
-        let invoiceid = "";
-
-        // Check if company has less tokens than the threshold
-        if(context.company.tokens < context.company.plan.threshold){
-          // Try to charge the user with the values defined in the plan
-          try{
-            const paymentreq = await axios.post("/api/payment/issuepayment", {
-              price: context.calculations.products[context.company.plan?.product].price,
-              customer: context.company.customerId,
-              method: context.company.paymentMethods[0].methodId
-            });
-
-            invoiceid = paymentreq.data.message;
-
-            paymentSuccesfull = true;
-          }catch{
-            paymentSuccesfull = false;
-          }
-
-
-          // If the payment was successfull
-          if(paymentSuccesfull){
-            // Get the tokens that will be added according to the plan
-            const amountToAdd = calculator.indexToPrice(context.company.plan?.product);
-            // Add the totkens to the tokens of the company
-            const updatedTokenValue = context.company.tokens + amountToAdd;
-
-            // Update paymentmethod
-            const newState = context.company.paymentMethods[0];
-            newState.lastState = "successfull"
-            const updatedMethods = [newState]
-
-            // Create an order for the charged amount
-            const currentOrders = context.company.orders;
-            const nextInvoiceNumber = context.invoice_data.last_used_number+1;
-
-            const newOrder: Order = {
-              id: invoiceid,
-              timestamp: Math.floor( Date.now() / 1000 ),
-              tokens: amountToAdd,
-              amount: context.calculations.products[context.company.plan?.product].price,
-              method: "Stripe",
-              state: "accepted",
-              type: "recharge",
-              invoiceId: `SM${context.invoice_data.number_offset + nextInvoiceNumber}`
-            }
-
-            // Added the new order to the company orders
-            currentOrders.push( newOrder );
-            // Update the last used invoice id
-            await updateData( "Settings", "Invoices", { last_used_number: nextInvoiceNumber } );
-
-            // Update the tokens of the company
-            await updateData("Company", context.user.Company, {
-              tokens: updatedTokenValue,
-              paymentMethods: updatedMethods,
-              orders: currentOrders
-            });
-
-            props.notificationApi.info({
-              message: "Automatisches Nachfüllen",
-              description: `Dein Credit-Budget wurde automatisch um ${toGermanCurrencyString(amountToAdd)} Tokens aufgefüllt!`,
-              duration: MSGDURATION
-            });
-          }else{
-            const newState = context.company.paymentMethods[0];
-            newState.lastState = "error"
-            const updatedMethods = [newState]
-
-            await updateData("Company", context.user.Company, { tokens: context.company.tokens, paymentMethods: updatedMethods })
-
-            props.notificationApi.error({
-              message: "Automatisches Nafüllen",
-              description: "Es ist ein Fehler beim automatischen Auffüllen deines Credit-Budgets aufgetreten.",
-              duration: MSGDURATION
-            });
-          }
-        }else{
-          // Update the balance of the company
-          console.log("Value to update ", context.company.tokens);
-          await updateDoc( doc( db, "Company", context.user.Company ), { tokens: context.company.tokens } );
-        }
-
-      }else{
-        // Update the balance of the company
-        await updateDoc( doc( db, "Company", context.user.Company ), { tokens: context.company.tokens } );
-      }
-    }else{
-      // Update the balance of the company
-      await updateDoc( doc( db, "Company", context.user.Company ), { tokens: context.company.tokens } );
-    }
-
-    // Get the usage of the current month and year from the user
-    const userusageidx = context.user.usedCredits.findIndex( ( val ) => {
-      return val.month == currentMonth && val.year == currentYear
-    } );
-
-    // Check if the user used the tool in the current month and year
-    if( userusageidx != -1 ){
-      // If so just update the usage with the used tokens
-      const usageupdates = context.user.usedCredits;
-      usageupdates[userusageidx].amount += cost;
-      await updateDoc( doc( db, "User", context.login.uid ), { usedCredits: usageupdates } );
-    }else{
-      // Otherwise create a new usage object and write it to the user
-      const usageupdates = context.user.usedCredits;
-      usageupdates.push( { month: currentMonth, year: currentYear, amount: cost } );
-      await updateDoc( doc( db, "User", context.login.uid ), { usedCredits: usageupdates } );
-    }
-  }
-*/
 
   const generateAnswer = async ( values ) => {
     // Serach the decrypted profiles for the given profile in the values object
@@ -484,42 +369,21 @@ export default function QaAAssistant(props: {
                     // Validate that the answer is not empty
                     if(localAnswer != ""){
                       // We need to check if the user already has 10 saved states
-                      if(historyState.length >= MAXHISTITEMS){
+                      if(props.history.state.length >= MAXHISTITEMS){
                         // If so remove last Element from array
-                        historyState.pop();
+                        props.history.state.pop();
                       }
 
                       // Add the answer with the current time and the used tokens to the front of the history array
-                      historyState.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: toGermanCurrencyString(cost) });
+                      props.history.state.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: toGermanCurrencyString(cost) });
 
                       // Encrypt the history array
                       const encHistObj = await axios.post( "/api/prompt/encrypt", {
-                        content: JSON.stringify(historyState),
+                        content: JSON.stringify(props.history.state),
                         salt: context.user.salt
                       } );
 
                       const encHist = encHistObj.data.message;
-
-                      // Check if the user previously had a history
-                      /*if(context.user.history){
-                                                  // If so get the history
-                          
-                                                }else{
-                                                  // If the user previously didn't have a history
-                                                  // Init the history
-                                                  const hist: History = {
-                                                    monolog: "",
-                                                    dialog: "",
-                                                    monolog_old: "",
-                                                    dialog_old: "",
-                                                    blog: "",
-                                                    excel: ""
-                                                  };
-                                                  // Update the history state of the assistant and update the user
-                                                  const encHist = encHistObj.data.message;
-                                                  hist[props.laststate] = encHist;
-                                                  await updateDoc( doc( db, "User", props.context.login.uid ), { history: hist } );
-                                                }*/
 
                       const userhist = context.user.history;
                       // Set the history to the encoded string and update the user
@@ -688,7 +552,7 @@ export default function QaAAssistant(props: {
             <Button className={styles.histbutton} onClick={() => {
               props.setHistoryOpen(true)
             }} icon={
-              <HistoryOutlined/>}>{`Bisherige Anfragen ${historyState.length}/${MAXHISTITEMS}`}</Button> : <></>
+              <HistoryOutlined/>}>{`Bisherige Anfragen ${props.history.state.length}/${MAXHISTITEMS}`}</Button> : <></>
           }
         </div>
         <Divider className={styles.welcomeseperator}/>

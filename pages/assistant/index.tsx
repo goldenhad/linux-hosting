@@ -1,4 +1,4 @@
-import { Button, Drawer, Form, List, message, notification, Typography } from "antd";
+import { Button, Drawer, List, message, notification, Typography } from "antd";
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { GetServerSideProps } from "next";
@@ -6,35 +6,21 @@ import { getAllDocs } from "../../firebase/data/getData";
 import Assistant, { AssistantType } from "../../firebase/types/Assistant";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import styles from "../../components/AssistantBase/AssistantBase.module.scss";
-import { useRouter } from "next/router";
 import axios from "axios";
-import { TokenCalculator } from "../../helper/price";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../db";
 import QaAAssistant from "../../components/Assistants/QaAAssistant/QaAAssistant";
 import ChatAssistant, { MsgType } from "../../components/Assistants/ChatAssistant/ChatAssistant";
 import { CloseOutlined, EyeOutlined } from "@ant-design/icons";
 
-// Defines how long antd messages will be visible
-const MSGDURATION = 3;
-
 // Defines the max amount of history states saved per user
-const MAXHISTITEMS = 10;
+export const MAXHISTITEMS = 10;
+
+// Defines how long antd messages will be visible
+export const MSGDURATION = 3;
 
 const { Paragraph } = Typography;
 
-
-/**
- * Update a field of a given form with the provided value
- * @param form Form containing the fields
- * @param field Field to be updated
- * @param value Value the field will be updated to
- */
-function updateField( form, field: string, value: string ){
-  if( value && value != "" ){
-    form.setFieldValue( field, value );
-  }
-}
 
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -72,36 +58,17 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 export default function Assistant(props: { assistant: Assistant }) {
   const context = useAuthContext();
-  const { login, user } = context;
+  const { user } = context;
 
-  const [ decryptedProfiles, setDecryptedProfiles ] = useState( [] );
-  const [ quotaOverused, setQuotaOverused ] =  useState( true );
-  const [ renderAllowed, setRenderAllowed ] = useState( false );
-  const [ tokenCountVisible, setTokenCountVisible ] = useState( false );
-  const [ isAnswerVisible, setIsAnswerVisible ] = useState( false );
-  const [ isLoaderVisible, setIsLoaderVisible ] = useState( false );
-  const [ isAnswerCardVisible, setIsAnswerCardvisible ] = useState( false );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [ answer, setAnswer ] = useState( "" );
-  const [ formDisabled, setFormDisabled ] = useState( false );
+  const [ quotaOverused, setQuotaOverused ] =  useState( false );
+  const [ formDisabled] = useState( false );
   const [messageApi, contextHolder] = message.useMessage();
-  const [ promptError, setPromptError ] = useState( false );
-  const [ showAnswer, setShowAnswer ] = useState( false );
   const [ historyState, setHistoryState ] = useState([]);
-  const [ cancleController, setCancleController ] = useState(new AbortController());
   const [ histOpen, setHistOpen ] = useState(false);
   const [ histloading, setHistloading ] = useState(false);
-  //const [open, setOpen] = useState<boolean>( tourState  );
   const [notificationAPI, notificationContextHolder] = notification.useNotification();
-  const [ calculator ] = useState(new TokenCalculator(context.calculations))
-  const router = useRouter();
-  const [ form ] = Form.useForm();
   const [ prefState, setPrefState ] = useState([]);
   const [ prefStateIdx, setPrefStateIdx ] = useState(-1);
-
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1;
 
 
   useEffect( () => {
@@ -210,12 +177,10 @@ export default function Assistant(props: { assistant: Assistant }) {
                     <span>{item.time}</span>
                     <span>{(typeof item.tokens == "string")? item.tokens: 0}</span>
                     <Button icon={<EyeOutlined />} onClick={() => {
+                      console.log(item.content);
                       setHistOpen(false);
-                      setIsAnswerCardvisible( true );
-                      setShowAnswer( true );
-                      setIsAnswerVisible( true );
-                      setPromptError( false );
-                      setAnswer(item.content);
+                      setPrefState([item.content]);
+                      setPrefStateIdx(id);
                     }}></Button>
                     <Button icon={<CloseOutlined />} onClick={async () => {
                       setHistloading(true);

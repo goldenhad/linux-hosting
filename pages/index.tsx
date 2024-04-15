@@ -10,24 +10,32 @@ import AssistantCard from "../components/AssistantCard/AssistantCard";
 import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
 import { Service } from "../firebase/types/Service";
 import ReactPlayer from "react-player/lazy"
+import axios from "axios";
+import { getAllDocs } from "../firebase/data/getData";
+import Assistant from "../firebase/types/Assistant";
 
 
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const datum = new Date();
+  let assistants: Array<Assistant> = [];
+  
+  const assistantreq = await getAllDocs("Assistants");
+
+  if(assistantreq.result){
+    assistants = assistantreq.result;
+  }
+  
 
   return {
     props: {
-      Data: {
-        currentMonth: datum.getMonth() + 1,
-        currentYear: datum.getFullYear()
-      }
+      assistants: assistants
     }
   };
 };
 
 
-export default function Home() {
+export default function Home(props: { assistants: Array<Assistant> }) {
   const context = useAuthContext();
   const { login, user, services } = context;
   const router = useRouter();
@@ -145,15 +153,15 @@ export default function Home() {
   ];
 
   const AssistantCardList = () => {
-    let servicearr = services;
+    let servicearr = props.assistants;
 
     if(selectedCat != "all"){
       if(selectedCat != "favourites"){
-        servicearr = services.filter((singleService: Service) => {
+        servicearr = props.assistants.filter((singleService: Assistant) => {
           return singleService.category == selectedCat;
         });
       }else{
-        servicearr = services.filter((singleService: Service) => {
+        servicearr = props.assistants.filter((singleService: Assistant) => {
           if(user.services){
             return user.services.favourites.includes(singleService.uid);
           }
@@ -161,7 +169,7 @@ export default function Home() {
       }
     }
 
-    servicearr = servicearr.sort((a: Service, b: Service) => {
+    /*servicearr = servicearr.sort((a: Assistant, b: Assistant) => {
       if( a.rank < b.rank){
         return -1;
       }else if( a.rank > b.rank){
@@ -169,7 +177,7 @@ export default function Home() {
       }else{
         return 0;
       }
-    })
+    })*/
 
     const getRibbonText = (uid: string) => {
       if(uid == "excel" || uid == "dialog" || uid == "monolog" || uid == "translator" || uid == "plain"){
@@ -181,14 +189,14 @@ export default function Home() {
 
     return (
       <div className={styles.servicelist}>
-        {servicearr.map((singleService: Service, idx: number) => {
+        {servicearr.map((singleService: Assistant, idx: number) => {
           return <AssistantCard
             name={singleService.uid}
             key={idx}
             image={singleService.image}
-            title={singleService.title}
+            title={singleService.name}
             description={singleService.description}
-            link={singleService.link}
+            link={`/assistant?aid=${singleService.uid}`}
             fav={user.services?.favourites.includes(singleService.uid)}
             ribbonText={getRibbonText(singleService.uid)}
             onVideoClick={() => {

@@ -27,6 +27,8 @@ export interface AssistantInput {
     key: string;
     name: string;
     placeholder?: string;
+    multiple?: boolean;
+    maxSelected?: number;
     options?: Array<AssistantOption>;
 }
 
@@ -37,9 +39,16 @@ export interface AssistantInputColumn {
 
 export default interface Assistant {
     name: string;
+    image: string;
+    category: string;
+    description: string;
+    rank: number;
+    video: string;
     type: AssistantType;
     prompt: string;
     inputColumns: Array<AssistantInputColumn>;
+    initialMessage: string;
     uid: string;
     personality: string;
+    published: boolean;
 }

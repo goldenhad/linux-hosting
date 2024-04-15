@@ -1,6 +1,7 @@
 import { firebase_app } from "../../db";
 import { signInWithEmailAndPassword, getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import addData, { addDataWithoutId } from "../data/setData";
+import { sendEmailVerification } from "@firebase/auth";
 
 const auth = getAuth( firebase_app );
 
@@ -20,6 +21,11 @@ export default async function signIn( email, password ) {
         Authorization: `Bearer ${idToken}`
       }
     });
+
+    if(!result.user.email_verified){
+      await sendEmailVerification(result.user);
+      console.log("EMAIL VERSENDET");
+    }
     
   } catch ( e ) {
     error = e;

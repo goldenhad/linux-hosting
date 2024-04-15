@@ -49,6 +49,8 @@ export default function Login(){
     // Call the firebase sign in routine
     const { result, error } = await signIn( values.email, values.password );
 
+    console.log(error);
+
     // Check if we ecounter a sign in error
     if ( error ) {
       //console.log(error);

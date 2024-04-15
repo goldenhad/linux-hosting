@@ -22,8 +22,8 @@ export default async function signIn( email, password ) {
       }
     });
 
-    if(!result.user.email_verified){
-      await sendEmailVerification(result.user);
+    if(!auth.currentUser.emailVerified){
+      await sendEmailVerification(auth.currentUser);
       console.log("EMAIL VERSENDET");
     }
     

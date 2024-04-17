@@ -1,37 +1,32 @@
 import { COMPONENT_POSITIONS, ReactInfiniteCanvas, ReactInfiniteCanvasHandle } from "react-infinite-canvas";
-import {useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./editorcanvas.module.scss";
 import { FloatButton } from "antd";
 import { HomeOutlined, QuestionCircleOutlined } from "@ant-design/icons";
-import { DndContext, useDroppable } from "@dnd-kit/core";
-
+import { DndContext, DragOverlay, useDroppable } from "@dnd-kit/core";
+import { useEditorContext } from "../EditorSidebar/EditorSidebar";
+import {
+  restrictToWindowEdges
+} from "@dnd-kit/modifiers";
+import EditorBlock from "../EditorBlock/EditorBlock";
 
 export default function EditorCanvas() {
   const canvasRef = useRef<ReactInfiniteCanvasHandle>();
-
-  const BuildingblockWrapper = () => {
-    return (
-      <div className={styles.buildingblock} style={{ top: 200 }}>
-              Neuer Baustein
-      </div>
-    );
-  }
+  const { isOver, setNodeRef } = useDroppable({
+    id: "droppable"
+  });
+  const { activeId } = useEditorContext();
+  const [ buldingBricks, setBuldingBricks ] = useState<Array<{ name: string }>>([ { name: "Neuer Block" } ])
 
 
-  function Droppable(props) {
-    const { isOver, setNodeRef } = useDroppable({
-      id: props.id
-    });
-    const style = {
-      opacity: isOver ? 1 : 0.5
-    };
 
-    return (
-      <div ref={setNodeRef} style={style}>
-        {props.children}
-      </div>
-    );
-  }
+  useEffect(() => {
+    if(activeId){
+      const localbricks = [...buldingBricks];
+      localbricks.push({ name: activeId.toString() });
+      setBuldingBricks(localbricks);
+    }
+  }, [activeId]);
 
   return (
     <div className={styles.canvascontainer}>
@@ -40,21 +35,37 @@ export default function EditorCanvas() {
         onCanvasMount={(mountFunc: ReactInfiniteCanvasHandle) => {
           mountFunc.fitContentToView({ scale: 2 });
         }}
+        panOnScroll={false}
         customComponents={[
           
         ]}
         renderScrollBar={false}
+        minZoom={2}
+        maxZoom={2}
       >
-          <div className={styles.buildingblock}>
+        {/*<div className={styles.buildingblock}>
               Neuer Block
-          </div>
+        </div>*/}
+        {/*<DragOverlay dropAnimation={{
+          duration: 500,
+          easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)"
+        }} modifiers={[restrictToWindowEdges]}>
+          {activeId ? (
+            <BuildingblockWrapper />
+          ): null}
+        </DragOverlay>*/}
+        <>
+          {buldingBricks.map((brick, idx) => {
+
+
+            return(<EditorBlock key={idx} name={brick.name} />);
+          })}
+        </>
       </ReactInfiniteCanvas>
       <FloatButton.Group shape="square" style={{ right: 24 }}>
         <FloatButton icon={<HomeOutlined />} onClick={() => {
           canvasRef.current?.fitContentToView({ scale: 2 });
         }} />
-        <FloatButton />
-        <FloatButton.BackTop visibilityHeight={0} />
       </FloatButton.Group>
     </div>
   );

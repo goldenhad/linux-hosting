@@ -21,7 +21,7 @@ export default function Editor(){
 
   return(
     <EditorSidebar>
-      <div style={{ width: "100%", height: "100vh", border: "1px solid red" }}>
+      <div style={{ width: "100%", height: "100vh" }}>
         <Suspense fallback={<div>Loading...</div>}>
           <EditorCanvas />
         </Suspense>

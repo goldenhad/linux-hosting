@@ -1,7 +1,7 @@
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import { LogoutOutlined } from "@ant-design/icons";
+import {ArrowLeftOutlined, LogoutOutlined} from "@ant-design/icons";
 import Icon, { HistoryOutlined } from "@ant-design/icons";
-import type { MenuProps } from "antd";
+import {Button, Input, MenuProps, Switch} from "antd";
 import { Avatar, ConfigProvider, Divider, Drawer, FloatButton, Layout, Menu, Popover } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -15,28 +15,19 @@ import Help from "../../public/icons/help.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
 import { DndContext, useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import EditorBlock from "../EditorBlock/EditorBlock";
 
 
 type MenuItem = Required<MenuProps>["items"][number];
 
 
-
-
-function Draggable(props) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: props.id
-  });
-  const style = {
-    // Outputs `translate3d(x, y, 0)`
-    transform: CSS.Translate.toString(transform)
-  };
-
-  return (
-    <button ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      {props.children}
-    </button>
-  );
+export interface editorctx{
+  activeId: null | number;
 }
+
+export const EditorSidebarContext = React.createContext<editorctx>( {} as editorctx );
+
+export const useEditorContext = () => React.useContext( EditorSidebarContext );
 
 
 /**
@@ -66,9 +57,11 @@ const EditorSidebar = ( props: {
   const [ sidebaropen, setSidebarOpen ] = useState(false);
 
   const [ screenwidth, setScreenwidth ] = useState(window.innerWidth);
-  const [parent, setParent] = useState(null);
 
-
+  const [ activeId, setActiveId ] = useState(null);
+  const [ counter, setCounter ] = useState(0);
+  const [ assistantName, setAssistantName ] = useState("Neuer Assistent");
+  const [ isPublic, setIsPublic ] = useState(false);
 
   /**
      * Effect used for responsive sizing of the sidebar
@@ -120,7 +113,6 @@ const EditorSidebar = ( props: {
       );
     }
   }
-
 
 
 
@@ -194,38 +186,29 @@ const EditorSidebar = ( props: {
   }else{
     // If the width of the screen is above 1500px we render the desktop variant of the component
     return (
-      <DndContext onDragEnd={({ over }) => {
-        setParent(over ? over.id : null);
-      }}>
-        <Layout className={styles.layout} hasSider={true}>
-          <Sider
-            collapsible
-            className={`${styles.sidebar}`}
-            breakpoint={breakpoint}
-            collapsedWidth={collapseWidth}
-            collapsed={collapsed}
-            onCollapse={( value ) => {
-              setCollapsed( value )
-            }}
-          >
-            <Link href={"/"}>
-              <div className={styles.logobox}>
-                {/*eslint-disable-next-line */}
-                            <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
-              </div>
+      <EditorSidebarContext.Provider value={{ activeId: activeId }}>
+        <Layout className={styles.layout}>
+          <Header className={styles.header}>
+            <Link className={styles.backbutton} href={"/"}>
+              <Button><ArrowLeftOutlined /></Button>
+            </Link>
+            <Link href={"/"} className={styles.headerlink}>
+              {/*eslint-disable-next-line */}
+              <img src="/small_logo.png" width={32} height={32} alt="Logo"/>
             </Link>
 
-            <div className={styles.navigation}>
-              <div className={styles.lib}>
-
-              </div>
-
-              <div className={styles.sidebarbottomcontainer}>
-                <div className={styles.avatarcontainer}>
-                </div>
-              </div>
+            <div className={styles.nameinput}>
+              <Input placeholder={"Neuer Assistent"} onChange={(val) => setAssistantName(val.target.value)}></Input>
             </div>
-          </Sider>
+
+            <div className={styles.headerActions}>
+              <div className={styles.additionalSettings}>
+                <span className={styles.settingsname}>Öffentlich?</span>
+                <Switch size="small" onChange={(val) => setIsPublic(val)} />
+              </div>
+              <Button className={styles.savebutton} type={"primary"}>Speichern</Button>
+            </div>
+          </Header>
 
           <Layout>
             <Content className={styles.layoutcontent}>
@@ -236,8 +219,8 @@ const EditorSidebar = ( props: {
           </Layout>
           <CookieBanner />
         </Layout>
-
-      </DndContext>
+        <style>{"html{ overflow-y: hidden !important; }"}</style>
+      </EditorSidebarContext.Provider>
 
     );
   }

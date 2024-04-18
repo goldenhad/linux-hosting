@@ -1,28 +1,22 @@
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import {ArrowLeftOutlined, LogoutOutlined} from "@ant-design/icons";
+import { ArrowLeftOutlined, LogoutOutlined, SettingOutlined } from "@ant-design/icons";
 import Icon, { HistoryOutlined } from "@ant-design/icons";
-import {Button, Input, MenuProps, Switch} from "antd";
+import {Button, Form, Input, MenuProps, message, Modal, Select, Switch} from "antd";
 import { Avatar, ConfigProvider, Divider, Drawer, FloatButton, Layout, Menu, Popover } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 const { Header, Content, Footer, Sider } = Layout;
-import { User } from "../../firebase/types/User";
 import styles from "./editorsidebar.module.scss";
-import Home from "../../public/icons/home.svg";
-import Nav from "../../public/icons/nav.svg";
-import Profiles from "../../public/icons/profiles.svg";
-import Help from "../../public/icons/help.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
-import { DndContext, useDraggable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
-import EditorBlock from "../EditorBlock/EditorBlock";
+import Assistant, {Block, MultiStepBlock} from "../../firebase/types/Assistant";
+import updateData from "../../firebase/data/updateData";
+import addData, {addDataWithoutId} from "../../firebase/data/setData";
 
-
-type MenuItem = Required<MenuProps>["items"][number];
+const { TextArea } = Input;
 
 
 export interface editorctx{
-  activeId: null | number;
+  assistant: Assistant;
 }
 
 export const EditorSidebarContext = React.createContext<editorctx>( {} as editorctx );
@@ -41,7 +35,9 @@ export const useEditorContext = () => React.useContext( EditorSidebarContext );
  * @returns SidebarLayout component
  */
 const EditorSidebar = ( props: {
-    children: ReactNode,
+  assistant: Assistant,
+  aid: string,
+  children: ReactNode,
 } ) => {
   const [collapsed, setCollapsed] = useState( false );
   // eslint-disable-next-line
@@ -58,10 +54,31 @@ const EditorSidebar = ( props: {
 
   const [ screenwidth, setScreenwidth ] = useState(window.innerWidth);
 
-  const [ activeId, setActiveId ] = useState(null);
-  const [ counter, setCounter ] = useState(0);
-  const [ assistantName, setAssistantName ] = useState("Neuer Assistent");
-  const [ isPublic, setIsPublic ] = useState(false);
+  const [ assistantState, setAssistantState ] = useState({
+    name: "Neuer Assistent",
+    image: "",
+    category: "other",
+    description: "",
+    video: "",
+    published: false,
+    uid: "",
+    blocks: Array<Block | MultiStepBlock>()
+  });
+
+  const [ settingsModalOpen, setSettingsModalOpen ] = useState(false);
+  const [ settForm ] = Form.useForm();
+  const [messageApi, messageContext] = message.useMessage();
+  const [ name, setName ] = useState((props.assistant)? props.assistant.name: "Neuer Assistant");
+
+
+  useEffect(() => {
+    if(props.assistant){
+      setAssistantState(props.assistant);
+      settForm.setFieldValue("category", assistantState.category);
+      settForm.setFieldValue("description", assistantState.description);
+    }
+  }, [props.assistant]);
+
 
   /**
      * Effect used for responsive sizing of the sidebar
@@ -96,9 +113,48 @@ const EditorSidebar = ( props: {
     };
   }, []);
 
-  // Links displayd in the sidebar footer
-  const footeritems = [];
-  
+
+  const saveAssistant = async () => {
+    const AssistantToUpdate: Assistant = assistantState;
+    const desc = settForm.getFieldValue("description");
+
+    AssistantToUpdate.description = (desc)? desc: "";
+    AssistantToUpdate.category = settForm.getFieldValue("category");
+    AssistantToUpdate.name = name;
+
+    if(AssistantToUpdate.name){
+      if(AssistantToUpdate.category){
+        if(props.aid){
+          const updateReq = await updateData("Assistants", props.aid, AssistantToUpdate);
+
+          if(updateReq.error){
+            console.log(updateReq.error);
+            messageApi.error("Speichern fehlgeschlagen. Bitte versuch es später erneut!");
+          }else{
+            messageApi.success("Speichern erfolgreich!");
+          }
+        }else{
+          const createReq = await addDataWithoutId("Assistants", AssistantToUpdate);
+
+          if(createReq.error){
+            console.log(createReq.error);
+            messageApi.error("Speichern fehlgeschlagen. Bitte versuch es später erneut!");
+          }else{
+            messageApi.success("Speichern erfolgreich!");
+            router.replace(`/editor?aid=${createReq.result.id}`);
+          }
+        }
+      }else{
+        setSettingsModalOpen(true);
+        messageApi.error("Bitte lege eine Kategorie fest!");
+      }
+    }else{
+      messageApi.error("Bitte gib einen Namen für deinen Assistenten ein!");
+    }
+
+
+  }
+
 
   /**
      * Subcomponent to render a header if the screenwidth is below a fixed amount
@@ -108,19 +164,87 @@ const EditorSidebar = ( props: {
     if(screenwidth <= 1500){
       return(
         <Header className={styles.header}>
-          
+          <Link className={styles.backbutton} href={"/"}>
+            <Button><ArrowLeftOutlined/></Button>
+          </Link>
+          <Link href={"/"} className={styles.headerlink}>
+            {/*eslint-disable-next-line */}
+              <img src="/small_logo.png" width={32} height={32} alt="Logo"/>
+          </Link>
+
+          <div className={styles.nameinput}>
+            <Input value={name} placeholder={"Neuer Assistent"}
+              onChange={(val) => {
+                setName( val.target.value )
+              }}></Input>
+          </div>
+
+          <div className={styles.assistantSettings}>
+            <div className={styles.settingsbutton} onClick={() => setSettingsModalOpen(true)}>
+              <SettingOutlined/>
+            </div>
+          </div>
+          <SettingsModal/>
+
+          <div className={styles.headerActions}>
+            <div className={styles.additionalSettings}>
+              <span className={styles.settingsname}>Öffentlich?</span>
+              <Switch value={(assistantState) ? assistantState.published : false} size="small"
+                onChange={(val) => setAssistantState({ ...assistantState, published: val })}/>
+            </div>
+            <Button onClick={() => {
+              saveAssistant();
+            }} className={styles.savebutton} type={"primary"}>{(props.aid)? "Speichern" : "Assistenten anlegen"}</Button>
+          </div>
         </Header>
       );
     }
   }
 
 
+  const SettingsModal = () => {
+    return (
+      <Modal
+        width={"40%"}
+        title="Einstellungen"
+        open={settingsModalOpen} onOk={() => {
+          setSettingsModalOpen(true)
+        }} onCancel={() => {
+          setSettingsModalOpen(false) 
+        }}
+        footer={<Button type={"primary"} onClick={() => setSettingsModalOpen(false)} >Fertig</Button>}
+      >
+        <Form form={settForm} layout={"vertical"}>
+          <Form.Item label={<b>Assistant-Thumbnail</b>}>
+
+          </Form.Item>
+
+          <Form.Item name={"category"} label={<b>Kategorie</b>}>
+            <Select
+              placeholder={"Bitte wähle eine Kategorie"}
+              options={[
+                { value: "productivity", label: "Produktivität" },
+                { value: "content", label: "Content-Erstellung" },
+                { value: "other", label: "Sonstige" }
+              ]} ></Select>
+          </Form.Item>
+
+          <Form.Item name={"description"} label={<b>Beschreibung</b>}>
+            <TextArea rows={7} placeholder={"Beschreibe deinen Assistenten kurz"} />
+          </Form.Item>
+        </Form>
+      </Modal>
+    );
+  }
+  
+  
 
   // Check the current screenwidth
   if(screenwidth <= 1500){
     // if the screenwidth is below 1500px render the mobile layout of the sidebar
     return (
       <Layout className={styles.layout} hasSider={(screenwidth > 1500)}>
+        {messageContext}
         <MobileHeader />
         <Drawer
           style={{ backgroundColor: "#101828" }}
@@ -186,7 +310,8 @@ const EditorSidebar = ( props: {
   }else{
     // If the width of the screen is above 1500px we render the desktop variant of the component
     return (
-      <EditorSidebarContext.Provider value={{ activeId: activeId }}>
+      <EditorSidebarContext.Provider value={{ assistant: assistantState }}>
+        {messageContext}
         <Layout className={styles.layout}>
           <Header className={styles.header}>
             <Link className={styles.backbutton} href={"/"}>
@@ -198,15 +323,26 @@ const EditorSidebar = ( props: {
             </Link>
 
             <div className={styles.nameinput}>
-              <Input placeholder={"Neuer Assistent"} onChange={(val) => setAssistantName(val.target.value)}></Input>
+              <Input value={name} placeholder={"Neuer Assistent"} onChange={(val) => {
+                setName(val.target.value )
+              }}></Input>
             </div>
+
+            <div className={styles.assistantSettings}>
+              <div className={styles.settingsbutton} onClick={() => setSettingsModalOpen(true)}>
+                <SettingOutlined />
+              </div>
+            </div>
+            <SettingsModal />
 
             <div className={styles.headerActions}>
               <div className={styles.additionalSettings}>
                 <span className={styles.settingsname}>Öffentlich?</span>
-                <Switch size="small" onChange={(val) => setIsPublic(val)} />
+                <Switch value={(assistantState)? assistantState.published: false} size="small" onChange={(val) => setAssistantState({ ...assistantState, published: val })} />
               </div>
-              <Button className={styles.savebutton} type={"primary"}>Speichern</Button>
+              <Button onClick={() => {
+                saveAssistant(); 
+              }} className={styles.savebutton} type={"primary"}>{(props.aid)? "Speichern" : "Assistenten anlegen"}</Button>
             </div>
           </Header>
 
@@ -221,7 +357,7 @@ const EditorSidebar = ( props: {
         </Layout>
         <style>{"html{ overflow-y: hidden !important; }"}</style>
       </EditorSidebarContext.Provider>
-
+      
     );
   }
 };

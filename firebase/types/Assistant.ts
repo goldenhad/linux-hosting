@@ -42,13 +42,19 @@ export default interface Assistant {
     image: string;
     category: string;
     description: string;
-    rank: number;
     video: string;
-    type: AssistantType;
+    uid: string;
+    published: boolean;
+    blocks: Array<Block | MultiStepBlock>;
+}
+
+export interface Block {
     prompt: string;
+    personality: string;
+}
+
+export interface MultiStepBlock extends Block {
+    type: AssistantType;
     inputColumns: Array<AssistantInputColumn>;
     initialMessage: string;
-    uid: string;
-    personality: string;
-    published: boolean;
 }

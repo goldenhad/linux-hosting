@@ -1,6 +1,6 @@
 import router from "next/router";
-import { useState } from "react";
-import { Alert, Checkbox, Form, Input, Menu, MenuProps } from "antd";
+import { useState, useEffect } from "react";
+import { Alert, Checkbox, Form, Input, Menu, MenuProps, Row, Col, Layout } from "antd";
 import styles from "./login.module.scss"
 import signIn from "../../firebase/auth/signin";
 import Head from "next/head";
@@ -13,6 +13,50 @@ import { logEvent } from "firebase/analytics";
 import { analytics } from "../../db";
 import getDocument from "../../firebase/data/getData";
 import { User } from "../../firebase/types/User";
+
+const { Header, Content, Footer } = Layout;
+
+const TypewriterEffect = ({ texts }) => {
+  const [index, setIndex] = useState(0);
+  const [subIndex, setSubIndex] = useState(0);
+  const [blink, setBlink] = useState(true);
+  const [reverse, setReverse] = useState(false);
+
+  useEffect(() => {
+    if (index >= texts.length) return;
+
+    if (subIndex === texts[index].length + 1 && !reverse) {
+        // Nach dem Anzeigen des gesamten Textes warten, bevor gelöscht wird
+        setTimeout(() => setReverse(true), 3000); // Warten Sie 3 Sekunden, bevor der Text gelöscht wird.
+        return;
+    }
+
+    if (subIndex === 0 && reverse) {
+        // Sofortiger Reset des subIndex, um den Text zu löschen
+        setReverse(false);
+        setIndex((prev) => (prev + 1) % texts.length);
+        return;
+    }
+
+    const typingSpeed = 35; // Geschwindigkeit des Schreibens
+    const timeout = setTimeout(() => {
+        setSubIndex(prev => reverse ? 0 : prev + 1);
+    }, typingSpeed);
+
+    return () => clearTimeout(timeout);
+  }, [subIndex, index, reverse, texts]);
+
+  useEffect(() => {
+    const blinkSpeed = 500; // Geschwindigkeit des Blinkens beibehalten
+    const timeout2 = setTimeout(() => {
+        setBlink((prev) => !prev);
+    }, blinkSpeed);
+
+    return () => clearTimeout(timeout2);
+  }, [blink]);
+
+  return <span>{`${texts[index].substring(0, subIndex)}${blink ? "|" : " "}`}</span>;
+};
 
 
 /**
@@ -27,10 +71,6 @@ const frontendnav: MenuProps["items"] = [
     label: <Link href={"legal"}>Impressum</Link>,
     key: "legal"
   },
-  {
-    label: <Link href={"login"}>Siteware business</Link>,
-    key: "login"
-  }
 ]
 
 /**
@@ -92,28 +132,61 @@ export default function Login(){
     setLoginFailed( true );
   };
 
-  return(
-    <div className={styles.logincontent}>
-      <div className={styles.logincontainer}>
-        <div className={styles.logorow}>
-          <div className={styles.logobox}>
+  return (
+    
+
+    <Layout className={styles.backgroundStyle}>
+    <div className={styles.overlayStyle}></div>
+    <div className={styles.overlay}></div>
+    <Content className={styles.contentContainer}>
+        <Row justify="space-around" align="bottom" style={{ height: '100%' , padding: '5% 0' }}>
+            <Col xs={8}  // Vollbreite auf sehr kleinen Bildschirmen
+      sm={8}  // Breitere Bildschirme, aber kleiner als Tablet
+      md={8}  // Tablet
+      lg={8}  // Kleine Desktops
+      xl={4}   // Große Desktops 
+      align="center" style={{ textAlign: 'right' }}>
+            <div className={styles.logobox}>
             <Link href={"/login"}>
               {/*eslint-disable-next-line */}
-              <img src={"/logo.svg"} alt="Logo" width={100}/>
+              <img src={"/siteware-logo-white.svg"} alt="Logo"/>
             </Link>
           </div>
-          <div className={styles.nav}>
-            <Menu className={styles.navmenu} overflowedIndicator={
-              <Icon
-                component={Nav}
-                className={styles.headericon}
-                viewBox='0 0 40 40'
-              />} selectedKeys={["login"]} mode="horizontal" items={frontendnav} />
-          </div>
-        </div>
-
-        <div className={styles.formContainer}>
-          <div className={styles.formtitle}>testLog in 12etgserw453</div>
+            </Col>
+            <Col xs={9}  // Vollbreite auf sehr kleinen Bildschirmen
+      sm={18}  // Breitere Bildschirme, aber kleiner als Tablet
+      md={12}  // Tablet
+      lg={10}  // Kleine Desktops
+      xl={8}   // Große Desktops 
+      >
+                <div className={styles.typewriterEffect}>
+                    <
+        TypewriterEffect texts = {
+            ["Ich bin Dein neuer KI Assistent aus Deutschland.",
+            "Ich biete Dir laufend neue KI -Apps, die das Leben leichter machen schreibe und antworte auf E-Mails in Deinem Stil.",
+            "Ich verfasse Text in dem Stil, den Du Dir wünschst.",
+            "Meine Ergebnisse sind  unlimitiert im Umfang.",
+            "Ich arbeite mit mehreren KI Modellen in einem System DMSP:", 
+            "Ich arbeite Deine Aufgaben in mehreren Schritten ab (DMSP).",
+            "Ich sorge dafür, dass Du wieder mehr Zeit für Deine wesentlichen Aufgaben hast.",
+            "Ich beantworte dir alle Fragen zu Excel wie ein Berater.",
+            "Ich biete Dir Zugang zu führenden KI Modellen in einem System.",
+            "Ich lerne schnell und viel über Dich, Dein Unternehmen, Deine Produkte und Dienstleistungen.",
+            "Ich übersetze Deine Texte in viele Sprachen.",
+            "Ich sorge dafür, dass Deine Texte der Rechtschreibung entsprechen.",
+            "Bald kannst Du eigene Apps mit Siteware entwickeln und damit Geld verdienen."
+            ]
+        }
+        />
+                </div>
+            </Col>
+            <Col className={styles.formContainer} xs={24}  // Vollbreite auf sehr kleinen Bildschirmen
+      sm={18}  // Breitere Bildschirme, aber kleiner als Tablet
+      md={12}  // Tablet
+      lg={10}  // Kleine Desktops
+      xl={8}   // Große Desktops 
+      >
+          <h1 className={styles.formtitle}>Log in</h1>
           <div className={styles.formexplanation}>Willkommen zurück. Bitte gebe unten deine Logindaten ein.</div>
           <Form
             name="basic"
@@ -134,7 +207,7 @@ export default function Login(){
               name="email"
               className={styles.loginpart}
             >
-              <Input className={styles.logininput} />
+              <Input className={styles.logininput} name="email" />
             </Form.Item>
 
             <Form.Item
@@ -142,7 +215,7 @@ export default function Login(){
               name="password"
               className={styles.loginpart}
             >
-              <Input.Password className={styles.logininput} />
+              <Input.Password className={styles.logininput}  name="password"/>
             </Form.Item>
 
             <div className={styles.rememberrow}>
@@ -157,7 +230,7 @@ export default function Login(){
             />
 
             <Form.Item className={styles.loginbutton}>
-              <FatButton isSubmitButton={true} text="Anmelden" />
+              <FatButton isSubmitButton={true} text="Kostenlos Anmelden" />
             </Form.Item>
           </Form>
 
@@ -166,10 +239,14 @@ export default function Login(){
           <div className={styles.signupnotice}>
             <div>Noch keinen Account?</div><Link className={styles.signuplink} href={"/register"}>Jetzt registrieren</Link>
           </div>
-        </div>
-      </div>
-      <div className={styles.copyrightfooter}>© Siteware business 2024</div>
-    </div>
+            </Col>
+        </Row>
+    </Content>
+    <Footer className={styles.footerContainer}>
+            <Menu className={styles.navmenu} mode="horizontal" items={frontendnav} />
+            
+        </Footer>
+    </Layout>
   );
 }
 
@@ -182,14 +259,14 @@ Login.getLayout = ( page ) => {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
+        <meta property="og:title" content="Siteware | Dein intelligenter KI-Assistent" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/ogimage.jpg" />
         <meta property="og:url" content={`${process.env.BASEURL}`} />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware business | ai assistant</title>
+        <title>Siteware | Dein intelligenter KI-Assistent</title>
       </Head>
-      <main>
+      <main >
         {page}
         <CookieBanner />
       </main>

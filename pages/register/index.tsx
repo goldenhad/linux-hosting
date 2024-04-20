@@ -797,7 +797,7 @@ export default function Register( props ){
           <div className={styles.logobox}>
             <Link href={"/login"}>
               {/*eslint-disable-next-line */}
-              <img src={"/logo.svg"} alt="Logo" width={100}/>
+              <img src={"/siteware-logo-black.svg"} alt="Logo" width={100}/>
             </Link>
           </div>
           <div className={styles.nav}>
@@ -837,7 +837,7 @@ Register.getLayout = ( page ) => {
         <meta property="og:image" content="/ogimage.jpg" />
         <meta property="og:url" content={`${process.env.BASEURL}`} />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware business | ai assistant</title>
+        <title>Siteware | ai assistant</title>
       </Head>
       <main>
         {page}

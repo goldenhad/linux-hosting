@@ -8,7 +8,7 @@
     .typewriterEffect{
         font-size: 18px !important;
         line-height: 1.2;
-        font-weight: 100px;
+        font-weight: 100;
         
     }
     .formContainer {
@@ -129,8 +129,6 @@
         .loginpart{
             font-weight: 700;
             line-height: 20px;
-            size: 14px;
-            letter-spacing: 1%;
         }
 
         .logininput{
@@ -178,8 +176,6 @@
     background: transparent; 
     text-align: center; 
     z-index: 1; 
-    padding: 0;
-    /*border-bottom: 10px solid #0903F5;*/
     border-bottom: 10px solid #1478FD;
     padding: 25px;
     

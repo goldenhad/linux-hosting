@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authMiddleware, redirectToHome, redirectToLogin } from "next-firebase-auth-edge";
 import serviceAccount from "./mailbuddy_priv_key.json";
 
-const PUBLIC_PATHS = ["/register", "/login", "/forgot/password"];
+const PUBLIC_PATHS = ["/register", "/login", "/forgot/password", "/privacy", "/legal"];
 
 const redirectToRoute = (pathname: string, request: NextRequest) => {
   const url = request.nextUrl.clone();

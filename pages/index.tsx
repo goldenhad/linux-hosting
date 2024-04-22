@@ -37,7 +37,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default function Home(props: { assistants: Array<Assistant> }) {
   const context = useAuthContext();
-  const { login, user, services } = context;
+  const { login, user, services, role } = context;
   const router = useRouter();
   const dialogRef = useRef( null );
   const monologRef = useRef( null );
@@ -155,18 +155,28 @@ export default function Home(props: { assistants: Array<Assistant> }) {
   const AssistantCardList = () => {
     let servicearr = props.assistants;
 
-    if(selectedCat != "all"){
-      if(selectedCat != "favourites"){
-        servicearr = props.assistants.filter((singleService: Assistant) => {
-          return singleService.category == selectedCat;
-        });
-      }else{
-        servicearr = props.assistants.filter((singleService: Assistant) => {
-          if(user.services){
-            return user.services.favourites.includes(singleService.uid);
-          }
-        });
+    if(selectedCat != "unpublished"){
+      servicearr = props.assistants.filter((singleService: Assistant) => {
+        return singleService.published == true;
+      });
+
+      if(selectedCat != "all"){
+        if(selectedCat != "favourites"){
+          servicearr = servicearr.filter((singleService: Assistant) => {
+            return singleService.category == selectedCat;
+          });
+        }else{
+          servicearr = servicearr.filter((singleService: Assistant) => {
+            if(user.services){
+              return user.services.favourites.includes(singleService.uid);
+            }
+          });
+        }
       }
+    }else{
+      servicearr.filter((singleService: Assistant) => {
+        return singleService.published == false;
+      });
     }
 
     /*servicearr = servicearr.sort((a: Assistant, b: Assistant) => {
@@ -191,6 +201,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
       <div className={styles.servicelist}>
         {servicearr.map((singleService: Assistant, idx: number) => {
           return <AssistantCard
+            aid={singleService.uid}
             name={singleService.uid}
             key={idx}
             image={singleService.image}
@@ -216,6 +227,8 @@ export default function Home(props: { assistants: Array<Assistant> }) {
               })
               await updateData("User", login.uid, { services: { favourites: currentfavs } });
             }}
+            canEdit={role.canManageUser}
+            published={singleService.published}
           />
         })}
       </div>

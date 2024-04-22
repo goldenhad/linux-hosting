@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { GetServerSideProps } from "next";
 import { getAllDocs } from "../../firebase/data/getData";
-import Assistant, { AssistantType } from "../../firebase/types/Assistant";
+import Assistant, { AssistantType, InputBlock } from "../../firebase/types/Assistant";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
-import styles from "../../components/AssistantBase/AssistantBase.module.scss";
+import styles from "./assistant.module.scss";
 import axios from "axios";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../db";
@@ -162,7 +162,7 @@ export default function Assistant(props: { assistant: Assistant }) {
 
   const HistoryCard = () => {
     if(historyState.length > 0){
-      if(props.assistant.type == AssistantType.QAA){
+      if((props.assistant.blocks[0] as InputBlock).type == AssistantType.QAA){
         return(
           <List
             bordered
@@ -199,7 +199,7 @@ export default function Assistant(props: { assistant: Assistant }) {
             }}
           />
         );
-      }else if(props.assistant.type == AssistantType.CHAT){
+      }else if((props.assistant.blocks[0] as InputBlock).type == AssistantType.CHAT){
         console.log(historyState);
         return(
           <List
@@ -238,7 +238,7 @@ export default function Assistant(props: { assistant: Assistant }) {
           />
         );
       }else{
-        console.log(props.assistant.type);
+        console.log((props.assistant.blocks[0] as InputBlock).type);
       }
     }else{
       return (<div className={styles.emptyhistory}>
@@ -246,12 +246,12 @@ export default function Assistant(props: { assistant: Assistant }) {
       </div>);
     }
   }
-  
+
   
   const getAssistantForm = () => {
-    console.log(props.assistant.type);
+    console.log((props.assistant.blocks[0] as InputBlock).type);
 
-    switch (props.assistant.type){
+    switch ((props.assistant.blocks[0] as InputBlock).type){
     case AssistantType.QAA:
       return <QaAAssistant
         assistant={props.assistant} 

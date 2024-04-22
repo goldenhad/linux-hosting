@@ -12,6 +12,12 @@ export enum AssistantInputType {
     SELECT,
 }
 
+export enum AiModel {
+    GPT4,
+    VISION,
+    GEMINI
+}
+
 export interface GenericInput {
     key: string;
     placeholder: string;
@@ -45,16 +51,18 @@ export default interface Assistant {
     video: string;
     uid: string;
     published: boolean;
-    blocks: Array<Block | MultiStepBlock>;
+    blocks: Array<Block | InputBlock>;
 }
 
 export interface Block {
     prompt: string;
     personality: string;
+    name: string,
+    model: AiModel
 }
 
-export interface MultiStepBlock extends Block {
+export interface InputBlock extends Block {
     type: AssistantType;
     inputColumns: Array<AssistantInputColumn>;
-    initialMessage: string;
+    initialMessage?: string;
 }

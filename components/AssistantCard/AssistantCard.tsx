@@ -1,6 +1,6 @@
 import { Badge, Card, Typography } from "antd";
 import styles from "./assistantcard.module.scss";
-import Icon from "@ant-design/icons";
+import Icon, { EditOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import Play from "../../public/icons/play.svg";
 import Heart from "../../public/icons/heart.svg";
@@ -24,6 +24,7 @@ const { Paragraph } = Typography;
  * @constructor
  */
 const AssistantCard = ( props: {
+    aid: string,
     name: string,
     image: string,
     title: string,
@@ -33,7 +34,9 @@ const AssistantCard = ( props: {
     ribbonText: string,
     onFav?: () => void,
     onDeFav?: () => void,
-    onVideoClick?: () => void
+    onVideoClick?: () => void,
+    canEdit: boolean,
+    published: boolean
   } ) => {
   const [image, setImage] = useState("/base.svg");
 
@@ -56,6 +59,32 @@ const AssistantCard = ( props: {
   }, [image]);
 
 
+  const FavButton = () => {
+    if(props.published){
+      if(props.fav){
+        return (
+          <Icon
+            component={HeartFull}
+            onClick={props.onDeFav}
+            data-favname={`${props.name}-fav`}
+            className={`${styles.iconsvg} ${styles.active}`}
+            viewBox='0 0 22 25'
+          />
+        );
+      }else{
+        return (
+          <Icon
+            component={Heart}
+            onClick={props.onFav}
+            className={styles.iconsvg}
+            data-favname={`${props.name}-fav`}
+            viewBox='0 0 22 25'
+          />
+        );
+      }
+    }
+  }
+  
   const AssCard = () => {
     return (
       <div className={styles.servicebox}>
@@ -73,24 +102,11 @@ const AssistantCard = ( props: {
         </Card>
         <div className={styles.servicefooter}>
           <div className={styles.actions}>
-            {(props.fav)?
-              <Icon
-                component={HeartFull}
-                onClick={props.onDeFav}
-                data-favname={`${props.name}-fav`}
-                className={`${styles.iconsvg} ${styles.active}`}
-                viewBox='0 0 22 25'
-              />:
-              <Icon
-                component={Heart}
-                onClick={props.onFav}
-                className={styles.iconsvg}
-                data-favname={`${props.name}-fav`}
-                viewBox='0 0 22 25'
-              />}
+            <FavButton />
             <div onClick={props.onVideoClick} className={styles.videobuttoncontainer}>
               <Icon component={Play} className={styles.iconsvg} viewBox='0 0 22 22'/>
             </div>
+            {(props.canEdit)? <a href={`/editor?aid=${props.aid}`}><EditOutlined /></a> : <></>}
           </div>
           <Link href={props.link} attribute-assistantname={`${props.name}-link`}>
             <span className={styles.assistantlink}>Zum Assistenten</span>

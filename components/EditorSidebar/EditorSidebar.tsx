@@ -1,22 +1,22 @@
-import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import { ArrowLeftOutlined, LogoutOutlined, SettingOutlined } from "@ant-design/icons";
-import Icon, { HistoryOutlined } from "@ant-design/icons";
-import {Button, Form, Input, MenuProps, message, Modal, Select, Switch} from "antd";
-import { Avatar, ConfigProvider, Divider, Drawer, FloatButton, Layout, Menu, Popover } from "antd";
+import React, { Dispatch, ReactNode, useEffect, useState } from "react";
+import { ArrowLeftOutlined, SettingOutlined } from "@ant-design/icons";
+import { Button, Form, Input, message, Modal, Select, Switch } from "antd";
+import { Drawer, Layout } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 const { Header, Content, Footer, Sider } = Layout;
 import styles from "./editorsidebar.module.scss";
 import CookieBanner from "../CookieBanner/CookieBanner";
-import Assistant, {Block, MultiStepBlock} from "../../firebase/types/Assistant";
+import Assistant, { Block, InputBlock } from "../../firebase/types/Assistant";
 import updateData from "../../firebase/data/updateData";
-import addData, {addDataWithoutId} from "../../firebase/data/setData";
+import { addDataWithoutId } from "../../firebase/data/setData";
 
 const { TextArea } = Input;
 
 
 export interface editorctx{
   assistant: Assistant;
+  setAssistant: Dispatch<any>;
 }
 
 export const EditorSidebarContext = React.createContext<editorctx>( {} as editorctx );
@@ -62,7 +62,7 @@ const EditorSidebar = ( props: {
     video: "",
     published: false,
     uid: "",
-    blocks: Array<Block | MultiStepBlock>()
+    blocks: Array<Block | InputBlock>()
   });
 
   const [ settingsModalOpen, setSettingsModalOpen ] = useState(false);
@@ -79,6 +79,10 @@ const EditorSidebar = ( props: {
     }
   }, [props.assistant]);
 
+
+  useEffect(() => {
+    console.log(assistantState);
+  }, [assistantState]);
 
   /**
      * Effect used for responsive sizing of the sidebar
@@ -115,6 +119,7 @@ const EditorSidebar = ( props: {
 
 
   const saveAssistant = async () => {
+    console.log(assistantState);
     const AssistantToUpdate: Assistant = assistantState;
     const desc = settForm.getFieldValue("description");
 
@@ -243,74 +248,75 @@ const EditorSidebar = ( props: {
   if(screenwidth <= 1500){
     // if the screenwidth is below 1500px render the mobile layout of the sidebar
     return (
-      <Layout className={styles.layout} hasSider={(screenwidth > 1500)}>
-        {messageContext}
-        <MobileHeader />
-        <Drawer
-          style={{ backgroundColor: "#101828" }}
-          bodyStyle={{ backgroundColor: "#101828", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", width: 80, borderColor: "#101828" }}
-          placement="left"
-          width={80}
-          onClose={() => {
-            setSidebarOpen(false)
-          }}
-          open={sidebaropen}
-          closeIcon={null}
-        >
-          <div className={styles.mobilesidebarcontainer}>
-            <div className={styles.logobox}>
-              {/*eslint-disable-next-line */}
-                        <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
-            </div>
-            <div className={styles.drawermenu}>
-            </div>
-            <div className={styles.sidebarbottomcontainer}>
-              <div className={styles.avatarcontainer}>
+      <EditorSidebarContext.Provider value={{ assistant: assistantState, setAssistant: setAssistantState }}>
+        <Layout className={styles.layout} hasSider={(screenwidth > 1500)}>
+          {messageContext}
+          <MobileHeader />
+          <Drawer
+            style={{ backgroundColor: "#101828" }}
+            bodyStyle={{ backgroundColor: "#101828", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", width: 80, borderColor: "#101828" }}
+            placement="left"
+            width={80}
+            onClose={() => {
+              setSidebarOpen(false)
+            }}
+            open={sidebaropen}
+            closeIcon={null}
+          >
+            <div className={styles.mobilesidebarcontainer}>
+              <div className={styles.logobox}>
+                {/*eslint-disable-next-line */}
+                  <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
+              </div>
+              <div className={styles.drawermenu}>
+              </div>
+              <div className={styles.sidebarbottomcontainer}>
+                <div className={styles.avatarcontainer}>
+                </div>
               </div>
             </div>
-          </div>
-        </Drawer>
-        <Sider
-          width={80}
-          className={`${styles.sidebar}`}
-          breakpoint={breakpoint}
-          collapsedWidth={collapseWidth}
-          collapsed={collapsed}
-          onCollapse={( value ) => {
-            setCollapsed( value )
-          }}
-        >
-          <Link href={"/"}>
-            <div className={styles.logobox}>
-              {/*eslint-disable-next-line */}
-                        <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
-            </div>
-          </Link>
+          </Drawer>
+          <Sider
+            width={80}
+            className={`${styles.sidebar}`}
+            breakpoint={breakpoint}
+            collapsedWidth={collapseWidth}
+            collapsed={collapsed}
+            onCollapse={( value ) => {
+              setCollapsed( value )
+            }}
+          >
+            <Link href={"/"}>
+              <div className={styles.logobox}>
+                {/*eslint-disable-next-line */}
+                  <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
+              </div>
+            </Link>
 
-          <div className={styles.navigation}>
+            <div className={styles.navigation}>
 
-            <div className={styles.sidebarbottomcontainer}>
-              <div className={styles.avatarcontainer}>
+              <div className={styles.sidebarbottomcontainer}>
+                <div className={styles.avatarcontainer}>
+                </div>
               </div>
             </div>
-          </div>
-        </Sider>
+          </Sider>
 
-        <Layout>
-          <Content className={styles.layoutcontent}>
-            <div className={styles.childrencontainer}>
-              {props.children}
-            </div>
-          </Content>
+          <Layout>
+            <Content className={styles.layoutcontent}>
+              <div className={styles.childrencontainer}>
+                {props.children}
+              </div>
+            </Content>
+          </Layout>
+          <CookieBanner />
         </Layout>
-        <CookieBanner />
-      </Layout>
-
+      </EditorSidebarContext.Provider>
     );
   }else{
     // If the width of the screen is above 1500px we render the desktop variant of the component
     return (
-      <EditorSidebarContext.Provider value={{ assistant: assistantState }}>
+      <EditorSidebarContext.Provider value={{ assistant: assistantState, setAssistant: setAssistantState }}>
         {messageContext}
         <Layout className={styles.layout}>
           <Header className={styles.header}>
@@ -338,7 +344,11 @@ const EditorSidebar = ( props: {
             <div className={styles.headerActions}>
               <div className={styles.additionalSettings}>
                 <span className={styles.settingsname}>Öffentlich?</span>
-                <Switch value={(assistantState)? assistantState.published: false} size="small" onChange={(val) => setAssistantState({ ...assistantState, published: val })} />
+                <Switch
+                  value={(assistantState)? assistantState.published: false}
+                  size="small"
+                  onChange={(val) => setAssistantState({ ...assistantState, published: val })}
+                />
               </div>
               <Button onClick={() => {
                 saveAssistant(); 

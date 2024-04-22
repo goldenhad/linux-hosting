@@ -6,7 +6,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../db";
 import { Profile } from "../../../firebase/types/Profile";
 import axios from "axios";
-import Assistant, { AssistantInputColumn, AssistantInputType } from "../../../firebase/types/Assistant";
+import Assistant, { AssistantInputColumn, AssistantInputType, InputBlock } from "../../../firebase/types/Assistant";
 import updateData from "../../../firebase/data/updateData";
 import getDocument from "../../../firebase/data/getData";
 import { Templates } from "../../../firebase/types/Settings";
@@ -71,6 +71,8 @@ export default function QaAAssistant(props: {
   const [ calculator ] = useState(new TokenCalculator(context.calculations))
   const router = useRouter();
   const [ form ] = Form.useForm();
+
+  const mainblock = props.assistant.blocks[0] as InputBlock;
 
 
   useEffect(() => {
@@ -188,8 +190,9 @@ export default function QaAAssistant(props: {
 
   const promptFunction = (values, prompt: string) => {
     let replaced = prompt;
+
     console.log(prompt)
-    props.assistant.inputColumns.forEach((column: AssistantInputColumn) => {
+    mainblock.inputColumns.forEach((column: AssistantInputColumn) => {
       column.inputs.forEach((inputobj) => {
         console.log(values);
         console.log(inputobj.key);
@@ -226,7 +229,7 @@ export default function QaAAssistant(props: {
 
   const getBasicState = () => {
     const obj = {};
-    props.assistant.inputColumns.forEach((column: AssistantInputColumn) => {
+    mainblock.inputColumns.forEach((column: AssistantInputColumn) => {
       column.inputs.forEach((inputobj, index) => {
         if(inputobj.type ==  AssistantInputType.PROFILE){
           if (decryptedProfiles.length > 0){
@@ -315,7 +318,7 @@ export default function QaAAssistant(props: {
       const templates: Templates = templatereq.result.data();
 
       // Format the given values to fit to the prompt api
-      const { prompt } = promptFunction( values, props.assistant.prompt )
+      const { prompt } = promptFunction( values, mainblock.prompt )
 
       //Calculate the used tokens of the input
       const costbeforereq = await axios.post("/api/prompt/count", { prompt: prompt });
@@ -329,7 +332,7 @@ export default function QaAAssistant(props: {
 
           try{
             // Query the api for an answer to the input
-            await axios.post( "/api/prompt/generate", { prompt: prompt, personality: props.assistant.personality },
+            await axios.post( "/api/prompt/generate", { prompt: prompt, personality: mainblock.personality },
               { onDownloadProgress: async (progressEvent) => {
                 // Disable the loading of the answer if we have recieved a chunk of data
                 if(!isFreed){
@@ -564,7 +567,7 @@ export default function QaAAssistant(props: {
           setIsAnswerVisible(false);
           setIsLoaderVisible(false)
         }} form={form}>
-          <AssistantForm title={props.assistant.name} inputColumns={props.assistant.inputColumns}
+          <AssistantForm title={props.assistant.name} inputColumns={mainblock.inputColumns}
             quotaOverused={quotaOverused}
             formDisabled={formDisabled} profiles={decryptedProfiles}/>
           <div className={styles.formfootercontainer}>

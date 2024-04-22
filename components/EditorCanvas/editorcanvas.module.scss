@@ -19,3 +19,17 @@
   flex-direction: column;
   justify-content: flex-end;
 }
+
+.addBlock{
+  background-color: black;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 14px 14px 14px 14px;
+  line-height: 8px;
+  border-radius: 50%;
+
+  &:hover {
+    cursor: pointer;
+  }
+}

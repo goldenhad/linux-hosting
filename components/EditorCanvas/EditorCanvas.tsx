@@ -1,39 +1,47 @@
-import { COMPONENT_POSITIONS, ReactInfiniteCanvas, ReactInfiniteCanvasHandle } from "react-infinite-canvas";
+import { ReactInfiniteCanvas, ReactInfiniteCanvasHandle } from "react-infinite-canvas";
 import { useEffect, useRef, useState } from "react";
 import styles from "./editorcanvas.module.scss";
 import { FloatButton } from "antd";
-import { HomeOutlined, QuestionCircleOutlined } from "@ant-design/icons";
-import { DndContext, DragOverlay, useDroppable } from "@dnd-kit/core";
+import { HomeOutlined } from "@ant-design/icons";
+import { useDroppable } from "@dnd-kit/core";
 import { useEditorContext } from "../EditorSidebar/EditorSidebar";
-import {
-  restrictToWindowEdges
-} from "@dnd-kit/modifiers";
-import EditorBlock from "../EditorBlock/EditorBlock";
+import InputEditorBlock from "../InputBlock/InputBlock";
+import { AiModel, AssistantType, Block, InputBlock } from "../../firebase/types/Assistant";
 
 export default function EditorCanvas() {
   const canvasRef = useRef<ReactInfiniteCanvasHandle>();
   const { isOver, setNodeRef } = useDroppable({
     id: "droppable"
   });
-  const { activeId } = useEditorContext();
-  const [ buldingBricks, setBuldingBricks ] = useState<Array<{ name: string }>>([ { name: "Neuer Block" } ])
+  const { assistant, setAssistant } = useEditorContext();
+  const [ buildingBricks, setBuildingBricks ] = useState<Array<Block | InputBlock>>([])
 
 
 
   useEffect(() => {
-    if(activeId){
-      const localbricks = [...buldingBricks];
-      localbricks.push({ name: activeId.toString() });
-      setBuldingBricks(localbricks);
+    if(assistant){
+      setBuildingBricks(assistant.blocks);
     }
-  }, [activeId]);
+  }, [assistant]);
+
+  useEffect(() => {
+    console.log(assistant);
+
+
+    if(assistant){
+      const localAss = assistant;
+      localAss.blocks = buildingBricks;
+      setAssistant(localAss);
+    }
+
+  }, [buildingBricks]);
 
   return (
     <div className={styles.canvascontainer}>
       <ReactInfiniteCanvas
         ref={canvasRef}
         onCanvasMount={(mountFunc: ReactInfiniteCanvasHandle) => {
-          mountFunc.fitContentToView({ scale: 2 });
+          mountFunc.fitContentToView({ scale: 2, offset: { x: 0, y: 400 } });
         }}
         panOnScroll={false}
         customComponents={[
@@ -54,13 +62,25 @@ export default function EditorCanvas() {
             <BuildingblockWrapper />
           ): null}
         </DragOverlay>*/}
-        <>
-          {buldingBricks.map((brick, idx) => {
-
-
-            return(<EditorBlock key={idx} name={brick.name} />);
+        <div>
+          {buildingBricks.map((brick, idx) => {
+            if(idx == 0){
+              return(<InputEditorBlock key={idx} blockid={idx} blocks={buildingBricks} setBlocks={setBuildingBricks}/>);
+            }
           })}
-        </>
+          {(buildingBricks.length == 0)? <div className={styles.addBlock} onClick={() => {
+            const localBricks = [];
+            localBricks.push({
+              name: "Neuer Block",
+              prompt: "",
+              personality: "",
+              model: AiModel.GPT4,
+              type: AssistantType.QAA,
+              inputColumns: []
+            });
+            setBuildingBricks(localBricks);
+          }}>+</div>: <></>}
+        </div>
       </ReactInfiniteCanvas>
       <FloatButton.Group shape="square" style={{ right: 24 }}>
         <FloatButton icon={<HomeOutlined />} onClick={() => {

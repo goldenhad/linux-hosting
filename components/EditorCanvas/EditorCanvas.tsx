@@ -65,7 +65,7 @@ export default function EditorCanvas() {
         <div>
           {buildingBricks.map((brick, idx) => {
             if(idx == 0){
-              return(<InputEditorBlock key={idx} blockid={idx} blocks={buildingBricks} setBlocks={setBuildingBricks}/>);
+              return(<InputEditorBlock key={idx} block={brick as InputBlock} updateBlockState={() => {}}/>);
             }
           })}
           {(buildingBricks.length == 0)? <div className={styles.addBlock} onClick={() => {

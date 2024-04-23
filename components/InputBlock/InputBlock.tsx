@@ -1,8 +1,15 @@
 import styles from "./editorblock.module.scss"
-import { ForwardedRef, forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Card, Form, Input, Modal, Select, Space, Switch } from "antd";
-import { AssistantInput, AssistantInputColumn, AssistantInputType, AssistantType } from "../../firebase/types/Assistant";
+import {ForwardedRef, forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
+import {DeleteOutlined, EditOutlined} from "@ant-design/icons";
+import {Button, Card, Col, Form, Input, Modal, Row, Select, Space, Switch, Tag} from "antd";
+import {
+  AiModel,
+  AssistantInput,
+  AssistantInputColumn,
+  AssistantInputType,
+  AssistantType,
+  InputBlock
+} from "../../firebase/types/Assistant";
 
 const { TextArea } = Input;
 
@@ -44,27 +51,37 @@ interface InputRepresentation {
   settings: InputSettings
 }
 
-export default function InputEditorBlock(props: { blockid: number, blocks: any, setBlocks: any }) {
-  const [x, setX] = useState(0);
+export default function InputEditorBlock(props: { block: InputBlock, updateBlockState: any }) {
+  const [ x, setX] = useState(0);
   const [ y, setY ] = useState(0);
   const [ modalOpen, setModalOpen ] = useState(false);
   const [ stepType, setStepType ] = useState<AssistantType>(AssistantType.QAA);
   const [ name, setName ] = useState("");
   const [ personality, setPersonality ] = useState("");
-  const [ block, setBlock ] = useState((props.blocks[props.blockid])? props.blocks[props.blockid]: { name: "", type: AssistantInputType.TEXT_INPUT, inputColumns: [] })
+  const [ block, setBlock ] = useState((props.block)? props.block: { name: "", personality: "", prompt: "", model: AiModel.GPT4, type: AssistantInputType.TEXT_INPUT, inputColumns: [] })
   const [form] = Form.useForm();
   const rootRef = useRef<any>(null);
+  const [ inputKeys, setInputKeys ] = useState<Array<string>>([]);
 
-  let nameContainer = props.blocks[props.blockid].name;
-  let personalityContainer = props.blocks[props.blockid].personality;
+  //let nameContainer = props.blocks[props.blockid].name;
+  //let personalityContainer = props.blocks[props.blockid].personality;
 
   useEffect(() => {
-    console.log(props.blocks[props.blockid].name);
-    if(props.blockid != undefined){
-      setName(props.blocks[props.blockid].name);
-      setPersonality(props.blocks[props.blockid].personality);
+    if(props.block != undefined){
+      //const blockref = props.blocks[props.blockid];
+      /*if(blockref){
+        setName(blockref.name);
+        setPersonality(blockref.personality);
+
+        const localKeys = [];
+        console.log(blockref.inputColumns);
+        blockref.inputColumns.inputs?.forEach((inp) => {
+          localKeys.push(inp.key);
+        })
+        setInputKeys(inputKeys);
+      }*/
     }
-  }, [props.blockid, props.blocks]);
+  }, []);
 
   const InputAdd = forwardRef((props: { idx: number, inputs }, ref: ForwardedRef<any>) => {
     const optionsRef = useRef<any>([])
@@ -128,7 +145,7 @@ export default function InputEditorBlock(props: { blockid: number, blocks: any, 
       <div ref={ref}>
         {inputs.map((inp, idx) => {
           return <Card className={styles.editorcard} key={idx} type={"inner"} title={"Eingabe"} extra={<InputDelete idx={idx} />}>
-            <InputOptions inputRepresentation={(props.inputs)? props.inputs[idx]: {}} ref={(el) => optionsRef.current[idx] = el} />
+            <InputOptions idx={idx} inputRepresentation={(props.inputs)? props.inputs[idx]: {}} ref={(el) => optionsRef.current[idx] = el} />
           </Card>
         })}
         <div className={styles.inputaddrow}>
@@ -169,8 +186,6 @@ export default function InputEditorBlock(props: { blockid: number, blocks: any, 
     const [ usesMaxSelect, setUsesMaxSelect ] = useState(false);
 
     useEffect(() => {
-      console.log(props.inputRepresentation);
-      console.log(inputKey);
       if(props.inputRepresentation){
         setInputKey(props.inputRepresentation.key);
         setInputLabel(props.inputRepresentation.name);
@@ -203,7 +218,13 @@ export default function InputEditorBlock(props: { blockid: number, blocks: any, 
       <>
         <Space className={styles.optionsinput} direction={"vertical"}>
           <Space direction={"horizontal"}>
-            <Input value={inputKey} placeholder={"Key"} onChange={(val) => setInputKey(val.target.value)}></Input>
+            <Input value={inputKey} placeholder={"Key"} onChange={(val) => {
+              const linpkeys = [...inputKeys];
+              console.log(linpkeys);
+              linpkeys[props.idx] = val.target.value;
+              setInputKeys(linpkeys);
+              setInputKey(val.target.value);
+            }}></Input>
             <Input value={inputLabel} placeholder={"Label"} onChange={(val) => setInputLabel(val.target.value)}></Input>
           </Space>
           <Input value={inputPlaceholder} placeholder={"Platzhaltertext"} onChange={(val) => setInputPlaceholder(val.target.value)}></Input>
@@ -414,7 +435,7 @@ export default function InputEditorBlock(props: { blockid: number, blocks: any, 
       console.log("INVALID");
     }else{
       console.log("VALID");
-      const localBlocksCopy = [...props.blocks];
+      const localBlockCopy = { ...block };
       const cols = [];
 
       sections.forEach((sec) => {
@@ -449,15 +470,15 @@ export default function InputEditorBlock(props: { blockid: number, blocks: any, 
         cols.push(secRepresentation);
       });
 
-      localBlocksCopy[props.blockid].inputColumns = cols;
-      localBlocksCopy[props.blockid].personality = personalityContainer;
-      localBlocksCopy[props.blockid].name = nameContainer;
+      localBlockCopy.inputColumns = cols;
+      //localBlockCopy.personality = personalityContainer;
+      //localBlockCopy.name = nameContainer;
 
-      setName(nameContainer);
-      setPersonality(personalityContainer);
+      //setName(nameContainer);
+      //setPersonality(personalityContainer);
       
-      console.log(localBlocksCopy);
-      props.setBlocks(localBlocksCopy);
+      //console.log(localBlocksCopy);
+      //props.setBlocks(localBlocksCopy);
 
       setModalOpen(false);
     }
@@ -471,33 +492,56 @@ export default function InputEditorBlock(props: { blockid: number, blocks: any, 
         setModalOpen(true)
       }}><EditOutlined/></span>
 
-      <Modal open={modalOpen} footer={<Button onClick={() => {
+      <Modal width={"80%"} open={modalOpen} footer={<Button onClick={() => {
         //console.log(rootRef.current.getSections());
-        validateEditorConfig(rootRef.current.getSections());
+        //validateEditorConfig(rootRef.current.getSections());
+        form.submit();
       }}>Speichern</Button>} onCancel={() => {
         setModalOpen(false);
       }}>
-        <Form layout={"vertical"} form={form}>
-          <Form.Item initialValue={nameContainer} name={"stepName"} label={<b>Name des Blocks</b>}>
-            <Input value={nameContainer} onChange={(val) => nameContainer = val.target.value}></Input>
-          </Form.Item>
+        <Form layout={"vertical"} form={form} onFinish={(values) => {
+          console.log(values)
+          console.log(rootRef.current.getSections());
+        }}>
+          <Row align={"top"} className={styles.editcol}>
+            <Col span={12}>
+              <Form.Item initialValue={block.name} name={"stepName"} label={<b>Name des Blocks</b>}>
+                <Input></Input>
+              </Form.Item>
 
-          <Form.Item initialValue={stepType} name={"stepType"} label={<b>Art des Blocks</b>}>
-            <Select options={[
-              { value: AssistantType.QAA, label: "QaA-Assistant" },
-              { value: AssistantType.CHAT, label: "Chat-Assistant" }
-            ]}
-            defaultValue={AssistantType.QAA}
-            onChange={(val) => setStepType(val)}
-            >
-            </Select>
-          </Form.Item>
+              <Form.Item initialValue={stepType} name={"stepType"} label={<b>Art des Blocks</b>}>
+                <Select options={[
+                  { value: AssistantType.QAA, label: "QaA-Assistant" },
+                  { value: AssistantType.CHAT, label: "Chat-Assistant" }
+                ]}
+                defaultValue={AssistantType.QAA}
+                onChange={(val) => setStepType(val)}
+                >
+                </Select>
+              </Form.Item>
 
-          <Form.Item name={"stepPersonality"} label={<b>Persönlichkeit des Blocks</b>}>
-            <TextArea value={personalityContainer} onChange={(val) => personalityContainer = val.target.value}></TextArea>
-          </Form.Item>
+              <div className={styles.inputedit}>
+                {(stepType == AssistantType.QAA)? <QaAInput ref={rootRef} /> : <ChatInput />}
+              </div>
+            </Col>
 
-          {(stepType == AssistantType.QAA)? <QaAInput ref={rootRef} /> : <ChatInput />}
+            <Col span={12} className={styles.editcol}>
+              <Form.Item initialValue={block.personality} name={"stepPersonality"} label={<b>Persönlichkeit des Blocks</b>}>
+                <TextArea value={block.personality} rows={10}></TextArea>
+              </Form.Item>
+
+              <Form.Item name={"stepPrompt"} label={<b>Prompt des Blocks</b>}>
+                <TextArea rows={10}></TextArea>
+              </Form.Item>
+
+              <div className={styles.taglist}>
+                {inputKeys.map((key, idx) => {
+                  return <Tag key={idx}>{key}</Tag>
+                })}
+              </div>
+            </Col>
+          </Row>
+
         </Form>
       </Modal>
     </div>

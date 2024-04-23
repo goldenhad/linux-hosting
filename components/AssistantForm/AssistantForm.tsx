@@ -7,6 +7,7 @@ import {
 import styles from "./assistantform.module.scss";
 import { Card, Form, Input, Select } from "antd";
 import { isMobile } from "react-device-detect";
+import { useEffect } from "react";
 const { TextArea } = Input;
 
 function optionsToAntdObjects (options: Array<AssistantOption>) {
@@ -26,6 +27,10 @@ function filterOption (input: string, option?: { label: string; value: string })
 
 
 export default function AssistantForm(props: { title: string, inputColumns: Array<AssistantInputColumn>, formDisabled: boolean, quotaOverused: boolean, profiles }){
+  useEffect(() => {
+    console.log(props.inputColumns);
+  }, []);
+
 
   return(
     <div className={styles.userinputform}>
@@ -35,6 +40,29 @@ export default function AssistantForm(props: { title: string, inputColumns: Arra
             <div className={styles.inputlist}>
               {column.inputs.map((inputobj: AssistantInput, idx: number) => {
                 switch (inputobj.type) {
+                case AssistantInputType.TEXT_INPUT:
+                  return (
+                    <div key={idx}>
+                      <Form.Item
+                        className={styles.formpart}
+                        label={<b>{inputobj.name}</b>}
+                        name={inputobj.key}
+                        rules={[
+                          {
+                            required: true,
+                            message: "Bitte gib einen Text ein"
+                          }
+                        ]}
+                      >
+                        <Input
+                          className={styles.forminput}
+                          placeholder={inputobj.placeholder}
+                          disabled={props.formDisabled || props.quotaOverused}
+                        />
+                      </Form.Item>
+                    </div>
+                  );
+                  
                 case AssistantInputType.TEXT_AREA:
                   return (
                     <div key={idx}>

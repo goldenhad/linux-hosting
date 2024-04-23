@@ -159,6 +159,9 @@
   }
 }
 
+.addbutton{
+  margin-top: 20px;
+}
 
 .editorcard{
   margin-top: 15px;
@@ -178,4 +181,13 @@
 .editcol{
   padding-left: 32px;
   padding-right: 32px;
+}
+
+.selectoptions > *{
+  display: flex !important;
+  flex-direction: row !important;
+}
+
+.selectsettings{
+  width: 100%;
 }

@@ -1,7 +1,7 @@
 import styles from "./editorblock.module.scss"
-import {ForwardedRef, forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
-import {DeleteOutlined, EditOutlined} from "@ant-design/icons";
-import {Button, Card, Col, Form, Input, Modal, Row, Select, Space, Switch, Tag} from "antd";
+import { useEffect, useRef, useState } from "react";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { Button, Card, Col, Form, Input, Modal, Row, Select, Space, Switch, Tag } from "antd";
 import {
   AiModel,
   AssistantInput,
@@ -51,6 +51,15 @@ interface InputRepresentation {
   settings: InputSettings
 }
 
+const DEFAULT_ASSISTANT = {
+  name: "",
+  personality: "",
+  prompt: "",
+  model: AiModel.GPT4,
+  type: AssistantInputType.TEXT_INPUT,
+  inputColumns: []
+}
+
 export default function InputEditorBlock(props: { block: InputBlock, updateBlockState: any }) {
   const [ x, setX] = useState(0);
   const [ y, setY ] = useState(0);
@@ -58,13 +67,13 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
   const [ stepType, setStepType ] = useState<AssistantType>(AssistantType.QAA);
   const [ name, setName ] = useState("");
   const [ personality, setPersonality ] = useState("");
-  const [ block, setBlock ] = useState((props.block)? props.block: { name: "", personality: "", prompt: "", model: AiModel.GPT4, type: AssistantInputType.TEXT_INPUT, inputColumns: [] })
+  const [ block, setBlock ] = useState((props.block)? props.block: DEFAULT_ASSISTANT)
   const [form] = Form.useForm();
-  const rootRef = useRef<any>(null);
+
+  const [ assFormState, setAssFormState ] = useState([]);
+
   const [ inputKeys, setInputKeys ] = useState<Array<string>>([]);
 
-  //let nameContainer = props.blocks[props.blockid].name;
-  //let personalityContainer = props.blocks[props.blockid].personality;
 
   useEffect(() => {
     if(props.block != undefined){
@@ -83,321 +92,210 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
     }
   }, []);
 
-  const InputAdd = forwardRef((props: { idx: number, inputs }, ref: ForwardedRef<any>) => {
-    const optionsRef = useRef<any>([])
-    const [ inputs, setInputs ] = useState<Array<Inputs>>([]);
+  useEffect(() => {
+    console.log(assFormState);
+  }, [assFormState]);
+
+
+  const OptionsList = ( props: { name: (string | number)[], inputId: number } ) => {
+    
+    return (
+      <Form.List name={props.name}>
+        {(options, optionsoperation) => {
+          return (
+            <Card className={styles.editorcard} type={"inner"} title={"Optionen"} extra={<></>}>
+
+              {options.map((opt, optid) => {
+                return (
+                  <Space key={optid} direction={"horizontal"}>
+                    <Form.Item name={[opt.name, "key"]}>
+                      <Input placeholder={"Schlüssel"}></Input>
+                    </Form.Item>
+
+                    <Form.Item name={[opt.name, "value"]}>
+                      <Input placeholder={"Wert"}></Input>
+                    </Form.Item>
+
+                    { optid > 0 && <DeleteOutlined onClick={() => optionsoperation.remove(optid)} /> }
+                  </Space>
+                );
+              })}
+              <Button
+                className={styles.addbutton}
+                type="dashed"
+                onClick={() => {
+                  optionsoperation.add()
+                }}
+                block
+                icon={<PlusOutlined />}
+              >
+                    Eingabe hinzufügen
+              </Button>
+            </Card>
+
+          );
+        }}
+      </Form.List>
+    );
+  }
+
+  const InputList = (props: { name:  (string | number)[], colId: number }) => {
+    const inputWatch = Form.useWatch(["sections", props.colId, "inputs"], form);
 
     useEffect(() => {
-      const defaultInputs = [
-        {
-          key: 0,
-          label: "Input",
-          type: AssistantInputType.TEXT_INPUT,
-          children: <></>
+      console.log(inputWatch);
+    }, [inputWatch]);
+
+    const SelectSettings = (props: { prefix: number, inputId: number }) => {
+      if(inputWatch){
+        if(inputWatch[props.inputId] != undefined && inputWatch[props.inputId].type == AssistantInputType.SELECT){
+          return (
+            <Space direction={"vertical"}>
+              <Form.Item
+                labelCol={{ span: 12 }}
+                wrapperCol={{ span: 12 }}
+                className={styles.selectoptions}
+                name={[props.prefix, "multiple"]}
+                label={"Mehrfachauswahl erlaubt?"}
+              >
+                <Switch></Switch>
+              </Form.Item>
+
+              <Space direction={"horizontal"}>
+                <Form.Item
+                  labelCol={{ span: 12 }}
+                  wrapperCol={{ span: 12 }}
+                  className={styles.selectoptions}
+                  name={[props.prefix, "usesMaxSelect"]}
+                  label={"Mehrfachauswahl begrenzen?"}
+                >
+                  <Switch disabled={!inputWatch[props.inputId].multiple}></Switch>
+                </Form.Item>
+
+                <Form.Item
+                  labelCol={{ span: 12 }}
+                  wrapperCol={{ span: 12 }}
+                  className={styles.selectoptions}
+                  name={[props.prefix, "maxSelect"]}
+                  label={"Mehrfachauswahlgrenze?"}
+                >
+                  <Input disabled={!inputWatch[props.inputId].multiple || !inputWatch[props.inputId].usesMaxSelect}></Input>
+                </Form.Item>
+
+              </Space>
+
+              <OptionsList inputId={props.inputId} name={[props.prefix, "options"]} />
+
+            </Space>
+          );
         }
-      ];
-
-      let localinputs = [];
-
-      if(props.inputs?.length > 0){
-        props.inputs.forEach((inp, idx) => {
-          localinputs.push({
-            key: idx,
-            label: "Input",
-            type: inp.type,
-            children: <></>
-          });
-        });
-      }else{
-        localinputs = defaultInputs;
-      }
-
-      setInputs(localinputs);
-    }, []);
-
-    useImperativeHandle(ref, () => ({
-      getInputs: () => {
-
-        const inputData = [];
-        inputs.forEach((inp, idx) => {
-          inputData.push({ input: inp, settings: optionsRef.current[idx].getSettings() });
-        });
-
-        return inputData;
-      }
-    }));
-    
-    const InputDelete = ({ idx }) => {
-      if(idx != 0){
-        return (
-          <DeleteOutlined onClick={() => {
-            setInputs(inputs.filter((intp) => {
-              return intp.key !== idx
-            }))
-          }} />
-        );
-      }else{
-        return null;
       }
     }
 
     return (
-      <div ref={ref}>
-        {inputs.map((inp, idx) => {
-          return <Card className={styles.editorcard} key={idx} type={"inner"} title={"Eingabe"} extra={<InputDelete idx={idx} />}>
-            <InputOptions idx={idx} inputRepresentation={(props.inputs)? props.inputs[idx]: {}} ref={(el) => optionsRef.current[idx] = el} />
-          </Card>
-        })}
-        <div className={styles.inputaddrow}>
-          <div className={styles.inputadd} onClick={() => {
-            const localinputs = [...inputs];
-            const lastkey = localinputs.length;
-            const thiskey = lastkey as number;
+      <Form.List name={props.name}>
+        {(inputs, inptoperations) => {
+          console.log(inputs);
+          return (
+            <>
+              {inputs.map((inpt, inpid) => {
+                
+                return (
+                  <Card 
+                    key={`inpid-${inpid}`} 
+                    className={styles.editorcard} 
+                    type={"inner"} 
+                    title={"Eingabe"} 
+                    extra={<DeleteOutlined onClick={() => inptoperations.remove(inpid)} />}
+                  >
+                    <Space direction={"horizontal"}>
+                      <Form.Item name={[inpt.name, "key"]}>
+                        <Input placeholder={"Schlüssel"}></Input>
+                      </Form.Item>
 
-            localinputs.push({
-              key: thiskey,
-              label: "Input",
-              children: <></>,
-              type: AssistantInputType.PROFILE,
-              extra: <DeleteOutlined onClick={() => {
-                setInputs(inputs.filter((inp) => {
-                  return inp.key !== thiskey
-                }))
-              }} />
-            });
-            setInputs(localinputs);
-          }}>+</div>
-        </div>
-      </div>
+                      <Form.Item name={[inpt.name, "name"]}>
+                        <Input placeholder={"Name"}></Input>
+                      </Form.Item>
+
+                      <Form.Item name={[inpt.name, "type"]}>
+                        <Select placeholder={"Typ"} options={[
+                          { value: AssistantInputType.PROFILE, label: "Profil" },
+                          { value: AssistantInputType.TEXT_AREA, label: "Textblock" },
+                          { value: AssistantInputType.TEXT_INPUT, label: "Text" },
+                          { value: AssistantInputType.SELECT, label: "Select" }
+                        ]}></Select>
+                      </Form.Item>
+                    </Space>
+
+                    <SelectSettings prefix={inpt.name} inputId={inpid} />
+
+                  </Card>
+                );
+              })}
+              <Button
+                className={styles.addbutton}
+                type="dashed"
+                onClick={() => {
+                  inptoperations.add()
+                }}
+                block
+                icon={<PlusOutlined />}
+              >
+                    Eingabe hinzufügen
+              </Button>
+            </>
+          );
+        }}
+      </Form.List>
     );
-  })
+  }
 
-  InputAdd.displayName = "InputAdd";
-
-
-  const InputOptions = forwardRef((props: any, ref) => {
-    const [ inputType, setInputType ] = useState<AssistantInputType>(AssistantInputType.TEXT_INPUT);
-    const [ options, setOptions ] = useState<Array<Options>>([]);
-    const [ inputKey, setInputKey ] = useState("");
-    const [ inputLabel, setInputLabel ] = useState("");
-    const [ inputPlaceholder, setInputPlaceholder ] = useState("");
-    const [ inputMultipleOptions, setInputMultipleOptions ] = useState(false);
-    const [ inputMaxSelect, setInputMaxSelect ] = useState(-1);
-    const [ usesMaxSelect, setUsesMaxSelect ] = useState(false);
-
-    useEffect(() => {
-      if(props.inputRepresentation){
-        setInputKey(props.inputRepresentation.key);
-        setInputLabel(props.inputRepresentation.name);
-        setInputPlaceholder(props.inputRepresentation.placeholder);
-        setInputType(props.inputRepresentation.type);
-        setInputMultipleOptions(props.inputRepresentation.multiple);
-        setInputMaxSelect(props.inputRepresentation.maxSelected);
-        if(props.inputRepresentation.maxSelected != undefined){
-          setUsesMaxSelect(props.inputRepresentation.maxSelected != -1);
-        }
-        setOptions(props.inputRepresentation.options);
-      }
-    }, []);
-
-    useImperativeHandle(ref, () => ({
-      getSettings: () => {
-        return {
-          key: inputKey,
-          name: inputLabel,
-          placeholder: inputPlaceholder,
-          type: inputType,
-          multiple: inputMultipleOptions,
-          maxSelected: (usesMaxSelect)? inputMaxSelect: -1,
-          options: options
-        }
-      }
-    }));
-
-    return (
-      <>
-        <Space className={styles.optionsinput} direction={"vertical"}>
-          <Space direction={"horizontal"}>
-            <Input value={inputKey} placeholder={"Key"} onChange={(val) => {
-              const linpkeys = [...inputKeys];
-              console.log(linpkeys);
-              linpkeys[props.idx] = val.target.value;
-              setInputKeys(linpkeys);
-              setInputKey(val.target.value);
-            }}></Input>
-            <Input value={inputLabel} placeholder={"Label"} onChange={(val) => setInputLabel(val.target.value)}></Input>
-          </Space>
-          <Input value={inputPlaceholder} placeholder={"Platzhaltertext"} onChange={(val) => setInputPlaceholder(val.target.value)}></Input>
-
-          <Select value={inputType} placeholder={"Typ"} defaultValue={inputType} options={[
-            { value: AssistantInputType.PROFILE, label: "Profil" },
-            { value: AssistantInputType.TEXT_AREA, label: "Textblock" },
-            { value: AssistantInputType.TEXT_INPUT, label: "Text" },
-            { value: AssistantInputType.SELECT, label: "Select" }
-          ]} onSelect={(val: AssistantInputType) => {
-            setInputType(val);
-          }}></Select>
-        </Space>
-        <div className={styles.optioncontainer}>
-          {inputType == AssistantInputType.SELECT ? <>
-            <div className={styles.selectadditionaloptions}>
-              <div className={styles.optionswitch}>
-                <span className={styles.optionswitchlabel}>Mehrfachauswahl erlaubt?</span>
-                <Switch defaultChecked={inputMultipleOptions} defaultValue={inputMultipleOptions} onChange={(val) => setInputMultipleOptions(val)}></Switch>
-              </div>
-              <div className={styles.optionswitch}>
-                <span className={styles.optionswitchlabel}>Mehrfachauswahl begrenzen?</span>
-                <Switch 
-                  defaultChecked={(inputMaxSelect != -1 && inputMaxSelect != undefined)}
-                  disabled={!inputMultipleOptions}
-                  defaultValue={usesMaxSelect}
-                  onChange={(val) => setUsesMaxSelect(val)} />
-                <Input
-                  value={inputMaxSelect}
-                  type={"number"}
-                  disabled={!usesMaxSelect}
-                  placeholder={"Begrenzt auf?"}
-                  onChange={(val) => setInputMaxSelect(val.target.value as unknown as number)}
-                ></Input>
-              </div>
-            </div>
-            <b>Optionen</b>
-            <div className={styles.options}>{options?.map((option, idx) => {
-              return (
-                <div key={idx} className={styles.optionrow}>
-                  <Space dir={"horizontal"}>
-                    <Input value={option.key} placeholder={"Key"} onChange={(val) => {
-                      const localOptions = options;
-                      localOptions[idx].key = val.target.value;
-                      setOptions(localOptions);
-                    }}></Input>
-                    <Input value={option.value} placeholder={"Wert"} onChange={(val) => {
-                      const localOptions = options;
-                      localOptions[idx].value = val.target.value;
-                      setOptions(localOptions);
-                    }}></Input>
-                    { idx != 0 && (
-                      <DeleteOutlined onClick={() => {
-                        setOptions(options.filter((opt) => {
-                          return opt.idx !== idx
-                        }))
-                      }} />
-                    )}
-                  </Space>
-                </div>
-              );
-            })}</div>
-            <div className={styles.optionaddrow}>
-              <span className={styles.optionadd} onClick={() => {
-                const localinp = [...options];
-                localinp.push({
-                  idx: localinp.length,
-                  key: "",
-                  value: ""
-                });
-                setOptions(localinp)
-              }}>+</span>
-            </div>
-          </> : <>
-
-          </>}
-        </div>
-      </>
-    )
-  });
-
-  InputOptions.displayName = "Input";
-
-
-  const SectionCont = forwardRef((props: any, ref: ForwardedRef<any>) => {
-    const inputAddRef = useRef<any>(null);
-    const [ inputCol ] = useState(props.inputColumn);
-    const [ sectionName, setSectionName ] = useState(props.inputColumn?.title);
-
-    useImperativeHandle(ref, () => ({
-      getInputContainer: () => {
-        return inputAddRef.current.getInputs();
-      },
-      getName: () => {
-        return sectionName;
-      }
-    }));
+  const QI = () => {
 
     return(
-      <Card ref={ref} className={styles.editorcard} type={"inner"} title={"Section"} extra={props.extra}>
-        <Form.Item label={<b>Name der Section</b>}>
-          <Input defaultValue={sectionName} onChange={(val) => {
-            setSectionName(val.target.value) 
-          }}></Input>
-        </Form.Item>
-        <InputAdd inputs={inputCol?.inputs} ref={inputAddRef} idx={0}/>
-      </Card>
+      <Form.List name={"sections"} initialValue={block.inputColumns.map((inpcol) => {
+        return { secname: inpcol.title, inputs: [
+          { key: "test" }
+        ] }
+      })}>
+        {(fields, operation) => {
+          return (
+            <>
+              {fields.map((field, fieldid) => {
+
+                return (
+                  <Card
+                    key={`fieldid-${fieldid}`}
+                    className={styles.editorcard} 
+                    type={"inner"} title={"Section"} 
+                    extra={<DeleteOutlined onClick={() => operation.remove(fieldid)} />}
+                  >
+                    <Form.Item name={[field.name, "secname"]} label={<b>Name der Section</b>}>
+                      <Input></Input>
+                    </Form.Item>
+
+                    <InputList colId={fieldid} name={[field.name, "inputs"]} />
+                  </Card>
+                );
+              })}
+              <Button
+                className={styles.addbutton}
+                type="dashed"
+                onClick={() => {
+                  operation.add()
+                }}
+                block
+                icon={<PlusOutlined />}
+                disabled={fields.length >= 2}
+              >
+                  Section hinzufügen
+              </Button>
+            </>
+          );
+        }}
+      </Form.List>
     );
-  });
-
-  SectionCont.displayName = "Section";
-
-  const QaAInput = forwardRef((props, ref: ForwardedRef<any>) => {
-    const sectionRefs = useRef([]);
-    const [sections, setSections] = useState<Array<Section>>([
-      {
-        key: 0,
-        label: "Section",
-        name: "",
-        children: <></>,
-        openInput: ["0"]
-      }
-    ]);
-
-    useImperativeHandle(ref, () => ({
-      getSections: () => {
-        const sectionInformation = [];
-        sections.forEach((sec, idx) => {
-          const specificSectionReference = sectionRefs.current[idx];
-          sectionInformation.push({ name: specificSectionReference.getName(), inputs: specificSectionReference.getInputContainer() })
-        });
-
-        return sectionInformation;
-      }
-    }));
-
-
-    return (
-      <div ref={ref}>
-        <Form.Item className={styles.setioninput} label={<b>Eingabe</b>}>
-          {sections.map((sec, idx) => {
-            console.log(block.inputColumns[idx])
-            return <SectionCont section={sec} inputColumn={block.inputColumns[idx]} key={idx} ref={(el) => sectionRefs.current[idx] = el} extra={sec.extra}>
-              {sec.children}
-            </SectionCont>;
-          })}
-          {sections.length < 2 && (
-            <div className={styles.sectionaddrow}>
-              <div className={styles.sectionadd} onClick={() => {
-                const lastkey = sections.length;
-                setSections([...sections, {
-                  key: lastkey,
-                  label: "Section",
-                  name: "",
-                  children: <></>,
-                  openInput: ["0"],
-                  extra: <DeleteOutlined onClick={() => {
-                    const sects = [...sections];
-                    sects.splice(lastkey as number + 1, 1);
-                    setSections(sects);
-                  }}
-                  />
-                }])
-              }}>+
-              </div>
-            </div>
-          )}
-        </Form.Item>
-      </div>
-    );
-  });
-
-  QaAInput.displayName = "QaAInput";
+  }
 
   const ChatInput = () => {
 
@@ -471,14 +369,6 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
       });
 
       localBlockCopy.inputColumns = cols;
-      //localBlockCopy.personality = personalityContainer;
-      //localBlockCopy.name = nameContainer;
-
-      //setName(nameContainer);
-      //setPersonality(personalityContainer);
-      
-      //console.log(localBlocksCopy);
-      //props.setBlocks(localBlocksCopy);
 
       setModalOpen(false);
     }
@@ -501,7 +391,7 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
       }}>
         <Form layout={"vertical"} form={form} onFinish={(values) => {
           console.log(values)
-          console.log(rootRef.current.getSections());
+
         }}>
           <Row align={"top"} className={styles.editcol}>
             <Col span={12}>
@@ -521,7 +411,7 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
               </Form.Item>
 
               <div className={styles.inputedit}>
-                {(stepType == AssistantType.QAA)? <QaAInput ref={rootRef} /> : <ChatInput />}
+                {(stepType == AssistantType.QAA)? <QI /> : <ChatInput />}
               </div>
             </Col>
 
@@ -541,7 +431,6 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
               </div>
             </Col>
           </Row>
-
         </Form>
       </Modal>
     </div>

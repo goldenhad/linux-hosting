@@ -1,7 +1,7 @@
 import { ReactInfiniteCanvas, ReactInfiniteCanvasHandle } from "react-infinite-canvas";
 import { useEffect, useRef, useState } from "react";
 import styles from "./editorcanvas.module.scss";
-import { FloatButton } from "antd";
+import { FloatButton, message } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import { useDroppable } from "@dnd-kit/core";
 import { useEditorContext } from "../EditorSidebar/EditorSidebar";
@@ -15,7 +15,7 @@ export default function EditorCanvas() {
   });
   const { assistant, setAssistant } = useEditorContext();
   const [ buildingBricks, setBuildingBricks ] = useState<Array<Block | InputBlock>>([])
-
+  const [messageApi, messageContext] = message.useMessage();
 
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function EditorCanvas() {
 
   useEffect(() => {
     console.log(assistant);
-
+    console.log(buildingBricks);
 
     if(assistant){
       const localAss = assistant;
@@ -38,6 +38,7 @@ export default function EditorCanvas() {
 
   return (
     <div className={styles.canvascontainer}>
+      {messageContext}
       <ReactInfiniteCanvas
         ref={canvasRef}
         onCanvasMount={(mountFunc: ReactInfiniteCanvasHandle) => {
@@ -65,7 +66,12 @@ export default function EditorCanvas() {
         <div>
           {buildingBricks.map((brick, idx) => {
             if(idx == 0){
-              return(<InputEditorBlock key={idx} block={brick as InputBlock} updateBlockState={() => {}}/>);
+              return(<InputEditorBlock messageApi={messageApi} key={idx} block={brick as InputBlock} updateBlockState={(inpBUpdated: InputBlock) => {
+                const localBricks = [...buildingBricks];
+                localBricks[idx] = inpBUpdated;
+                console.log(inpBUpdated);
+                setBuildingBricks(localBricks);
+              }}/>);
             }
           })}
           {(buildingBricks.length == 0)? <div className={styles.addBlock} onClick={() => {

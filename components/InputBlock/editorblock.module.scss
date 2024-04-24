@@ -191,3 +191,19 @@
 .selectsettings{
   width: 100%;
 }
+
+.keytag {
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.optionrow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.deleteOption{
+  height: 50px;
+}

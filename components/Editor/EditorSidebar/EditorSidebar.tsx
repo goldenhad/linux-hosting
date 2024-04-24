@@ -6,10 +6,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 const { Header, Content, Sider } = Layout;
 import styles from "./editorsidebar.module.scss";
-import CookieBanner from "../CookieBanner/CookieBanner";
-import Assistant, { Block, InputBlock } from "../../firebase/types/Assistant";
-import updateData from "../../firebase/data/updateData";
-import { addDataWithoutId } from "../../firebase/data/setData";
+import CookieBanner from "../../CookieBanner/CookieBanner";
+import Assistant, { Block, InputBlock } from "../../../firebase/types/Assistant";
+import updateData from "../../../firebase/data/updateData";
+import { addDataWithoutId } from "../../../firebase/data/setData";
 
 const { TextArea } = Input;
 

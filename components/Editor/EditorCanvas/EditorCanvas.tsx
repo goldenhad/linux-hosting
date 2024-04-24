@@ -6,7 +6,7 @@ import { HomeOutlined } from "@ant-design/icons";
 import { useDroppable } from "@dnd-kit/core";
 import { useEditorContext } from "../EditorSidebar/EditorSidebar";
 import InputEditorBlock from "../InputBlock/InputBlock";
-import { AiModel, AssistantType, Block, InputBlock } from "../../firebase/types/Assistant";
+import { AiModel, AssistantType, Block, InputBlock } from "../../../firebase/types/Assistant";
 
 export default function EditorCanvas() {
   const canvasRef = useRef<ReactInfiniteCanvasHandle>();

@@ -8,6 +8,7 @@
     .servicecard{
         border-radius: 12px 12px 12px 12px;
         border-style: dashed;
+        border-width: 3px;
         height: 249px;
         background-color: transparent;
         //border-bottom-color: #fff;
@@ -15,6 +16,7 @@
         box-shadow: 0px 1px 3px 0px #1018281A;
 
         color: #1018283A;
+        border-color: #1018283A;
 
         &:hover {
             border-color: #1018287A;

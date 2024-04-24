@@ -2,7 +2,7 @@ import styles from "./editorblock.module.scss"
 import { useEffect, useState } from "react";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button, Card, Col, Form, Input, Modal, Row, Select, Space, Switch, Tag } from "antd";
-import { AiModel, AssistantInputType, AssistantType, InputBlock } from "../../firebase/types/Assistant";
+import { AiModel, AssistantInputType, AssistantType, InputBlock } from "../../../firebase/types/Assistant";
 import { MessageInstance } from "antd/es/message/interface";
 
 const { TextArea } = Input;

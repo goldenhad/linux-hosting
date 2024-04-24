@@ -4,7 +4,7 @@ import { Button, Form, Input, message, Modal, Select, Switch } from "antd";
 import { Drawer, Layout } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content, Sider } = Layout;
 import styles from "./editorsidebar.module.scss";
 import CookieBanner from "../CookieBanner/CookieBanner";
 import Assistant, { Block, InputBlock } from "../../firebase/types/Assistant";
@@ -74,8 +74,8 @@ const EditorSidebar = ( props: {
   useEffect(() => {
     if(props.assistant){
       setAssistantState(props.assistant);
-      settForm.setFieldValue("category", assistantState.category);
-      settForm.setFieldValue("description", assistantState.description);
+      settForm.setFieldValue("category", props.assistant.category);
+      settForm.setFieldValue("description", props.assistant.description);
     }
   }, [props.assistant]);
 
@@ -126,35 +126,42 @@ const EditorSidebar = ( props: {
     AssistantToUpdate.description = (desc)? desc: "";
     AssistantToUpdate.category = settForm.getFieldValue("category");
     AssistantToUpdate.name = name;
+    
+    if(AssistantToUpdate.blocks && AssistantToUpdate.blocks.length > 0){
+      
+    
 
-    if(AssistantToUpdate.name){
-      if(AssistantToUpdate.category){
-        if(props.aid){
-          const updateReq = await updateData("Assistants", props.aid, AssistantToUpdate);
+      if(AssistantToUpdate.name){
+        if(AssistantToUpdate.category){
+          if(props.aid){
+            const updateReq = await updateData("Assistants", props.aid, AssistantToUpdate);
 
-          if(updateReq.error){
-            console.log(updateReq.error);
-            messageApi.error("Speichern fehlgeschlagen. Bitte versuch es später erneut!");
+            if(updateReq.error){
+              console.log(updateReq.error);
+              messageApi.error("Speichern fehlgeschlagen. Bitte versuch es später erneut!");
+            }else{
+              messageApi.success("Speichern erfolgreich!");
+            }
           }else{
-            messageApi.success("Speichern erfolgreich!");
+            const createReq = await addDataWithoutId("Assistants", AssistantToUpdate);
+
+            if(createReq.error){
+              console.log(createReq.error);
+              messageApi.error("Speichern fehlgeschlagen. Bitte versuch es später erneut!");
+            }else{
+              messageApi.success("Speichern erfolgreich!");
+              router.replace(`/editor?aid=${createReq.result.id}`);
+            }
           }
         }else{
-          const createReq = await addDataWithoutId("Assistants", AssistantToUpdate);
-
-          if(createReq.error){
-            console.log(createReq.error);
-            messageApi.error("Speichern fehlgeschlagen. Bitte versuch es später erneut!");
-          }else{
-            messageApi.success("Speichern erfolgreich!");
-            router.replace(`/editor?aid=${createReq.result.id}`);
-          }
+          setSettingsModalOpen(true);
+          messageApi.error("Bitte lege eine Kategorie fest!");
         }
       }else{
-        setSettingsModalOpen(true);
-        messageApi.error("Bitte lege eine Kategorie fest!");
+        messageApi.error("Bitte gib einen Namen für deinen Assistenten ein!");
       }
     }else{
-      messageApi.error("Bitte gib einen Namen für deinen Assistenten ein!");
+      messageApi.error("Bitte definiere mindestens einen Block!");
     }
 
 
@@ -197,9 +204,14 @@ const EditorSidebar = ( props: {
               <Switch value={(assistantState) ? assistantState.published : false} size="small"
                 onChange={(val) => setAssistantState({ ...assistantState, published: val })}/>
             </div>
-            <Button onClick={() => {
-              saveAssistant();
-            }} className={styles.savebutton} type={"primary"}>{(props.aid)? "Speichern" : "Assistenten anlegen"}</Button>
+            <div className={styles.editorActions}>
+              {(props.aid) &&
+                  <Button target={"_blank"} href={`/assistant?aid=${props.aid}`} className={styles.savebutton}>Vorschau</Button>}
+              <Button onClick={() => {
+                saveAssistant();
+              }} className={styles.savebutton}
+              type={"primary"}>{(props.aid) ? "Speichern" : "Assistenten anlegen"}</Button>
+            </div>
           </div>
         </Header>
       );
@@ -215,7 +227,7 @@ const EditorSidebar = ( props: {
         open={settingsModalOpen} onOk={() => {
           setSettingsModalOpen(true)
         }} onCancel={() => {
-          setSettingsModalOpen(false) 
+          setSettingsModalOpen(false)
         }}
         footer={<Button type={"primary"} onClick={() => setSettingsModalOpen(false)} >Fertig</Button>}
       >
@@ -224,7 +236,7 @@ const EditorSidebar = ( props: {
 
           </Form.Item>
 
-          <Form.Item name={"category"} label={<b>Kategorie</b>}>
+          <Form.Item initialValue={assistantState.category} name={"category"} label={<b>Kategorie</b>}>
             <Select
               placeholder={"Bitte wähle eine Kategorie"}
               options={[
@@ -234,7 +246,7 @@ const EditorSidebar = ( props: {
               ]} ></Select>
           </Form.Item>
 
-          <Form.Item name={"description"} label={<b>Beschreibung</b>}>
+          <Form.Item initialValue={assistantState.description} name={"description"} label={<b>Beschreibung</b>}>
             <TextArea rows={7} placeholder={"Beschreibe deinen Assistenten kurz"} />
           </Form.Item>
         </Form>
@@ -350,9 +362,12 @@ const EditorSidebar = ( props: {
                   onChange={(val) => setAssistantState({ ...assistantState, published: val })}
                 />
               </div>
-              <Button onClick={() => {
-                saveAssistant(); 
-              }} className={styles.savebutton} type={"primary"}>{(props.aid)? "Speichern" : "Assistenten anlegen"}</Button>
+              <div className={styles.editorActions}>
+                {(props.aid) && <Button target={"_blank"} href={`/assistant?aid=${props.aid}`} className={styles.savebutton}>Vorschau</Button>}
+                <Button onClick={() => {
+                  saveAssistant();
+                }} className={styles.savebutton} type={"primary"}>{(props.aid)? "Speichern" : "Assistenten anlegen"}</Button>
+              </div>
             </div>
           </Header>
 

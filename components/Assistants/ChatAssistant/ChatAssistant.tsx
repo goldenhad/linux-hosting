@@ -1,8 +1,8 @@
-import Assistant from "../../../firebase/types/Assistant";
+import Assistant, { InputBlock } from "../../../firebase/types/Assistant";
 import React, { Dispatch, ReactComponentElement, SetStateAction, useEffect, useRef, useState } from "react";
 import { MessageInstance } from "antd/es/message/interface";
 import { NotificationInstance } from "antd/es/notification/interface";
-import { Alert, Button, Card, Divider, Form, Input, Result, Skeleton } from "antd";
+import { Button, Divider, Form, Input, Result, Skeleton } from "antd";
 import { ArrowLeftOutlined, ArrowRightOutlined, HistoryOutlined } from "@ant-design/icons";
 import { handleEmptyString, reduceCost, updateCompanyTokens } from "../../../helper/architecture";
 import { isMobile } from "react-device-detect";
@@ -55,14 +55,16 @@ export default function ChatAssistant(props: {
 }) {
   const router = useRouter();
   const [ chatMsgs, setChatMsgs ] = useState<Array<ChatMsg>>([
-    { content: (props.assistant.initialMessage)? props.assistant.initialMessage: "Wie kann ich dir heute helfen?", type: MsgType.MODEL 
+    { 
+      content: ((props.assistant.blocks[0] as InputBlock).initialMessage)? 
+        (props.assistant.blocks[0] as InputBlock).initialMessage: "Wie kann ich dir heute helfen?", type: MsgType.MODEL
     }]);
   const [ formDisabled, setFormDisabled ] = useState(props.formDisabled);
   const lastMsgRef = useRef<null | HTMLDivElement>(null);
   const [msgContext, setMsgContext ] = useState<Array<MsgContext>>([
     {
       role: "system",
-      content: props.assistant.personality
+      content: props.assistant.blocks[0].personality
     }
   ]);
   const [ calculator ] = useState(new TokenCalculator(props.context.calculations))

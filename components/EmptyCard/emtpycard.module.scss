@@ -1,0 +1,62 @@
+
+.servicebox {
+    display: flex;
+    flex-direction: column;
+
+
+
+    .servicecard{
+        border-radius: 12px 12px 12px 12px;
+        border-style: dashed;
+        height: 249px;
+        background-color: transparent;
+        //border-bottom-color: #fff;
+        box-shadow: 0px -1px 2px 0px #1018280F;
+        box-shadow: 0px 1px 3px 0px #1018281A;
+
+        color: #1018283A;
+
+        &:hover {
+            border-color: #1018287A;
+            color: #1018287A;
+            cursor: pointer;
+        }
+    }
+
+    .serviceheadline{
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 32px;
+        margin-bottom: 20px;
+        height: 50px;
+
+
+    }
+
+    .servicedescription{
+
+        height: 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        font-weight: 600;
+
+        .addicon{
+            font-size: 64px;
+            margin-bottom: 32px;
+        }
+
+
+    }
+
+}
+
+.videobuttoncontainer{
+    &:hover {
+        cursor: pointer;
+    }
+}

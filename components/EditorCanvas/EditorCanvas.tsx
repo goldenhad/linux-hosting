@@ -69,7 +69,6 @@ export default function EditorCanvas() {
               return(<InputEditorBlock messageApi={messageApi} key={idx} block={brick as InputBlock} updateBlockState={(inpBUpdated: InputBlock) => {
                 const localBricks = [...buildingBricks];
                 localBricks[idx] = inpBUpdated;
-                console.log(inpBUpdated);
                 setBuildingBricks(localBricks);
               }}/>);
             }
@@ -90,7 +89,7 @@ export default function EditorCanvas() {
       </ReactInfiniteCanvas>
       <FloatButton.Group shape="square" style={{ right: 24 }}>
         <FloatButton icon={<HomeOutlined />} onClick={() => {
-          canvasRef.current?.fitContentToView({ scale: 2 });
+          canvasRef.current?.fitContentToView({ scale: 2, offset: { x: 0, y: 400 } });
         }} />
       </FloatButton.Group>
     </div>

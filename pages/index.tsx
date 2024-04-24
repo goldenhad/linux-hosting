@@ -8,16 +8,14 @@ import updateData from "../firebase/data/updateData";
 import { handleUndefinedTour } from "../helper/architecture";
 import AssistantCard from "../components/AssistantCard/AssistantCard";
 import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
-import { Service } from "../firebase/types/Service";
 import ReactPlayer from "react-player/lazy"
-import axios from "axios";
 import { getAllDocs } from "../firebase/data/getData";
 import Assistant from "../firebase/types/Assistant";
+import EmptyCard from "../components/EmptyCard/EmptyCard";
 
 
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const datum = new Date();
   let assistants: Array<Assistant> = [];
   
   const assistantreq = await getAllDocs("Assistants");
@@ -37,7 +35,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default function Home(props: { assistants: Array<Assistant> }) {
   const context = useAuthContext();
-  const { login, user, services, role } = context;
+  const { login, user, role } = context;
   const router = useRouter();
   const dialogRef = useRef( null );
   const monologRef = useRef( null );
@@ -231,6 +229,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
             published={singleService.published}
           />
         })}
+        {role.canManageUser && <EmptyCard />}
       </div>
     );
   }

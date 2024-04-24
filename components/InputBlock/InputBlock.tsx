@@ -7,51 +7,14 @@ import { MessageInstance } from "antd/es/message/interface";
 
 const { TextArea } = Input;
 
-interface Section {
-  key: number,
-  label: string,
-  name: string,
-  children: JSX.Element,
-  extra?: JSX.Element,
-  openInput: Array<string>
-}
-
-interface Inputs {
-  key: number,
-  label: string,
-  children: JSX.Element,
-  extra?: JSX.Element,
-  type: AssistantInputType,
-}
-
-interface Options {
-  idx: number;
-  key: string;
-  value: string
-}
-
-interface InputSettings {
-  key: string,
-  name: string,
-  options: Array<Options>,
-  type: AssistantInputType,
-  placeholder: string,
-  multiple: boolean,
-  maxSelected: number
-}
-
-interface InputRepresentation {
-  input: Inputs,
-  settings: InputSettings
-}
-
 const DEFAULT_ASSISTANT = {
   name: "",
   personality: "",
   prompt: "",
   model: AiModel.GPT4,
   type: AssistantInputType.TEXT_INPUT,
-  inputColumns: []
+  inputColumns: [],
+  initialMessage: ""
 }
 
 export default function InputEditorBlock(props: { block: InputBlock, updateBlockState: any, messageApi: MessageInstance }) {
@@ -59,8 +22,6 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
   const [ y, setY ] = useState(0);
   const [ modalOpen, setModalOpen ] = useState(false);
   const [ stepType, setStepType ] = useState<AssistantType>((props.block)? props.block.type: AssistantType.QAA);
-  const [ name, setName ] = useState("");
-  const [ personality, setPersonality ] = useState("");
   const [ block, setBlock ] = useState((props.block)? props.block: DEFAULT_ASSISTANT)
   const [form] = Form.useForm();
 
@@ -224,6 +185,18 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
                       </Form.Item>
 
                       <Form.Item
+                        name={[inpt.name, "placeholder"]}
+                        rules={[
+                          {
+                            required: true,
+                            message: "Bitte lege einen Platzhaltertext für die Eingabemöglichkeit fest!"
+                          }
+                        ]}
+                      >
+                        <Input placeholder={"Platzhaltertext"}></Input>
+                      </Form.Item>
+
+                      <Form.Item
                         name={[inpt.name, "name"]}
                         rules={[
                           {
@@ -333,6 +306,7 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
             return {
               key: inp.key,
               name: inp.name,
+              placeholder: inp.placeholder,
               multiple: inp.multiple,
               type: inp.type,
               usesMaxSelect: (inp.maxSelected != undefined),
@@ -399,8 +373,15 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
   }
 
   const ChatInput = () => {
-
-    return (<></>);
+    return (
+      <Form.Item
+        name={"stepInitialMessage"}
+        initialValue={block.initialMessage}
+        label={<b>Erste Nachricht des Chats</b>}
+      >
+        <TextArea rows={10}></TextArea>
+      </Form.Item>
+    );
   }
 
   const saveBlockConfig = ( values ) => {
@@ -445,6 +426,7 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
       localBlockCopy.personality = values.stepPersonality;
       localBlockCopy.prompt = values.stepPrompt;
       localBlockCopy.type = values.stepType;
+      localBlockCopy.initialMessage = (values.stepInitialMessage)? values.stepInitialMessage: "";
 
       cols = (values.sections)? values.sections?.map((sec) => {
         return {
@@ -454,6 +436,7 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
               key: inp.key,
               name: inp.name,
               type: inp.type,
+              placeholder: inp.placeholder,
               multiple: (inp.multiple)? inp.multiple: false,
               maxSelected: (inp.maxSelected)? inp.maxSelected: -1,
               options: inp.options? inp.options?.map((opt) => {
@@ -487,7 +470,7 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
 
   return (
     <div className={styles.blockcontainer} style={{ top: y, left: x }}>
-      {name}
+      {block.name}
       <span className={styles.add}></span>
       <span className={styles.edit} onClick={() => {
         setModalOpen(true)

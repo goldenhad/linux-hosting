@@ -74,7 +74,6 @@
         font-size: 36px;
         fill: transparent;
         color: inherit;
-        stroke: inherit;
       }
     }
 
@@ -242,7 +241,6 @@
   transform: translate(-2px, 3px);
   fill: transparent;
   color: inherit;
-  stroke: inherit;
 }
 
 .floaticon > svg{
@@ -355,4 +353,10 @@
       cursor: pointer;
     }
   }
+}
+
+.editorActions{
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
 }

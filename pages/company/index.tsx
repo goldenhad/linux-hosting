@@ -44,7 +44,7 @@ import {
 } from "chart.js";
 import { User } from "../../firebase/types/User";
 import { InvitedUser } from "../../firebase/types/Company";
-import { getImageUrl } from "../../firebase/drive/upload_file";
+import { getProfilePictureUrl } from "../../firebase/drive/upload_file";
 import FatButton from "../../components/FatButton";
 import { toGermanCurrencyString } from "../../helper/price";
 const { TextArea } = Input;
@@ -383,7 +383,7 @@ export default function Company( props: InitialProps ) {
       const usersWithPictures = [];
 
       for( let i=0; i < userTableData.length; i++ ){
-        const imageurl = await getImageUrl( userTableData[i].id );
+        const imageurl = await getProfilePictureUrl( userTableData[i].id );
         if( imageurl ){
           userTableData[i].profilepicture = imageurl;
         }

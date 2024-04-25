@@ -1,9 +1,11 @@
 import { GetServerSideProps } from "next";
 import EditorSidebar from "../../components/Editor/EditorSidebar/EditorSidebar";
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import getDocument from "../../firebase/data/getData";
-import Assistant from "../../firebase/types/Assistant";
+import Assistant, { Block, InputBlock } from "../../firebase/types/Assistant";
+import { addDataWithoutId } from "../../firebase/data/setData";
+import { auth } from "../../firebase/admin";
 
 
 export interface EditorContextState {
@@ -15,20 +17,65 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   let Assistant = null;
   let AID = null;
 
-  if(aid){
-    const AssistantReq = await getDocument("Assistants", aid);
-    const ass = AssistantReq.result;
-    AID = aid;
+  const token = await auth.verifyIdToken( ctx.req.cookies.token );
 
-    if(ass){
-      Assistant = ass.data();
+  if(token){
+    const userid = token.uid;
+    const userreq = await getDocument("User", userid);
+
+    if(userreq.result){
+      const userrepresentation = userreq.result.data();
+      if(userrepresentation){
+        if(userrepresentation.Role == "Superadmin" || userrepresentation.Role == "Marketing"){
+          if(aid){
+            const AssistantReq = await getDocument("Assistants", aid);
+            const ass = AssistantReq.result;
+            AID = aid;
+
+            if(ass){
+              Assistant = ass.data();
+            }
+          }else{
+            const assistantToCreate = {
+              name: "Neuer Assistent",
+              image: "",
+              category: "other",
+              description: "",
+              video: "",
+              published: false,
+              uid: "",
+              blocks: Array<Block | InputBlock>()
+            }
+            const createReq = await addDataWithoutId("Assistants", assistantToCreate);
+
+            if(createReq.error){
+              console.log(createReq.error.toString());
+            }else{
+              return {
+                redirect: {
+                  permanent: false,
+                  destination: `/editor?aid=${createReq.result.id}`
+                }
+              }
+            }
+          }
+
+          return { props: {
+            assistant: Assistant,
+            aid: AID
+          } }
+        }
+      }
     }
   }
 
-  return { props: {
-    assistant: Assistant,
-    aid: AID
-  } }
+  return {
+    redirect: {
+      permanent: false,
+      destination: "/"
+    }
+  }
+  
 }
 
 

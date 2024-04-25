@@ -201,6 +201,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
           return <AssistantCard
             aid={singleService.uid}
             name={singleService.uid}
+            blocks={singleService.blocks}
             key={idx}
             image={singleService.image}
             title={singleService.name}

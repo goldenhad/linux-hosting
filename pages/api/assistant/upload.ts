@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { auth } from "../../../firebase/admin"
 import { Formidable } from "formidable";
-import { uploadProfilePicture } from "../../../firebase/drive/upload_file";
+import { uploadAssistantImage, uploadProfilePicture } from "../../../firebase/drive/upload_file";
 import fs from "fs";
 
 type ResponseData = {
@@ -32,10 +32,11 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       }
     );
 
+
     // Check the input to the API route
-    if( data.fields.user && data.fields.user.length == 1 && data.files.image && data.files.image.length == 1 ){
+    if( data.fields.aid && data.fields.aid.length == 1 && data.files.image && data.files.image.length == 1 ){
       const uploadedImage = data.files.image[0];
-      const uploadingUser = data.fields.user[0];
+      const assistant = data.fields.aid[0];
 
       // Read the temporary uploaded file
       const imageData = fs.readFileSync( uploadedImage.filepath );
@@ -44,7 +45,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
       try {
         // Upload the image to firebase
-        const imageurl = await uploadProfilePicture( imageBytes, uploadingUser );
+        const imageurl = await uploadAssistantImage( imageBytes, assistant );
 
         return res.status( 200 ).send( { errorcode: 0, message: imageurl } );
 

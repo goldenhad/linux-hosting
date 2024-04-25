@@ -12,6 +12,7 @@ import { db } from "../../db";
 import QaAAssistant from "../../components/Assistants/QaAAssistant/QaAAssistant";
 import ChatAssistant, { MsgType } from "../../components/Assistants/ChatAssistant/ChatAssistant";
 import { CloseOutlined, EyeOutlined } from "@ant-design/icons";
+import { checkValidityOfAssistantConfig } from "../../helper/assistant";
 
 // Defines the max amount of history states saved per user
 export const MAXHISTITEMS = 10;
@@ -39,9 +40,20 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       if(assistantIndex != -1){
         const assistant = assistantDocs[assistantIndex];
 
-        return {
-          props: {
-            assistant: assistant
+        const valid = checkValidityOfAssistantConfig(assistant.blocks);
+
+        if(valid){
+          return {
+            props: {
+              assistant: assistant
+            }
+          }
+        }else{
+          return {
+            redirect: {
+              destination: "/",
+              permanent: false
+            }
           }
         }
       }else{

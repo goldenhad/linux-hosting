@@ -15,7 +15,7 @@ import Help from "../../public/icons/help.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
 import Stats from "../../public/icons/stat.svg";
 import Settings from "../../public/icons/settings.svg";
-import { getImageUrl } from "../../firebase/drive/upload_file";
+import { getProfilePictureUrl } from "../../firebase/drive/upload_file";
 
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -57,7 +57,7 @@ const SidebarLayout = ( props: {
   useEffect( () => {
     const setProfileImage = async () => {
       if(props.context.login?.uid){
-        const url = await getImageUrl( props.context.login.uid );
+        const url = await getProfilePictureUrl( props.context.login.uid );
         setImageUrl( url );
       }
     }

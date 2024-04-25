@@ -13,7 +13,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
 import { useRouter } from "next/navigation";
 import { Calculations, InvoiceSettings, Parameters } from "../../firebase/types/Settings";
-import { getImageUrl } from "../../firebase/drive/upload_file";
+import { getProfilePictureUrl } from "../../firebase/drive/upload_file";
 import { Service } from "../../firebase/types/Service";
 
 
@@ -93,7 +93,7 @@ export const AuthContextProvider = ( {
                 const invoice_data = await getDocument( "Settings", "Invoices" );
                 const calculations = await getDocument( "Settings", "Calculation" );
                 const services = await getAllDocs( "Services" );
-                const url = await getImageUrl( login.uid );
+                const url = await getProfilePictureUrl( login.uid );
 
                 if( parameters.result && invoice_data.result ){
                   

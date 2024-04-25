@@ -1,15 +1,17 @@
 import React, { Dispatch, ReactNode, useEffect, useState } from "react";
 import { ArrowLeftOutlined, SettingOutlined } from "@ant-design/icons";
-import { Button, Form, Input, message, Modal, Select, Switch } from "antd";
-import { Drawer, Layout } from "antd";
+import { Button, Drawer, Form, Input, Layout, message, Modal, Select, Switch } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
-const { Header, Content, Sider } = Layout;
 import styles from "./editorsidebar.module.scss";
 import CookieBanner from "../../CookieBanner/CookieBanner";
-import Assistant, { Block, InputBlock } from "../../../firebase/types/Assistant";
+import Assistant, { AssistantInputType, AssistantType, Block, InputBlock } from "../../../firebase/types/Assistant";
 import updateData from "../../../firebase/data/updateData";
-import { addDataWithoutId } from "../../../firebase/data/setData";
+import UploadAssistantIcon from "../UploadAssistantIcon/UploadAssistantIcon";
+import { getAssistantImageUrl } from "../../../firebase/drive/upload_file";
+import { checkValidityOfAssistantConfig } from "../../../helper/assistant";
+
+const { Header, Content, Sider } = Layout;
 
 const { TextArea } = Input;
 
@@ -69,7 +71,8 @@ const EditorSidebar = ( props: {
   const [ settForm ] = Form.useForm();
   const [messageApi, messageContext] = message.useMessage();
   const [ name, setName ] = useState((props.assistant)? props.assistant.name: "Neuer Assistant");
-
+  const [ confValid, setConfValid ] = useState(false);
+  const [ predefinedImage, setPredefinedImage ] = useState("");
 
   useEffect(() => {
     if(props.assistant){
@@ -81,8 +84,19 @@ const EditorSidebar = ( props: {
 
 
   useEffect(() => {
-    console.log(assistantState);
+    const loadAssistantImage = async () => {
+      const url = await getAssistantImageUrl(props.aid);
+      setPredefinedImage(url);
+    }
+
+    loadAssistantImage();
+  }, []);
+
+
+  useEffect(() => {
+    setConfValid(checkValidityOfAssistantConfig(assistantState.blocks));
   }, [assistantState]);
+
 
   /**
      * Effect used for responsive sizing of the sidebar
@@ -143,7 +157,7 @@ const EditorSidebar = ( props: {
               messageApi.success("Speichern erfolgreich!");
             }
           }else{
-            const createReq = await addDataWithoutId("Assistants", AssistantToUpdate);
+            /*const createReq = await addDataWithoutId("Assistants", AssistantToUpdate);
 
             if(createReq.error){
               console.log(createReq.error);
@@ -151,7 +165,7 @@ const EditorSidebar = ( props: {
             }else{
               messageApi.success("Speichern erfolgreich!");
               router.replace(`/editor?aid=${createReq.result.id}`);
-            }
+            }*/
           }
         }else{
           setSettingsModalOpen(true);
@@ -163,10 +177,17 @@ const EditorSidebar = ( props: {
     }else{
       messageApi.error("Bitte definiere mindestens einen Block!");
     }
-
-
   }
 
+  const PreviewButton = () => {
+    if( confValid ){
+      return <Button target={"_blank"} href={`/assistant?aid=${props.aid}`} className={styles.savebutton}>Vorschau</Button>;
+    }else{
+      return <Button onClick={() => {
+        messageApi.error("Konfiguration fehlerhaft. Bitte überprüfe die Blöcke.")
+      }} className={styles.savebutton}>Vorschau</Button>;
+    }
+  }
 
   /**
      * Subcomponent to render a header if the screenwidth is below a fixed amount
@@ -205,8 +226,7 @@ const EditorSidebar = ( props: {
                 onChange={(val) => setAssistantState({ ...assistantState, published: val })}/>
             </div>
             <div className={styles.editorActions}>
-              {(props.aid) &&
-                  <Button target={"_blank"} href={`/assistant?aid=${props.aid}`} className={styles.savebutton}>Vorschau</Button>}
+              <PreviewButton />
               <Button onClick={() => {
                 saveAssistant();
               }} className={styles.savebutton}
@@ -233,7 +253,13 @@ const EditorSidebar = ( props: {
       >
         <Form form={settForm} layout={"vertical"}>
           <Form.Item label={<b>Assistant-Thumbnail</b>}>
-
+            <div className={styles.assimage}>
+              <UploadAssistantIcon
+                aid={props.aid}
+                imageUrl={predefinedImage}
+                messageApi={messageApi}
+              />
+            </div>
           </Form.Item>
 
           <Form.Item initialValue={assistantState.category} name={"category"} label={<b>Kategorie</b>}>
@@ -363,7 +389,7 @@ const EditorSidebar = ( props: {
                 />
               </div>
               <div className={styles.editorActions}>
-                {(props.aid) && <Button target={"_blank"} href={`/assistant?aid=${props.aid}`} className={styles.savebutton}>Vorschau</Button>}
+                <PreviewButton />
                 <Button onClick={() => {
                   saveAssistant();
                 }} className={styles.savebutton} type={"primary"}>{(props.aid)? "Speichern" : "Assistenten anlegen"}</Button>

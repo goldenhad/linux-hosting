@@ -99,9 +99,22 @@
 
         
 
-        .assistantlink{
+        .assistantlink {
             font-weight: 700;
             color: #1478FD;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+
+        .brokenassistantlink {
+            font-weight: 700;
+            color: lightgray;
+
+            &:hover {
+                cursor: pointer;
+            }
         }
     }
 }

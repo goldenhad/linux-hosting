@@ -19,7 +19,7 @@ import All from "../../public/icons/all.svg";
 import Chat from "../../public/icons/chat.svg";
 import Zap from "../../public/icons/zap.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
-import { getImageUrl } from "../../firebase/drive/upload_file";
+import { getProfilePictureUrl } from "../../firebase/drive/upload_file";
 //import RecommendBox from "../RecommendBox/RecommendBox";
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -61,7 +61,7 @@ const HomeSidebarLayout = ( props: {
   useEffect( () => {
     const setProfileImage = async () => {
       if(props.context.login?.uid){
-        const url = await getImageUrl( props.context.login.uid );
+        const url = await getProfilePictureUrl( props.context.login.uid );
         setImageUrl( url );
       }
     }
@@ -501,13 +501,14 @@ const HomeSidebarLayout = ( props: {
                       <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Produktivität</div>  
                     </List.Item>
-                      {(props.context.role.canManageUser)? <List.Item className={`${styles.assistantlink} ${isselected("unpublished")}`} data-function={"unpublished"} onClick={() => {
-                      props.category.setter("unpublished");
-                      setSidebarOpen(false);
-                    }}>
-                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                      <div className={styles.assistantcatname}>Unveröffentlicht</div>
-                    </List.Item>: <></>}
+                    {(props.context.role.canManageUser)? 
+                      <List.Item className={`${styles.assistantlink} ${isselected("unpublished")}`} data-function={"unpublished"} onClick={() => {
+                        props.category.setter("unpublished");
+                        setSidebarOpen(false);
+                      }}>
+                        <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                        <div className={styles.assistantcatname}>Unveröffentlicht</div>
+                      </List.Item>: <></>}
                   </List>
                 </div>
                 {/* <RecommendBox user={props.context.user} messageApi={props.messageApi} /> */}

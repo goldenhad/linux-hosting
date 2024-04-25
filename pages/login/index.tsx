@@ -11,6 +11,7 @@ import { logEvent } from "firebase/analytics";
 import { analytics } from "../../db";
 import getDocument from "../../firebase/data/getData";
 import { User } from "../../firebase/types/User";
+import * as Sentry from "@sentry/nextjs"
 
 const { Content, Footer } = Layout;
 
@@ -89,7 +90,7 @@ export default function Login(){
 
     // Check if we ecounter a sign in error
     if ( error ) {
-      //console.log(error);
+      Sentry.captureException(error);
       setLoginFailed( true );
     }else{
       setLoginFailed( false );
@@ -120,6 +121,7 @@ export default function Login(){
         }
       }else{
         // If we encounter an error set the failed flga
+        Sentry.captureException(usereq.error);
         setLoginFailed( true );
       }
     }

@@ -124,3 +124,10 @@
         cursor: pointer;
     }
 }
+
+.deletemodalbuttons{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 16px;
+}

@@ -1,6 +1,6 @@
-import { Badge, Card, Tooltip, Typography } from "antd";
+import { Badge, Button, Card, Modal, Tooltip, Typography } from "antd";
 import styles from "./assistantcard.module.scss";
-import Icon, { EditOutlined } from "@ant-design/icons";
+import Icon, { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import Play from "../../public/icons/play.svg";
 import Heart from "../../public/icons/heart.svg";
@@ -41,6 +41,7 @@ const AssistantCard = ( props: {
     blocks: Array<Block | InputBlock>
   } ) => {
   const [image, setImage] = useState("/base.svg");
+  const [ deleteModalOpen, setDeleteModalOpen ] = useState(false);
 
   /**
    * Effect to load the provided assistant image.
@@ -128,6 +129,12 @@ const AssistantCard = ( props: {
     }
   }
 
+  const DeleteAssistantButton = () => {
+    return <DeleteOutlined onClick={() => {
+      setDeleteModalOpen(true);
+    }} />
+  }
+
   const AssCard = () => {
     return (
       <div className={styles.servicebox}>
@@ -150,9 +157,27 @@ const AssistantCard = ( props: {
               <Icon component={Play} className={styles.iconsvg} viewBox='0 0 22 22'/>
             </div>
             {(props.canEdit)? <a href={`/editor?aid=${props.aid}`}><EditOutlined /></a> : <></>}
+            {(props.canEdit)? <DeleteAssistantButton /> : <></> }
           </div>
           <AssistantLink />
         </div>
+        <Modal
+          title="Assistenten löschen?"
+          open={deleteModalOpen}
+          onOk={async () => {
+            setDeleteModalOpen(false);
+          }}
+          footer={
+            <div className={styles.deletemodalbuttons}>
+              <Button>Abbrechen</Button>
+              <Button danger>Löschen</Button>
+            </div>
+          }
+          onCancel={() => {
+            setDeleteModalOpen(false);
+          }}>
+          <Paragraph>Möchtest du den Assistenten wirklich löschen?</Paragraph>
+        </Modal>
       </div>
     );
   }

@@ -1,9 +1,10 @@
 import styles from "./editorblock.module.scss"
 import { useEffect, useState } from "react";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Card, Col, Form, Input, Modal, Row, Select, Space, Switch, Tag } from "antd";
+import { DeleteOutlined, EditOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import { Button, Card, Col, Form, Input, Modal, Row, Select, Space, Switch, Tag, Upload } from "antd";
 import { AiModel, AssistantInputType, AssistantType, InputBlock } from "../../../firebase/types/Assistant";
 import { MessageInstance } from "antd/es/message/interface";
+import { UploadProps } from "antd/es/upload";
 
 const { TextArea } = Input;
 
@@ -80,6 +81,9 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
       setKeyList(toUpdate);
     }
   }
+
+
+
 
 
   const OptionsList = ( props: { name: (string | number)[], inputId: number } ) => {

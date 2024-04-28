@@ -1,6 +1,6 @@
 import React, { Dispatch, ReactNode, useEffect, useState } from "react";
-import { ArrowLeftOutlined, SettingOutlined } from "@ant-design/icons";
-import { Button, Drawer, Form, Input, Layout, message, Modal, Select, Switch } from "antd";
+import {ArrowLeftOutlined, SettingOutlined, UploadOutlined} from "@ant-design/icons";
+import {Button, Drawer, Form, Input, Layout, message, Modal, Select, Switch, Upload} from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import styles from "./editorsidebar.module.scss";
@@ -10,6 +10,7 @@ import updateData from "../../../firebase/data/updateData";
 import UploadAssistantIcon from "../UploadAssistantIcon/UploadAssistantIcon";
 import { getAssistantImageUrl } from "../../../firebase/drive/upload_file";
 import { checkValidityOfAssistantConfig } from "../../../helper/assistant";
+import {UploadProps} from "antd/es/upload";
 
 const { Header, Content, Sider } = Layout;
 
@@ -130,6 +131,28 @@ const EditorSidebar = ( props: {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+
+  const uploadprops: UploadProps = {
+    name: "file",
+    action: "/api/assistant/knowledge/upload",
+    headers: {
+      authorization: "authorization-text"
+    },
+    data: {
+      aid: props.aid
+    },
+    onChange(info) {
+      if (info.file.status !== "uploading") {
+        console.log(info.file, info.fileList);
+      }
+      if (info.file.status === "done") {
+        message.success(`${info.file.name} file uploaded successfully`);
+      } else if (info.file.status === "error") {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    }
+  };
 
 
   const saveAssistant = async () => {
@@ -274,6 +297,12 @@ const EditorSidebar = ( props: {
 
           <Form.Item initialValue={assistantState.description} name={"description"} label={<b>Beschreibung</b>}>
             <TextArea rows={7} placeholder={"Beschreibe deinen Assistenten kurz"} />
+          </Form.Item>
+
+          <Form.Item>
+            <Upload {...uploadprops}>
+              <Button icon={<UploadOutlined />}>Wissensbasis hochladen</Button>
+            </Upload>
           </Form.Item>
         </Form>
       </Modal>

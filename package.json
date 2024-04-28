@@ -41,6 +41,7 @@
     "formidable": "^3.5.1",
     "gpt-tokenizer": "^2.1.2",
     "import": "^0.0.6",
+    "llamaindex": "^0.2.13",
     "moment": "^2.29.4",
     "next": "latest",
     "next-firebase-auth-edge": "^1.4.3",

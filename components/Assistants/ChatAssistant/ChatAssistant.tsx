@@ -23,12 +23,13 @@ const { TextArea } = Input;
 
 const MAXHISTITEMS = 10;
 const MSGDURATION = 3;
-const MAXCONTEXTSIZE = 32;
+const MAXCONTEXTSIZE = 3;
 
 
 export enum MsgType {
-    MODEL,
-    USER
+    MODEL = "system",
+    USER = "user",
+    ASSISTANT = "assistant"
 }
 
 interface ChatMsg {
@@ -41,6 +42,12 @@ interface MsgContext {
     content: string
 }
 
+enum ParsingState {
+  UNDEFINED,
+  STARTMSG_RECEIVED,
+  PARSING,
+  ENDMSG_RECEIVED
+}
 
 export default function ChatAssistant(props: {
     assistant: Assistant,
@@ -55,23 +62,23 @@ export default function ChatAssistant(props: {
 }) {
   const router = useRouter();
   const [ chatMsgs, setChatMsgs ] = useState<Array<ChatMsg>>([
-    { 
-      content: ((props.assistant.blocks[0] as InputBlock).initialMessage)? 
+    {
+      content: ((props.assistant.blocks[0] as InputBlock).initialMessage)?
         (props.assistant.blocks[0] as InputBlock).initialMessage: "Wie kann ich dir heute helfen?", type: MsgType.MODEL
     }]);
+  const [ quotaOverused, setQuotaOverused ] =  useState( props.quotaOverused );
   const [ formDisabled, setFormDisabled ] = useState(props.formDisabled);
   const lastMsgRef = useRef<null | HTMLDivElement>(null);
-  const [msgContext, setMsgContext ] = useState<Array<MsgContext>>([
-    {
-      role: "system",
-      content: props.assistant.blocks[0].personality
-    }
-  ]);
+  const [msgContext, setMsgContext ] = useState<Array<MsgContext>>([]);
   const [ calculator ] = useState(new TokenCalculator(props.context.calculations))
   const [ promptError, setPromptError ] = useState(false);
+  const [form] = Form.useForm();
 
   const { user } = props.context;
 
+  useEffect(() => {
+    setQuotaOverused(props.context.company.tokens < 0);
+  }, [props.context.company]);
 
   useEffect(() => {
     const element = lastMsgRef.current;
@@ -105,120 +112,115 @@ export default function ChatAssistant(props: {
       localHist.unshift({ content: localmsgs, time: moment(Date.now()).format("DD.MM.YYYY") });
     }
 
+    const relevantcontext = [...msgContext];
+    // Add the personality to the front of the msg context;
+    relevantcontext.unshift({
+      role: "system",
+      content: props.assistant.blocks[0].personality
+    });
+
+
     //lastMsgRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
     localmsgs.push({ content: values.chatmsg, type: MsgType.USER });
     localmsgs.push({ content: <Skeleton active/>, type: MsgType.MODEL });
 
-
+    console.log(msgContext.length);
+    // We add one here to ignore the assistants personality
     if(msgContext.length >= MAXCONTEXTSIZE){
       msgContext.shift();
     }
 
     msgContext.push({ content: values.chatmsg, role: "user" });
-
     setChatMsgs(localmsgs);
 
     setFormDisabled(true);
 
-
     const usedTokens = { in: 0, out: 0 };
     let cost = 0;
 
-    const costbeforereq = await axios.post("/api/chat/count", { msgs: msgContext, content: values.chatmsg });
+    const state = ParsingState.UNDEFINED;
 
     try{
-      if(costbeforereq) {
-        const costbefore = costbeforereq.data.tokens;
+      await axios.post("/api/llama/query", {
+        aid: props.assistant.uid,
+        query: values.chatmsg,
+        messages: relevantcontext,
+        companyId: props.context.user.Company
+      }, {
+        onDownloadProgress: async (progressEvent) => {
+          const lmsgs = [...localmsgs];
+          let dataChunk: string = progressEvent.event?.currentTarget.response;
 
-        if(costbefore){
-          try{
-            await axios.post("/api/chat/generate", { msgContext: msgContext }, { onDownloadProgress: async (progressEvent) => {
-              const lmsgs = [...localmsgs];
-              let dataChunk: string = progressEvent.event?.currentTarget.response;
+          const parseRegEx = /(?<=<~).+?(?=~>)/g;
+          const parsedval = dataChunk.match(parseRegEx);
 
-              const parseRegEx = /(?<=<~).+?(?=~>)/g;
-              const parsedval = dataChunk.match(parseRegEx);
+          // part that runs after the stop flag was found...
+          if(parsedval && parsedval.length == 1){
+            dataChunk = dataChunk.replace(`<~${parsedval[0]}~>`, "");
+            const topMostIndex = lmsgs.length-1;
+            lmsgs[topMostIndex] = { content: dataChunk, type: MsgType.MODEL };
 
-              // part that runs after the stop flag was found...
-              if(parsedval && parsedval.length == 1){
-                dataChunk = dataChunk.replace(`<~${parsedval[0]}~>`, "");
-                const topMostIndex = lmsgs.length-1;
-                lmsgs[topMostIndex] = { content: dataChunk, type: MsgType.MODEL };
-
-                if(msgContext.length >= MAXCONTEXTSIZE){
-                  msgContext.shift();
-                }
-
-                msgContext.push({ content: dataChunk, role: "assistant" });
-
-
-                const costafterreq = await axios.post("/api/chat/count", { msgs: [], content: dataChunk });
-
-                if(costafterreq){
-                  const answerUsedTokens = costafterreq.data.tokens;
-
-                  usedTokens.in = costbefore;
-                  usedTokens.out = answerUsedTokens;
-
-                  cost = calculator.cost(usedTokens);
-
-                  // Hier muss noch die History geschrieben werden
-                  // We need to check if the user already has 10 saved states
-                  let histIndex = 0;
-                  if(props.predefinedState.idx && props.predefinedState.idx != -1){
-                    histIndex = props.predefinedState.idx;
-                  }
-
-                  localHist[histIndex] = { content: lmsgs, time: moment(Date.now()).format("DD.MM.YYYY") }
-
-                  const encHistObj = await axios.post( "/api/prompt/encrypt", {
-                    content: JSON.stringify(localHist),
-                    salt: user.salt
-                  } );
-                  const encHist = encHistObj.data.message;
-
-                  props.history.set(localHist);
-                  const userhist = user.history;
-                  // Set the history to the encoded string and update the user
-                  userhist[props.assistant.uid] = encHist;
-                  await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
-                    
-                  reduceCost(props.context.company.tokens, cost);
-                  await updateCompanyTokens(props.context, calculator, props.notificationApi, cost);
-
-                  props.notificationApi.info({
-                    message: "Creditverbrauch",
-                    description: `Die Anfrage hat ${toGermanCurrencyString(cost)} verbraucht`,
-                    duration: MSGDURATION
-                  });
-                }
-
-                setChatMsgs(lmsgs);
-              }else{
-                const topMostIndex = lmsgs.length-1;
-                lmsgs[topMostIndex] = { content: dataChunk + "█", type: MsgType.MODEL };
-                setChatMsgs(lmsgs);
-              }
-
+            if(msgContext.length >= MAXCONTEXTSIZE){
+              msgContext.shift();
             }
+
+            msgContext.push({ content: dataChunk, role: "assistant" });
+
+
+            usedTokens.in = 0;
+            usedTokens.out = 0;
+
+            try{
+              const costReturned = JSON.parse(parsedval[0]);
+              cost = costReturned.cost;
+            }catch (e){
+              cost = 0;
+            }
+
+            // Hier muss noch die History geschrieben werden
+            // We need to check if the user already has 10 saved states
+            let histIndex = 0;
+            if(props.predefinedState.idx && props.predefinedState.idx != -1){
+              histIndex = props.predefinedState.idx;
+            }
+
+            localHist[histIndex] = { content: lmsgs, time: moment(Date.now()).format("DD.MM.YYYY") }
+
+            const encHistObj = await axios.post( "/api/prompt/encrypt", {
+              content: JSON.stringify(localHist),
+              salt: user.salt
+            } );
+            const encHist = encHistObj.data.message;
+
+            props.history.set(localHist);
+            const userhist = user.history;
+            // Set the history to the encoded string and update the user
+            userhist[props.assistant.uid] = encHist;
+            await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
+
+            //reduceCost(props.context.company.tokens, cost);
+            //await updateCompanyTokens(props.context, calculator, props.notificationApi, cost);
+
+            props.notificationApi.info({
+              message: "Creditverbrauch",
+              description: `Die Anfrage hat ${toGermanCurrencyString(cost)} verbraucht`,
+              duration: MSGDURATION
             });
 
-            setFormDisabled(false);
-
-          }catch (e){
-            console.log(e);
-            setPromptError(true);
+            setChatMsgs(lmsgs);
+          }else{
+            const topMostIndex = lmsgs.length-1;
+            lmsgs[topMostIndex] = { content: dataChunk + "█", type: MsgType.MODEL };
+            setChatMsgs(lmsgs);
           }
-        }else{
-          throw("Costbefore undefined");
+
         }
-      }else{
-        throw("Costbreforereq undefined");
-      }
-    }catch (oe){
-      console.log(oe);
-      setPromptError( true );
+      });
+
       setFormDisabled(false);
+    }catch (e){
+      console.log(e);
+      setPromptError(true);
     }
   }
   
@@ -295,12 +297,24 @@ export default function ChatAssistant(props: {
           : <ChatMessages />}
       </div>
       <div className={styles.inputwindow}>
-        <Form disabled={formDisabled} layout={"horizontal"} onFinish={handleUserMsg} className={styles.inputform}>
+        <Form form={form} disabled={formDisabled} layout={"horizontal"} onFinish={handleUserMsg} className={styles.inputform}>
           <Form.Item className={styles.inputformitem} name={"chatmsg"} label={""}>
             <TextArea placeholder={"Worum geht es?"}></TextArea>
           </Form.Item>
             
-          <Button className={styles.inputformbutton} type={"primary"} htmlType={"submit"}><ArrowRightOutlined /></Button>
+          <Button
+              className={styles.inputformbutton}
+              type={"primary"}
+              onClick={() => {
+                if(quotaOverused) {
+                  props.messageApi.error("Dein Budget ist ausgeschöpft. In der Kontoübersicht kannst du neues Guthaben dazubuchen!")
+                }else {
+                  form.submit();
+                }
+              }}
+          >
+            <ArrowRightOutlined />
+          </Button>
         </Form>
       </div>
     </div>

@@ -27,6 +27,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { MessageInstance } from "antd/es/message/interface";
 import { NotificationInstance } from "antd/es/notification/interface";
 import { MAXHISTITEMS, MSGDURATION } from "../../../pages/assistant";
+import { MsgType } from "../ChatAssistant/ChatAssistant";
 
 
 
@@ -85,6 +86,10 @@ export default function QaAAssistant(props: {
       setAnswer(props.predefinedState.state[0]);
     }
   }, [props.predefinedState]);
+
+  useEffect(() => {
+    setQuotaOverused(props.context.company.tokens < 0);
+  }, [props.context.company]);
 
   /**
      * Effect to encrypt the user profiles
@@ -303,8 +308,8 @@ export default function QaAAssistant(props: {
 
 
       let isFreed = false;
-      const usedTokens = { in: 0, out: 0 };
       let cost = 0;
+      let usedTokens = { in: 0, out: 0 };
 
       // Retrieve the template for prompts from the database
       const templatereq = await getDocument("Settings", "Prompts");
@@ -314,26 +319,21 @@ export default function QaAAssistant(props: {
         throw Error("Settings not found...");
       }
 
-      // Extract the template data
-      const templates: Templates = templatereq.result.data();
-
       // Format the given values to fit to the prompt api
       const { prompt } = promptFunction( values, mainblock.prompt )
 
       //Calculate the used tokens of the input
-      const costbeforereq = await axios.post("/api/prompt/count", { prompt: prompt });
+      let localAnswer = "";
 
-      if(costbeforereq){
-        const costbefore = costbeforereq.data.tokens;
-
-        if(costbefore){
-          let localtext = "";
-          let localAnswer = "";
-
-          try{
-            // Query the api for an answer to the input
-            await axios.post( "/api/prompt/generate", { prompt: prompt, personality: mainblock.personality },
-              { onDownloadProgress: async (progressEvent) => {
+      try{
+        // Query the api for an answer to the input
+        await axios.post("/api/llama/query", {
+              aid: props.assistant.uid,
+              query: prompt,
+              messages: [ { content: mainblock.personality, role: MsgType.ASSISTANT } ],
+              companyId: props.context.user.Company
+            },
+            { onDownloadProgress: async (progressEvent) => {
                 // Disable the loading of the answer if we have recieved a chunk of data
                 if(!isFreed){
                   setIsLoaderVisible( false );
@@ -342,7 +342,6 @@ export default function QaAAssistant(props: {
                 }
                 // Get the generated words from the response
                 let dataChunk: string = progressEvent.event?.currentTarget.response;
-                localtext = dataChunk;
 
                 // Remove possible contained control sequences
                 const parseRegEx = /(?<=<~).+?(?=~>)/g;
@@ -353,59 +352,59 @@ export default function QaAAssistant(props: {
                   // If we found the control sequence, we reached the end of the response
                   // Remove the control sequence
                   dataChunk = dataChunk.replace(`<~${parsedval[0]}~>`, "");
-                  localAnswer = dataChunk;
 
-                  // Calculate the tokens of the answer
-                  const costbeforereq = await axios.post("/api/prompt/count", { prompt: localtext });
-                  if(costbeforereq){
-                    const tokensused = costbeforereq.data.tokens
-                    // Set the tokens to the sum of the input and the received answer
-                    usedTokens.in = costbefore;
-                    usedTokens.out = tokensused;
+                  usedTokens.in = 0;
+                  usedTokens.out = 0;
 
-                    // Update the used tokens and display them
-                    setTokenCountVisible(true);
+                  try{
+                    const costReturned = JSON.parse(parsedval[0]);
+                    cost = costReturned.cost;
+                  }catch (e){
+                    cost = 0;
+                  }
 
-                    cost = calculator.cost(usedTokens);
 
-                    // Add the generated answer to the history state
-                    // Validate that the answer is not empty
-                    if(localAnswer != ""){
-                      // We need to check if the user already has 10 saved states
-                      if(props.history.state.length >= MAXHISTITEMS){
-                        // If so remove last Element from array
-                        props.history.state.pop();
-                      }
-
-                      // Add the answer with the current time and the used tokens to the front of the history array
-                      props.history.state.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: toGermanCurrencyString(cost) });
-
-                      // Encrypt the history array
-                      const encHistObj = await axios.post( "/api/prompt/encrypt", {
-                        content: JSON.stringify(props.history.state),
-                        salt: context.user.salt
-                      } );
-
-                      const encHist = encHistObj.data.message;
-
-                      const userhist = context.user.history;
-                      // Set the history to the encoded string and update the user
-                      userhist[props.assistant.uid] = encHist;
-                      await updateDoc( doc( db, "User", context.login.uid ), { history: userhist } );
+                  // Add the generated answer to the history state
+                  // Validate that the answer is not empty
+                  if(localAnswer != ""){
+                    // We need to check if the user already has 10 saved states
+                    if(props.history.state.length >= MAXHISTITEMS){
+                      // If so remove last Element from array
+                      props.history.state.pop();
                     }
 
-                    reduceCost(props.context.company.tokens, cost);
-                    await updateCompanyTokens(props.context, calculator, props.notificationApi, cost);
+                    // Add the answer with the current time and the used tokens to the front of the history array
+                    props.history.state.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: toGermanCurrencyString(cost) });
 
-                    props.notificationApi.info({
-                      message: "Creditverbrauch",
-                      description: `Die Anfrage hat ${toGermanCurrencyString(cost)} verbraucht`,
-                      duration: MSGDURATION
-                    });
+                    // Encrypt the history array
+                    const encHistObj = await axios.post( "/api/prompt/encrypt", {
+                      content: JSON.stringify(props.history.state),
+                      salt: context.user.salt
+                    } );
 
-                    // Set the answer to the recieved data without the control sequence
-                    setAnswer(dataChunk);
+                    const encHist = encHistObj.data.message;
+
+                    const userhist = context.user.history;
+                    // Set the history to the encoded string and update the user
+                    userhist[props.assistant.uid] = encHist;
+                    await updateDoc( doc( db, "User", context.login.uid ), { history: userhist } );
                   }
+
+                  //reduceCost(props.context.company.tokens, cost);
+                  //await updateCompanyTokens(props.context, calculator, props.notificationApi, cost);
+
+                  props.notificationApi.info({
+                    message: "Creditverbrauch",
+                    description: `Die Anfrage hat ${toGermanCurrencyString(cost)} verbraucht`,
+                    duration: MSGDURATION
+                  });
+
+                  // Set the answer to the recieved data without the control sequence
+                  setAnswer(dataChunk);
+
+                  localAnswer = dataChunk;
+
+                  setTokenCountVisible(true);
 
 
                 }else{
@@ -414,61 +413,16 @@ export default function QaAAssistant(props: {
                   localAnswer = dataChunk;
 
                 }
-
-
-
-              }, signal: cancleController.signal
-              });
-          }catch(e){
-            // If we encounter an error
-            if(axios.isCancel(e)){
-              // Check if we encounterd a cancle signal. e.g if the user aborted the request
-              // Show the used tokens
-
-              const costbeforereq = await axios.post("/api/prompt/count", { prompt: localtext });
-              if(costbeforereq){
-                const tokensused = costbeforereq.data.tokens
-                // Set the tokens to the sum of the input and the received answer
-                usedTokens.in = costbefore;
-                usedTokens.out = tokensused;
-
-                cost = calculator.cost(usedTokens);
-
-                reduceCost(props.context.company.tokens, cost);
-                await updateCompanyTokens(props.context, calculator, props.notificationApi, cost);
-
-                // Update the used tokens and display them
-                setTokenCountVisible(true);
-
-                props.notificationApi.info({
-                  message: "Creditverbrauch",
-                  description: `Die Anfrage hat  ${toGermanCurrencyString(cost)} Credits verbraucht`,
-                  duration: MSGDURATION
-                });
               }
-
-              // Abort the request
-              setCancleController(new AbortController);
-            }else{
-              setAnswer("");
-              setPromptError(true);
-            }
-          }
-
-          console.log("hier", context.company.tokens);
-
-
-
-          // Check if the user activated automatic recharge. If charge them and add tokens
-          console.log(context.company);
-
-
-        }else{
-          throw("Costbefore undefined");
-        }
-      }else{
-        throw("Costbreforereq undefined");
+            });
+      }catch(e){
+        setAnswer("");
+        setPromptError(true);
       }
+
+
+      // Check if the user activated automatic recharge. If charge them and add tokens
+      console.log(context.company);
     }catch( e ){
       console.log(e);
       setIsLoaderVisible( false );
@@ -571,20 +525,18 @@ export default function QaAAssistant(props: {
             quotaOverused={quotaOverused}
             formDisabled={formDisabled} profiles={decryptedProfiles}/>
           <div className={styles.formfootercontainer}>
-            <div className={styles.tokenalert}>
-              {
-                (quotaOverused) ?
-                  <Alert
-                    message={"Das Budget ist ausgeschöpft. In der Kontoübersicht kannst du weiteres Budget dazubuchen."}
-                    type="error"/>
-                  : <></>
-              }
-            </div>
             <div className={styles.generatebuttonrow}>
               <FatButton
-                isSubmitButton={true}
-                disabled={formDisabled || quotaOverused}
+                disabled={formDisabled}
+                type={(quotaOverused)? "default": "primary"}
                 text="Assistenten ausführen"
+                onClick={() => {
+                  if(quotaOverused){
+                    props.messageApi.error("Dein Budget ist ausgeschöpft. In der Kontoübersicht kannst du neues Guthaben dazubuchen!")
+                  }else{
+                    form.submit();
+                  }
+                }}
               />
             </div>
           </div>
@@ -622,7 +574,11 @@ export default function QaAAssistant(props: {
               setCancleController(new AbortController);
             }} text="Zurück"/>
             <FatButton type={"default"} onClick={() => {
-              form.submit();
+              if(quotaOverused){
+                props.messageApi.error("Dein Budget ist ausgeschöpft. In der Kontoübersicht kannst du neues Guthaben dazubuchen!")
+              }else{
+                form.submit();
+              }
             }} text="Neu generieren"/>
           </div>
         </div>

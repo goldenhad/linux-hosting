@@ -35,6 +35,8 @@ const encoding = encodingForModel("gpt-4-0125-preview");
 
 Settings.callbackManager.on("llm-start", (event: LLMStartEvent) => {
   const { messages } = event.detail.payload;
+  console.log(messages);
+
   tokenCount.in = messages.reduce((count: number, message: ChatMessage) => {
     return count + encoding.encode(extractText(message.content)).length;
   }, 0);
@@ -72,8 +74,6 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
         msg.role = MsgType.ASSISTANT;
       })
 
-      console.log(messages);
-
       let index = undefined;
 
       // Check if the collection is available = if the user supplied a knowledgebase
@@ -104,10 +104,10 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       });
 
       const retriever = index.asRetriever();
+      // Limit the context window to the three most relevant nodes
       retriever.similarityTopK = 3;
 
       const chatEngine = new ContextChatEngine({ retriever, chatModel: llm , chatHistory: messages });
-
 
       let resp = "";
       const response = chatEngine.chat({ message: query, stream: true });

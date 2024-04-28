@@ -76,6 +76,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       
       
       if(reader != undefined){
+        console.log("Starting read process...");
         const documents = await reader.loadData(uploadFile.filepath);
 
         let cost = 0;

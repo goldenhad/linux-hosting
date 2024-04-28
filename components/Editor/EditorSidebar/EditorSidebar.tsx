@@ -300,7 +300,7 @@ const EditorSidebar = ( props: {
           </Form.Item>
 
           <Form.Item>
-            <Upload {...uploadprops}>
+            <Upload {...uploadprops} maxCount={1} multiple={false}>
               <Button icon={<UploadOutlined />}>Wissensbasis hochladen</Button>
             </Upload>
           </Form.Item>

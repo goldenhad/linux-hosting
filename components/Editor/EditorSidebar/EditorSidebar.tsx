@@ -1,16 +1,23 @@
 import React, { Dispatch, ReactNode, useEffect, useState } from "react";
-import {ArrowLeftOutlined, SettingOutlined, UploadOutlined} from "@ant-design/icons";
-import {Button, Drawer, Form, Input, Layout, message, Modal, Select, Switch, Upload} from "antd";
+import { ArrowLeftOutlined, FileTextOutlined, SettingOutlined, UploadOutlined } from "@ant-design/icons";
+import { Avatar, Button, Drawer, Form, Input, Layout, List, message, Modal, Select, Switch, Upload } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import styles from "./editorsidebar.module.scss";
 import CookieBanner from "../../CookieBanner/CookieBanner";
-import Assistant, { AssistantInputType, AssistantType, Block, InputBlock } from "../../../firebase/types/Assistant";
+import Assistant, {
+  AssistantInputType,
+  AssistantType,
+  Block,
+  FileReference,
+  InputBlock
+} from "../../../firebase/types/Assistant";
 import updateData from "../../../firebase/data/updateData";
 import UploadAssistantIcon from "../UploadAssistantIcon/UploadAssistantIcon";
 import { getAssistantImageUrl } from "../../../firebase/drive/upload_file";
 import { checkValidityOfAssistantConfig } from "../../../helper/assistant";
-import {UploadProps} from "antd/es/upload";
+import { UploadProps } from "antd/es/upload";
+import axios from "axios";
 
 const { Header, Content, Sider } = Layout;
 
@@ -65,7 +72,8 @@ const EditorSidebar = ( props: {
     video: "",
     published: false,
     uid: "",
-    blocks: Array<Block | InputBlock>()
+    blocks: Array<Block | InputBlock>(),
+    knowledgeFiles: Array<FileReference>()
   });
 
   const [ settingsModalOpen, setSettingsModalOpen ] = useState(false);
@@ -142,12 +150,40 @@ const EditorSidebar = ( props: {
     data: {
       aid: props.aid
     },
-    onChange(info) {
+    async onChange(info) {
       if (info.file.status !== "uploading") {
         console.log(info.file, info.fileList);
       }
       if (info.file.status === "done") {
-        message.success(`${info.file.name} file uploaded successfully`);
+        const knowledgeFiles = assistantState.knowledgeFiles;
+        info.fileList.forEach((file) => {
+          if(file.response.errorcode == 0){
+            const fileRef = {
+              name: "",
+              nodes: []
+            };
+            fileRef.name = file.name;
+            fileRef.nodes = file.response.message;
+
+            knowledgeFiles.push(fileRef);
+          }
+        });
+        
+        const assState = { ...assistantState };
+        assState.knowledgeFiles = knowledgeFiles;
+        setAssistantState(assState);
+        
+        try{
+          const updateReq = await updateData("Assistants", props.aid, { knowledgeFiles: knowledgeFiles });
+          if(!updateReq.error){
+            console.log(updateReq);
+            message.success(`${info.file.name} file uploaded successfully`);
+          }else{
+            throw Error("Assistant could not be updated");
+          }
+        }catch (e){
+          message.error(`${info.file.name} file upload failed.`);
+        }
       } else if (info.file.status === "error") {
         message.error(`${info.file.name} file upload failed.`);
       }
@@ -156,7 +192,6 @@ const EditorSidebar = ( props: {
 
 
   const saveAssistant = async () => {
-    console.log(assistantState);
     const AssistantToUpdate: Assistant = assistantState;
     const desc = settForm.getFieldValue("description");
 
@@ -261,6 +296,77 @@ const EditorSidebar = ( props: {
     }
   }
 
+  const KnowledgeButton = () => {
+    const UploadButton = () => {
+      return <Upload {...uploadprops} maxCount={1} multiple={false}>
+        <Button icon={<UploadOutlined />}>Wissensbasis hochladen</Button>
+      </Upload>;
+    };
+
+    if(assistantState.knowledgeFiles.length > 0){
+      const knowledgeData = assistantState.knowledgeFiles.map((fileRef, idx) => {
+        return {
+          index: idx,
+          title: fileRef.name,
+          nodes: fileRef.nodes
+        }
+      })
+
+      return (
+        <>
+          <List
+            itemLayout="horizontal"
+            dataSource={knowledgeData}
+            renderItem={(item, index) => (
+              <List.Item
+                actions={[
+                  <Button key={"del"} onClick={async () => {
+                    const delReq = await axios.post("/api/assistant/knowledge/delete", { aid: props.aid, nodes: item.nodes });
+                    if(delReq.status == 200){
+                      const ass = props.assistant;
+                      ass.knowledgeFiles.splice(item.index, 1);
+
+                      console.log(item.index);
+                      console.log(ass.knowledgeFiles)
+
+                      try{
+                        const updateReq = await updateData("Assistants", props.aid, ass);
+                        if(!updateReq.error){
+                          console.log(updateReq);
+
+                          const assState = { ...assistantState }
+                          assState.knowledgeFiles = ass.knowledgeFiles;
+                          setAssistantState(assState);
+
+                          messageApi.success("Dokument erfolgreich entfernt!");
+                        }else{
+                          throw Error("Assistant could not be updated");
+                        }
+                      }catch (e){
+                        messageApi.error("Fehler beim Löschen des Dokuments! Bitte versuche es später erneut.")
+                      }
+                    }else{
+                      messageApi.error("Fehler beim Löschen des Dokuments! Bitte versuche es später erneut.")
+                    }
+                  }} danger>Löschen</Button>
+                ]}
+              >
+                <List.Item.Meta
+                  avatar={<Avatar icon={<FileTextOutlined />} />}
+                  title={<b>{item.title}</b>}
+                />
+              </List.Item>
+            )}
+          />
+          <UploadButton />
+        </>
+      );
+    }else{
+      return (
+        <UploadButton />
+      );
+    }
+  }
 
   const SettingsModal = () => {
     return (
@@ -299,11 +405,12 @@ const EditorSidebar = ( props: {
             <TextArea rows={7} placeholder={"Beschreibe deinen Assistenten kurz"} />
           </Form.Item>
 
-          <Form.Item>
-            <Upload {...uploadprops} maxCount={1} multiple={false}>
-              <Button icon={<UploadOutlined />}>Wissensbasis hochladen</Button>
-            </Upload>
+
+
+          <Form.Item name={"knowledgeupload"} label={<b>Wissensbasis</b>}>
+            <KnowledgeButton />
           </Form.Item>
+
         </Form>
       </Modal>
     );

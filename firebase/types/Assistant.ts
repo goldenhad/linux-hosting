@@ -43,6 +43,11 @@ export interface AssistantInputColumn {
     inputs: Array<AssistantInput>;
 }
 
+export interface FileReference {
+    name: string,
+    nodes: Array<string>
+}
+
 export default interface Assistant {
     name: string;
     image: string;
@@ -52,6 +57,7 @@ export default interface Assistant {
     uid: string;
     published: boolean;
     blocks: Array<Block | InputBlock>;
+    knowledgeFiles: Array<FileReference>;
 }
 
 export interface Block {

@@ -1,13 +1,6 @@
 version: '3'
 
 services:
-    mailbuddy:
-        image: ghcr.io/printerboi/siteware_business_dev:latest
-        ports:
-            - '3002:3000'
-        volumes:
-            - ./stats:/app/stats
-
     qdrant:
       image: qdrant/qdrant:latest
       restart: always

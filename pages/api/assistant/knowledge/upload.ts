@@ -6,19 +6,21 @@ import fs from "fs";
 import * as path from "path";
 import {
   ChatMessage,
-  LLMStartEvent, OpenAIEmbedding,
+  LLMStartEvent, Metadata, OpenAIEmbedding,
   PDFReader,
   QdrantVectorStore, serviceContextFromDefaults,
   storageContextFromDefaults,
-  VectorStoreIndex
+  VectorStoreIndex,
+  Document
 } from "llamaindex";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { Settings } from "llamaindex/Settings";
-import { extractText } from "llamaindex/llm/utils";
-import {encodingForModel} from "js-tiktoken";
+import { encodingForModel } from "js-tiktoken";
 
 type ResponseData = {
     errorcode: number,
-    message: string,
+    message: string | Array<string>,
 }
 
 
@@ -74,14 +76,15 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
         return res.status( 400 ).send( { errorcode: 97, message: "Filetype not supported!" } );
       }
       
-      
+      const docIds: Array<string> = [];
       if(reader != undefined){
         console.log("Starting read process...");
-        const documents = await reader.loadData(uploadFile.filepath);
+        const documents: Document<Metadata>[] = await reader.loadData(uploadFile.filepath);
 
         let cost = 0;
         documents.forEach((doc) => {
           cost += encoding.encode(doc.text).length;
+          docIds.push(doc.id_);
         });
 
         console.log(cost, "=>", cost / 1_000_000 * 0.02);
@@ -95,10 +98,11 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           vectorStore
         });
 
+        console.log(index.indexStruct);
         console.log("INDEXING FINISHED!");
       }
 
-      return res.status( 200 ).send( { errorcode: 0, message: "DONE" } );
+      return res.status( 200 ).send( { errorcode: 0, message: docIds } );
     }else{
       return res.status( 400 ).send( { errorcode: 1, message: "The provided Data causend an error" } );
     }

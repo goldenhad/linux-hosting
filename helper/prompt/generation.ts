@@ -13,7 +13,7 @@ type InputData = {
 }
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAIAPIKEY
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 export enum Model {

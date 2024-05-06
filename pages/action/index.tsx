@@ -24,8 +24,6 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
   const code = ctx.query.oobCode;
   const apikey = ctx.query.apiKey;
 
-  //console.log(mode, code, apikey);
-
   if( mode && code && apikey ){
     return { props: { mode: mode, oobCode: code, apiKey: apikey  } } 
   }else{
@@ -39,6 +37,7 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
  * @constructor
  */
 export default function Action( props: restprops ){
+  console.log("loading action component...")
   const ActionComponent = () => {
     if(props.mode == "resetPassword"){
       return <ResetPassword oobCode={props.oobCode} />
@@ -62,15 +61,13 @@ Action.getLayout = ( page ) => {
   return(
     <>
       <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" type="image/x-icon" href="small_logo.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <link rel="icon" type="image/x-icon" href="small_logo.ico"/>
         <title>Siteware business | ai assistant</title>
       </Head>
-      <AuthContextProvider>
-        <main>
-          {page}
-        </main>
-      </AuthContextProvider>
+      <main>
+        {page}
+      </main>
 
     </>
   );

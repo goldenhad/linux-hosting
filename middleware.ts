@@ -49,12 +49,17 @@ export async function middleware(request: NextRequest) {
     },
     handleInvalidToken: async (reason) => {
       console.info("Missing or malformed credentials", { reason });
-      console.log(PUBLIC_PATHS);
+      //console.log(PUBLIC_PATHS);
+      console.log(request.nextUrl.pathname);
+      console.log(PUBLIC_PATHS.includes(request.nextUrl.pathname))
 
-      return redirectToLogin(request, {
-        path: "/login",
-        publicPaths: PUBLIC_PATHS
-      });
+      if (!PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
+        console.log("redirecting....");
+        return redirectToLogin(request, {
+          path: "/login",
+          publicPaths: PUBLIC_PATHS
+        });
+      }
     }
   });
 }

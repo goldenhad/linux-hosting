@@ -26,8 +26,6 @@ export function ResetPassword(props: { oobCode: string }){
       //console.log(result)
       setWasReset( true );
     }
-
-
   };
 
   /**

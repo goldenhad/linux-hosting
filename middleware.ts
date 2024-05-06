@@ -37,6 +37,7 @@ export async function middleware(request: NextRequest) {
     },
     handleValidToken: async ({ token, decodedToken }, headers) => {
       if (PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
+        console.log(`ROUTE ${request.nextUrl.pathname} is not public, redirecting to home...`)
         return redirectToHome(request);
       }
 

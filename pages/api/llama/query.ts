@@ -25,9 +25,9 @@ import updateData from "../../../firebase/data/updateData";
 import { getDoc } from "firebase/firestore";
 import getDocument from "../../../firebase/data/getData";
 import { TokenCalculator } from "../../../helper/price";
-import {Calculations, InvoiceSettings} from "../../../firebase/types/Settings";
-import {Company, Order} from "../../../firebase/types/Company";
-import {stripe} from "../../../stripe/api";
+import { Calculations, InvoiceSettings } from "../../../firebase/types/Settings";
+import { Company, Order } from "../../../firebase/types/Company";
+import { stripe } from "../../../stripe/api";
 
 
 const tokenCount = { in:0 , out: 0 };
@@ -105,7 +105,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
       const retriever = index.asRetriever();
       // Limit the context window to the three most relevant nodes
-      retriever.similarityTopK = 3;
+      retriever.similarityTopK = 2;
 
       const chatEngine = new ContextChatEngine({ retriever, chatModel: llm , chatHistory: messages });
 
@@ -209,7 +209,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
               // Added the new order to the company orders
               currentOrders.push( newOrder );
               // Update the last used invoice id
-              await firestore.doc(`/Settings/Invoices`).update( { last_used_number: nextInvoiceNumber } );
+              await firestore.doc("/Settings/Invoices").update( { last_used_number: nextInvoiceNumber } );
 
               console.log(updatedTokenValue);
 

@@ -11,7 +11,7 @@ import {
   QdrantVectorStore, serviceContextFromDefaults,
   storageContextFromDefaults,
   VectorStoreIndex,
-  Document
+  Document, IngestionPipeline, SimpleNodeParser, TitleExtractor
 } from "llamaindex";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -23,6 +23,8 @@ type ResponseData = {
     message: string | Array<string>,
 }
 
+Settings.chunkSize = 100
+Settings.chunkOverlap = 50;
 
 const encoding = encodingForModel("text-embedding-ada-002");
 
@@ -91,8 +93,21 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
         console.log("STARTING INDEXING PLEASE WAIT...");
 
+        const pipeline = new IngestionPipeline({
+          transformations: [
+              //512
+            new SimpleNodeParser({ chunkSize: 128, chunkOverlap: 10 }),
+            new TitleExtractor(),
+            new OpenAIEmbedding({ model: "text-embedding-3-large", dimensions: 1536 })
+          ],
+          vectorStore
+        });
 
-        Settings.embedModel = new OpenAIEmbedding({ model: "text-embedding-3-small" });
+        /*Settings.embedModel = new OpenAIEmbedding({ model: "text-embedding-3-large", dimensions: 1536 });
+        */
+
+        const nodes = await pipeline.run({ documents: documents });
+
 
         const index = await VectorStoreIndex.fromDocuments(documents, {
           vectorStore

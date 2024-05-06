@@ -155,7 +155,7 @@ const EditorSidebar = ( props: {
         console.log(info.file, info.fileList);
       }
       if (info.file.status === "done") {
-        const knowledgeFiles = assistantState.knowledgeFiles;
+        const knowledgeFiles = (assistantState.knowledgeFiles)? assistantState.knowledgeFiles: [];
         info.fileList.forEach((file) => {
           if(file.response.errorcode == 0){
             const fileRef = {
@@ -303,7 +303,7 @@ const EditorSidebar = ( props: {
       </Upload>;
     };
 
-    if(assistantState.knowledgeFiles.length > 0){
+    if(assistantState.knowledgeFiles?.length > 0){
       const knowledgeData = assistantState.knowledgeFiles.map((fileRef, idx) => {
         return {
           index: idx,

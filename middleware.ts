@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authMiddleware, redirectToHome, redirectToLogin } from "next-firebase-auth-edge";
 import serviceAccount from "./mailbuddy_priv_key.json";
 
-const PUBLIC_PATHS = ["/register", "/login", "/forgot/password", "/privacy", "/legal", "/monitoring", "/sentry-example-page"];
+const PUBLIC_PATHS = ["/register", "/login", "/forgot/password", "/privacy", "/legal", "/monitoring", "/sentry-example-page", "/action"];
 
 const redirectToRoute = (pathname: string, request: NextRequest) => {
   const url = request.nextUrl.clone();
@@ -37,6 +37,7 @@ export async function middleware(request: NextRequest) {
     },
     handleValidToken: async ({ token, decodedToken }, headers) => {
       if (PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
+        console.log(`ROUTE ${request.nextUrl.pathname} is not public, redirecting to home...`)
         return redirectToHome(request);
       }
 
@@ -48,6 +49,7 @@ export async function middleware(request: NextRequest) {
     },
     handleInvalidToken: async (reason) => {
       console.info("Missing or malformed credentials", { reason });
+      console.log(PUBLIC_PATHS);
 
       return redirectToLogin(request, {
         path: "/login",

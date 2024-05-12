@@ -1,32 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { auth } from "../../../../firebase/admin"
-import { Formidable } from "formidable";
-import { uploadAssistantImage, uploadProfilePicture } from "../../../../firebase/drive/upload_file";
-import fs from "fs";
-import * as path from "path";
 import {
-  ChatMessage,
-  LLMStartEvent, OpenAIEmbedding,
-  PDFReader,
-  QdrantVectorStore, serviceContextFromDefaults,
-  storageContextFromDefaults,
+  QdrantVectorStore,
   VectorStoreIndex
 } from "llamaindex";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { Settings } from "llamaindex/Settings";
-import { encodingForModel } from "js-tiktoken";
 
 type ResponseData = {
     errorcode: number,
     message: string,
 }
 
-
-const encoding = encodingForModel("text-embedding-ada-002");
-
-
-const SITEWARE_TMP_FOLDER = process.env.SITEWARE_TMP_FOLDER;
 
 /**
  * API route handling assistant knowledgebase input

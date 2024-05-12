@@ -6,7 +6,7 @@ import Play from "../../public/icons/play.svg";
 import Heart from "../../public/icons/heart.svg";
 import HeartFull from "../../public/icons/heartFull.svg";
 import { useEffect, useState } from "react";
-import { getAssistantImage, getAssistantImageUrl } from "../../firebase/drive/upload_file";
+import { getAssistantImageUrl } from "../../firebase/drive/upload_file";
 import { AssistantInputType, AssistantType, Block, InputBlock } from "../../firebase/types/Assistant";
 
 const { Paragraph } = Typography;

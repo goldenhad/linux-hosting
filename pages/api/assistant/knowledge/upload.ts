@@ -1,35 +1,23 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { auth } from "../../../../firebase/admin"
 import { Formidable } from "formidable";
-import { uploadAssistantImage, uploadProfilePicture } from "../../../../firebase/drive/upload_file";
-import fs from "fs";
-import * as path from "path";
 import {
-  ChatMessage,
-  LLMStartEvent, Metadata, OpenAIEmbedding,
+  Metadata, OpenAIEmbedding,
   PDFReader,
-  QdrantVectorStore, serviceContextFromDefaults,
-  storageContextFromDefaults,
+  QdrantVectorStore,
   VectorStoreIndex,
-  Document, IngestionPipeline, SimpleNodeParser, TitleExtractor
+  Document, IngestionPipeline, SimpleNodeParser, TitleExtractor, TextFileReader, MarkdownReader
 } from "llamaindex";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { Settings } from "llamaindex/Settings";
 import { encodingForModel } from "js-tiktoken";
+import getDocument from "../../../../firebase/data/getData";
+import { EmbeddingParameters } from "../../../../firebase/types/Settings";
 
 type ResponseData = {
     errorcode: number,
     message: string | Array<string>,
 }
 
-Settings.chunkSize = 100
-Settings.chunkOverlap = 50;
-
 const encoding = encodingForModel("text-embedding-ada-002");
-
-
-const SITEWARE_TMP_FOLDER = process.env.SITEWARE_TMP_FOLDER;
 
 /**
  * API route handling assistant knowledgebase input
@@ -54,13 +42,10 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       }
     );
 
-    console.log(data.files);
-
     // Check the input to the API route
     if( data.fields.aid && data.files.file.length == 1){
       const aid = data.fields.aid;
       const uploadFile = data.files.file[0];
-      const assistant = data.fields.aid[0];
 
       const vectorStore = new QdrantVectorStore({
         collectionName: `${aid}`,
@@ -72,7 +57,12 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       switch (uploadFile.mimetype){
       case "application/pdf":
         reader = new PDFReader();
-
+        break;
+      case "text/plain":
+        reader = new TextFileReader();
+        break;
+      case "text/markdown":
+        reader = new MarkdownReader();
         break;
       default:
         return res.status( 400 ).send( { errorcode: 97, message: "Filetype not supported!" } );
@@ -83,38 +73,39 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
         console.log("Starting read process...");
         const documents: Document<Metadata>[] = await reader.loadData(uploadFile.filepath);
 
-        let cost = 0;
         documents.forEach((doc) => {
-          cost += encoding.encode(doc.text).length;
           docIds.push(doc.id_);
         });
 
-        console.log(cost, "=>", cost / 1_000_000 * 0.02);
-
-        console.log("STARTING INDEXING PLEASE WAIT...");
-
-        const pipeline = new IngestionPipeline({
-          transformations: [
-              //512
-            new SimpleNodeParser({ chunkSize: 128, chunkOverlap: 10 }),
-            new TitleExtractor(),
-            new OpenAIEmbedding({ model: "text-embedding-3-large", dimensions: 1536 })
-          ],
-          vectorStore
-        });
-
-        /*Settings.embedModel = new OpenAIEmbedding({ model: "text-embedding-3-large", dimensions: 1536 });
-        */
-
-        const nodes = await pipeline.run({ documents: documents });
+        const EmbeddingParameterRequest  = await getDocument("Settings", "Embedding");
 
 
-        const index = await VectorStoreIndex.fromDocuments(documents, {
-          vectorStore
-        });
+        if(EmbeddingParameterRequest){
+          console.log(EmbeddingParameterRequest);
+          const parameters = EmbeddingParameterRequest.result.data as EmbeddingParameters;
 
-        console.log(index.indexStruct);
-        console.log("INDEXING FINISHED!");
+          console.log("STARTING INDEXING PLEASE WAIT...");
+          const pipeline = new IngestionPipeline({
+            transformations: [
+              new SimpleNodeParser({ chunkSize: parameters.chunkSize, chunkOverlap: parameters.overlap }),
+              new TitleExtractor(),
+              new OpenAIEmbedding({ model: "text-embedding-3-large", dimensions: 1536 })
+            ],
+            vectorStore
+          });
+
+          await pipeline.run({ documents: documents });
+
+
+          const index = await VectorStoreIndex.fromDocuments(documents, {
+            vectorStore
+          });
+
+          console.log(index.indexStruct);
+          console.log("INDEXING FINISHED!");
+        }else{
+          return res.status( 400 ).send( { errorcode: 3, message: "Could not find Parameters" } );
+        }
       }
 
       return res.status( 200 ).send( { errorcode: 0, message: docIds } );

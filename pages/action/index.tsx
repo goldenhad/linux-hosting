@@ -1,9 +1,5 @@
 import { GetServerSideProps } from "next";
-import { useState } from "react";
-import { Alert, Button, Form, Input, Result } from "antd";
-import styles from "./action.module.scss"
 import Head from "next/head";
-import resetpassword from "../../firebase/auth/reset";
 import { ResetPassword } from "../../components/Actions/ResetPassword/ResetPassword";
 import { VerifyMail } from "../../components/Actions/VeryfyMail/VerifyMail";
 import { AuthContextProvider } from "../../components/context/AuthContext";

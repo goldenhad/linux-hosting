@@ -1,10 +1,9 @@
 import styles from "./editorblock.module.scss"
 import { useEffect, useState } from "react";
-import { DeleteOutlined, EditOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
-import { Button, Card, Col, Form, Input, Modal, Row, Select, Space, Switch, Tag, Upload } from "antd";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { Button, Card, Col, Form, Input, Modal, Row, Select, Space, Switch, Tag } from "antd";
 import { AiModel, AssistantInputType, AssistantType, InputBlock } from "../../../firebase/types/Assistant";
 import { MessageInstance } from "antd/es/message/interface";
-import { UploadProps } from "antd/es/upload";
 
 const { TextArea } = Input;
 
@@ -19,8 +18,8 @@ const DEFAULT_ASSISTANT = {
 }
 
 export default function InputEditorBlock(props: { block: InputBlock, updateBlockState: any, messageApi: MessageInstance }) {
-  const [ x, setX] = useState(0);
-  const [ y, setY ] = useState(0);
+  const [ x] = useState(0);
+  const [ y ] = useState(0);
   const [ modalOpen, setModalOpen ] = useState(false);
   const [ stepType, setStepType ] = useState<AssistantType>((props.block)? props.block.type: AssistantType.QAA);
   const [ block, setBlock ] = useState((props.block)? props.block: DEFAULT_ASSISTANT)
@@ -28,6 +27,9 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
 
   const [ keyList, setKeyList ] = useState([])
 
+  useEffect(() => {
+    form.setFieldValue("name", block.name);
+  }, []);
 
   useEffect(() => {
     const keys = [];
@@ -500,7 +502,7 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
                 name={"stepName"}
                 label={<b>Name des Blocks</b>}
               >
-                <Input></Input>
+                <Input onChange={(val) => setBlock({ ...block, name: val.target.value })}></Input>
               </Form.Item>
 
               <Form.Item

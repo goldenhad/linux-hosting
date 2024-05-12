@@ -3,18 +3,14 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./editorcanvas.module.scss";
 import { FloatButton, message } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
-import { useDroppable } from "@dnd-kit/core";
 import { useEditorContext } from "../EditorSidebar/EditorSidebar";
 import InputEditorBlock from "../InputBlock/InputBlock";
 import { AiModel, AssistantType, Block, InputBlock } from "../../../firebase/types/Assistant";
 
 export default function EditorCanvas() {
   const canvasRef = useRef<ReactInfiniteCanvasHandle>();
-  const { isOver, setNodeRef } = useDroppable({
-    id: "droppable"
-  });
   const { assistant, setAssistant } = useEditorContext();
-  const [ buildingBricks, setBuildingBricks ] = useState<Array<Block | InputBlock>>([])
+  const [ buildingBricks, setBuildingBricks ] = useState<Array<Block | InputBlock>>(assistant.blocks)
   const [messageApi, messageContext] = message.useMessage();
 
 

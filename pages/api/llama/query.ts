@@ -21,9 +21,6 @@ import ResponseData = Dispatcher.ResponseData;
 import axios from "axios";
 import { MsgType } from "../../../components/Assistants/ChatAssistant/ChatAssistant";
 import { firestore } from "../../../firebase/admin";
-import updateData from "../../../firebase/data/updateData";
-import { getDoc } from "firebase/firestore";
-import getDocument from "../../../firebase/data/getData";
 import { TokenCalculator } from "../../../helper/price";
 import { Calculations, InvoiceSettings } from "../../../firebase/types/Settings";
 import { Company, Order } from "../../../firebase/types/Company";
@@ -55,10 +52,6 @@ const llm = new OpenAI({
 });
 
 export default async function handler( req: NextApiRequest, res: NextApiResponse<ResponseData> ) {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1;
-
 
   if(req.method == "POST"){
 
@@ -67,9 +60,10 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     const QDRANTURL = `http://${process.env.QDRANT_ADDRESS}:6333`;
     const query = req.body.query;
     const messages = req.body.messages;
+    const assistantType = req.body.assistantType;
 
 
-    if(aid && query && companyId && messages?.length){
+    if(aid && query && companyId && messages?.length && assistantType != undefined){
       messages.forEach((msg) => {
         msg.role = MsgType.ASSISTANT;
       })
@@ -105,7 +99,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
       const retriever = index.asRetriever();
       // Limit the context window to the three most relevant nodes
-      retriever.similarityTopK = 2;
+      retriever.similarityTopK = 10;
 
       const chatEngine = new ContextChatEngine({ retriever, chatModel: llm , chatHistory: messages });
 
@@ -142,7 +136,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           const invoiceInfo = invoiceData.data() as InvoiceSettings;
 
 
-          const cost = calculator.cost({ in: tokenCount.in, out: tokenCount.out });
+          const cost = calculator.cost({ in: tokenCount.in, out: tokenCount.out }, assistantType);
           console.log("Kosten:", cost);
           if(company.plan && company.plan.state == "active" && company.tokens - cost < company.plan.threshold){
             console.log("Attempting Recharge...");

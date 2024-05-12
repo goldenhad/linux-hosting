@@ -6,10 +6,14 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../db";
 import { Profile } from "../../../firebase/types/Profile";
 import axios from "axios";
-import Assistant, { AssistantInputColumn, AssistantInputType, InputBlock } from "../../../firebase/types/Assistant";
+import Assistant, {
+  AssistantInputColumn,
+  AssistantInputType,
+  AssistantType,
+  InputBlock
+} from "../../../firebase/types/Assistant";
 import updateData from "../../../firebase/data/updateData";
 import getDocument from "../../../firebase/data/getData";
-import { Templates } from "../../../firebase/types/Settings";
 import moment from "moment";
 import styles from "./qaaassistant.module.scss";
 import Icon, { ArrowLeftOutlined, HistoryOutlined } from "@ant-design/icons";
@@ -18,7 +22,7 @@ import Markdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { handleEmptyString, reduceCost, updateCompanyTokens } from "../../../helper/architecture";
+import { handleEmptyString } from "../../../helper/architecture";
 import { isMobile } from "react-device-detect";
 import AssistantForm from "../../AssistantForm/AssistantForm";
 import FatButton from "../../FatButton";
@@ -309,7 +313,7 @@ export default function QaAAssistant(props: {
 
       let isFreed = false;
       let cost = 0;
-      let usedTokens = { in: 0, out: 0 };
+      const usedTokens = { in: 0, out: 0 };
 
       // Retrieve the template for prompts from the database
       const templatereq = await getDocument("Settings", "Prompts");
@@ -328,93 +332,94 @@ export default function QaAAssistant(props: {
       try{
         // Query the api for an answer to the input
         await axios.post("/api/llama/query", {
-              aid: props.assistant.uid,
-              query: prompt,
-              messages: [ { content: mainblock.personality, role: MsgType.ASSISTANT } ],
-              companyId: props.context.user.Company
-            },
-            { onDownloadProgress: async (progressEvent) => {
-                // Disable the loading of the answer if we have recieved a chunk of data
-                if(!isFreed){
-                  setIsLoaderVisible( false );
-                  setIsAnswerVisible( true );
-                  isFreed = true;
-                }
-                // Get the generated words from the response
-                let dataChunk: string = progressEvent.event?.currentTarget.response;
+          aid: props.assistant.uid,
+          assistantType: AssistantType.QAA,
+          query: prompt,
+          messages: [ { content: mainblock.personality, role: MsgType.ASSISTANT } ],
+          companyId: props.context.user.Company
+        },
+        { onDownloadProgress: async (progressEvent) => {
+          // Disable the loading of the answer if we have recieved a chunk of data
+          if(!isFreed){
+            setIsLoaderVisible( false );
+            setIsAnswerVisible( true );
+            isFreed = true;
+          }
+          // Get the generated words from the response
+          let dataChunk: string = progressEvent.event?.currentTarget.response;
 
-                // Remove possible contained control sequences
-                const parseRegEx = /(?<=<~).+?(?=~>)/g;
-                const parsedval = dataChunk.match(parseRegEx);
+          // Remove possible contained control sequences
+          const parseRegEx = /(?<=<~).+?(?=~>)/g;
+          const parsedval = dataChunk.match(parseRegEx);
 
-                // Check if we encounterd a control char.
-                if(parsedval && parsedval.length == 1){
-                  // If we found the control sequence, we reached the end of the response
-                  // Remove the control sequence
-                  dataChunk = dataChunk.replace(`<~${parsedval[0]}~>`, "");
+          // Check if we encounterd a control char.
+          if(parsedval && parsedval.length == 1){
+            // If we found the control sequence, we reached the end of the response
+            // Remove the control sequence
+            dataChunk = dataChunk.replace(`<~${parsedval[0]}~>`, "");
 
-                  usedTokens.in = 0;
-                  usedTokens.out = 0;
+            usedTokens.in = 0;
+            usedTokens.out = 0;
 
-                  try{
-                    const costReturned = JSON.parse(parsedval[0]);
-                    cost = costReturned.cost;
-                  }catch (e){
-                    cost = 0;
-                  }
-
-
-                  // Add the generated answer to the history state
-                  // Validate that the answer is not empty
-                  if(localAnswer != ""){
-                    // We need to check if the user already has 10 saved states
-                    if(props.history.state.length >= MAXHISTITEMS){
-                      // If so remove last Element from array
-                      props.history.state.pop();
-                    }
-
-                    // Add the answer with the current time and the used tokens to the front of the history array
-                    props.history.state.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: toGermanCurrencyString(cost) });
-
-                    // Encrypt the history array
-                    const encHistObj = await axios.post( "/api/prompt/encrypt", {
-                      content: JSON.stringify(props.history.state),
-                      salt: context.user.salt
-                    } );
-
-                    const encHist = encHistObj.data.message;
-
-                    const userhist = context.user.history;
-                    // Set the history to the encoded string and update the user
-                    userhist[props.assistant.uid] = encHist;
-                    await updateDoc( doc( db, "User", context.login.uid ), { history: userhist } );
-                  }
-
-                  //reduceCost(props.context.company.tokens, cost);
-                  //await updateCompanyTokens(props.context, calculator, props.notificationApi, cost);
-
-                  props.notificationApi.info({
-                    message: "Creditverbrauch",
-                    description: `Die Anfrage hat ${toGermanCurrencyString(cost)} verbraucht`,
-                    duration: MSGDURATION
-                  });
-
-                  // Set the answer to the recieved data without the control sequence
-                  setAnswer(dataChunk);
-
-                  localAnswer = dataChunk;
-
-                  setTokenCountVisible(true);
+            try{
+              const costReturned = JSON.parse(parsedval[0]);
+              cost = costReturned.cost;
+            }catch (e){
+              cost = 0;
+            }
 
 
-                }else{
-                  // Update the answer and show the cursor char
-                  setAnswer(dataChunk + "█");
-                  localAnswer = dataChunk;
-
-                }
+            // Add the generated answer to the history state
+            // Validate that the answer is not empty
+            if(localAnswer != ""){
+              // We need to check if the user already has 10 saved states
+              if(props.history.state.length >= MAXHISTITEMS){
+                // If so remove last Element from array
+                props.history.state.pop();
               }
+
+              // Add the answer with the current time and the used tokens to the front of the history array
+              props.history.state.unshift({ content: localAnswer, time: moment(Date.now()).format("DD.MM.YYYY"), tokens: toGermanCurrencyString(cost) });
+
+              // Encrypt the history array
+              const encHistObj = await axios.post( "/api/prompt/encrypt", {
+                content: JSON.stringify(props.history.state),
+                salt: context.user.salt
+              } );
+
+              const encHist = encHistObj.data.message;
+
+              const userhist = context.user.history;
+              // Set the history to the encoded string and update the user
+              userhist[props.assistant.uid] = encHist;
+              await updateDoc( doc( db, "User", context.login.uid ), { history: userhist } );
+            }
+
+            //reduceCost(props.context.company.tokens, cost);
+            //await updateCompanyTokens(props.context, calculator, props.notificationApi, cost);
+
+            props.notificationApi.info({
+              message: "Creditverbrauch",
+              description: `Die Anfrage hat ${toGermanCurrencyString(cost)} verbraucht`,
+              duration: MSGDURATION
             });
+
+            // Set the answer to the recieved data without the control sequence
+            setAnswer(dataChunk);
+
+            localAnswer = dataChunk;
+
+            setTokenCountVisible(true);
+
+
+          }else{
+            // Update the answer and show the cursor char
+            setAnswer(dataChunk + "█");
+            localAnswer = dataChunk;
+
+          }
+        }
+        });
       }catch(e){
         setAnswer("");
         setPromptError(true);

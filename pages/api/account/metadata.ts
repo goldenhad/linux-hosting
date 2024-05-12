@@ -1,7 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { auth } from "../../../firebase/admin"
-import CryptoJS from "crypto-js";
-import { getDoc } from "firebase/firestore";
 import getDocument from "../../../firebase/data/getData";
 import { UserMetadata } from "@firebase/auth";
 
@@ -21,7 +19,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
   if( req.method == "POST" ){
     if( token ){
       const data = req.body;
-      const { result, error } = await getDocument("User", token.user_id);
+      const { result } = await getDocument("User", token.user_id);
       const user = result.data();
       if(result && ( user.Role == "Superadmin" ||  user.Role == "Marketing") ){
 

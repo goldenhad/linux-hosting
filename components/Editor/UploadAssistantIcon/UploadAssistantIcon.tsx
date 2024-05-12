@@ -4,8 +4,8 @@ import ImgCrop from "antd-img-crop";
 import styles from "./uploadassistanticon.module.scss"
 import { RcFile, UploadChangeParam, UploadFile, UploadProps } from "antd/es/upload";
 import axios from "axios";
-import { deleteAssistantImage, deleteProfilePicture } from "../../../firebase/drive/delete";
-import { Dispatch, SetStateAction, useState } from "react";
+import { deleteAssistantImage } from "../../../firebase/drive/delete";
+import { useState } from "react";
 import { MessageInstance } from "antd/es/message/interface";
 import { PlusOutlined, DeleteOutlined, LoadingOutlined } from "@ant-design/icons";
 import { getBase64 } from "../../../helper/upload";

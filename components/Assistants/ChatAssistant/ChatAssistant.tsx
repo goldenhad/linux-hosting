@@ -1,15 +1,15 @@
-import Assistant, { InputBlock } from "../../../firebase/types/Assistant";
+import Assistant, { AssistantType, InputBlock } from "../../../firebase/types/Assistant";
 import React, { Dispatch, ReactComponentElement, SetStateAction, useEffect, useRef, useState } from "react";
 import { MessageInstance } from "antd/es/message/interface";
 import { NotificationInstance } from "antd/es/notification/interface";
 import { Button, Divider, Form, Input, Result, Skeleton } from "antd";
 import { ArrowLeftOutlined, ArrowRightOutlined, HistoryOutlined } from "@ant-design/icons";
-import { handleEmptyString, reduceCost, updateCompanyTokens } from "../../../helper/architecture";
+import { handleEmptyString } from "../../../helper/architecture";
 import { isMobile } from "react-device-detect";
 import { useRouter } from "next/router";
 import styles from "./chatassistant.module.scss"
 import axios from "axios";
-import { toGermanCurrencyString, TokenCalculator } from "../../../helper/price";
+import { toGermanCurrencyString } from "../../../helper/price";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
@@ -70,7 +70,6 @@ export default function ChatAssistant(props: {
   const [ formDisabled, setFormDisabled ] = useState(props.formDisabled);
   const lastMsgRef = useRef<null | HTMLDivElement>(null);
   const [msgContext, setMsgContext ] = useState<Array<MsgContext>>([]);
-  const [ calculator ] = useState(new TokenCalculator(props.context.calculations))
   const [ promptError, setPromptError ] = useState(false);
   const [form] = Form.useForm();
 
@@ -138,11 +137,10 @@ export default function ChatAssistant(props: {
     const usedTokens = { in: 0, out: 0 };
     let cost = 0;
 
-    const state = ParsingState.UNDEFINED;
-
     try{
       await axios.post("/api/llama/query", {
         aid: props.assistant.uid,
+        assistantType: AssistantType.CHAT,
         query: values.chatmsg,
         messages: relevantcontext,
         companyId: props.context.user.Company
@@ -303,15 +301,15 @@ export default function ChatAssistant(props: {
           </Form.Item>
             
           <Button
-              className={styles.inputformbutton}
-              type={"primary"}
-              onClick={() => {
-                if(quotaOverused) {
-                  props.messageApi.error("Dein Budget ist ausgeschöpft. In der Kontoübersicht kannst du neues Guthaben dazubuchen!")
-                }else {
-                  form.submit();
-                }
-              }}
+            className={styles.inputformbutton}
+            type={"primary"}
+            onClick={() => {
+              if(quotaOverused) {
+                props.messageApi.error("Dein Budget ist ausgeschöpft. In der Kontoübersicht kannst du neues Guthaben dazubuchen!")
+              }else {
+                form.submit();
+              }
+            }}
           >
             <ArrowRightOutlined />
           </Button>

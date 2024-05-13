@@ -62,7 +62,7 @@ export async function getAssistantImage( name: string ) {
 
 export async function fileExists( id: string ) {
   try{
-    const storageRef = ref( drive, `profilepictures/${id}` );
+    const storageRef = ref( drive, `${id}` );
 
     await getMetadata( storageRef );
     return true;

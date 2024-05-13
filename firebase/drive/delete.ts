@@ -25,7 +25,7 @@ export async function deleteProfilePicture( id: string ){
 
 export async function deleteAssistantImage( id: string ){
   if( id != "" ){
-    if( fileExists( `assistant/image/${id}` ) ){
+    if( await fileExists(`assistant/images/${id}`) ){
       const storageRef = ref( drive, `assistant/images/${id}` );
 
       try{

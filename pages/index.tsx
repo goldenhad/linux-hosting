@@ -208,7 +208,9 @@ export default function Home(props: { assistants: Array<Assistant> }) {
             description={singleService.description}
             link={`/assistant?aid=${singleService.uid}`}
             fav={user.services?.favourites.includes(singleService.uid)}
+            knowledeFiles={singleService.knowledgeFiles}
             ribbonText={getRibbonText(singleService.uid)}
+            router={router}
             onVideoClick={() => {
               // setVideoLink(singleService.video);
               // setVideoPopupVisible(true);

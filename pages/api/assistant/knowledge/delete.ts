@@ -24,7 +24,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     
     if (req.method == "POST"){
       const data = req.body;
-      console.log(req.body);
+      console.log("params: ", req.body);
 
       if(data.aid && data.nodes && data.nodes.length > 0){
         const aid = data.aid;
@@ -48,13 +48,17 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
             return res.status( 200 ).send( { errorcode: 0, message: "OK" } );
           }else{
-            return res.status( 400 ).send( { errorcode: 4, message: "Assistant has no knowledge base!" } );
+            return res.status( 400 ).send( { errorcode: 6, message: "Assistant has no knowledge base!" } );
           }
         }catch (e){
           console.log(e);
-          return res.status( 400 ).send( { errorcode: 3, message: "Error deleting collection!" } );
+          return res.status( 400 ).send( { errorcode: 5, message: "Error deleting collection!" } );
         }
+      }else {
+        return res.status( 400 ).send( { errorcode: 4, message: "Data missing" } );
       }
+    }else{
+      return res.status( 403 ).send( { errorcode: 3, message: "Request method forbidden" } );
     }
 
   }else{

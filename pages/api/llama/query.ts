@@ -57,6 +57,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
     const aid = req.body.aid;
     const companyId = req.body.companyId;
+
     const QDRANTURL = `${process.env.QDRANT_ADDRESS}:6333`;
     const query = req.body.query;
     const messages = req.body.messages;

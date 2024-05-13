@@ -49,7 +49,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
       const vectorStore = new QdrantVectorStore({
         collectionName: `${aid}`,
-        url: `http://${process.env.QDRANT_ADDRESS}:6333`
+        url: `${process.env.QDRANT_ADDRESS}:6333`
       });
 
       let reader = undefined;

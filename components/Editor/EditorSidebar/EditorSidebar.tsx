@@ -1,24 +1,37 @@
 import React, { Dispatch, ReactNode, useEffect, useState } from "react";
 import { ArrowLeftOutlined, SettingOutlined } from "@ant-design/icons";
-import { Button, Drawer, Form, Input, Layout, message, Modal, Select, Switch } from "antd";
+import { Button, Drawer, Form, Input, Layout, message, Switch } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import styles from "./editorsidebar.module.scss";
 import CookieBanner from "../../CookieBanner/CookieBanner";
-import Assistant, { AssistantInputType, AssistantType, Block, InputBlock } from "../../../firebase/types/Assistant";
+import Assistant, {
+  Block,
+  FileReference,
+  InputBlock
+} from "../../../firebase/types/Assistant";
 import updateData from "../../../firebase/data/updateData";
-import UploadAssistantIcon from "../UploadAssistantIcon/UploadAssistantIcon";
-import { getAssistantImageUrl } from "../../../firebase/drive/upload_file";
 import { checkValidityOfAssistantConfig } from "../../../helper/assistant";
+import GeneralSettingsModal from "../GeneralSettingsModal/GeneralSettingsModal";
 
 const { Header, Content, Sider } = Layout;
-
-const { TextArea } = Input;
 
 
 export interface editorctx{
   assistant: Assistant;
   setAssistant: Dispatch<any>;
+}
+
+export interface AssistantState {
+  name: string,
+  image: string,
+  category: string,
+  description: string,
+  video: string,
+  published: boolean,
+  uid: string,
+  blocks: Array<Block | InputBlock>,
+  knowledgeFiles: Array<FileReference>
 }
 
 export const EditorSidebarContext = React.createContext<editorctx>( {} as editorctx );
@@ -48,7 +61,6 @@ const EditorSidebar = ( props: {
     const [ breakpoint, setBreakpoint ] = useState( undefined );
   // eslint-disable-next-line
     const [ imageUrl, setImageUrl ] = useState( undefined );
-  const router = useRouter();
   // eslint-disable-next-line
     const [ version, setVersion ] = useState( "" );
 
@@ -56,41 +68,24 @@ const EditorSidebar = ( props: {
 
   const [ screenwidth, setScreenwidth ] = useState(window.innerWidth);
 
-  const [ assistantState, setAssistantState ] = useState({
-    name: "Neuer Assistent",
-    image: "",
-    category: "other",
-    description: "",
-    video: "",
-    published: false,
-    uid: "",
-    blocks: Array<Block | InputBlock>()
-  });
+  const [ assistantState, setAssistantState ] = useState<AssistantState>(props.assistant);
 
   const [ settingsModalOpen, setSettingsModalOpen ] = useState(false);
   const [ settForm ] = Form.useForm();
   const [messageApi, messageContext] = message.useMessage();
   const [ name, setName ] = useState((props.assistant)? props.assistant.name: "Neuer Assistant");
   const [ confValid, setConfValid ] = useState(false);
-  const [ predefinedImage, setPredefinedImage ] = useState("");
-
-  useEffect(() => {
-    if(props.assistant){
-      setAssistantState(props.assistant);
-      settForm.setFieldValue("category", props.assistant.category);
-      settForm.setFieldValue("description", props.assistant.description);
-    }
-  }, [props.assistant]);
 
 
   useEffect(() => {
-    const loadAssistantImage = async () => {
-      const url = await getAssistantImageUrl(props.aid);
-      setPredefinedImage(url);
-    }
+    setAssistantState(props.assistant);
+    settForm.setFieldValue("category", props.assistant.category);
+    settForm.setFieldValue("description", props.assistant.description);
 
-    loadAssistantImage();
+    console.log(assistantState)
+    console.log(props.assistant)
   }, []);
+  
 
 
   useEffect(() => {
@@ -132,8 +127,8 @@ const EditorSidebar = ( props: {
   }, []);
 
 
+
   const saveAssistant = async () => {
-    console.log(assistantState);
     const AssistantToUpdate: Assistant = assistantState;
     const desc = settForm.getFieldValue("description");
 
@@ -217,7 +212,16 @@ const EditorSidebar = ( props: {
               <SettingOutlined/>
             </div>
           </div>
-          <SettingsModal/>
+          <GeneralSettingsModal 
+            aid={props.aid} 
+            assistantState={assistantState} 
+            setAssistantState={setAssistantState} 
+            assistant={props.assistant} 
+            open={settingsModalOpen}
+            setOpen={setSettingsModalOpen}
+            messageApi={messageApi} 
+            settForm={settForm} 
+          />
 
           <div className={styles.headerActions}>
             <div className={styles.additionalSettings}>
@@ -236,48 +240,6 @@ const EditorSidebar = ( props: {
         </Header>
       );
     }
-  }
-
-
-  const SettingsModal = () => {
-    return (
-      <Modal
-        width={"40%"}
-        title="Einstellungen"
-        open={settingsModalOpen} onOk={() => {
-          setSettingsModalOpen(true)
-        }} onCancel={() => {
-          setSettingsModalOpen(false)
-        }}
-        footer={<Button type={"primary"} onClick={() => setSettingsModalOpen(false)} >Fertig</Button>}
-      >
-        <Form form={settForm} layout={"vertical"}>
-          <Form.Item label={<b>Assistant-Thumbnail</b>}>
-            <div className={styles.assimage}>
-              <UploadAssistantIcon
-                aid={props.aid}
-                imageUrl={predefinedImage}
-                messageApi={messageApi}
-              />
-            </div>
-          </Form.Item>
-
-          <Form.Item initialValue={assistantState.category} name={"category"} label={<b>Kategorie</b>}>
-            <Select
-              placeholder={"Bitte wähle eine Kategorie"}
-              options={[
-                { value: "productivity", label: "Produktivität" },
-                { value: "content", label: "Content-Erstellung" },
-                { value: "other", label: "Sonstige" }
-              ]} ></Select>
-          </Form.Item>
-
-          <Form.Item initialValue={assistantState.description} name={"description"} label={<b>Beschreibung</b>}>
-            <TextArea rows={7} placeholder={"Beschreibe deinen Assistenten kurz"} />
-          </Form.Item>
-        </Form>
-      </Modal>
-    );
   }
   
   
@@ -377,7 +339,16 @@ const EditorSidebar = ( props: {
                 <SettingOutlined />
               </div>
             </div>
-            <SettingsModal />
+            <GeneralSettingsModal
+              aid={props.aid}
+              assistantState={assistantState}
+              setAssistantState={setAssistantState}
+              assistant={props.assistant}
+              open={settingsModalOpen}
+              setOpen={setSettingsModalOpen}
+              messageApi={messageApi}
+              settForm={settForm}
+            />
 
             <div className={styles.headerActions}>
               <div className={styles.additionalSettings}>

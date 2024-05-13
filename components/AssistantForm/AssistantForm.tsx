@@ -8,17 +8,16 @@ import styles from "./assistantform.module.scss";
 import { Card, Form, Input, Select } from "antd";
 import { isMobile } from "react-device-detect";
 import { useEffect } from "react";
+
 const { TextArea } = Input;
 
 function optionsToAntdObjects (options: Array<AssistantOption>) {
-  const arr = options.map( ( element ) => {
+  return options.map((element) => {
     return {
       value: element.key,
       label: element.value
     };
-  } );
-
-  return arr;
+  });
 }
 
 function filterOption (input: string, option?: { label: string; value: string }) {

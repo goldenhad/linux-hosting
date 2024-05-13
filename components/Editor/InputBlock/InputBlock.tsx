@@ -18,8 +18,8 @@ const DEFAULT_ASSISTANT = {
 }
 
 export default function InputEditorBlock(props: { block: InputBlock, updateBlockState: any, messageApi: MessageInstance }) {
-  const [ x, setX] = useState(0);
-  const [ y, setY ] = useState(0);
+  const [ x] = useState(0);
+  const [ y ] = useState(0);
   const [ modalOpen, setModalOpen ] = useState(false);
   const [ stepType, setStepType ] = useState<AssistantType>((props.block)? props.block.type: AssistantType.QAA);
   const [ block, setBlock ] = useState((props.block)? props.block: DEFAULT_ASSISTANT)
@@ -27,6 +27,9 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
 
   const [ keyList, setKeyList ] = useState([])
 
+  useEffect(() => {
+    form.setFieldValue("name", block.name);
+  }, []);
 
   useEffect(() => {
     const keys = [];
@@ -80,6 +83,9 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
       setKeyList(toUpdate);
     }
   }
+
+
+
 
 
   const OptionsList = ( props: { name: (string | number)[], inputId: number } ) => {
@@ -496,7 +502,7 @@ export default function InputEditorBlock(props: { block: InputBlock, updateBlock
                 name={"stepName"}
                 label={<b>Name des Blocks</b>}
               >
-                <Input></Input>
+                <Input onChange={(val) => setBlock({ ...block, name: val.target.value })}></Input>
               </Form.Item>
 
               <Form.Item

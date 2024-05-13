@@ -345,6 +345,14 @@ const HomeSidebarLayout = ( props: {
                     <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Produktivität</div>  
                   </List.Item>
+                  {(props.context.role.canManageUser)?
+                    <List.Item className={`${styles.assistantlink} ${isselected("unpublished")}`} data-function={"unpublished"} onClick={() => {
+                      props.category.setter("unpublished");
+                      setSidebarOpen(false);
+                    }}>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Unveröffentlicht</div>
+                    </List.Item>: <></>}
                 </List>
               </div>
               {/* <RecommendBox user={props.context.user} messageApi={props.messageApi} /> */}
@@ -506,7 +514,7 @@ const HomeSidebarLayout = ( props: {
                         props.category.setter("unpublished");
                         setSidebarOpen(false);
                       }}>
-                        <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                        <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
                         <div className={styles.assistantcatname}>Unveröffentlicht</div>
                       </List.Item>: <></>}
                   </List>

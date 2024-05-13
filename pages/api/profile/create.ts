@@ -5,7 +5,7 @@ import { parseProfilePrompt } from "../../../helper/prompt/templating";
 import getDocument from "../../../firebase/data/getData";
 
 const openai = new OpenAI( {
-  apiKey: process.env.OPENAIAPIKEY
+  apiKey: process.env.OPENAI_API_KEY
 } );
 
 type ResponseData = {

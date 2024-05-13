@@ -18,8 +18,6 @@ const roboto = Roboto( {
   subsets: ["latin"]
 } )
 
-const auth = getAuth(firebase_app);
-
 const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( {
   Component,
   pageProps

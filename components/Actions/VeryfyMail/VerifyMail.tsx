@@ -15,7 +15,7 @@ const auth = getAuth( firebase_app );
 export function VerifyMail(props: { oobCode: string }){
   const router = useRouter();
   const context = useAuthContext();
-  const { login, user } = context;
+  const { login } = context;
   const [ verifyFailed, setVerifyFailed ] = useState(false);
   const [ worked, setWorked ] = useState(false);
   const [ emailSend, setEmailSend ] = useState(false);

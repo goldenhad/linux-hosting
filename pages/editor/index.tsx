@@ -81,17 +81,11 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
 
 export default function Editor({ assistant, aid }){
-  const [assState, setAssState] = useState(null)
-    
   const EditorCanvas = dynamic(
     () => {
       return import("../../components/Editor/EditorCanvas/EditorCanvas").then((res) => res);
     }
   );
-
-  useEffect(() => {
-    console.log(aid);
-  }, []);
   
 
   return(

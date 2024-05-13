@@ -3,7 +3,6 @@ import { auth } from "../../../firebase/admin"
 import {
   AIMessage,
   AssistantResponse,
-  generateAIResponse,
   generateChatResponse,
   Model
 } from "../../../helper/prompt/generation";
@@ -33,8 +32,6 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
               msg.role = "system";
             }
           });
-
-          console.log(messages);
 
           // Call the model and get the used tokens back.
           const { count } = await generateChatResponse(Model.GPT4, messages, res )

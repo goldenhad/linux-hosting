@@ -56,14 +56,14 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
   // Load Companies
 
-  const { result, error } = await getAllDocs("Company");
+  const { result } = await getAllDocs("Company");
   // eslint-disable-next-line
   const companies: Array<any> = [];
   const userComps: Array<any> = [];
 
   for (const obj of result) {
     if(obj.name != ""){
-      const { result, error } = await getDocWhere("User", "Company", "==", obj.uid);
+      const { result } = await getDocWhere("User", "Company", "==", obj.uid);
       const adminrecIdx = result.findIndex((user) => {
         return user.Role == "Company-Admin";
       });
@@ -80,7 +80,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
       companies.push(obj);
 
     }else{
-      const { result, error } = await getDocWhere("User", "Company", "==", obj.uid);
+      const { result } = await getDocWhere("User", "Company", "==", obj.uid);
       if(result.length > 0){
         if(result[0]){
           obj.user = result[0];
@@ -128,7 +128,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
 export default function Company( props: InitialProps ) {
   const context = useAuthContext();
-  const { login, user, company, role } = context;
+  const { role } = context;
   const [ companies, setCompanies ] = useState(props.Data.companies);
   const [ userCompanies, setUserCompanies ] = useState(props.Data.userCompanies);
 
@@ -136,7 +136,7 @@ export default function Company( props: InitialProps ) {
   const [ memberModalOpen, setMemberModalOpen ] = useState(false);
   const [ companyToLoadMembersFrom, setCompanyToLoadMembersFrom ] = useState(-1);
   const [ membersLoading, setMembersLoading ] = useState(true);
-  const [ companyLoading, setCompanyLoading ] = useState(false);
+  const [ companyLoading ] = useState(false);
   const [ newestRegister, setNewestRegister ] = useState(null);
   const [ registersThisMonth, setRegistersThisMonth ] = useState(0);
 
@@ -181,7 +181,7 @@ export default function Company( props: InitialProps ) {
   useEffect(() => {
     const load = async () => {
       // Query the users from the database that belong to the same company as the user
-      const { result, error } = await getDocWhere("User", "Company", "==", companyToLoadMembersFrom);
+      const { result } = await getDocWhere("User", "Company", "==", companyToLoadMembersFrom);
       // eslint-disable-next-line
 
       const locmembers = [];
@@ -313,7 +313,7 @@ export default function Company( props: InitialProps ) {
       title: "Token",
       dataIndex: "token",
       key: "token",
-      render: ( _, obj, idx ) => {
+      render: ( _, obj ) => {
         if(obj.tokens != undefined){
           return (<div className={styles.tokencell}>
             <span className={styles.token}>{toGermanCurrencyString(obj.tokens)}</span>
@@ -325,7 +325,7 @@ export default function Company( props: InitialProps ) {
       title: "Aktionen",
       dataIndex: "actions",
       key: "actions",
-      render: ( _, obj, idx ) => {
+      render: ( _, obj ) => {
         return(
           <div className={styles.actionrow}>
             <div className={styles.singleaction} onClick={() => {
@@ -385,7 +385,7 @@ export default function Company( props: InitialProps ) {
       title: "Token",
       dataIndex: "token",
       key: "token",
-      render: ( _, obj, idx ) => {
+      render: ( _, obj ) => {
         if(obj.tokens != undefined){
           return (<div className={styles.tokencell}>
             <span className={styles.token}>{toGermanCurrencyString(obj.tokens)}</span>
@@ -397,7 +397,7 @@ export default function Company( props: InitialProps ) {
       title: "Nutzung",
       dataIndex: "usage",
       key: "usage",
-      render: ( _, obj, idx ) => {
+      render: ( _, obj ) => {
         return <SparkLine obj={obj} />;
       }
     }
@@ -438,7 +438,7 @@ export default function Company( props: InitialProps ) {
       title: "Rolle",
       dataIndex: "role",
       key: "role",
-      render: ( _, obj, idx ) => {
+      render: ( _, obj ) => {
         switch (obj.Role){
         case "Company-Admin":
           return <Tag color="cyan">Admin</Tag>
@@ -455,7 +455,7 @@ export default function Company( props: InitialProps ) {
       title: "Nutzung",
       dataIndex: "usage",
       key: "usage",
-      render: ( _, obj, idx ) => {
+      render: ( _, obj ) => {
         return <SparkLine obj={obj} />;
       }
     }

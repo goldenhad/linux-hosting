@@ -9,7 +9,7 @@ To setup the project you need to add an environment file `.env`, the following c
 
 | Variable                                  | Expected value                                                                |
 |-------------------------------------------|-------------------------------------------------------------------------------|
-| `OPENAIAPIKEY`                            | API key for openai                                                            |
+| `OPENAI_API_KEY`                            | API key for openai                                                            |
 | `PEPPER`                                  | Pepper used to encrypt user data                                              |
 | `NEXT_PUBLIC_FIREBASE_API_KEY`            | Firebase public API key                                                       |
 | `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`        | Firebase authentication domain                                                |

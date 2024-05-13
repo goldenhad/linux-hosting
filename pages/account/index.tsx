@@ -16,9 +16,6 @@ import { deleteProfilePicture } from "../../firebase/drive/delete";
 import FatButton from "../../components/FatButton";
 import EditUserForm from "../../components/Forms/EditUserForm/EditUserForm";
 import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
-import { getAuth } from "firebase/auth";
-import { firebase_app } from "../../db";
-import { auth } from "../../firebase/admin";
 
 
 /**

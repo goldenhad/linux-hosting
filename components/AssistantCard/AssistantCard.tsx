@@ -6,8 +6,12 @@ import Play from "../../public/icons/play.svg";
 import Heart from "../../public/icons/heart.svg";
 import HeartFull from "../../public/icons/heartFull.svg";
 import { useEffect, useState } from "react";
-import { getAssistantImage, getAssistantImageUrl } from "../../firebase/drive/upload_file";
-import { AssistantInputType, AssistantType, Block, InputBlock } from "../../firebase/types/Assistant";
+import { getAssistantImageUrl } from "../../firebase/drive/upload_file";
+import { AssistantInputType, AssistantType, Block, FileReference, InputBlock } from "../../firebase/types/Assistant";
+import deleteData from "../../firebase/data/deleteData";
+import axios from "axios";
+import { deleteAssistantImage } from "../../firebase/drive/delete";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 const { Paragraph } = Typography;
 
@@ -38,7 +42,9 @@ const AssistantCard = ( props: {
     onVideoClick?: () => void,
     canEdit: boolean,
     published: boolean,
-    blocks: Array<Block | InputBlock>
+    blocks: Array<Block | InputBlock>,
+    knowledeFiles: Array<FileReference>,
+    router: AppRouterInstance
   } ) => {
   const [image, setImage] = useState("/base.svg");
   const [ deleteModalOpen, setDeleteModalOpen ] = useState(false);
@@ -135,6 +141,26 @@ const AssistantCard = ( props: {
     }} />
   }
 
+  const deleteAssistant = async () => {
+    console.log("attempting delete");
+    try{
+      if (props.knowledeFiles != undefined && props.knowledeFiles.length > 0){
+        for(const file of props.knowledeFiles){
+          await axios.post("/api/assistant/knowledge/delete", { aid: props.aid, nodes: file.nodes });
+        }
+      }
+
+      const imagedelete = await deleteAssistantImage(props.aid);
+      console.log(imagedelete);
+      await deleteData("Assistants", props.aid);
+      setDeleteModalOpen(false);
+      props.router.refresh();
+    }catch (e){
+      console.error("Fehler beim löschen des Konfigurators! ");
+      console.log(e);
+    }
+  }
+
   const AssCard = () => {
     return (
       <div className={styles.servicebox}>
@@ -169,8 +195,12 @@ const AssistantCard = ( props: {
           }}
           footer={
             <div className={styles.deletemodalbuttons}>
-              <Button>Abbrechen</Button>
-              <Button danger>Löschen</Button>
+              <Button onClick={() => {
+                setDeleteModalOpen(false);
+              }}>Abbrechen</Button>
+              <Button danger onClick={async () => {
+                deleteAssistant();
+              }}>Löschen</Button>
             </div>
           }
           onCancel={() => {

@@ -1,4 +1,5 @@
 import { Calculations, Product } from "../firebase/types/Settings"
+import { AssistantType } from "../firebase/types/Assistant";
 
 export const mailPriceMapping = [
   5.0,
@@ -134,8 +135,18 @@ export class TokenCalculator{
     }
   }
 
-  cost(tokens: { in: number, out: number }): number {
-    return ((tokens.in * this.parameter.costPerToken.in) + (tokens.out * this.parameter.costPerToken.out)) * this.parameter.profitPercent/100
+  cost(tokens: { in: number, out: number }, assistantType: AssistantType): number {
+    let profit = 0;
+
+    if(assistantType == AssistantType.QAA){
+      profit = this.parameter.services.profitPercent.QaA;
+    }else if(assistantType == AssistantType.CHAT){
+      profit = this.parameter.services.profitPercent.chat;
+    }
+
+    console.log("PROFIT: ", profit);
+
+    return ((tokens.in * this.parameter.costPerToken.in) + (tokens.out * this.parameter.costPerToken.out)) * profit/100
   }
 }
 

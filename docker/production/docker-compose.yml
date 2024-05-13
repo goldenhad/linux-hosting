@@ -23,6 +23,7 @@ services:
         - ./qdrant_data:/qdrant_data
       networks:
         - mailbuddynetwork
+        - proxynetwork
 
 networks:
   mailbuddynetwork:

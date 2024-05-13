@@ -1,12 +1,17 @@
-import { Badge, Card, Typography } from "antd";
+import { Badge, Button, Card, Modal, Tooltip, Typography } from "antd";
 import styles from "./assistantcard.module.scss";
-import Icon from "@ant-design/icons";
+import Icon, { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import Play from "../../public/icons/play.svg";
 import Heart from "../../public/icons/heart.svg";
 import HeartFull from "../../public/icons/heartFull.svg";
 import { useEffect, useState } from "react";
-import { getAssistantImage } from "../../firebase/drive/upload_file";
+import { getAssistantImageUrl } from "../../firebase/drive/upload_file";
+import { AssistantInputType, AssistantType, Block, FileReference, InputBlock } from "../../firebase/types/Assistant";
+import deleteData from "../../firebase/data/deleteData";
+import axios from "axios";
+import { deleteAssistantImage } from "../../firebase/drive/delete";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 const { Paragraph } = Typography;
 
@@ -24,6 +29,7 @@ const { Paragraph } = Typography;
  * @constructor
  */
 const AssistantCard = ( props: {
+    aid: string,
     name: string,
     image: string,
     title: string,
@@ -33,9 +39,15 @@ const AssistantCard = ( props: {
     ribbonText: string,
     onFav?: () => void,
     onDeFav?: () => void,
-    onVideoClick?: () => void
+    onVideoClick?: () => void,
+    canEdit: boolean,
+    published: boolean,
+    blocks: Array<Block | InputBlock>,
+    knowledeFiles: Array<FileReference>,
+    router: AppRouterInstance
   } ) => {
   const [image, setImage] = useState("/base.svg");
+  const [ deleteModalOpen, setDeleteModalOpen ] = useState(false);
 
   /**
    * Effect to load the provided assistant image.
@@ -43,18 +55,111 @@ const AssistantCard = ( props: {
    */
   useEffect(() => {
     const loadImage = async () => {
-      if(props.image){
-        const url = await getAssistantImage(props.image);
+      const url = await getAssistantImageUrl(props.aid);
+      if(url){
         setImage(url);
       }else{
-        setImage("/base.svg");
+        setImage("/base.svg")
       }
     }
 
     loadImage();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [image]);
+  }, []);
 
+
+  const FavButton = () => {
+    if(props.published){
+      if(props.fav){
+        return (
+          <Icon
+            component={HeartFull}
+            onClick={props.onDeFav}
+            data-favname={`${props.name}-fav`}
+            className={`${styles.iconsvg} ${styles.active}`}
+            viewBox='0 0 22 25'
+          />
+        );
+      }else{
+        return (
+          <Icon
+            component={Heart}
+            onClick={props.onFav}
+            className={styles.iconsvg}
+            data-favname={`${props.name}-fav`}
+            viewBox='0 0 22 25'
+          />
+        );
+      }
+    }
+  }
+  
+  const AssistantLink = () => {
+    let valid = false;
+
+    if(props.blocks.length > 0){
+      const inpBlock = props.blocks[0] as InputBlock;
+      const isValidChat = inpBlock.type == AssistantType.CHAT;
+      const isValidQaQ = inpBlock.type == AssistantType.QAA && inpBlock.inputColumns.length > 0 &&
+              inpBlock.inputColumns.every((col) => {
+                return col.title != undefined && col.inputs.every((inp) => {
+                  if(inp.type != undefined ){
+                    if(inp.type == AssistantInputType.SELECT){
+                      return inp.key != undefined && inp.name != undefined && inp.options.every((opt) => {
+                        return opt.key != undefined && opt.value != undefined;
+                      });
+                    }else{
+                      return inp.key != undefined && inp.name != undefined;
+                    }
+                  }
+
+                  return false;
+                })
+              });
+
+      valid = isValidQaQ || isValidChat
+    }
+
+    if(valid){
+      return (
+        <Link href={props.link} attribute-assistantname={`${props.name}-link`}>
+          <span className={styles.assistantlink}>Zum Assistenten</span>
+        </Link>
+      );
+    }else{
+      return (
+        <Tooltip title={"Die Konfiguration ist aktuell noch fehlerhaft!"}>
+          <span className={styles.brokenassistantlink}>Zum Assistenten</span>
+        </Tooltip>
+      );
+    }
+  }
+
+  const DeleteAssistantButton = () => {
+    return <DeleteOutlined onClick={() => {
+      setDeleteModalOpen(true);
+    }} />
+  }
+
+  const deleteAssistant = async () => {
+    console.log("attempting delete");
+    try{
+      if (props.knowledeFiles != undefined && props.knowledeFiles.length > 0){
+        for(const file of props.knowledeFiles){
+          await axios.post("/api/assistant/knowledge/delete", { aid: props.aid, nodes: file.nodes });
+        }
+      }
+
+      const imagedelete = await deleteAssistantImage(props.aid);
+      console.log(imagedelete);
+      await deleteData("Assistants", props.aid);
+      setDeleteModalOpen(false);
+      props.router.refresh();
+    }catch (e){
+      console.error("Fehler beim löschen des Konfigurators! ");
+      console.log(e);
+    }
+  }
 
   const AssCard = () => {
     return (
@@ -73,29 +178,36 @@ const AssistantCard = ( props: {
         </Card>
         <div className={styles.servicefooter}>
           <div className={styles.actions}>
-            {(props.fav)?
-              <Icon
-                component={HeartFull}
-                onClick={props.onDeFav}
-                data-favname={`${props.name}-fav`}
-                className={`${styles.iconsvg} ${styles.active}`}
-                viewBox='0 0 22 25'
-              />:
-              <Icon
-                component={Heart}
-                onClick={props.onFav}
-                className={styles.iconsvg}
-                data-favname={`${props.name}-fav`}
-                viewBox='0 0 22 25'
-              />}
+            <FavButton />
             <div onClick={props.onVideoClick} className={styles.videobuttoncontainer}>
               <Icon component={Play} className={styles.iconsvg} viewBox='0 0 22 22'/>
             </div>
+            {(props.canEdit)? <a href={`/editor?aid=${props.aid}`}><EditOutlined /></a> : <></>}
+            {(props.canEdit)? <DeleteAssistantButton /> : <></> }
           </div>
-          <Link href={props.link} attribute-assistantname={`${props.name}-link`}>
-            <span className={styles.assistantlink}>Zum Assistenten</span>
-          </Link>
+          <AssistantLink />
         </div>
+        <Modal
+          title="Assistenten löschen?"
+          open={deleteModalOpen}
+          onOk={async () => {
+            setDeleteModalOpen(false);
+          }}
+          footer={
+            <div className={styles.deletemodalbuttons}>
+              <Button onClick={() => {
+                setDeleteModalOpen(false);
+              }}>Abbrechen</Button>
+              <Button danger onClick={async () => {
+                deleteAssistant();
+              }}>Löschen</Button>
+            </div>
+          }
+          onCancel={() => {
+            setDeleteModalOpen(false);
+          }}>
+          <Paragraph>Möchtest du den Assistenten wirklich löschen?</Paragraph>
+        </Modal>
       </div>
     );
   }

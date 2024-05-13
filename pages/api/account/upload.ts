@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { auth } from "../../../firebase/admin"
 import { Formidable } from "formidable";
-import { uploadFile } from "../../../firebase/drive/upload_file";
+import { uploadProfilePicture } from "../../../firebase/drive/upload_file";
 import fs from "fs";
 
 type ResponseData = {
@@ -44,7 +44,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
       try {
         // Upload the image to firebase
-        const imageurl = await uploadFile( imageBytes, uploadingUser );
+        const imageurl = await uploadProfilePicture( imageBytes, uploadingUser );
 
         return res.status( 200 ).send( { errorcode: 0, message: imageurl } );
 

@@ -64,7 +64,7 @@ export type Company = {
     plan?: Plan;
     customerId?: string;
     paymentMethods: Array<PaymentMethod>,
-    api_password?: string;
+    apikey?: string;
 }
 
 export const basicCompany = {

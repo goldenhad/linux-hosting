@@ -1,4 +1,4 @@
-import { Card, Button, Form, Input, Result, message, Modal } from "antd";
+import {Card, Button, Form, Input, Result, message, Modal, Typography, Tabs} from "antd";
 import styles from "./account.module.scss"
 import { useEffect, useState } from "react";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
@@ -17,12 +17,13 @@ import FatButton from "../../components/FatButton";
 import EditUserForm from "../../components/Forms/EditUserForm/EditUserForm";
 import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
 
+const { Paragraph } = Typography;
 
 /**
  * Account-Page
- * 
+ *
  * Page resolving around everything user account related
- * 
+ *
  */
 export default function Account() {
   const context = useAuthContext();
@@ -64,6 +65,41 @@ export default function Account() {
     }else{
       return <></>;
     }
+  }
+
+
+
+  const ApiCard = () => {
+    const generateApiKey = async () => {
+      await axios.post("/api/company/apikey/generate", {});
+    }
+
+    const deleteApiKey = async () => {
+      await axios.post("/api/company/apikey/delete", {});
+    }
+
+    return (
+      <div className={styles.password}>
+        <Card className={styles.passwordcard} title="API" bordered={true}>
+          {(company.apikey)?
+            <div className={styles.apikeyrow}>
+              <Paragraph>
+                <pre>{company.apikey}</pre>
+              </Paragraph>
+              <Button type={"default"} danger onClick={() => {
+                deleteApiKey();
+              }}>Löschen</Button>
+            </div>
+            :
+            <>
+              <FatButton onClick={() => {
+                generateApiKey()
+              }} text={"Api Key generieren"}></FatButton>
+            </>
+          }
+        </Card>
+      </div>
+    );
   }
 
 
@@ -153,7 +189,7 @@ export default function Account() {
         await deleteSitewareUser()
       }
       break;
-            
+
     case "Mailagent":
       // Mailagents can be deleted easily as they have no constraint on the company
       const mlgntDeleteData = await deleteData( "User", login.uid );
@@ -176,7 +212,7 @@ export default function Account() {
         }
       }
       break;
-        
+
     default:
       break;
     }
@@ -211,14 +247,8 @@ export default function Account() {
           </div>
 
           <AnalyticsCard/>
-
-          <div className={styles.password}>
-            <Card className={styles.passwordcard} title="Einstellungen" bordered={true}>
-              <FatButton onClick={() => {
-                resetTutorial()
-              }} text="Tutorial zurücksetzen"/>
-            </Card>
-          </div>
+          
+          <ApiCard />
 
           <div className={styles.deleteRow}>
             <FatButton danger={true} onClick={() => {

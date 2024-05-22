@@ -207,14 +207,13 @@ export default function QaAAssistant(props: {
         console.log(inputobj.key);
         //const cleanedValued = values[inputobj.key].replace(/(<~).+?(~>)/gm, "");
         const cleanedValued = values[inputobj.key];
-
         if(inputobj.type == AssistantInputType.PROFILE){
           const profile: Profile = decryptedProfiles.find( ( singleProfile: Profile ) => {
             return singleProfile.name == values.profile;
           });
 
           if(profile){
-            let profileInformation = "";
+            let profileInformation = `Mein Name ist ${user.firstname} ${user.lastname}. Ich bin ${profile.settings.personal}`;
             if(context.role.isCompany){
               const companyinfo = `Ich arbeite für ${context.company.name}. Wir beschäftigen uns mit: ${context.company.settings.background}`;
               profileInformation = `Mein Name ist ${user.firstname} ${user.lastname}. Ich bin ${profile.settings.personal}. ${companyinfo}`

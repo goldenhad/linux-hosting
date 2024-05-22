@@ -3,9 +3,9 @@ import { auth, firestore } from "../../../../firebase/admin"
 import { Company } from "../../../../firebase/types/Company";
 import { User } from "../../../../firebase/types/User";
 import { Role } from "../../../../firebase/types/Role";
-import {hexString} from "@kurkle/color";
-import {hex} from "dingbat-to-unicode";
-import {cat} from "@xenova/transformers";
+import { hexString } from "@kurkle/color";
+import { hex } from "dingbat-to-unicode";
+import { cat } from "@xenova/transformers";
 
 type ResponseData = {
     errorcode: number,
@@ -49,28 +49,28 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
           if(roleData.canEditCompanyDetails) {
             // Query the data of the company from the database
-            const companyReq = await firestore.doc(`/Company/${userData.Company}`).get();
-            const companyData = companyReq.data();
+            //const companyReq = await firestore.doc(`/User/${userData.Company}`).get();
+            //const companyData = companyReq.data();
 
             // Check if the found database is valid
-            if (companyData) {
-              // Generate an array with random bytes
-              const tokenArray = new Uint8Array(TOKENLENGTH / 2);
-              crypto.getRandomValues(tokenArray);
+            //if (companyData) {
+            // Generate an array with random bytes
+            const tokenArray = new Uint8Array(TOKENLENGTH / 2);
+            crypto.getRandomValues(tokenArray);
 
-              // Convert the random bytes to string
-              const hexString = Array.from(tokenArray, dec2hex).join("");
+            // Convert the random bytes to string
+            const hexString = Array.from(tokenArray, dec2hex).join("");
 
-              try{
-                // Save the generated random string token to the company
-                await firestore.doc(`/Company/${userData.Company}`).update({ apikey: hexString });
-              }catch (e){
-                console.error(e);
-                return res.status(400).send({ errorcode: 7, message: "Error saving key to company!" });
-              }
-            } else {
-              return res.status(400).send({ errorcode: 6, message: "Company not found!" });
+            try{
+              // Save the generated random string token to the company
+              await firestore.doc(`/User/${userid}`).update({ apikey: hexString });
+            }catch (e){
+              console.error(e);
+              return res.status(400).send({ errorcode: 7, message: "Error saving key to company!" });
             }
+            //} else {
+            //  return res.status(400).send({ errorcode: 6, message: "Company not found!" });
+            //}
           }else{
             return res.status( 400 ).send( { errorcode: 5, message: "Role not defined" } );
           }

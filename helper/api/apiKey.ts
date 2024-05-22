@@ -1,5 +1,6 @@
 import * as CryptoJS from "crypto-js";
 import { firestore } from "../../firebase/admin";
+import {User} from "../../firebase/types/User";
 
 interface KeyInformation {
     company_id: string,
@@ -7,7 +8,7 @@ interface KeyInformation {
 }
 
 export interface ValidationResult{
-  companyId: string,
+  user: User,
 }
 
 export function validateApiKey(apiKey): Promise<ValidationResult> {
@@ -16,67 +17,36 @@ export function validateApiKey(apiKey): Promise<ValidationResult> {
    * the promise if api key is invalid in any regard
    */
   return new Promise(async (resolve, reject) => {
-    try{
-      // Get the api key password from the env file
-      const apikeyguard = process.env.APIKEY_GUARD;
-
-      // decrypt the given api key with the guard
-      const decrypted = CryptoJS.AES.decrypt(apiKey, apikeyguard);
-
+    if(apiKey && apiKey != ""){
       try{
-        // Convert the decrypted value to a string
-        const decryptedString = CryptoJS.enc.Utf8.stringify(decrypted);
-        // Parse converted as json to get the included JSON object containing all the data
-        const parsedString: KeyInformation = JSON.parse(decryptedString);
-        // Type the json object as KeyInformation object
-        const keyInformation = parsedString;
-
-        // Validate the members of the given key object
-        if(keyInformation && keyInformation.company_id != "" && keyInformation.api_key != ""){
-          // If the company id is present get the company representation from our database
-          const privateKeyReq = await firestore.doc(`Company/${keyInformation.company_id}`).get();
-
-          // Validate if the company can be found in the database
-          if(privateKeyReq){
-            // Get the data of the company
-            const companyData = privateKeyReq.data();
-
-            // Query the company representation for the api password to check against the key contained in the decrypted object
-            const privateKey = companyData.api_password;
-
-            try{
-              // Validate existance of the api password contained in the company representation
-              if(privateKey && privateKey != ""){
-                // Check if the given api_key and the password from the database match
-                if(keyInformation.api_key == privateKey){
-                  // If they match, then the given api key is valid
-                  console.log("passed!");
-                  resolve({ companyId: keyInformation.company_id });
-                }else{
-                  throw Error("API key does not match");
-                }
-              }else {
-                throw Error("API key definition incomplete");
-              }
-            }catch(matchError){
-              console.error(matchError);
-              reject({ errorcode: 997, message: "API key invalid" });
-            }
+        // Get the api key password from the env file
+        //const apikeyguard = process.env.APIKEY_GUARD;
+  
+        // decrypt the given api key with the guard
+        //const decrypted = CryptoJS.AES.decrypt(apiKey, apikeyguard);
+        console.log(apiKey)
+  
+        const userCol = firestore.collection("User");
+        const docByKey = await userCol.where("apikey", "==", apiKey).get();
+  
+        if(!docByKey.empty){
+          if(docByKey.docs.length == 1){
+            const user = docByKey.docs[0].data() as User;
+            resolve({ user: user });
           }else{
-            throw Error("Key parsing revealed invalid object");
+            reject({ errorcode: 666, message: "API key exists multiple times!" });
           }
         }else{
-          throw Error("Key parsing revealed invalid object");
+          console.error(docByKey.docs);
+          reject({ errorcode: 777, message: "API key does not exist!" });
         }
-
-      }catch(parseError){
-        console.error(parseError);
-        reject({ errorcode: 998, message: "API key does not exist!" });
+  
+      }catch(decryptionError){
+        console.error(decryptionError);
+        reject({ errorcode: 888, message: "API key does not exist!" });
       }
-
-    }catch(decryptionError){
-      console.error(decryptionError);
-      reject({ errorcode: 999, message: "API key does not exist!" });
+    }else{
+      reject({ errorcode: 999, message: "Please provide an api key!" });
     }
   })
 }

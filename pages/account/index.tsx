@@ -81,10 +81,10 @@ export default function Account() {
     return (
       <div className={styles.password}>
         <Card className={styles.passwordcard} title="API" bordered={true}>
-          {(company.apikey)?
+          {(user.apikey)?
             <div className={styles.apikeyrow}>
               <Paragraph>
-                <pre>{company.apikey}</pre>
+                <pre>{user.apikey}</pre>
               </Paragraph>
               <Button type={"default"} danger onClick={() => {
                 deleteApiKey();

@@ -2,7 +2,6 @@ import React, { Dispatch, ReactNode, useEffect, useState } from "react";
 import { ArrowLeftOutlined, SettingOutlined } from "@ant-design/icons";
 import { Button, Drawer, Form, Input, Layout, message, Switch } from "antd";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import styles from "./editorsidebar.module.scss";
 import CookieBanner from "../../CookieBanner/CookieBanner";
 import Assistant, {

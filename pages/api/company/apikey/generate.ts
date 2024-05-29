@@ -1,11 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { auth, firestore } from "../../../../firebase/admin"
-import { Company } from "../../../../firebase/types/Company";
 import { User } from "../../../../firebase/types/User";
 import { Role } from "../../../../firebase/types/Role";
-import { hexString } from "@kurkle/color";
-import { hex } from "dingbat-to-unicode";
-import { cat } from "@xenova/transformers";
 
 type ResponseData = {
     errorcode: number,

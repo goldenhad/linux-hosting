@@ -1,12 +1,11 @@
-import {Card, Button, Form, Input, Result, message, Modal, Typography, Tabs} from "antd";
+import { Card, Button, Form, Input, Result, message, Modal, Typography } from "antd";
 import styles from "./account.module.scss"
 import { useEffect, useState } from "react";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useAuthContext } from "../../components/context/AuthContext";
 import forgotpassword from "../../firebase/auth/forgot";
-import updateData from "../../firebase/data/updateData";
 import axios from "axios";
-import { TourState, User } from "../../firebase/types/User";
+import { User } from "../../firebase/types/User";
 import deleteData from "../../firebase/data/deleteData";
 import deleteSitewareUser from "../../firebase/auth/delete";
 import { getDocWhere } from "../../firebase/data/getData";
@@ -126,27 +125,6 @@ export default function Account() {
           }
         }} text="Passwort zurücksetzen" />
       );
-    }
-  }
-
-  const resetTutorial = async () => {
-    const resetTutObj: TourState = {
-      home: false,
-      dialog: false,
-      monolog: false,
-      blog: false,
-      usage: false,
-      profiles: false,
-      company: false,
-      excel: false,
-      translator: false,
-      plain: false
-    }
-    const { error } = await updateData( "User", login.uid, { tour: resetTutObj } );
-    if( error ){
-      messageApi.error( "Beim zurücksetzen des Tutorials ist etwas schiefgelaufen. Versuche es später nochmal!" );
-    }else{
-      messageApi.success( "Tutorial zurückgesetzt!" );
     }
   }
 

@@ -3,30 +3,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 // @ts-ignore
 import ResponseData = Dispatcher.ResponseData;
 import { validateApiKey } from "../../../helper/api/apiKey";
-import { MsgType } from "../../../components/Assistants/ChatAssistant/ChatAssistant";
-import axios from "axios";
-import {
-  ChatMessage,
-  ContextChatEngine,
-  Document,
-  LLMStartEvent,
-  OpenAI,
-  QdrantVectorStore,
-  VectorStoreIndex
-} from "llamaindex";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { extractText } from "llamaindex/llm/utils";
 import { firestore } from "../../../firebase/admin";
-import { TokenCalculator } from "../../../helper/price";
-import { Calculations, InvoiceSettings } from "../../../firebase/types/Settings";
-import { Company, Order } from "../../../firebase/types/Company";
-import { stripe } from "../../../stripe/api";
-import { encodingForModel } from "js-tiktoken";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { Settings } from "llamaindex/Settings";
-import Assistant, {AssistantType, InputBlock} from "../../../firebase/types/Assistant";
+import Assistant, { AssistantType, InputBlock } from "../../../firebase/types/Assistant";
 
 
 
@@ -42,7 +20,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     if(aid){
 
       // validate the api key
-      validateApiKey(apikey).then(async ({ user }) => {
+      validateApiKey(apikey).then(async () => {
 
         const assistantDoc = await firestore.doc(`/Assistants/${aid}`).get();
         const assistantData = assistantDoc.data() as Assistant;

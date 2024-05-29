@@ -117,7 +117,7 @@ export default function GeneralSettingsModal(props: {
           <List
             itemLayout="horizontal"
             dataSource={knowledgeData}
-            renderItem={(item, index) => (
+            renderItem={(item) => (
               <List.Item
                 actions={[
                   <Button key={"del"} onClick={async () => {

@@ -3,7 +3,6 @@ import type { NextApiRequest, NextApiResponse } from "next";
 // @ts-ignore
 import ResponseData = Dispatcher.ResponseData;
 import { validateApiKey } from "../../../../helper/api/apiKey";
-import { MsgType } from "../../../../components/Assistants/ChatAssistant/ChatAssistant";
 import axios from "axios";
 import {
   ChatMessage,
@@ -33,10 +32,8 @@ import Assistant, {
   InputBlock
 } from "../../../../firebase/types/Assistant";
 import { Profile } from "../../../../firebase/types/Profile";
-import { dec } from "dingbat-to-unicode";
 import { Role } from "../../../../firebase/types/Role";
-import * as repl from "node:repl";
-import {decryptProfile} from "../../prompt/decrypt";
+import { decryptProfile } from "../../prompt/decrypt";
 
 
 // Define the url where we reach qdrant

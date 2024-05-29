@@ -42,13 +42,6 @@ interface MsgContext {
     content: string
 }
 
-enum ParsingState {
-  UNDEFINED,
-  STARTMSG_RECEIVED,
-  PARSING,
-  ENDMSG_RECEIVED
-}
-
 export default function ChatAssistant(props: {
     assistant: Assistant,
     context,

@@ -168,7 +168,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                   res.flushHeaders();
                 }
               }).finally(async () => {
-                //console.log(encoding.encode(extractText(resp)).length)
+                console.log(encoding.encode(extractText(resp)).length)
                 //console.log(`${tokenCount.in} ${tokenCount.out}`)
                 console.log(`IN: $${(tokenCount.in / 1_000_000) * 5}`, `OUT: $${(tokenCount.out / 1_000_000) * 15}`);
 

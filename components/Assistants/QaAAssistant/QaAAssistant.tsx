@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Alert, Button, Card, Divider, Form, Result, Skeleton } from "antd";
-import { toGermanCurrencyString, TokenCalculator } from "../../../helper/price";
+import { toGermanCurrencyString } from "../../../helper/price";
 import { useRouter } from "next/router";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../db";
@@ -73,7 +73,6 @@ export default function QaAAssistant(props: {
   const [ promptError, setPromptError ] = useState( false );
   const [ showAnswer, setShowAnswer ] = useState( false );
   const [ cancleController, setCancleController ] = useState(new AbortController());
-  const [ calculator ] = useState(new TokenCalculator(context.calculations))
   const router = useRouter();
   const [ form ] = Form.useForm();
 
@@ -238,7 +237,7 @@ export default function QaAAssistant(props: {
   const getBasicState = () => {
     const obj = {};
     mainblock.inputColumns.forEach((column: AssistantInputColumn) => {
-      column.inputs.forEach((inputobj, index) => {
+      column.inputs.forEach((inputobj) => {
         if(inputobj.type ==  AssistantInputType.PROFILE){
           if (decryptedProfiles.length > 0){
             obj[inputobj.key] = decryptedProfiles[0];

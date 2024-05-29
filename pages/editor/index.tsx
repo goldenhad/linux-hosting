@@ -1,6 +1,6 @@
 import { GetServerSideProps } from "next";
 import EditorSidebar from "../../components/Editor/EditorSidebar/EditorSidebar";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
 import getDocument from "../../firebase/data/getData";
 import Assistant, { Block, InputBlock } from "../../firebase/types/Assistant";

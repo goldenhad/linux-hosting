@@ -8,7 +8,6 @@ import {
   VectorStoreIndex,
   Document, IngestionPipeline, SimpleNodeParser, TitleExtractor, TextFileReader, MarkdownReader
 } from "llamaindex";
-import { encodingForModel } from "js-tiktoken";
 import getDocument from "../../../../firebase/data/getData";
 import { EmbeddingParameters } from "../../../../firebase/types/Settings";
 
@@ -16,8 +15,6 @@ type ResponseData = {
     errorcode: number,
     message: string | Array<string>,
 }
-
-const encoding = encodingForModel("text-embedding-ada-002");
 
 /**
  * API route handling assistant knowledgebase input

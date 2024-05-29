@@ -8,9 +8,8 @@ import type { NextComponentType } from "next";
 import Chatra from "@chatra/chatra";
 import { useRouter } from "next/router";
 import { logEvent, setAnalyticsCollectionEnabled } from "firebase/analytics";
-import { analytics, firebase_app } from "../db";
+import { analytics } from "../db";
 import cookieCutter from "cookie-cutter"
-import { getAuth } from "firebase/auth";
 
 
 const roboto = Roboto( {

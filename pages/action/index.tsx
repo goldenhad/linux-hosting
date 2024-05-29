@@ -2,7 +2,6 @@ import { GetServerSideProps } from "next";
 import Head from "next/head";
 import { ResetPassword } from "../../components/Actions/ResetPassword/ResetPassword";
 import { VerifyMail } from "../../components/Actions/VeryfyMail/VerifyMail";
-import { AuthContextProvider } from "../../components/context/AuthContext";
 
 // Props given by firebase to this page trough redirection
 export interface restprops {

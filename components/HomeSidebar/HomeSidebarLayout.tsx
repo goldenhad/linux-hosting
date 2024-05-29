@@ -477,7 +477,7 @@ const HomeSidebarLayout = ( props: {
                 <div className={styles.homesidebar}>
                   <div className={styles.logo}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={"/logo.svg"} alt="Logo" width={100}/>
+                    <img src={"/siteware-logo-black.svg"} alt="Logo" width={100}/>
                   </div>
                   <div className={styles.title}>Assistenten</div>
                   <List className={styles.assistantlist} split={false}>

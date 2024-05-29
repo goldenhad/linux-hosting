@@ -208,7 +208,7 @@ const SidebarLayout = ( props: {
         <Header className={styles.header}>
           <Link href={"/"} className={styles.headerlink}>
             {/*eslint-disable-next-line */}
-            <img src="/siteware-logo-black.svg" width={32} height={32} alt="Logo"/>
+            <img src="/siteware-logo-BM-white.svg" width={32} height={32} alt="Logo"/>
           </Link>
           <div className={styles.headerinteraction}>
             {(props.hist)? 
@@ -266,7 +266,7 @@ const SidebarLayout = ( props: {
             <div className={styles.mobilesidebarcontainer}>
               <div className={styles.logobox}>
                 {/*eslint-disable-next-line */}
-                <img src="/siteware-logo-black.svg" width={41.15} height={40} alt="Logo"/>
+                <img src="/siteware-logo-BM-white.svg" width={41.15} height={40} alt="Logo"/>
               </div>
               <div className={styles.drawermenu}>
                 <Menu className={styles.primarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
@@ -304,7 +304,7 @@ const SidebarLayout = ( props: {
             <Link href={"/"}>
               <div className={styles.logobox}>
                 {/*eslint-disable-next-line */}
-                <img src="/siteware-logo-black.svg" width={41.15} height={40} alt="Logo"/>
+                <img src="/siteware-logo-BM-white.svg" width={41.15} height={40} alt="Logo"/>
               </div>
             </Link>
   
@@ -380,7 +380,7 @@ const SidebarLayout = ( props: {
             <Link href={"/"}>
               <div className={styles.logobox}>
                 {/*eslint-disable-next-line */}
-                <img src="/siteware-logo-black.svg" width={41.15} height={40} alt="Logo"/>
+                <img src="/siteware-logo-BM-white.svg" width={41.15} height={40} alt="Logo"/>
               </div>
             </Link>
   

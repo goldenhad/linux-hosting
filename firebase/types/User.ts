@@ -78,7 +78,8 @@ export type User =  {
     tour: TourState,
     services:{
       favourites: Array<string>
-    }
+    },
+    apikey: string,
     history: History
 }
 
@@ -124,5 +125,6 @@ export const basicUser: User = {
     monolog_old: "",
     blog: "",
     excel: ""
-  }
+  },
+  apikey: ""
 }

@@ -169,3 +169,17 @@
     margin-top: 50pt;
     color: #D0D5DD;
 }
+
+.apikeyrow{
+    display: flex;
+    flex-direction: column;
+}
+
+.tabcard {
+    max-width: 800px;
+}
+
+.personalrow{
+    display: flex;
+    flex-direction: row;
+}

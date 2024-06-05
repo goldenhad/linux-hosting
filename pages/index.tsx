@@ -228,7 +228,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
               })
               await updateData("User", login.uid, { services: { favourites: currentfavs } });
             }}
-            canEdit={role.canManageUser}
+            canEdit={role.canUseEditor}
             published={singleService.published}
           />
         })}

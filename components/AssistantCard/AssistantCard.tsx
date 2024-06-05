@@ -1,7 +1,8 @@
-import { Badge, Button, Card, Modal, Tooltip, Typography } from "antd";
+import { Badge, Button, Card, Dropdown, Modal, Space, Tooltip, Typography } from "antd";
 import styles from "./assistantcard.module.scss";
-import Icon, { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import Icon, { CopyOutlined, DeleteOutlined, DownOutlined, EditOutlined } from "@ant-design/icons";
 import Link from "next/link";
+import type { MenuProps } from "antd";
 import Play from "../../public/icons/play.svg";
 import Heart from "../../public/icons/heart.svg";
 import HeartFull from "../../public/icons/heartFull.svg";
@@ -12,6 +13,7 @@ import deleteData from "../../firebase/data/deleteData";
 import axios from "axios";
 import { deleteAssistantImage } from "../../firebase/drive/delete";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import router from "next/router";
 
 const { Paragraph } = Typography;
 
@@ -135,29 +137,85 @@ const AssistantCard = ( props: {
     }
   }
 
-  const DeleteAssistantButton = () => {
-    return <DeleteOutlined onClick={() => {
-      setDeleteModalOpen(true);
-    }} />
-  }
-
   const deleteAssistant = async () => {
     console.log("attempting delete");
-    try{
-      if (props.knowledeFiles != undefined && props.knowledeFiles.length > 0){
-        for(const file of props.knowledeFiles){
-          await axios.post("/api/assistant/knowledge/delete", { aid: props.aid, nodes: file.nodes });
-        }
-      }
+    const knowledgeExistsReq = await axios.get(`/api/assistant/knowledge/exists?aid=${props.aid}`);
 
-      const imagedelete = await deleteAssistantImage(props.aid);
-      console.log(imagedelete);
+    if(knowledgeExistsReq.data.message){
+      try{
+        if (props.knowledeFiles != undefined && props.knowledeFiles.length > 0){
+          for(const file of props.knowledeFiles){
+            await axios.post("/api/assistant/knowledge/delete", { aid: props.aid, nodes: file.nodes });
+          }
+        }
+
+        const imagedelete = await deleteAssistantImage(props.aid);
+        console.log(imagedelete);
+        await deleteData("Assistants", props.aid);
+        setDeleteModalOpen(false);
+        props.router.refresh();
+      }catch (e){
+        console.error("Fehler beim löschen des Konfigurators! ");
+        console.log(e);
+      }
+    }else{
       await deleteData("Assistants", props.aid);
       setDeleteModalOpen(false);
       props.router.refresh();
-    }catch (e){
-      console.error("Fehler beim löschen des Konfigurators! ");
-      console.log(e);
+    }
+  }
+
+  const CardDropDownItems: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (<a href={`/editor?aid=${props.aid}`}>Bearbeiten</a>),
+      icon: <EditOutlined/>
+    },
+    {
+      key: "2",
+      label: "Duplizieren",
+      icon: <CopyOutlined />,
+      onClick: async () => {
+        console.log("cloning...")
+        // Clone the data in the database
+        const dataCloneReq = await axios.post("/api/assistant/clone", { aid: props.aid });
+
+        if(dataCloneReq.status == 200){
+          const existsReq = await axios.get(`/api/assistant/knowledge/exists?aid=${props.aid}`);
+          if(existsReq.data.message){
+            const newAid = dataCloneReq.data.message;
+
+            // Clone the vector storage
+            await axios.post("/api/assistant/knowledge/copy", { newAid: newAid, oldAid: props.aid });
+          }
+        }
+
+        router.reload();
+      }
+    },
+    {
+      key: "3",
+      label: "Löschen",
+      icon: <DeleteOutlined/>,
+      onClick: () => {
+        setDeleteModalOpen(true);
+      }
+    }
+  ];
+
+  const EditDropdown = () => {
+    if(props.canEdit){
+      return(
+        <Dropdown menu={{ items: CardDropDownItems }}>
+          <a onClick={(e) => e.preventDefault()}>
+            <Space>
+              <DownOutlined />
+            </Space>
+          </a>
+        </Dropdown>
+      );
+    }else{
+      return <></>;
     }
   }
 
@@ -182,8 +240,7 @@ const AssistantCard = ( props: {
             <div onClick={props.onVideoClick} className={styles.videobuttoncontainer}>
               <Icon component={Play} className={styles.iconsvg} viewBox='0 0 22 22'/>
             </div>
-            {(props.canEdit)? <a href={`/editor?aid=${props.aid}`}><EditOutlined /></a> : <></>}
-            {(props.canEdit)? <DeleteAssistantButton /> : <></> }
+            <EditDropdown />
           </div>
           <AssistantLink />
         </div>

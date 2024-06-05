@@ -4,6 +4,7 @@ import {
   QdrantVectorStore,
   VectorStoreIndex
 } from "llamaindex";
+import { QdrantClient } from "@qdrant/js-client-rest";
 
 type ResponseData = {
     errorcode: number,
@@ -21,31 +22,34 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
   const token = await auth.verifyIdToken( req.cookies.token );
 
   if( token ){
+
     if (req.method == "POST"){
       const data = req.body;
       console.log("params: ", req.body);
 
-      if(data.aid && data.nodes && data.nodes.length > 0){
-        const aid = data.aid;
-        const nodes: Array<string> = data.nodes;
+      if(data.newAid && data.oldAid){
+        const oldAid = data.oldAid;
+        const newAid = data.newAid;
 
         try{
-          const vectorStore = new QdrantVectorStore({
-            collectionName: `${aid}`,
+          const qdrantClient = new QdrantClient({
             url: `${process.env.QDRANT_ADDRESS}:6333`
           });
 
-          if(await vectorStore.collectionExists(aid)){
-            //await vectorStore.client().deleteCollection(aid);
-            const index = await VectorStoreIndex.fromVectorStore(vectorStore);
-            const dict = index.indexStruct;
-            console.log(dict.indexId);
+          const existsReq = await qdrantClient.collectionExists(oldAid);
 
-            for (const nodeId of nodes) {
-              await vectorStore.delete(nodeId);
+          if(existsReq.exists){
+            const oldCollection = await qdrantClient.getCollection(oldAid);
+            const newCollection = await qdrantClient.createCollection(newAid, {
+              vectors: oldCollection.config.params.vectors,
+              init_from: { collection: oldAid }
+            });
+            
+            if(newCollection){
+              return res.status( 200 ).send( { errorcode: 0, message: "OK" } );
+            }else{
+              return res.status( 500 ).send( { errorcode: 7, message: "Copying of collection failed!" } );
             }
-
-            return res.status( 200 ).send( { errorcode: 0, message: "OK" } );
           }else{
             return res.status( 400 ).send( { errorcode: 6, message: "Assistant has no knowledge base!" } );
           }

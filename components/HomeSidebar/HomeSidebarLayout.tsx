@@ -345,7 +345,7 @@ const HomeSidebarLayout = ( props: {
                     <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Produktivität</div>  
                   </List.Item>
-                  {(props.context.role.canManageUser)?
+                  {(props.context.role.canUseEditor)?
                     <List.Item className={`${styles.assistantlink} ${isselected("unpublished")}`} data-function={"unpublished"} onClick={() => {
                       props.category.setter("unpublished");
                       setSidebarOpen(false);
@@ -509,7 +509,7 @@ const HomeSidebarLayout = ( props: {
                       <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Produktivität</div>  
                     </List.Item>
-                    {(props.context.role.canManageUser)? 
+                    {(props.context.role.canUseEditor)?
                       <List.Item className={`${styles.assistantlink} ${isselected("unpublished")}`} data-function={"unpublished"} onClick={() => {
                         props.category.setter("unpublished");
                         setSidebarOpen(false);

@@ -232,7 +232,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
             published={singleService.published}
           />
         })}
-        {role.canManageUser && <EmptyCard />}
+        {role.canUseEditor && <EmptyCard />}
       </div>
     );
   }

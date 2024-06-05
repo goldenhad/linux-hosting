@@ -4,10 +4,11 @@ import {
   QdrantVectorStore,
   VectorStoreIndex
 } from "llamaindex";
+import { QdrantClient } from "@qdrant/js-client-rest";
 
 type ResponseData = {
     errorcode: number,
-    message: string,
+    message: string | boolean,
 }
 
 
@@ -21,34 +22,22 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
   const token = await auth.verifyIdToken( req.cookies.token );
 
   if( token ){
-    if (req.method == "POST"){
-      const data = req.body;
-      console.log("params: ", req.body);
 
-      if(data.aid && data.nodes && data.nodes.length > 0){
-        const aid = data.aid;
-        const nodes: Array<string> = data.nodes;
+    if (req.method == "GET"){
+      const data = req.query;
 
+      if( data.aid ){
+        const aid = data.aid as string;
+                
         try{
-          const vectorStore = new QdrantVectorStore({
-            collectionName: `${aid}`,
+          const qdrantClient = new QdrantClient({
             url: `${process.env.QDRANT_ADDRESS}:6333`
           });
 
-          if(await vectorStore.collectionExists(aid)){
-            //await vectorStore.client().deleteCollection(aid);
-            const index = await VectorStoreIndex.fromVectorStore(vectorStore);
-            const dict = index.indexStruct;
-            console.log(dict.indexId);
+          const existsReq = await qdrantClient.collectionExists(aid);
+          const exists = existsReq.exists;
 
-            for (const nodeId of nodes) {
-              await vectorStore.delete(nodeId);
-            }
-
-            return res.status( 200 ).send( { errorcode: 0, message: "OK" } );
-          }else{
-            return res.status( 400 ).send( { errorcode: 6, message: "Assistant has no knowledge base!" } );
-          }
+          return res.status( 200 ).send( { errorcode: 0, message: exists } );
         }catch (e){
           console.log(e);
           return res.status( 400 ).send( { errorcode: 5, message: "Error deleting collection!" } );

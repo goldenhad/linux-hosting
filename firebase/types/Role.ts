@@ -5,4 +5,5 @@ export interface Role {
     canSetupCompany?: boolean,
     canManageUser?: boolean,
     canViewAnalytics?: boolean,
+    canUseEditor?: boolean
 }

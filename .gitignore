@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/chatbot/node_modules
+/chatbot/dist
 /.pnp
 .pnp.js
 

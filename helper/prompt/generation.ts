@@ -28,7 +28,7 @@ export type AIMessage = {
 
 export async function generateAIResponse(
   model: Model,
-  messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],  
+  messages: Array<AIMessage>,
   apiResponse: NextApiResponse<AssistantResponse | string>,
   data: InputData
 ){
@@ -40,8 +40,11 @@ export async function generateAIResponse(
     "Content-Type": "text/event-stream"
   }); 
     
+  
   const response = await openai.chat.completions.create({
     model: model,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     messages: messages,
     stream: true
   });  

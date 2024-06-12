@@ -57,7 +57,6 @@ export default function Action( props: restprops ){
  * Exclusive Layout of the action page
  * @param page
  */
-/*
 Action.getLayout = ( page ) => {
   return(
     <>
@@ -72,4 +71,4 @@ Action.getLayout = ( page ) => {
 
     </>
   );
-}*/
+}

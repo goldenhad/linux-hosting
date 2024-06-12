@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authMiddleware, redirectToHome, redirectToLogin } from "next-firebase-auth-edge";
 import serviceAccount from "./mailbuddy_priv_key.json";
 
-const PUBLIC_PATHS = ["/register", "/login", "/forgot/password", "/privacy", "/legal", "/monitoring", "/sentry-example-page"];
+const PUBLIC_PATHS = ["/register", "/login", "/forgot/password", "/privacy", "/legal", "/monitoring", "/sentry-example-page", "/action"];
 
 const redirectToRoute = (pathname: string, request: NextRequest) => {
   const url = request.nextUrl.clone();
@@ -37,9 +37,11 @@ export async function middleware(request: NextRequest) {
     },
     handleValidToken: async ({ token, decodedToken }, headers) => {
       if (PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
-        console.log(`ROUTE ${request.nextUrl.pathname} is not public, redirecting to home...`)
+        //.log(`ROUTE ${request.nextUrl.pathname} is not public, redirecting to home...`)
         return redirectToHome(request);
       }
+
+      console.log(request.nextUrl.pathname);
 
       if(!request.nextUrl.pathname.startsWith("/confirm") && !request.nextUrl.pathname.startsWith("/action")){
         if(!decodedToken.email_verified){
@@ -48,13 +50,13 @@ export async function middleware(request: NextRequest) {
       }
     },
     handleInvalidToken: async (reason) => {
-      console.info("Missing or malformed credentials", { reason });
+      //console.info("Missing or malformed credentials", { reason });
       //console.log(PUBLIC_PATHS);
-      console.log(request.nextUrl.pathname);
-      console.log(PUBLIC_PATHS.includes(request.nextUrl.pathname))
+      //console.log(request.nextUrl.pathname);
+      //console.log(PUBLIC_PATHS.includes(request.nextUrl.pathname))
 
       if (!PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
-        console.log("redirecting....");
+        //console.log("redirecting....");
         return redirectToLogin(request, {
           path: "/login",
           publicPaths: PUBLIC_PATHS

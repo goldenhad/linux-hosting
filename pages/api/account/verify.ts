@@ -13,27 +13,22 @@ type ResponseData = {
  * @param res Response object
  */
 export default async function handler( req: NextApiRequest, res: NextApiResponse<ResponseData> ) {
-  const token = await auth.verifyIdToken( req.cookies.token );
-
   if( req.method == "POST" ) {
-    if (token) {
-      const data = req.body;
-      if (data.uid) {
-        try {
-          await verifyEmail(data.uid);
-          return res.status(200).send({ errorcode: 0, message: "OK" });
-        } catch (e) {
-          return res.status(400).send({ errorcode: 4, message: "Verification failed" });
-        }
-      } else {
-        return res.status(400).send({ errorcode: 3, message: "Missing data" });
+    const data = req.body;
+
+    if (data.oobCode) {
+      try {
+        console.log("CODE", data.oobCode);
+        await verifyEmail(data.oobCode);
+        return res.status(200).send({ errorcode: 0, message: "OK" });
+      } catch (e) {
+        return res.status(400).send({ errorcode: 4, message: "Verification failed" });
       }
-
-
     } else {
-      return res.status(400).send({ errorcode: 2, message: "Authentication required!" });
+      return res.status(400).send({ errorcode: 3, message: "Missing data" });
     }
   }else if(req.method == "GET"){
+    const token = await auth.verifyIdToken( req.cookies.token );
     const uid = req.query.uid as string;
 
     if(token){

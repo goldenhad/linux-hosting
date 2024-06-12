@@ -31,7 +31,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             }
           ];
 
-          const { count } = await generateAIResponse(Model.GPT4, messages, res, data )
+          const { count } = await generateAIResponse(Model.GPT4, messages, res, data)
 
           // Send a response with token counts
           return res.status(200).send(`<~${count.response + count.request}~>`);

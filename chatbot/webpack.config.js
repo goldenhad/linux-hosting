@@ -5,7 +5,7 @@ module.exports = {
   entry: './src/index.tsx',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'chat.js',
+    filename: 'chat-bot.js',
   },
   module: {
     rules: [
@@ -21,7 +21,17 @@ module.exports = {
       },
       {
         test: /\.(sa|sc|c)ss$/,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
+        use: [
+          'style-loader',
+          'css-loader',
+          'resolve-url-loader', 
+          {
+            loader: "sass-loader",
+            options: {
+              sourceMap: true,
+            },
+          }
+        ],
       },
     ],
   },
@@ -38,9 +48,10 @@ module.exports = {
   devServer: {
     static: {
         directory: path.join(__dirname, 'public'),
+        publicPath: '/',
     },
     compress: true,
     port: 9000,
-    hot: false,
+    hot: true,
   },
 };

@@ -16,3 +16,7 @@ window.initChatBot = function (){
     reactRoot = createRoot(rootEle as HTMLElement);
     reactRoot.render(<App />)
 }
+
+let rootEle: HTMLElement | null = document.getElementById('root');
+reactRoot = createRoot(rootEle as HTMLElement);
+reactRoot.render(<App />)

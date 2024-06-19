@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 const { Header, Content, Sider } = Layout;
 import { User } from "../../firebase/types/User";
-import styles from "./homesidebar.module.scss";
+import styles from "./storesidebar.module.scss";
 import Home from "../../public/icons/home.svg";
 import Profiles from "../../public/icons/profiles.svg";
 import Help from "../../public/icons/help.svg";
@@ -36,7 +36,7 @@ type MenuItem = Required<MenuProps>["items"][number];
  * @param props.category.setter Dispatcher responsible for updating the assistant category 
  * @returns Sidebar with assistant category selector
  */
-const HomeSidebarLayout = ( props: { 
+const StoreSidebarLayout = (props: {
   children: ReactNode,
   context: {user: User, login, role, profile},
   category: { value: string, setter: Dispatch<SetStateAction<string>>},
@@ -353,13 +353,6 @@ const HomeSidebarLayout = ( props: {
                       <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Unveröffentlicht</div>
                     </List.Item>: <></>}
-                  <List.Item className={`${styles.assistantlink}`} onClick={() => {
-                    router.push("/store")
-                    setSidebarOpen(false);
-                  }}>
-                    <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                    <div className={styles.assistantcatname}>Appstore</div>
-                  </List.Item>
                 </List>
               </div>
               {/* <RecommendBox user={props.context.user} messageApi={props.messageApi} /> */}
@@ -494,15 +487,6 @@ const HomeSidebarLayout = ( props: {
                       <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Alle</div>
                     </List.Item>
-                    <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} data-function={"fav"} onClick={() => {
-                      props.category.setter("favourites"); 
-                    }}>
-                      <Icon component={Heart} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                      <div className={styles.assistantcatname}>Favoriten</div>
-                      <div className={styles.assistantcount}>
-                        <FavouriteBadge />
-                      </div>
-                    </List.Item>
                     <List.Item className={`${styles.assistantlink} ${isselected("content")}`} data-function={"content"} onClick={() => {
                       props.category.setter("content"); 
                     }}>
@@ -515,21 +499,6 @@ const HomeSidebarLayout = ( props: {
                     }}>
                       <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Produktivität</div>  
-                    </List.Item>
-                    {(props.context.role.canUseEditor)?
-                      <List.Item className={`${styles.assistantlink} ${isselected("unpublished")}`} data-function={"unpublished"} onClick={() => {
-                        props.category.setter("unpublished");
-                        setSidebarOpen(false);
-                      }}>
-                        <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                        <div className={styles.assistantcatname}>Unveröffentlicht</div>
-                      </List.Item>: <></>}
-                    <List.Item className={`${styles.assistantlink}`} onClick={() => {
-                      router.push("/store")
-                      setSidebarOpen(false);
-                    }}>
-                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                      <div className={styles.assistantcatname}>Appstore</div>
                     </List.Item>
                   </List>
                 </div>
@@ -550,4 +519,4 @@ const HomeSidebarLayout = ( props: {
     );
   }
 };
-export default HomeSidebarLayout;
+export default StoreSidebarLayout;

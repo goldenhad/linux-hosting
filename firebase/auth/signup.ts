@@ -54,7 +54,8 @@ export default async function signUp( firstname, lastname, email, username, pass
             tokens: credits,
             unlimited: false,
             orders: [],
-            invitedUsers: []
+            invitedUsers: [],
+            assistants: [],
           } );
 
           //console.log("created the company");

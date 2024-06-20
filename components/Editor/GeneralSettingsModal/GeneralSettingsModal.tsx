@@ -224,11 +224,11 @@ export default function GeneralSettingsModal(props: {
           name={"selectedCompanies"}
           label={<b>Ausgewählte Firmen (eine ID pro Zeile)</b>}
         >
-          <TextArea rows={7} placeholder={"Beschreibe deinen Assistenten kurz"} />
+          <TextArea rows={7} placeholder={"Beschreibe deinen Agenten kurz"} />
         </Form.Item>
 
         <Form.Item initialValue={props.assistantState.description} name={"description"} label={<b>Beschreibung</b>}>
-          <TextArea rows={7} placeholder={"Beschreibe deinen Assistenten kurz"} />
+          <TextArea rows={7} placeholder={"Beschreibe deinen Agenten kurz"} />
         </Form.Item>
 
 
@@ -239,7 +239,7 @@ export default function GeneralSettingsModal(props: {
             <div className={styles.infoicon} >
               <Popover overlayClassName={styles.infopopup} showArrow={true} title={"Informationen zur Wissensbasis"} content={
                 <div>
-                  Siteware kann Dokumente einlesen, verarbeiten und als Kontext für deinen Assistenten bereitstellen.
+                  Siteware kann Dokumente einlesen, verarbeiten und als Kontext für deinen Agenten bereitstellen.
                   Achte darauf die Daten ggf. so zu strukturieren, dass sie für die KI verständlich sind.
                   Darüber hinaus solltest du darauf achten, in der Wissensbasis keine sensiblen Daten zu speichern.
                   Diese könnten sonst durch die KI preisgegeben werden.

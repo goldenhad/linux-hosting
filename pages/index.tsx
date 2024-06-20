@@ -65,7 +65,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
   const steps: TourProps["steps"] = [
     {
       title: "Willkommen",
-      description: "Willkommen bei Siteware.business, dem Ort, an dem wir das E-Mail-Schreiben revolutionieren! Unser Ziel ist es, "+
+      description: "Willkommen bei Siteware, dem Ort, an dem wir das E-Mail-Schreiben revolutionieren! Unser Ziel ist es, "+
       "deine E-Mail-Kommunikation effizienter und angenehmer zu gestalten. Wir bieten dir innovative Funktionen, die deine E-Mail-Erfahrung "+
       "vereinfachen und verbessern. Im Folgenden wollen wir dir in diesen Tutorials die wichtigsten Funktionen näher erklären.",
       nextButtonProps: {
@@ -98,7 +98,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
       title: "Mail-Dialog",
       description: "Die Funktion \"Mail-Dialog\" ermöglicht es dir, einen bestehenden E-Mail-Verlauf nahtlos fortzuführen. "+
       "Hierbei kannst du einfach den bisherigen E-Mail-Verlauf in das System einfügen und spezifizieren, wie deine gewünschte Antwort aussehen "+
-      "soll. Basierend auf deinen Vorgaben und dem Kontext des E-Mail-Verlaufs generiert Siteware.Business automatisch eine passende Antwort.",
+      "soll. Basierend auf deinen Vorgaben und dem Kontext des E-Mail-Verlaufs generiert Siteware automatisch eine passende Antwort.",
       target: () => dialogRef.current,
       nextButtonProps: {
         children: (
@@ -115,7 +115,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
       title: "E-Mail schreiben",
       description: "Die Funktion \"E-Mail schreiben\" ist ein leistungsstarkes Tool, das dir dabei hilft, schnell und effektiv E-Mails zu verfassen. "+
       "Als Nutzer spezifizierst du einfach den gewünschten Inhalt oder den Hauptzweck deiner E-Mail, zum Beispiel eine Terminanfrage, ein Update für "+
-      "ein Projekt oder eine Rückmeldung zu einer Anfrage. Basierend auf deinen Angaben generiert Siteware business dann einen professionellen und "+
+      "ein Projekt oder eine Rückmeldung zu einer Anfrage. Basierend auf deinen Angaben generiert Siteware dann einen professionellen und "+
       "kohärenten E-Mail-Text, der genau auf deine Bedürfnisse zugeschnitten ist.",
       target: () => monologRef.current,
       nextButtonProps: {
@@ -132,7 +132,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
     {
       title: "Blogbeitrag erzeugen",
       description: "Die Funktion \"Blogbeitrag erzeugen\" dient dazu, voll automatisch fesselnde Blogbeiträge zu verfassen. "+
-      "Nachdem du das Thema des Blogtexts sowie individuelle Parameter festgelegt hast, generiert Siteware business automatisch einen professionellen und "+
+      "Nachdem du das Thema des Blogtexts sowie individuelle Parameter festgelegt hast, generiert Siteware automatisch einen professionellen und "+
       "ansprechenden Blogtext, ganz nach deinen Vorstellungen.",
       target: () => monologRef.current,
       nextButtonProps: {
@@ -260,7 +260,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
     }else{
       return (
         <div className={styles.servicelist}>
-            Bitte füge neue Assistenten im Appstore hinzu!
+            Bitte füge neue Agenten im Appstore hinzu!
         </div>
       );
     }
@@ -294,18 +294,18 @@ export default function Home(props: { assistants: Array<Assistant> }) {
                 <Card className={styles.comingsooncard}>
                   <div className={styles.builder}>
                     <div className={styles.buildercontent}>
-                      <h2 className={styles.builderheadline}>Frag jetzt deinen individuellen KI-Assistenten von
+                      <h2 className={styles.builderheadline}>Frag jetzt deinen individuellen KI-Agenten von
                           Siteware an.</h2>
                       <div className={styles.buildertext}>
                           Fordere jetzt dein maßgeschneidertes Angebot an und nutze unsere innovative DMSP-Technologie
                           für kostengünstige,
                           hochindividualisierte Lösungen. Einzigartig: Profitiere von einer möglichen vollständigen
                           Refinanzierung der Entwicklungskosten,
-                          wenn dein Assistent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern
+                          wenn dein Agent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern
                           schreiben wir dir die doppelte Höhe deiner
                           Entwicklungskosten auf dein Konto als siteware-Credits gut.
-                          Wähle schon bald aus einer Vielzahl an Assistenten im neuen siteware business APP-Store.
-                          Mit siteware business bist du immer einen Schritt voraus – sei dabei. Von Anfang an.
+                          Wähle schon bald aus einer Vielzahl an Agenten im neuen siteware APP-Store.
+                          Mit siteware bist du immer einen Schritt voraus – sei dabei. Von Anfang an.
                       </div>
                       <div className={styles.buttonsection}>
                         <Button type="primary" className={styles.builderbutton}>Angebot anfordern</Button>

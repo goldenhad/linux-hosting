@@ -226,7 +226,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                           },
                           payment_method: method,
                           off_session: true,
-                          description: "Automatische Nachbuchung Siteware business Credits"
+                          description: "Automatische Nachbuchung Siteware Credits"
                         });
 
                         // Get the invoice id from the create request

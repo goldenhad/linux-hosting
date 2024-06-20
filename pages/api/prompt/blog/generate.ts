@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           const messages: Array<AIMessage>  = [
             {
               role: "system",
-              content: "Du bist ein Assistent zum Erstellen von Blog Beiträgen. Nutzer geben dir Informationen zu sich und ihrem Schreibstil,"+
+              content: "Du bist ein Agent zum Erstellen von Blog Beiträgen. Nutzer geben dir Informationen zu sich und ihrem Schreibstil,"+
                   "du erzeugst daraus einen Blockbeitrag."
             },
             {

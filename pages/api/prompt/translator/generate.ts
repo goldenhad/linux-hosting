@@ -22,7 +22,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           const messages: Array<AIMessage>  = [
             {
               role: "system",
-              content: "Du bist ein Assistent und übersetzt Texte in eine Zielsprache die durch den Nutzer spezifiziert wird."+
+              content: "Du bist ein Agent und übersetzt Texte in eine Zielsprache die durch den Nutzer spezifiziert wird."+
                   "Die Antwort sollte den Inhalt des Originaltextes erhalten und so genau wie möglich übersetzen."+
                   "Daten, Fakten und Zahlen sollten immer unverändert wiedergegeben werden. Gib nur den übersetzen Text aus"
             },

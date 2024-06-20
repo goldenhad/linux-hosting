@@ -22,7 +22,7 @@ const frontendnav: MenuProps["items"] = [
     key: "legal"
   },
   {
-    label: <Link href={"login"}>Siteware business</Link>,
+    label: <Link href={"login"}>Siteware</Link>,
     key: "login"
   }
 ]
@@ -352,7 +352,7 @@ export default function Privacy(){
             <h3>ChatGPT</h3>
             <p>Wir nutzen ChatGPT f&uuml;r unsere Kundenkommunikation. Anbieter ist die OpenAI, 3180 18th St, San Francisco, CA 94110, USA, <a href="https://openai.com" target="_blank" rel="noopener noreferrer">https://openai.com</a>. Wir nutzen ChatGPT für folgende Tools:</p>
             <ul>
-              <li>siteware-business</li>
+              <li>siteware</li>
               <li>Pipedrive CRM</li>
               <li>ChatBot</li>
               <li>WhatsApp</li>
@@ -474,12 +474,12 @@ Privacy.getLayout = ( page ) => {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
+        <meta property="og:title" content="Siteware dein intelligenter KI-Agent" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/ogimage.jpg" />
         <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASEURL}`} />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware business | ai assistant</title>
+        <title>Siteware | ai assistant</title>
       </Head>
       <main>
         {page}

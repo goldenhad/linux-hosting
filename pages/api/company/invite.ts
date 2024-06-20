@@ -53,20 +53,20 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           try {
             // Create the email text and fill it with data
             const text = `Hallo ${data.firstname} ${data.lastname},\n\ndu wurdest von ${data.invitedbyname} von ${data.companyname} 
-            zu Siteware business eingeladen, unserem innovativen Tool, 
-            das das E-Mail-Schreiben revolutioniert.\n\nKlicke hier, um dich zu registrieren: ${baseurl}/register?invite=${invitecode}\n\nMit Siteware.Business 
+            zu Siteware eingeladen, unserem innovativen Tool, 
+            das das E-Mail-Schreiben revolutioniert.\n\nKlicke hier, um dich zu registrieren: ${baseurl}/register?invite=${invitecode}\n\nMit Siteware 
             erlebst du E-Mail-Kommunikation schneller, smarter und effizienter. Melde dich an und entdecke die Vorteile!\n\nBei Fragen sind wir jederzeit für 
-            dich da.\n\nViel Spaß!\n\nBeste Grüße,\nSiteware business Team`;
+            dich da.\n\nViel Spaß!\n\nBeste Grüße,\nSiteware Team`;
 
             const html = `<div>
                             <p>Hallo ${data.firstname} ${data.lastname},</p>
 
-                            <p>du wurdest von ${data.invitedbyname} von ${data.companyname} zu Siteware business eingeladen, unserem innovativen Tool, 
+                            <p>du wurdest von ${data.invitedbyname} von ${data.companyname} zu Siteware eingeladen, unserem innovativen Tool, 
                             das das E-Mail-Schreiben revolutioniert.</p>
                     
                             <p><a href="${baseurl}/register?invite=${invitecode}">Klicke hier, um dich zu registrieren</a></p>
                     
-                            <p>Mit <em>Siteware business</em> erlebst du E-Mail-Kommunikation schneller, smarter und effizienter.
+                            <p>Mit <em>Siteware</em> erlebst du E-Mail-Kommunikation schneller, smarter und effizienter.
                             Melde dich an und entdecke die Vorteile!</p>
                     
                             <p>Bei Fragen sind wir jederzeit für dich da.</p>
@@ -74,11 +74,11 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                             <p>Viel Spaß!</p>
                     
                             <p>Beste Grüße,<br>
-                            dein Siteware business Team</p>
+                            dein Siteware Team</p>
                         `;
 
             // Send the invite to the given mail
-            await sendMail( data.email, "Deine Einladung zu Siteware business", text, html );
+            await sendMail( data.email, "Deine Einladung zu Siteware", text, html );
 
             return res.status( 200 ).send( { errorcode: 0, message: "OK" } );
 

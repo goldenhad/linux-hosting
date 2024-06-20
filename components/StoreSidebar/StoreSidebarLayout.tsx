@@ -312,7 +312,7 @@ const StoreSidebarLayout = (props: {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={"/logo_w.svg"} alt="Logo" width={100}/>
                 </div>
-                <div className={styles.title}>Assistenten</div>
+                <div className={styles.title}>Agenten</div>
                 <List className={styles.assistantlist} split={false}>
                   <List.Item className={`${styles.assistantlink} ${isselected("all")}`} data-function={"all"} onClick={() => {
                     props.category.setter("all");
@@ -483,7 +483,7 @@ const StoreSidebarLayout = (props: {
                       <div className={styles.assistantcatname}>Zurück</div>
                     </List.Item>
                   </List>
-                  <div className={styles.title}>Assistenten</div>
+                  <div className={styles.title}>Agenten</div>
                   <List className={styles.assistantlist} split={false}>
                     <List.Item className={`${styles.assistantlink} ${isselected("all")}`} data-function={"all"} onClick={() => {
                       props.category.setter("all"); 

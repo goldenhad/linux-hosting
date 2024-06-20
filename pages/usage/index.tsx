@@ -145,7 +145,7 @@ export default function Usage() {
     },
     {
       title: "Statistik",
-      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Budget du über das aktuelle Jahr mit Siteware business bereits verbraucht hast.",
+      description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Budget du über das aktuelle Jahr mit Siteware bereits verbraucht hast.",
       target: () => statRef.current,
       nextButtonProps: {
         children: (
@@ -160,7 +160,7 @@ export default function Usage() {
     },
     {
       title: "Deine bisherigen Einkäufe",
-      description: "In dieser Tabelle findest du eine Übersicht deiner bisherigen Einkäufe bei Siteware business. Hier hast du die Möglichkeit, "+
+      description: "In dieser Tabelle findest du eine Übersicht deiner bisherigen Einkäufe bei Siteware. Hier hast du die Möglichkeit, "+
       "Rechnungen herunterzuladen und unterbrochene Einkäufe abzuschließen.",
       target: () => orderRef.current,
       nextButtonProps: {

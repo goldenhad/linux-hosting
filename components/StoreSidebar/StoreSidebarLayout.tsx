@@ -1,5 +1,5 @@
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import { LogoutOutlined, ToolOutlined } from "@ant-design/icons";
+import { LeftCircleOutlined, LogoutOutlined } from "@ant-design/icons";
 import Icon, { CloseOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Avatar, Badge, ConfigProvider, Divider, Drawer, FloatButton, Layout, List, Menu, Popover } from "antd";
@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 const { Header, Content, Sider } = Layout;
 import { User } from "../../firebase/types/User";
-import styles from "./homesidebar.module.scss";
+import styles from "./storesidebar.module.scss";
 import Home from "../../public/icons/home.svg";
 import Profiles from "../../public/icons/profiles.svg";
 import Help from "../../public/icons/help.svg";
@@ -36,7 +36,7 @@ type MenuItem = Required<MenuProps>["items"][number];
  * @param props.category.setter Dispatcher responsible for updating the assistant category 
  * @returns Sidebar with assistant category selector
  */
-const HomeSidebarLayout = ( props: { 
+const StoreSidebarLayout = (props: {
   children: ReactNode,
   context: {user: User, login, role, profile},
   category: { value: string, setter: Dispatch<SetStateAction<string>>},
@@ -353,13 +353,6 @@ const HomeSidebarLayout = ( props: {
                       <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Unveröffentlicht</div>
                     </List.Item>: <></>}
-                  <List.Item className={`${styles.assistantlink}`} onClick={() => {
-                    router.push("/store")
-                    setSidebarOpen(false);
-                  }}>
-                    <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                    <div className={styles.assistantcatname}>Appstore</div>
-                  </List.Item>
                 </List>
               </div>
               {/* <RecommendBox user={props.context.user} messageApi={props.messageApi} /> */}
@@ -482,10 +475,14 @@ const HomeSidebarLayout = ( props: {
             <Content className={styles.layoutcontent}>
               <aside className={styles.homesidebarcontainer}>
                 <div className={styles.homesidebar}>
-                  <div className={styles.logo}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={"/siteware-logo-black.svg"} alt="Logo" width={100}/>
-                  </div>
+                  <List className={styles.backlist} split={false}>
+                    <List.Item className={`${styles.assistantlink}`} onClick={() => {
+                      router.push("/");
+                    }}>
+                      <LeftCircleOutlined />
+                      <div className={styles.assistantcatname}>Zurück</div>
+                    </List.Item>
+                  </List>
                   <div className={styles.title}>Assistenten</div>
                   <List className={styles.assistantlist} split={false}>
                     <List.Item className={`${styles.assistantlink} ${isselected("all")}`} data-function={"all"} onClick={() => {
@@ -493,15 +490,6 @@ const HomeSidebarLayout = ( props: {
                     }}>
                       <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Alle</div>
-                    </List.Item>
-                    <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} data-function={"fav"} onClick={() => {
-                      props.category.setter("favourites"); 
-                    }}>
-                      <Icon component={Heart} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                      <div className={styles.assistantcatname}>Favoriten</div>
-                      <div className={styles.assistantcount}>
-                        <FavouriteBadge />
-                      </div>
                     </List.Item>
                     <List.Item className={`${styles.assistantlink} ${isselected("content")}`} data-function={"content"} onClick={() => {
                       props.category.setter("content"); 
@@ -516,22 +504,26 @@ const HomeSidebarLayout = ( props: {
                       <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Produktivität</div>  
                     </List.Item>
-                    {(props.context.role.canUseEditor)?
-                      <List.Item className={`${styles.assistantlink} ${isselected("admin")}`} data-function={"admin"} onClick={() => {
-                        props.category.setter("admin");
-                        setSidebarOpen(false);
-                      }}>
-                        <ToolOutlined />
-                        <div className={styles.assistantcatname}>Admin</div>
-                      </List.Item>: <></>}
-                  </List>
-                  <List className={`${styles.assistantlist} ${styles.sublist}`} split={false}>
-                    <List.Item className={`${styles.assistantlink}`} onClick={() => {
-                      router.push("/store")
+                    <List.Item className={`${styles.assistantlink} ${isselected("siteware")}`} data-function={"siteware"} onClick={() => {
+                      props.category.setter("siteware");
                       setSidebarOpen(false);
                     }}>
-                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                      <div className={styles.assistantcatname}>Appstore</div>
+                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Siteware</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("chatbots")}`} data-function={"chatbots"} onClick={() => {
+                      props.category.setter("chatbots");
+                      setSidebarOpen(false);
+                    }}>
+                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>ChatBots</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("analysis")}`} data-function={"analysis"} onClick={() => {
+                      props.category.setter("analysis");
+                      setSidebarOpen(false);
+                    }}>
+                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Analyse</div>
                     </List.Item>
                   </List>
                 </div>
@@ -552,4 +544,4 @@ const HomeSidebarLayout = ( props: {
     );
   }
 };
-export default HomeSidebarLayout;
+export default StoreSidebarLayout;

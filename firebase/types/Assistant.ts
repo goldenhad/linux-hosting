@@ -48,6 +48,12 @@ export interface FileReference {
     nodes: Array<string>
 }
 
+export enum Visibility{
+    PRIVATE,
+    SELECTED,
+    ALL
+}
+
 export default interface Assistant {
     name: string;
     image: string;
@@ -56,6 +62,9 @@ export default interface Assistant {
     video: string;
     uid: string;
     published: boolean;
+    visibility: Visibility;
+    selectedCompanies?: Array<string>;
+    owner: string;
     blocks: Array<Block | InputBlock>;
     knowledgeFiles: Array<FileReference>;
 }

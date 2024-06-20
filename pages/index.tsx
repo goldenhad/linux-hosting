@@ -1,4 +1,4 @@
-import { TourProps, Tour, Divider, message, Modal, Card, Badge, Button } from "antd";
+import { TourProps, Tour, Divider, message, Modal, Card, Badge, Button, Input } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -10,9 +10,10 @@ import AssistantCard from "../components/AssistantCard/AssistantCard";
 import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
 import ReactPlayer from "react-player/lazy"
 import { getAllDocs } from "../firebase/data/getData";
-import Assistant from "../firebase/types/Assistant";
+import Assistant, { Visibility } from "../firebase/types/Assistant";
 import EmptyCard from "../components/EmptyCard/EmptyCard";
 
+const { Search } = Input;
 
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -47,6 +48,8 @@ export default function Home(props: { assistants: Array<Assistant> }) {
   const [ videoLink, setVideoLink ] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [play, setPlay] = useState(false);
+  const [ searchValue, setSearchValue ] = useState<string>("");
+
 
   const videoplayer = useRef(null);
 
@@ -151,124 +154,158 @@ export default function Home(props: { assistants: Array<Assistant> }) {
   ];
 
   const AssistantCardList = () => {
-    let servicearr = props.assistants;
 
-    if(selectedCat != "unpublished"){
-      servicearr = props.assistants.filter((singleService: Assistant) => {
-        return singleService.published == true;
+
+    if(context.company.assistants !== undefined){
+      let servicearr = props.assistants.filter((assistant) => {
+        return context.company.assistants.includes(assistant.uid) || (selectedCat == "admin");
       });
 
-      if(selectedCat != "all"){
-        if(selectedCat != "favourites"){
-          servicearr = servicearr.filter((singleService: Assistant) => {
-            return singleService.category == selectedCat;
-          });
+
+      if(selectedCat != "admin"){
+        servicearr = props.assistants.filter((singleService: Assistant) => {
+          return singleService.published == true &&
+              (
+                (singleService.visibility === Visibility.ALL) ||
+                  (singleService.visibility === Visibility.SELECTED && singleService.selectedCompanies && singleService.selectedCompanies.includes(user.Company)) ||
+                  (singleService.visibility === Visibility.PRIVATE && singleService.owner === user.Company)
+              );
+        });
+
+        if(selectedCat != "all"){
+          if(selectedCat != "favourites"){
+            servicearr = servicearr.filter((singleService: Assistant) => {
+              return singleService.category == selectedCat;
+            });
+          }else{
+            servicearr = servicearr.filter((singleService: Assistant) => {
+              if(user.services){
+                return user.services.favourites.includes(singleService.uid);
+              }
+            });
+          }
+        }
+      }else{
+        servicearr = servicearr.filter((singleService: Assistant) => {
+          return true;
+        });
+      }
+
+      /*servicearr = servicearr.sort((a: Assistant, b: Assistant) => {
+        if( a.rank < b.rank){
+          return -1;
+        }else if( a.rank > b.rank){
+          return 1;
         }else{
-          servicearr = servicearr.filter((singleService: Assistant) => {
-            if(user.services){
-              return user.services.favourites.includes(singleService.uid);
-            }
-          });
+          return 0;
+        }
+      })*/
+
+      const getRibbonText = (published: boolean) => {
+        if(!published){
+          return "Entwurf"
+        }else{
+          return undefined;
         }
       }
+
+      return (
+        <div className={styles.servicelist}>
+          {servicearr.filter((assistant) => {
+            return context.company.assistants.includes(assistant.uid) || (selectedCat == "admin");
+          }).filter((singleService: Assistant) => {
+            if(searchValue !== ""){
+              return singleService.name.includes(searchValue);
+            }else{
+              return true;
+            }
+          }).map((singleService: Assistant, idx: number) => {
+            return <AssistantCard
+              aid={singleService.uid}
+              name={singleService.uid}
+              blocks={singleService.blocks}
+              key={idx}
+              image={singleService.image}
+              title={singleService.name}
+              description={singleService.description}
+              link={`/assistant?aid=${singleService.uid}`}
+              fav={user.services?.favourites.includes(singleService.uid)}
+              knowledeFiles={singleService.knowledgeFiles}
+              ribbonText={getRibbonText(singleService.published)}
+              router={router}
+              onVideoClick={() => {
+                // setVideoLink(singleService.video);
+                // setVideoPopupVisible(true);
+                // setPlay(true);
+                window.open(singleService.video, "_blank", "noreferrer");
+              }}
+              onFav={async () => {
+                const currentfavs = (user.services?.favourites)? user.services.favourites: [];
+                currentfavs.push(singleService.uid);
+                await updateData("User", login.uid, { services: { favourites: currentfavs } });
+              }}
+              onDeFav={async () => {
+                const currentfavs =  user.services.favourites.filter((fservice: string) => {
+                  return fservice != singleService.uid
+                })
+                await updateData("User", login.uid, { services: { favourites: currentfavs } });
+              }}
+              canEdit={role.canUseEditor}
+              published={singleService.published}
+            />
+          })}
+          {role.canUseEditor && <EmptyCard />}
+        </div>
+      );
     }else{
-      servicearr.filter((singleService: Assistant) => {
-        return singleService.published == false;
-      });
+      return (
+        <div className={styles.servicelist}>
+            Bitte füge neue Assistenten im Appstore hinzu!
+        </div>
+      );
     }
-
-    /*servicearr = servicearr.sort((a: Assistant, b: Assistant) => {
-      if( a.rank < b.rank){
-        return -1;
-      }else if( a.rank > b.rank){
-        return 1;
-      }else{
-        return 0;
-      }
-    })*/
-
-    const getRibbonText = (uid: string) => {
-      if(uid == "excel" || uid == "dialog" || uid == "monolog" || uid == "translator" || uid == "plain"){
-        return "Neu"
-      }else{
-        return undefined;
-      }
-    }
-
-    return (
-      <div className={styles.servicelist}>
-        {servicearr.map((singleService: Assistant, idx: number) => {
-          return <AssistantCard
-            aid={singleService.uid}
-            name={singleService.uid}
-            blocks={singleService.blocks}
-            key={idx}
-            image={singleService.image}
-            title={singleService.name}
-            description={singleService.description}
-            link={`/assistant?aid=${singleService.uid}`}
-            fav={user.services?.favourites.includes(singleService.uid)}
-            knowledeFiles={singleService.knowledgeFiles}
-            ribbonText={getRibbonText(singleService.uid)}
-            router={router}
-            onVideoClick={() => {
-              // setVideoLink(singleService.video);
-              // setVideoPopupVisible(true);
-              // setPlay(true);
-              window.open(singleService.video, "_blank", "noreferrer");
-            }}
-            onFav={async () => {
-              const currentfavs = (user.services?.favourites)? user.services.favourites: [];
-              currentfavs.push(singleService.uid);
-              await updateData("User", login.uid, { services: { favourites: currentfavs } });
-            }}
-            onDeFav={async () => {
-              const currentfavs =  user.services.favourites.filter((fservice: string) => {
-                return fservice != singleService.uid
-              })
-              await updateData("User", login.uid, { services: { favourites: currentfavs } });
-            }}
-            canEdit={role.canUseEditor}
-            published={singleService.published}
-          />
-        })}
-        {role.canUseEditor && <EmptyCard />}
-      </div>
-    );
   }
 
 
   return (
-    <HomeSidebarLayout messageApi={messageApi} context={context} category={{ value: selectedCat, setter: setSelectedCat }}>
+    <HomeSidebarLayout messageApi={messageApi} context={context}
+      category={{ value: selectedCat, setter: setSelectedCat }}>
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>
           <div className={styles.greeting}>Willkommen {user.firstname}</div>
+          <Search placeholder="Suchbegriff" allowClear onSearch={(value) => {
+            setSearchValue(value)
+          }} style={{ width: 200 }} />
         </div>
 
         <div className={styles.dividerrow}>
-          <Divider />
+          <Divider/>
         </div>
 
         <div className={styles.content}>
           <div className={styles.services}>
-            <AssistantCardList />
+            <AssistantCardList/>
           </div>
-          
+
           <div className={styles.comingsoonrow}>
             <Badge.Ribbon text={"Coming soon"} color="red">
               <div className={styles.comingsoon}>
                 <Card className={styles.comingsooncard}>
                   <div className={styles.builder}>
                     <div className={styles.buildercontent}>
-                      <h2 className={styles.builderheadline}>Frag jetzt deinen individuellen KI-Assistenten von Siteware an.</h2>
+                      <h2 className={styles.builderheadline}>Frag jetzt deinen individuellen KI-Assistenten von
+                          Siteware an.</h2>
                       <div className={styles.buildertext}>
-                        Fordere jetzt dein maßgeschneidertes Angebot an und nutze unsere innovative DMSP-Technologie für kostengünstige,
-                        hochindividualisierte Lösungen. Einzigartig: Profitiere von einer möglichen vollständigen Refinanzierung der Entwicklungskosten,
-                        wenn dein Assistent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern schreiben wir dir die doppelte Höhe deiner
-                        Entwicklungskosten auf dein Konto als siteware-Credits gut.
-                        Wähle schon bald aus einer Vielzahl an Assistenten im neuen siteware business APP-Store.
-                        Mit siteware business bist du immer einen Schritt voraus – sei dabei. Von Anfang an.
+                          Fordere jetzt dein maßgeschneidertes Angebot an und nutze unsere innovative DMSP-Technologie
+                          für kostengünstige,
+                          hochindividualisierte Lösungen. Einzigartig: Profitiere von einer möglichen vollständigen
+                          Refinanzierung der Entwicklungskosten,
+                          wenn dein Assistent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern
+                          schreiben wir dir die doppelte Höhe deiner
+                          Entwicklungskosten auf dein Konto als siteware-Credits gut.
+                          Wähle schon bald aus einer Vielzahl an Assistenten im neuen siteware business APP-Store.
+                          Mit siteware business bist du immer einen Schritt voraus – sei dabei. Von Anfang an.
                       </div>
                       <div className={styles.buttonsection}>
                         <Button type="primary" className={styles.builderbutton}>Angebot anfordern</Button>

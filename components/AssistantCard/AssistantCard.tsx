@@ -272,7 +272,7 @@ const AssistantCard = ( props: {
 
   if(props.ribbonText){
     return (
-      <Badge.Ribbon text={"Neu"} color="red">
+      <Badge.Ribbon text={props.ribbonText} color="red">
         <AssCard />
       </Badge.Ribbon>
     );

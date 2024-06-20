@@ -3,7 +3,7 @@ import EditorSidebar from "../../components/Editor/EditorSidebar/EditorSidebar";
 import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
 import getDocument from "../../firebase/data/getData";
-import Assistant, { Block, InputBlock } from "../../firebase/types/Assistant";
+import Assistant, { Block, InputBlock, Visibility } from "../../firebase/types/Assistant";
 import { addDataWithoutId } from "../../firebase/data/setData";
 import { auth } from "../../firebase/admin";
 
@@ -44,6 +44,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
               video: "",
               published: false,
               uid: "",
+              owner: userrepresentation.Company,
+              visibility: Visibility.PRIVATE,
+              selectedCompanies: [],
               blocks: Array<Block | InputBlock>()
             }
             const createReq = await addDataWithoutId("Assistants", assistantToCreate);

@@ -1,5 +1,5 @@
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import { LogoutOutlined } from "@ant-design/icons";
+import { LogoutOutlined, ToolOutlined } from "@ant-design/icons";
 import Icon, { CloseOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Avatar, Badge, ConfigProvider, Divider, Drawer, FloatButton, Layout, List, Menu, Popover } from "antd";
@@ -517,18 +517,20 @@ const HomeSidebarLayout = ( props: {
                       <div className={styles.assistantcatname}>Produktivität</div>  
                     </List.Item>
                     {(props.context.role.canUseEditor)?
-                      <List.Item className={`${styles.assistantlink} ${isselected("unpublished")}`} data-function={"unpublished"} onClick={() => {
-                        props.category.setter("unpublished");
+                      <List.Item className={`${styles.assistantlink} ${isselected("admin")}`} data-function={"admin"} onClick={() => {
+                        props.category.setter("admin");
                         setSidebarOpen(false);
                       }}>
-                        <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                        <div className={styles.assistantcatname}>Unveröffentlicht</div>
+                        <ToolOutlined />
+                        <div className={styles.assistantcatname}>Admin</div>
                       </List.Item>: <></>}
+                  </List>
+                  <List className={`${styles.assistantlist} ${styles.sublist}`} split={false}>
                     <List.Item className={`${styles.assistantlink}`} onClick={() => {
                       router.push("/store")
                       setSidebarOpen(false);
                     }}>
-                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Appstore</div>
                     </List.Item>
                   </List>

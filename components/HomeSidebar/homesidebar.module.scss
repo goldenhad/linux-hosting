@@ -115,7 +115,6 @@
             font-size: 36px;
             fill: transparent;
             color: inherit;
-            stroke: inherit;
         }
     }
 
@@ -155,11 +154,18 @@
             font-weight: 500;
 
             .homesidebar {
+                min-height: 93vh;
+                display: flex;
+                flex-direction: column;
+
                 .logo{
                     margin-bottom: 30px;
                 }
                 .assistantlist {
                     margin-top: 16px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
 
                     .assistantlink {
                         display: flex;
@@ -191,6 +197,36 @@
                     .selectedcat{
                         background-color: #F9FAFB;
                         border-radius: 6px;
+                    }
+                }
+
+                .sublist{
+                    margin-top: auto;
+
+                    .assistantlink {
+                        background-color: #1478FD;
+                        color: white;
+                        border-radius: 6px;
+                        padding-left: 20px;
+                        font-weight: bold;
+
+                        &:hover {
+                            background-color: #026af4;
+                        }
+
+                        .assistanticon > svg{
+                            size: 3px;
+                            height: 21px;
+                            width: 20px;
+                            transform: translate(-2px, -1px);
+                            fill: transparent;
+                            color: white;
+                            stroke: white;
+
+                            >path {
+                                stroke: white;
+                            }
+                        }
                     }
                 }
             }
@@ -393,7 +429,6 @@
     transform: translate(-2px, 3px);
     fill: transparent;
     color: inherit;
-    stroke: inherit;
 }
 
 .floaticon > svg{

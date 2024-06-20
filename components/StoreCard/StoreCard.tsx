@@ -70,8 +70,8 @@ const StoreCard = (props: {
         </Card>
         <div className={styles.servicefooter}>
           {(props.used)?
-            <Button onClick={props.onRemove} danger={true}>-</Button>:
-            <Button onClick={props.onAdd}>+</Button>
+            <Button className={styles.storebutton} onClick={props.onRemove} danger={true}> Entfernen</Button>:
+            <Button className={`${styles.storebutton} ${styles.addbutton}`} onClick={props.onAdd}> Hinzufügen +</Button>
           }
         </div>
       </div>

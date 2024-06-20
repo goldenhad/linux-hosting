@@ -7,7 +7,7 @@ import CookieBanner from "../../CookieBanner/CookieBanner";
 import Assistant, {
   Block,
   FileReference,
-  InputBlock
+  InputBlock, Visibility
 } from "../../../firebase/types/Assistant";
 import updateData from "../../../firebase/data/updateData";
 import { checkValidityOfAssistantConfig } from "../../../helper/assistant";
@@ -30,6 +30,9 @@ export interface AssistantState {
   published: boolean,
   uid: string,
   blocks: Array<Block | InputBlock>,
+  owner: string,
+  visibility: Visibility,
+  selectedCompanies?: Array<string>,
   knowledgeFiles: Array<FileReference>
 }
 
@@ -133,6 +136,9 @@ const EditorSidebar = ( props: {
 
     AssistantToUpdate.description = (desc)? desc: "";
     AssistantToUpdate.category = settForm.getFieldValue("category");
+    AssistantToUpdate.visibility = settForm.getFieldValue("visibility");
+    const selectedCompsString: string = settForm.getFieldValue("selectedCompanies");
+    AssistantToUpdate.selectedCompanies = selectedCompsString.split("\n");
     AssistantToUpdate.name = name;
     
     if(AssistantToUpdate.blocks && AssistantToUpdate.blocks.length > 0){
@@ -224,7 +230,7 @@ const EditorSidebar = ( props: {
 
           <div className={styles.headerActions}>
             <div className={styles.additionalSettings}>
-              <span className={styles.settingsname}>Öffentlich?</span>
+              <span className={styles.settingsname}>Veröffentlicht?</span>
               <Switch value={(assistantState) ? assistantState.published : false} size="small"
                 onChange={(val) => setAssistantState({ ...assistantState, published: val })}/>
             </div>
@@ -351,7 +357,7 @@ const EditorSidebar = ( props: {
 
             <div className={styles.headerActions}>
               <div className={styles.additionalSettings}>
-                <span className={styles.settingsname}>Öffentlich?</span>
+                <span className={styles.settingsname}>Veröffentlicht?</span>
                 <Switch
                   value={(assistantState)? assistantState.published: false}
                   size="small"

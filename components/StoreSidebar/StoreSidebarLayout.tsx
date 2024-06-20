@@ -1,5 +1,5 @@
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import { LogoutOutlined } from "@ant-design/icons";
+import { LeftCircleOutlined, LogoutOutlined } from "@ant-design/icons";
 import Icon, { CloseOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Avatar, Badge, ConfigProvider, Divider, Drawer, FloatButton, Layout, List, Menu, Popover } from "antd";
@@ -475,10 +475,14 @@ const StoreSidebarLayout = (props: {
             <Content className={styles.layoutcontent}>
               <aside className={styles.homesidebarcontainer}>
                 <div className={styles.homesidebar}>
-                  <div className={styles.logo}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={"/siteware-logo-black.svg"} alt="Logo" width={100}/>
-                  </div>
+                  <List className={styles.backlist} split={false}>
+                    <List.Item className={`${styles.assistantlink}`} onClick={() => {
+                      router.push("/");
+                    }}>
+                      <LeftCircleOutlined />
+                      <div className={styles.assistantcatname}>Zurück</div>
+                    </List.Item>
+                  </List>
                   <div className={styles.title}>Assistenten</div>
                   <List className={styles.assistantlist} split={false}>
                     <List.Item className={`${styles.assistantlink} ${isselected("all")}`} data-function={"all"} onClick={() => {
@@ -499,6 +503,27 @@ const StoreSidebarLayout = (props: {
                     }}>
                       <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Produktivität</div>  
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("siteware")}`} data-function={"siteware"} onClick={() => {
+                      props.category.setter("siteware");
+                      setSidebarOpen(false);
+                    }}>
+                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Siteware</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("chatbots")}`} data-function={"chatbots"} onClick={() => {
+                      props.category.setter("chatbots");
+                      setSidebarOpen(false);
+                    }}>
+                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>ChatBots</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("analysis")}`} data-function={"analysis"} onClick={() => {
+                      props.category.setter("analysis");
+                      setSidebarOpen(false);
+                    }}>
+                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Analyse</div>
                     </List.Item>
                   </List>
                 </div>

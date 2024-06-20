@@ -119,15 +119,16 @@
     }
 }
 
-.videobuttoncontainer{
-    &:hover {
-        cursor: pointer;
-    }
+.storebutton {
+    width: 100%;
+    color: white;
+    font-weight: bold;
 }
 
-.deletemodalbuttons{
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    gap: 16px;
+.addbutton{
+    background-color: #008000;
+    &:hover {
+        background-color: #0a5c0a !important;
+        color: white !important;
+    }
 }

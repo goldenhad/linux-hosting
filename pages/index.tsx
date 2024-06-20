@@ -1,4 +1,4 @@
-import { TourProps, Tour, Divider, message, Modal, Card, Badge, Button } from "antd";
+import { TourProps, Tour, Divider, message, Modal, Card, Badge, Button, Input } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -10,9 +10,10 @@ import AssistantCard from "../components/AssistantCard/AssistantCard";
 import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
 import ReactPlayer from "react-player/lazy"
 import { getAllDocs } from "../firebase/data/getData";
-import Assistant from "../firebase/types/Assistant";
+import Assistant, { Visibility } from "../firebase/types/Assistant";
 import EmptyCard from "../components/EmptyCard/EmptyCard";
 
+const { Search } = Input;
 
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -47,6 +48,8 @@ export default function Home(props: { assistants: Array<Assistant> }) {
   const [ videoLink, setVideoLink ] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [play, setPlay] = useState(false);
+  const [ searchValue, setSearchValue ] = useState<string>("");
+
 
   const videoplayer = useRef(null);
 
@@ -155,12 +158,18 @@ export default function Home(props: { assistants: Array<Assistant> }) {
 
     if(context.company.assistants !== undefined){
       let servicearr = props.assistants.filter((assistant) => {
-        return context.company.assistants.includes(assistant.uid);
+        return context.company.assistants.includes(assistant.uid) || (selectedCat == "admin");
       });
 
-      if(selectedCat != "unpublished"){
+
+      if(selectedCat != "admin"){
         servicearr = props.assistants.filter((singleService: Assistant) => {
-          return singleService.published == true;
+          return singleService.published == true &&
+              (
+                (singleService.visibility === Visibility.ALL) ||
+                  (singleService.visibility === Visibility.SELECTED && singleService.selectedCompanies && singleService.selectedCompanies.includes(user.Company)) ||
+                  (singleService.visibility === Visibility.PRIVATE && singleService.owner === user.Company)
+              );
         });
 
         if(selectedCat != "all"){
@@ -177,8 +186,8 @@ export default function Home(props: { assistants: Array<Assistant> }) {
           }
         }
       }else{
-        servicearr.filter((singleService: Assistant) => {
-          return singleService.published == false;
+        servicearr = servicearr.filter((singleService: Assistant) => {
+          return true;
         });
       }
 
@@ -192,9 +201,9 @@ export default function Home(props: { assistants: Array<Assistant> }) {
         }
       })*/
 
-      const getRibbonText = (uid: string) => {
-        if(uid == "excel" || uid == "dialog" || uid == "monolog" || uid == "translator" || uid == "plain"){
-          return "Neu"
+      const getRibbonText = (published: boolean) => {
+        if(!published){
+          return "Entwurf"
         }else{
           return undefined;
         }
@@ -203,7 +212,13 @@ export default function Home(props: { assistants: Array<Assistant> }) {
       return (
         <div className={styles.servicelist}>
           {servicearr.filter((assistant) => {
-            return context.company.assistants.includes(assistant.uid);
+            return context.company.assistants.includes(assistant.uid) || (selectedCat == "admin");
+          }).filter((singleService: Assistant) => {
+            if(searchValue !== ""){
+              return singleService.name.includes(searchValue);
+            }else{
+              return true;
+            }
           }).map((singleService: Assistant, idx: number) => {
             return <AssistantCard
               aid={singleService.uid}
@@ -216,7 +231,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
               link={`/assistant?aid=${singleService.uid}`}
               fav={user.services?.favourites.includes(singleService.uid)}
               knowledeFiles={singleService.knowledgeFiles}
-              ribbonText={getRibbonText(singleService.uid)}
+              ribbonText={getRibbonText(singleService.published)}
               router={router}
               onVideoClick={() => {
                 // setVideoLink(singleService.video);
@@ -259,6 +274,9 @@ export default function Home(props: { assistants: Array<Assistant> }) {
       <div className={styles.main}>
         <div className={styles.greetingrow}>
           <div className={styles.greeting}>Willkommen {user.firstname}</div>
+          <Search placeholder="Suchbegriff" allowClear onSearch={(value) => {
+            setSearchValue(value)
+          }} style={{ width: 200 }} />
         </div>
 
         <div className={styles.dividerrow}>

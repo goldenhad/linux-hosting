@@ -1,4 +1,4 @@
-import {TourProps, Tour, Divider, message, Modal, Card, Badge, Button, Input} from "antd";
+import { Badge, Button, Card, Divider, Input, message, Modal } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -6,11 +6,9 @@ import { useAuthContext } from "../../components/context/AuthContext";
 import { useRouter } from "next/navigation";
 import updateData from "../../firebase/data/updateData";
 import { handleUndefinedTour } from "../../helper/architecture";
-import AssistantCard from "../../components/AssistantCard/AssistantCard";
-import HomeSidebarLayout from "../../components/HomeSidebar/HomeSidebarLayout";
 import ReactPlayer from "react-player/lazy"
 import { getAllDocs } from "../../firebase/data/getData";
-import Assistant from "../../firebase/types/Assistant";
+import Assistant, { Visibility } from "../../firebase/types/Assistant";
 import EmptyCard from "../../components/EmptyCard/EmptyCard";
 import StoreSidebarLayout from "../../components/StoreSidebar/StoreSidebarLayout";
 import StoreCard from "../../components/StoreCard/StoreCard";
@@ -69,7 +67,12 @@ export default function Home(props: { assistants: Array<Assistant> }) {
 
     if(selectedCat != "unpublished"){
       servicearr = props.assistants.filter((singleService: Assistant) => {
-        return singleService.published == true;
+        return singleService.published == true && 
+            (
+              (singleService.visibility === Visibility.ALL) ||
+                    (singleService.visibility === Visibility.SELECTED && singleService.selectedCompanies && singleService.selectedCompanies.includes(user.Company)) ||
+                      (singleService.visibility === Visibility.PRIVATE && singleService.owner === user.Company)
+            );
       });
 
       if(selectedCat != "all"){
@@ -143,7 +146,6 @@ export default function Home(props: { assistants: Array<Assistant> }) {
             }}
           />
         })}
-        {role.canUseEditor && <EmptyCard />}
       </div>
     );
   }
@@ -167,34 +169,6 @@ export default function Home(props: { assistants: Array<Assistant> }) {
         <div className={styles.content}>
           <div className={styles.services}>
             <AssistantCardList />
-          </div>
-
-          <div className={styles.comingsoonrow}>
-            <Badge.Ribbon text={"Coming soon"} color="red">
-              <div className={styles.comingsoon}>
-                <Card className={styles.comingsooncard}>
-                  <div className={styles.builder}>
-                    <div className={styles.buildercontent}>
-                      <h2 className={styles.builderheadline}>Frag jetzt deinen individuellen KI-Assistenten von Siteware an.</h2>
-                      <div className={styles.buildertext}>
-                                                Fordere jetzt dein maßgeschneidertes Angebot an und nutze unsere innovative DMSP-Technologie für kostengünstige,
-                                                hochindividualisierte Lösungen. Einzigartig: Profitiere von einer möglichen vollständigen Refinanzierung der Entwicklungskosten,
-                                                wenn dein Assistent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern schreiben wir dir die doppelte Höhe deiner
-                                                Entwicklungskosten auf dein Konto als siteware-Credits gut.
-                                                Wähle schon bald aus einer Vielzahl an Assistenten im neuen siteware business APP-Store.
-                                                Mit siteware business bist du immer einen Schritt voraus – sei dabei. Von Anfang an.
-                      </div>
-                      <div className={styles.buttonsection}>
-                        <Button type="primary" className={styles.builderbutton}>Angebot anfordern</Button>
-                        <Button type="primary" className={styles.builderbutton}>Zum App-Store</Button>
-                      </div>
-                    </div>
-                    <div className={styles.builderteaser}>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            </Badge.Ribbon>
           </div>
 
           <div className={styles.bannersection}></div>

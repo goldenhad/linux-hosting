@@ -156,7 +156,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>
-          <div className={styles.greeting}>Verfügbare Assistenten</div>
+          <div className={styles.greeting}>Verfügbare Agenten</div>
           <Search placeholder="Suchbegriff" allowClear onSearch={(value) => {
             setSearchValue(value)
           }} style={{ width: 200 }} />

@@ -125,13 +125,13 @@ const AssistantCard = ( props: {
     if(valid){
       return (
         <Link href={props.link} attribute-assistantname={`${props.name}-link`}>
-          <span className={styles.assistantlink}>Zum Assistenten</span>
+          <span className={styles.assistantlink}>Zum Agenten</span>
         </Link>
       );
     }else{
       return (
         <Tooltip title={"Die Konfiguration ist aktuell noch fehlerhaft!"}>
-          <span className={styles.brokenassistantlink}>Zum Assistenten</span>
+          <span className={styles.brokenassistantlink}>Zum Agenten</span>
         </Tooltip>
       );
     }
@@ -245,7 +245,7 @@ const AssistantCard = ( props: {
           <AssistantLink />
         </div>
         <Modal
-          title="Assistenten löschen?"
+          title="Agenten löschen?"
           open={deleteModalOpen}
           onOk={async () => {
             setDeleteModalOpen(false);
@@ -263,7 +263,7 @@ const AssistantCard = ( props: {
           onCancel={() => {
             setDeleteModalOpen(false);
           }}>
-          <Paragraph>Möchtest du den Assistenten wirklich löschen?</Paragraph>
+          <Paragraph>Möchtest du den Agenten wirklich löschen?</Paragraph>
         </Modal>
       </div>
     );

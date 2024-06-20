@@ -37,7 +37,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             }
           }else{
             const assistantToCreate = {
-              name: "Neuer Assistent",
+              name: "Neuer Agent",
               image: "",
               category: "other",
               description: "",

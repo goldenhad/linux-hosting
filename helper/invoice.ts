@@ -121,7 +121,7 @@ export const createInvoice = (role: Role, user: User, company: Company, order: O
       },
       {
         width: 100,
-        text: "Rechnung für den Erwerb von Credits für Siteware.Business",
+        text: "Rechnung für den Erwerb von Credits für Siteware",
         style: "topic"
       },
       {
@@ -142,7 +142,7 @@ export const createInvoice = (role: Role, user: User, company: Company, order: O
             [
               { text: "1", align: "left" },
               { text: "swm0001", align: "left" },
-              { text: "Siteware business Credits", align: "left", bold: true },
+              { text: "Siteware Credits", align: "left", bold: true },
               { text: calculator.round(calculator.normalizeTokens(order.tokens), 0), align: "right" },
               { text: "19%", align: "right" },
               { text: convertToCurrency( order.amount / ( 1 + 0.19 ) ), align: "right" },

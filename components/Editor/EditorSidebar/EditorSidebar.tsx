@@ -172,7 +172,7 @@ const EditorSidebar = ( props: {
           messageApi.error("Bitte lege eine Kategorie fest!");
         }
       }else{
-        messageApi.error("Bitte gib einen Namen für deinen Assistenten ein!");
+        messageApi.error("Bitte gib einen Namen für deinen Agenten ein!");
       }
     }else{
       messageApi.error("Bitte definiere mindestens einen Block!");
@@ -206,7 +206,7 @@ const EditorSidebar = ( props: {
           </Link>
 
           <div className={styles.nameinput}>
-            <Input value={name} placeholder={"Neuer Assistent"}
+            <Input value={name} placeholder={"Neuer Agent"}
               onChange={(val) => {
                 setName( val.target.value )
               }}></Input>
@@ -239,7 +239,7 @@ const EditorSidebar = ( props: {
               <Button onClick={() => {
                 saveAssistant();
               }} className={styles.savebutton}
-              type={"primary"}>{(props.aid) ? "Speichern" : "Assistenten anlegen"}</Button>
+              type={"primary"}>{(props.aid) ? "Speichern" : "Agenten anlegen"}</Button>
             </div>
           </div>
         </Header>
@@ -334,7 +334,7 @@ const EditorSidebar = ( props: {
             </Link>
 
             <div className={styles.nameinput}>
-              <Input value={name} placeholder={"Neuer Assistent"} onChange={(val) => {
+              <Input value={name} placeholder={"Neuer Agent"} onChange={(val) => {
                 setName(val.target.value )
               }}></Input>
             </div>
@@ -368,7 +368,7 @@ const EditorSidebar = ( props: {
                 <PreviewButton />
                 <Button onClick={() => {
                   saveAssistant();
-                }} className={styles.savebutton} type={"primary"}>{(props.aid)? "Speichern" : "Assistenten anlegen"}</Button>
+                }} className={styles.savebutton} type={"primary"}>{(props.aid)? "Speichern" : "Agenten anlegen"}</Button>
               </div>
             </div>
           </Header>

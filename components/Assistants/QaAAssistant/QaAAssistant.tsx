@@ -532,7 +532,7 @@ export default function QaAAssistant(props: {
               <FatButton
                 disabled={formDisabled}
                 type={(quotaOverused)? "default": "primary"}
-                text="Assistenten ausführen"
+                text="Agenten ausführen"
                 onClick={() => {
                   if(quotaOverused){
                     props.messageApi.error("Dein Budget ist ausgeschöpft. In der Kontoübersicht kannst du neues Guthaben dazubuchen!")

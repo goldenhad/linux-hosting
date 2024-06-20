@@ -85,7 +85,7 @@ const RecommendBox = (props: { user: User, messageApi: MessageInstance }) => {
             }
           }}
           >
-            <div className={styles.catchphrase}>Du liebst Siteware business?</div>
+            <div className={styles.catchphrase}>Du liebst Siteware?</div>
           </div>
         </div>
       );
@@ -105,7 +105,7 @@ const RecommendBox = (props: { user: User, messageApi: MessageInstance }) => {
           <div className={styles.recommendtext}>
             <h3 className={styles.recommendHeadline}></h3>
             <Paragraph>
-          Du hast jetzt die Gelegenheit, deine Freunde zu Siteware business einzuladen.
+          Du hast jetzt die Gelegenheit, deine Freunde zu Siteware einzuladen.
           Für jeden Freund, der sich erfolgreich registriert, schenken wir dir 200 Gratis-Credits als Dankeschön.
           Teile einfach diesen Link, um deine Freunde einzuladen:
             </Paragraph>

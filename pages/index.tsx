@@ -308,8 +308,13 @@ export default function Home(props: { assistants: Array<Assistant> }) {
                           Mit siteware bist du immer einen Schritt voraus – sei dabei. Von Anfang an.
                       </div>
                       <div className={styles.buttonsection}>
-                        <Button type="primary" className={styles.builderbutton}>Angebot anfordern</Button>
-                        <Button type="primary" className={styles.builderbutton}>Zum App-Store</Button>
+                        <Button
+                          type="primary"
+                          href={"mailto:info@siteware.io?subject=Anfrage%20individueller%20KI-Agent"}
+                          className={styles.builderbutton}
+                        >
+                          Angebot anfordern
+                        </Button>
                       </div>
                     </div>
                     <div className={styles.builderteaser}>

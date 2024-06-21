@@ -475,59 +475,68 @@ const StoreSidebarLayout = (props: {
             <Content className={styles.layoutcontent}>
               <aside className={styles.homesidebarcontainer}>
                 <div className={styles.homesidebar}>
+                  <div className={styles.logo}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={"/siteware-logo-black.svg"} alt="Logo" width={100}/>
+                  </div>
+                  <div className={styles.title}>Agenten</div>
+                  <List className={styles.assistantlist} split={false}>
+                    <List.Item className={`${styles.assistantlink} ${isselected("all")}`} data-function={"all"}
+                      onClick={() => {
+                        props.category.setter("all");
+                      }}>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Alle</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("content")}`} data-function={"content"}
+                      onClick={() => {
+                        props.category.setter("content");
+                      }}>
+                      <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Content-Erstellung</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("productivity")}`}
+                      data-function={"productivity"} onClick={() => {
+                        props.category.setter("productivity");
+                        setSidebarOpen(false);
+                      }}>
+                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Produktivität</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("siteware")}`}
+                      data-function={"siteware"} onClick={() => {
+                        props.category.setter("siteware");
+                        setSidebarOpen(false);
+                      }}>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Siteware</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("chatbots")}`}
+                      data-function={"chatbots"} onClick={() => {
+                        props.category.setter("chatbots");
+                        setSidebarOpen(false);
+                      }}>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>ChatBots</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("analysis")}`}
+                      data-function={"analysis"} onClick={() => {
+                        props.category.setter("analysis");
+                        setSidebarOpen(false);
+                      }}>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Analyse</div>
+                    </List.Item>
+                  </List>
                   <List className={styles.backlist} split={false}>
                     <List.Item className={`${styles.assistantlink}`} onClick={() => {
                       router.push("/");
                     }}>
-                      <LeftCircleOutlined />
+                      <LeftCircleOutlined/>
                       <div className={styles.assistantcatname}>Zurück</div>
                     </List.Item>
                   </List>
-                  <div className={styles.title}>Agenten</div>
-                  <List className={styles.assistantlist} split={false}>
-                    <List.Item className={`${styles.assistantlink} ${isselected("all")}`} data-function={"all"} onClick={() => {
-                      props.category.setter("all"); 
-                    }}>
-                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                      <div className={styles.assistantcatname}>Alle</div>
-                    </List.Item>
-                    <List.Item className={`${styles.assistantlink} ${isselected("content")}`} data-function={"content"} onClick={() => {
-                      props.category.setter("content"); 
-                    }}>
-                      <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                      <div className={styles.assistantcatname}>Content-Erstellung</div>  
-                    </List.Item>
-                    <List.Item className={`${styles.assistantlink} ${isselected("productivity")}`} data-function={"productivity"} onClick={() => {
-                      props.category.setter("productivity");
-                      setSidebarOpen(false);
-                    }}>
-                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                      <div className={styles.assistantcatname}>Produktivität</div>  
-                    </List.Item>
-                    <List.Item className={`${styles.assistantlink} ${isselected("siteware")}`} data-function={"siteware"} onClick={() => {
-                      props.category.setter("siteware");
-                      setSidebarOpen(false);
-                    }}>
-                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                      <div className={styles.assistantcatname}>Siteware</div>
-                    </List.Item>
-                    <List.Item className={`${styles.assistantlink} ${isselected("chatbots")}`} data-function={"chatbots"} onClick={() => {
-                      props.category.setter("chatbots");
-                      setSidebarOpen(false);
-                    }}>
-                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                      <div className={styles.assistantcatname}>ChatBots</div>
-                    </List.Item>
-                    <List.Item className={`${styles.assistantlink} ${isselected("analysis")}`} data-function={"analysis"} onClick={() => {
-                      props.category.setter("analysis");
-                      setSidebarOpen(false);
-                    }}>
-                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
-                      <div className={styles.assistantcatname}>Analyse</div>
-                    </List.Item>
-                  </List>
                 </div>
-                {/* <RecommendBox user={props.context.user} messageApi={props.messageApi} /> */}
               </aside>
               <div className={styles.childrencontainer}>{}{props.children}</div>
             </Content>

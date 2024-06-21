@@ -155,11 +155,16 @@
             font-weight: 500;
 
             .homesidebar {
+                min-height: 93vh;
+                display: flex;
+                flex-direction: column;
+
                 .logo{
                     margin-bottom: 30px;
                 }
                 .assistantlist {
                     margin-top: 16px;
+
 
                     .assistantlink {
                         display: flex;
@@ -425,7 +430,7 @@
 }
 
 .backlist {
-    margin-bottom: 32px;
+    margin-top: auto;
 
     .assistantlink {
         display: flex;

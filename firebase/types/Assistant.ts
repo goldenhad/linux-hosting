@@ -67,6 +67,7 @@ export default interface Assistant {
     owner: string;
     blocks: Array<Block | InputBlock>;
     knowledgeFiles: Array<FileReference>;
+    primaryColor?: string
 }
 
 export interface Block {

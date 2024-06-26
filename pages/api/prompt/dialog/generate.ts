@@ -32,7 +32,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           ];
 
           // Call the model and get the used tokens back.
-          const { count } = await generateAIResponse(Model.GPT4, messages, res, data )
+          const { count } = await generateAIResponse(Model.GPT4, messages, res, data)
 
           // Send a response with token counts
           return res.status(200).send(`<~${count.response + count.request}~>`);

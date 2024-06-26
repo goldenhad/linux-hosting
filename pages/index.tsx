@@ -293,40 +293,38 @@ export default function Home(props: { assistants: Array<Assistant> }) {
           </div>
 
           <div className={styles.comingsoonrow}>
-            <Badge.Ribbon text={"Coming soon"} color="red">
-              <div className={styles.comingsoon}>
-                <Card className={styles.comingsooncard}>
-                  <div className={styles.builder}>
-                    <div className={styles.buildercontent}>
-                      <h2 className={styles.builderheadline}>Frag jetzt deinen individuellen KI-Agenten von
-                          Siteware an.</h2>
-                      <div className={styles.buildertext}>
-                          Fordere jetzt dein maßgeschneidertes Angebot an und nutze unsere innovative DMSP-Technologie
-                          für kostengünstige,
-                          hochindividualisierte Lösungen. Einzigartig: Profitiere von einer möglichen vollständigen
-                          Refinanzierung der Entwicklungskosten,
-                          wenn dein Agent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern
-                          schreiben wir dir die doppelte Höhe deiner
-                          Entwicklungskosten auf dein Konto als siteware-Credits gut.
-                          Wähle schon bald aus einer Vielzahl an Agenten im neuen siteware APP-Store.
-                          Mit siteware bist du immer einen Schritt voraus – sei dabei. Von Anfang an.
-                      </div>
-                      <div className={styles.buttonsection}>
-                        <Button
-                          type="primary"
-                          href={"mailto:info@siteware.io?subject=Anfrage%20individueller%20KI-Agent"}
-                          className={styles.builderbutton}
-                        >
-                          Angebot anfordern
-                        </Button>
-                      </div>
+            <div className={styles.comingsoon}>
+              <Card className={styles.comingsooncard}>
+                <div className={styles.builder}>
+                  <div className={styles.buildercontent}>
+                    <h2 className={styles.builderheadline}>Frag jetzt deinen individuellen KI-Agenten von
+                      Siteware an.</h2>
+                    <div className={styles.buildertext}>
+                      Fordere jetzt dein maßgeschneidertes Angebot an und nutze unsere innovative DMSP-Technologie
+                      für kostengünstige,
+                      hochindividualisierte Lösungen. Einzigartig: Profitiere von einer möglichen vollständigen
+                      Refinanzierung der Entwicklungskosten,
+                      wenn dein Agent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern
+                      schreiben wir dir die doppelte Höhe deiner
+                      Entwicklungskosten auf dein Konto als siteware-Credits gut.
+                      Wähle schon bald aus einer Vielzahl an Agenten im neuen siteware APP-Store.
+                      Mit siteware bist du immer einen Schritt voraus – sei dabei. Von Anfang an.
                     </div>
-                    <div className={styles.builderteaser}>
+                    <div className={styles.buttonsection}>
+                      <Button
+                        type="primary"
+                        href={"mailto:info@siteware.io?subject=Anfrage%20individueller%20KI-Agent"}
+                        className={styles.builderbutton}
+                      >
+                        Angebot anfordern
+                      </Button>
                     </div>
                   </div>
-                </Card>
-              </div>
-            </Badge.Ribbon>
+                  <div className={styles.builderteaser}>
+                  </div>
+                </div>
+              </Card>
+            </div>
           </div>
 
           <div className={styles.bannersection}></div>
@@ -335,13 +333,13 @@ export default function Home(props: { assistants: Array<Assistant> }) {
         <Modal className={styles.videopopup} footer={null} width={1000} open={videoPopupVisible} onCancel={() => {
           setPlay(false);
           setVideoPopupVisible(false);
-          if(videoLink){
+          if (videoLink) {
             const player = videoplayer.current as ReactPlayer;
-            if(player.getCurrentTime ){
+            if (player.getCurrentTime) {
               player.getInternalPlayer().pauseVideo();
               player.seekTo(0);
             }
-            
+
           }
         }}>
           <div className={styles.videoplayer}>
@@ -352,9 +350,9 @@ export default function Home(props: { assistants: Array<Assistant> }) {
         <Tour open={open} onClose={async () => {
           const currstate = user.tour;
           currstate.home = true;
-          updateData( "User", login.uid, { tour: currstate } );
-          setOpen( false );
-        }} steps={steps} />
+          updateData("User", login.uid, { tour: currstate });
+          setOpen(false);
+        }} steps={steps}/>
       </div>
     </HomeSidebarLayout>
   )

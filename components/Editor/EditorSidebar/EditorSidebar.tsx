@@ -4,11 +4,7 @@ import { Button, Drawer, Form, Input, Layout, message, Switch } from "antd";
 import Link from "next/link";
 import styles from "./editorsidebar.module.scss";
 import CookieBanner from "../../CookieBanner/CookieBanner";
-import Assistant, {
-  Block,
-  FileReference,
-  InputBlock, Visibility
-} from "../../../firebase/types/Assistant";
+import Assistant, { Block, FileReference, InputBlock, Visibility } from "../../../firebase/types/Assistant";
 import updateData from "../../../firebase/data/updateData";
 import { checkValidityOfAssistantConfig } from "../../../helper/assistant";
 import GeneralSettingsModal from "../GeneralSettingsModal/GeneralSettingsModal";
@@ -136,9 +132,9 @@ const EditorSidebar = ( props: {
 
     AssistantToUpdate.description = (desc)? desc: "";
     AssistantToUpdate.category = settForm.getFieldValue("category");
-    AssistantToUpdate.visibility = settForm.getFieldValue("visibility");
+    AssistantToUpdate.visibility = (settForm.getFieldValue("visibility"))? settForm.getFieldValue("visibility"): Visibility.PRIVATE;
     const selectedCompsString: string = settForm.getFieldValue("selectedCompanies");
-    AssistantToUpdate.selectedCompanies = selectedCompsString.split("\n");
+    AssistantToUpdate.selectedCompanies = (selectedCompsString)? selectedCompsString?.split("\n"): [];
     AssistantToUpdate.name = name;
     
     if(AssistantToUpdate.blocks && AssistantToUpdate.blocks.length > 0){

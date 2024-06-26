@@ -88,7 +88,8 @@ export default function ChatAssistant(props: {
    */
   useEffect(() => {
     const loadImage = async () => {
-      const url = await getAssistantImageUrl(props.assistant.uid);
+      //const url = await getAssistantImageUrl(props.assistant.uid);
+      const url = `/api/assistant/image?aid=${props.assistant.uid}`;
       if(url){
         setImage(url);
       }else{

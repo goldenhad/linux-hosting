@@ -8,6 +8,8 @@ import Assistant from "../../../firebase/types/Assistant";
 import { User } from "../../../firebase/types/User";
 import { Role } from "../../../firebase/types/Role";
 import axios from "axios";
+import { getDownloadURL, ref } from "firebase/storage";
+import { drive } from "../../../db";
 
 
 // Define the response data type
@@ -26,44 +28,20 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
     // Check if the user is authenticated
     if( token ){
+      const imageId = req.query.aid;
 
-      const userReq = await firestore.doc(`/User/${token.uid}`).get();
-      const user = userReq.data() as User;
+      if(imageId){
+        const storageRef = ref( drive, `assistant/images/${imageId}` );
+        const url = await getDownloadURL( storageRef );
 
-      if(user !== undefined){
-        const roleReq = await firestore.doc(`/Role/${user.Role}`).get();
-        const role = roleReq.data() as Role;
-
-        if(role !== undefined && role.canUseEditor){
-          // Extract data from the request body
-          const data = req.body;
-
-          // Check if required data fields are present in the request
-          if( data.aid != undefined ){
-
-            const assistantReq = await firestore.doc(`/Assistants/${data.aid}`).get();
-            const assistant: Assistant = assistantReq.data() as Assistant;
-
-            if(assistant){
-              assistant.name += " (duplicate)";
-
-              const addNewAssReq = await firestore.collection("/Assistants").add( assistant );
-              const newAssId = addNewAssReq.id;
-
-              return res.status(200).send({ errorcode: 0, message: newAssId });
-            }else{
-
-              return res.status(400).send({ errorcode: 6, message: "Assistant undfined!" });
-            }
-
-          } else {
-            return res.status(400).send({ errorcode: 5, message: "Missing Input!" });
-          }
-        }else{
-          return res.status(403).send({ errorcode: 4, message: "Not allowed" });
+        if(url){
+          axios.get(url).then((resp) => {
+            console.log(resp.data);
+            return res.send(resp.data)
+          })
         }
       }else{
-        return res.status(403).send({ errorcode: 3, message: "Not allowed" });
+        return res.status(400).send({ errorcode: 3, message: "Data missing" });
       }
 
     } else {

@@ -20,7 +20,6 @@ import Chat from "../../public/icons/chat.svg";
 import Zap from "../../public/icons/zap.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
 import { getProfilePictureUrl } from "../../firebase/drive/upload_file";
-//import RecommendBox from "../RecommendBox/RecommendBox";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -40,6 +39,7 @@ const HomeSidebarLayout = ( props: {
   children: ReactNode,
   context: {user: User, login, role, profile},
   category: { value: string, setter: Dispatch<SetStateAction<string>>},
+  favouriteCount: number,
   messageApi,
 }) => {
   const [collapsed, setCollapsed] = useState( true );
@@ -51,7 +51,6 @@ const HomeSidebarLayout = ( props: {
   const [ imageUrl, setImageUrl ] = useState( undefined );
   const router = useRouter();
   // eslint-disable-next-line
-  const [ version, setVersion ] = useState( "" );
   const [ sidebaropen, setSidebarOpen ] = useState(false);
   const [ screenwidth, setScreenwidth ] = useState(window.innerWidth);
 
@@ -219,9 +218,9 @@ const HomeSidebarLayout = ( props: {
    * @returns Badge with count of faved assistants
    */
   const FavouriteBadge = () => {
-    if(props.context.user.services?.favourites) {
+    if(props.favouriteCount) {
       return(
-        <Badge className={styles.badge} status="default" color="#f2f4f7" count={props.context.user.services.favourites.length}/>
+        <Badge className={styles.badge} status="default" color="#f2f4f7" count={props.favouriteCount}/>
       );
     }
   }

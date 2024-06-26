@@ -380,7 +380,7 @@ const SidebarLayout = ( props: {
             <Link href={"/"}>
               <div className={styles.logobox}>
                 {/*eslint-disable-next-line */}
-                <img src="/siteware-logo-BM-white.svg" width={41.15} height={40} alt="Logo"/>
+                <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
               </div>
             </Link>
   

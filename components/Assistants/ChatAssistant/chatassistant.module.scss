@@ -297,10 +297,34 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
+    align-items: center;
     gap: 16px;
 
+    .backbutton{
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .headerimagecontainer{
+      font-weight: bold;
+      font-size: 18px;
+
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+
+      .headerimage{
+        border-radius: 12px;
+        box-shadow: 0px -1px 2px 0px #1018280F;
+        box-shadow: 0px -1px 3px 0px #1018281A;
+      }
+    }
+
     .histbutton{
-      margin-left: auto;
     }
 
   }
@@ -656,16 +680,23 @@
   display: flex;
   flex-direction: row;
   width: 100%;
+  justify-content: space-between;
 }
 
 .inputformitem{
-  width: 90%;
+  width: 95%;
   margin-bottom: 0px;
+
+  .area{
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
 }
 
 .inputformbuttonitem{
-  width: 10%;
-
+  width: 5%;
   display: inline-block;
 }
 
@@ -682,9 +713,14 @@
 }
 
 .usermsg{
-  justify-content: flex-start;
+  justify-content: flex-end;
 
   .msgcontainer{
+    .msgsender {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+    }
     .chatmsg {
       background-color: #F2F4F7;
       color: black;
@@ -693,12 +729,10 @@
 }
 
 .systemmsg{
-  justify-content: flex-end;
+  justify-content: flex-start;
 
   .msgcontainer{
     .chatmsg {
-      background-color: #0f4faa;
-      color: white;
     }
   }
 }

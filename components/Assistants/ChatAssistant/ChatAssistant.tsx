@@ -149,6 +149,7 @@ export default function ChatAssistant(props: {
 
   const handleUserMsg = async (values: { chatmsg: string }) => {
     const localmsgs = [...chatMsgs];
+    form.setFieldValue("chatmsg", "");
     const localHist = [...props.history.state];
 
     if(localmsgs.length == 1){

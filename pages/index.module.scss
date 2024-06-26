@@ -8,6 +8,10 @@
 
         .greetingrow {
             width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            padding-right: 15%;
             
             .greeting {
                 font-size: large;
@@ -63,7 +67,7 @@
                 height: 100px;
                 display: flex;
                 flex-direction: column;
-                justify-content: space-between;
+                justify-content: center;
             }
 
             .builderbutton{
@@ -93,6 +97,10 @@
 
         .greetingrow {
             width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            padding-right: 15%;
             
             .greeting {
                 font-size: 32px;
@@ -113,9 +121,6 @@
 
     .comingsoon{
         width: 100%;
-        opacity: 0.5;
-
-        
     }
 
     .comingsooncard{
@@ -145,23 +150,21 @@
                 margin-top: 50px;
                 display: flex;
                 flex-direction: row;
-                justify-content: space-between;
+                justify-content: center;
             }
         }
-    
-        
-    
-        .builderteaser{
-            background-image: url("/builder.png");
-            background-position: center;
-            background-size: cover;
-            height: 360px;
-            width: 50%;
-            padding-left: 50px;
-            padding-right: 10px;
-            border-radius: 20px;
+    }
 
-        }
+    .builderteaser{
+        background-image: url("/builder.png");
+        background-position: center;
+        background-size: cover;
+        height: 360px;
+        width: 50%;
+        padding-left: 50px;
+        padding-right: 10px;
+        border-radius: 20px;
+
     }
 
     .bannersection{

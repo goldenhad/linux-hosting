@@ -1,12 +1,11 @@
-import { Card, Button, Form, Input, Result, message, Modal } from "antd";
+import { Card, Button, Form, Input, Result, message, Modal, Typography } from "antd";
 import styles from "./account.module.scss"
 import { useEffect, useState } from "react";
 import SidebarLayout from "../../components/Sidebar/SidebarLayout";
 import { useAuthContext } from "../../components/context/AuthContext";
 import forgotpassword from "../../firebase/auth/forgot";
-import updateData from "../../firebase/data/updateData";
 import axios from "axios";
-import { TourState, User } from "../../firebase/types/User";
+import { User } from "../../firebase/types/User";
 import deleteData from "../../firebase/data/deleteData";
 import deleteSitewareUser from "../../firebase/auth/delete";
 import { getDocWhere } from "../../firebase/data/getData";
@@ -16,16 +15,14 @@ import { deleteProfilePicture } from "../../firebase/drive/delete";
 import FatButton from "../../components/FatButton";
 import EditUserForm from "../../components/Forms/EditUserForm/EditUserForm";
 import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
-import { getAuth } from "firebase/auth";
-import { firebase_app } from "../../db";
-import { auth } from "../../firebase/admin";
 
+const { Paragraph } = Typography;
 
 /**
  * Account-Page
- * 
+ *
  * Page resolving around everything user account related
- * 
+ *
  */
 export default function Account() {
   const context = useAuthContext();
@@ -70,6 +67,41 @@ export default function Account() {
   }
 
 
+
+  const ApiCard = () => {
+    const generateApiKey = async () => {
+      await axios.post("/api/company/apikey/generate", {});
+    }
+
+    const deleteApiKey = async () => {
+      await axios.post("/api/company/apikey/delete", {});
+    }
+
+    return (
+      <div className={styles.password}>
+        <Card className={styles.passwordcard} title="API" bordered={true}>
+          {(user.apikey)?
+            <div className={styles.apikeyrow}>
+              <Paragraph>
+                <pre>{user.apikey}</pre>
+              </Paragraph>
+              <Button type={"default"} danger onClick={() => {
+                deleteApiKey();
+              }}>Löschen</Button>
+            </div>
+            :
+            <>
+              <FatButton onClick={() => {
+                generateApiKey()
+              }} text={"Api Key generieren"}></FatButton>
+            </>
+          }
+        </Card>
+      </div>
+    );
+  }
+
+
   /**
    * Local Component regarding the resetting of the users password
    * @returns JSX regarding the password action
@@ -93,27 +125,6 @@ export default function Account() {
           }
         }} text="Passwort zurücksetzen" />
       );
-    }
-  }
-
-  const resetTutorial = async () => {
-    const resetTutObj: TourState = {
-      home: false,
-      dialog: false,
-      monolog: false,
-      blog: false,
-      usage: false,
-      profiles: false,
-      company: false,
-      excel: false,
-      translator: false,
-      plain: false
-    }
-    const { error } = await updateData( "User", login.uid, { tour: resetTutObj } );
-    if( error ){
-      messageApi.error( "Beim zurücksetzen des Tutorials ist etwas schiefgelaufen. Versuche es später nochmal!" );
-    }else{
-      messageApi.success( "Tutorial zurückgesetzt!" );
     }
   }
 
@@ -156,7 +167,7 @@ export default function Account() {
         await deleteSitewareUser()
       }
       break;
-            
+
     case "Mailagent":
       // Mailagents can be deleted easily as they have no constraint on the company
       const mlgntDeleteData = await deleteData( "User", login.uid );
@@ -179,7 +190,7 @@ export default function Account() {
         }
       }
       break;
-        
+
     default:
       break;
     }
@@ -214,14 +225,8 @@ export default function Account() {
           </div>
 
           <AnalyticsCard/>
-
-          <div className={styles.password}>
-            <Card className={styles.passwordcard} title="Einstellungen" bordered={true}>
-              <FatButton onClick={() => {
-                resetTutorial()
-              }} text="Tutorial zurücksetzen"/>
-            </Card>
-          </div>
+          
+          <ApiCard />
 
           <div className={styles.deleteRow}>
             <FatButton danger={true} onClick={() => {

@@ -13,7 +13,7 @@ type InputData = {
 }
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAIAPIKEY
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 export enum Model {
@@ -28,7 +28,7 @@ export type AIMessage = {
 
 export async function generateAIResponse(
   model: Model,
-  messages: Array<AIMessage>,
+  messages: AIMessage[],
   apiResponse: NextApiResponse<AssistantResponse | string>,
   data: InputData
 ){
@@ -40,7 +40,6 @@ export async function generateAIResponse(
     "Content-Type": "text/event-stream"
   }); 
     
-  
   const response = await openai.chat.completions.create({
     model: model,
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -62,6 +61,46 @@ export async function generateAIResponse(
   }
 
   const tokenCountRequest = countFunction(data.prompt);
+  const tokenCountResult = countFunction(text);
+
+  return { count: { request: tokenCountRequest, response: tokenCountResult } }
+}
+
+export async function generateChatResponse(
+  model: Model,
+  messages: Array<AIMessage>,
+  apiResponse: NextApiResponse<AssistantResponse | string>
+){
+
+  apiResponse.writeHead(200, {
+    Connection: "keep-alive",
+    "Content-Encoding": "none",
+    "Cache-Control": "no-cache",
+    "Content-Type": "text/event-stream"
+  });
+
+
+  const response = await openai.chat.completions.create({
+    model: model,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    messages: messages,
+    stream: true
+  });
+
+  // Process and send chunks of response
+  let text = "";
+  for await (const chunk of response) {
+    const singletoken = chunk.choices[0].delta.content || "";
+    apiResponse.write(singletoken);
+    apiResponse.flushHeaders();
+    if (chunk.choices[0].finish_reason === "stop") {
+      console.log("stop!!");
+    }
+    text += singletoken;
+  }
+
+  const tokenCountRequest = countFunction(messages[messages.length-1].content);
   const tokenCountResult = countFunction(text);
 
   return { count: { request: tokenCountRequest, response: tokenCountResult } }

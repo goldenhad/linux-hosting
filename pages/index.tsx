@@ -1,4 +1,4 @@
-import { TourProps, Tour, Divider, message, Modal, Card, Badge, Button } from "antd";
+import { TourProps, Tour, Divider, message, Modal, Card, Badge, Button, Input } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
@@ -8,28 +8,35 @@ import updateData from "../firebase/data/updateData";
 import { handleUndefinedTour } from "../helper/architecture";
 import AssistantCard from "../components/AssistantCard/AssistantCard";
 import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
-import { Service } from "../firebase/types/Service";
 import ReactPlayer from "react-player/lazy"
+import { getAllDocs } from "../firebase/data/getData";
+import Assistant, { Visibility } from "../firebase/types/Assistant";
+import EmptyCard from "../components/EmptyCard/EmptyCard";
 
+const { Search } = Input;
 
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const datum = new Date();
+  let assistants: Array<Assistant> = [];
+  
+  const assistantreq = await getAllDocs("Assistants");
+
+  if(assistantreq.result){
+    assistants = assistantreq.result;
+  }
+  
 
   return {
     props: {
-      Data: {
-        currentMonth: datum.getMonth() + 1,
-        currentYear: datum.getFullYear()
-      }
+      assistants: assistants
     }
   };
 };
 
 
-export default function Home() {
+export default function Home(props: { assistants: Array<Assistant> }) {
   const context = useAuthContext();
-  const { login, user, services } = context;
+  const { login, user, role } = context;
   const router = useRouter();
   const dialogRef = useRef( null );
   const monologRef = useRef( null );
@@ -38,9 +45,12 @@ export default function Home() {
   const [ selectedCat, setSelectedCat ] = useState("all");
   const [ videoPopupVisible, setVideoPopupVisible ] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [ videoLink, setVideoLink ] = useState("");
+  const [ videoLink ] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [play, setPlay] = useState(false);
+  const [ searchValue, setSearchValue ] = useState<string>("");
+  const [ favs, setFavs ] = useState<Array<Assistant>>([])
+
 
   const videoplayer = useRef(null);
 
@@ -52,11 +62,24 @@ export default function Home() {
     }
   }, [router, user.setupDone] );
 
+  useEffect(() => {
+    const visibleAssistants = props.assistants.filter((singleService: Assistant) => {
+      return singleService.published == true &&
+          (
+            (singleService.visibility === Visibility.ALL) ||
+              (singleService.visibility === Visibility.SELECTED && singleService.selectedCompanies && singleService.selectedCompanies.includes(user.Company)) ||
+              (singleService.visibility === Visibility.PRIVATE && singleService.owner === user.Company)
+          );
+    });
+    
+    setFavs(visibleAssistants);
+  }, []);
+
 
   const steps: TourProps["steps"] = [
     {
       title: "Willkommen",
-      description: "Willkommen bei Siteware.business, dem Ort, an dem wir das E-Mail-Schreiben revolutionieren! Unser Ziel ist es, "+
+      description: "Willkommen bei Siteware, dem Ort, an dem wir das E-Mail-Schreiben revolutionieren! Unser Ziel ist es, "+
       "deine E-Mail-Kommunikation effizienter und angenehmer zu gestalten. Wir bieten dir innovative Funktionen, die deine E-Mail-Erfahrung "+
       "vereinfachen und verbessern. Im Folgenden wollen wir dir in diesen Tutorials die wichtigsten Funktionen näher erklären.",
       nextButtonProps: {
@@ -89,7 +112,7 @@ export default function Home() {
       title: "Mail-Dialog",
       description: "Die Funktion \"Mail-Dialog\" ermöglicht es dir, einen bestehenden E-Mail-Verlauf nahtlos fortzuführen. "+
       "Hierbei kannst du einfach den bisherigen E-Mail-Verlauf in das System einfügen und spezifizieren, wie deine gewünschte Antwort aussehen "+
-      "soll. Basierend auf deinen Vorgaben und dem Kontext des E-Mail-Verlaufs generiert Siteware.Business automatisch eine passende Antwort.",
+      "soll. Basierend auf deinen Vorgaben und dem Kontext des E-Mail-Verlaufs generiert Siteware automatisch eine passende Antwort.",
       target: () => dialogRef.current,
       nextButtonProps: {
         children: (
@@ -106,7 +129,7 @@ export default function Home() {
       title: "E-Mail schreiben",
       description: "Die Funktion \"E-Mail schreiben\" ist ein leistungsstarkes Tool, das dir dabei hilft, schnell und effektiv E-Mails zu verfassen. "+
       "Als Nutzer spezifizierst du einfach den gewünschten Inhalt oder den Hauptzweck deiner E-Mail, zum Beispiel eine Terminanfrage, ein Update für "+
-      "ein Projekt oder eine Rückmeldung zu einer Anfrage. Basierend auf deinen Angaben generiert Siteware business dann einen professionellen und "+
+      "ein Projekt oder eine Rückmeldung zu einer Anfrage. Basierend auf deinen Angaben generiert Siteware dann einen professionellen und "+
       "kohärenten E-Mail-Text, der genau auf deine Bedürfnisse zugeschnitten ist.",
       target: () => monologRef.current,
       nextButtonProps: {
@@ -123,7 +146,7 @@ export default function Home() {
     {
       title: "Blogbeitrag erzeugen",
       description: "Die Funktion \"Blogbeitrag erzeugen\" dient dazu, voll automatisch fesselnde Blogbeiträge zu verfassen. "+
-      "Nachdem du das Thema des Blogtexts sowie individuelle Parameter festgelegt hast, generiert Siteware business automatisch einen professionellen und "+
+      "Nachdem du das Thema des Blogtexts sowie individuelle Parameter festgelegt hast, generiert Siteware automatisch einen professionellen und "+
       "ansprechenden Blogtext, ganz nach deinen Vorstellungen.",
       target: () => monologRef.current,
       nextButtonProps: {
@@ -145,111 +168,157 @@ export default function Home() {
   ];
 
   const AssistantCardList = () => {
-    let servicearr = services;
 
-    if(selectedCat != "all"){
-      if(selectedCat != "favourites"){
-        servicearr = services.filter((singleService: Service) => {
-          return singleService.category == selectedCat;
-        });
-      }else{
-        servicearr = services.filter((singleService: Service) => {
-          if(user.services){
-            return user.services.favourites.includes(singleService.uid);
+
+    if(context.company.assistants !== undefined){
+      let servicearr = props.assistants.filter((assistant) => {
+        return context.company.assistants.includes(assistant.uid) || (selectedCat == "admin");
+      });
+
+
+      if(selectedCat != "admin"){
+        servicearr = favs
+
+        if(selectedCat != "all"){
+          if(selectedCat != "favourites"){
+            servicearr = servicearr.filter((singleService: Assistant) => {
+              return singleService.category == selectedCat;
+            });
+          }else{
+            servicearr = servicearr.filter((singleService: Assistant) => {
+              if(user.services){
+                return user.services.favourites.includes(singleService.uid);
+              }
+            });
           }
+        }
+      }else{
+        servicearr = servicearr.filter(() => {
+          return true;
         });
       }
-    }
+      
 
-    servicearr = servicearr.sort((a: Service, b: Service) => {
-      if( a.rank < b.rank){
-        return -1;
-      }else if( a.rank > b.rank){
-        return 1;
-      }else{
-        return 0;
+      const getRibbonText = (published: boolean) => {
+        if(!published){
+          return "Entwurf"
+        }else{
+          return undefined;
+        }
       }
-    })
 
-    const getRibbonText = (uid: string) => {
-      if(uid == "excel" || uid == "dialog" || uid == "monolog" || uid == "translator" || uid == "plain"){
-        return "Neu"
-      }else{
-        return undefined;
-      }
+      return (
+        <div className={styles.servicelist}>
+          {servicearr.filter((assistant) => {
+            return context.company.assistants.includes(assistant.uid) || (selectedCat == "admin");
+          }).filter((singleService: Assistant) => {
+            if(searchValue !== ""){
+              return singleService.name.includes(searchValue);
+            }else{
+              return true;
+            }
+          }).map((singleService: Assistant, idx: number) => {
+            return <AssistantCard
+              aid={singleService.uid}
+              name={singleService.uid}
+              blocks={singleService.blocks}
+              key={idx}
+              image={singleService.image}
+              title={singleService.name}
+              description={singleService.description}
+              link={`/assistant?aid=${singleService.uid}`}
+              fav={user.services?.favourites.includes(singleService.uid)}
+              knowledeFiles={singleService.knowledgeFiles}
+              ribbonText={getRibbonText(singleService.published)}
+              router={router}
+              onVideoClick={() => {
+                // setVideoLink(singleService.video);
+                // setVideoPopupVisible(true);
+                // setPlay(true);
+                window.open(singleService.video, "_blank", "noreferrer");
+              }}
+              onFav={async () => {
+                const currentfavs = (user.services?.favourites)? user.services.favourites: [];
+                currentfavs.push(singleService.uid);
+                await updateData("User", login.uid, { services: { favourites: currentfavs } });
+              }}
+              onDeFav={async () => {
+                const currentfavs =  user.services.favourites.filter((fservice: string) => {
+                  return fservice != singleService.uid
+                })
+                await updateData("User", login.uid, { services: { favourites: currentfavs } });
+              }}
+              canEdit={role.canUseEditor}
+              published={singleService.published}
+            />
+          })}
+          {role.canUseEditor && <EmptyCard />}
+        </div>
+      );
+    }else{
+      return (
+        <div className={styles.servicelist}>
+            Bitte füge neue Agenten im Appstore hinzu!
+        </div>
+      );
     }
-
-    return (
-      <div className={styles.servicelist}>
-        {servicearr.map((singleService: Service, idx: number) => {
-          return <AssistantCard
-            name={singleService.uid}
-            key={idx}
-            image={singleService.image}
-            title={singleService.title}
-            description={singleService.description}
-            link={singleService.link}
-            fav={user.services?.favourites.includes(singleService.uid)}
-            ribbonText={getRibbonText(singleService.uid)}
-            onVideoClick={() => {
-              // setVideoLink(singleService.video);
-              // setVideoPopupVisible(true);
-              // setPlay(true);
-              window.open(singleService.video, "_blank", "noreferrer");
-            }}
-            onFav={async () => {
-              const currentfavs = (user.services?.favourites)? user.services.favourites: [];
-              currentfavs.push(singleService.uid);
-              await updateData("User", login.uid, { services: { favourites: currentfavs } });
-            }}
-            onDeFav={async () => {
-              const currentfavs =  user.services.favourites.filter((fservice: string) => {
-                return fservice != singleService.uid
-              })
-              await updateData("User", login.uid, { services: { favourites: currentfavs } });
-            }}
-          />
-        })}
-      </div>
-    );
   }
 
 
   return (
-    <HomeSidebarLayout messageApi={messageApi} context={context} category={{ value: selectedCat, setter: setSelectedCat }}>
+    <HomeSidebarLayout messageApi={messageApi} context={context}
+      category={{ value: selectedCat, setter: setSelectedCat }} favouriteCount={
+        favs.filter((singleService: Assistant) => {
+          if(user.services){
+            return user.services.favourites.includes(singleService.uid);
+          }
+        }).length
+      } >
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>
           <div className={styles.greeting}>Willkommen {user.firstname}</div>
+          <Search placeholder="Suchbegriff" allowClear onSearch={(value) => {
+            setSearchValue(value)
+          }} style={{ width: 200 }} />
         </div>
 
         <div className={styles.dividerrow}>
-          <Divider />
+          <Divider/>
         </div>
 
         <div className={styles.content}>
           <div className={styles.services}>
-            <AssistantCardList />
+            <AssistantCardList/>
           </div>
-          
+
           <div className={styles.comingsoonrow}>
             <Badge.Ribbon text={"Coming soon"} color="red">
               <div className={styles.comingsoon}>
                 <Card className={styles.comingsooncard}>
                   <div className={styles.builder}>
                     <div className={styles.buildercontent}>
-                      <h2 className={styles.builderheadline}>Frag jetzt deinen individuellen KI-Assistenten von Siteware an.</h2>
+                      <h2 className={styles.builderheadline}>Frag jetzt deinen individuellen KI-Agenten von
+                          Siteware an.</h2>
                       <div className={styles.buildertext}>
-                        Fordere jetzt dein maßgeschneidertes Angebot an und nutze unsere innovative DMSP-Technologie für kostengünstige,
-                        hochindividualisierte Lösungen. Einzigartig: Profitiere von einer möglichen vollständigen Refinanzierung der Entwicklungskosten,
-                        wenn dein Assistent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern schreiben wir dir die doppelte Höhe deiner
-                        Entwicklungskosten auf dein Konto als siteware-Credits gut.
-                        Wähle schon bald aus einer Vielzahl an Assistenten im neuen siteware business APP-Store.
-                        Mit siteware business bist du immer einen Schritt voraus – sei dabei. Von Anfang an.
+                          Fordere jetzt dein maßgeschneidertes Angebot an und nutze unsere innovative DMSP-Technologie
+                          für kostengünstige,
+                          hochindividualisierte Lösungen. Einzigartig: Profitiere von einer möglichen vollständigen
+                          Refinanzierung der Entwicklungskosten,
+                          wenn dein Agent auch von anderen aktiv genutzt wird. Je nach Akzeptanz unter den Nutzern
+                          schreiben wir dir die doppelte Höhe deiner
+                          Entwicklungskosten auf dein Konto als siteware-Credits gut.
+                          Wähle schon bald aus einer Vielzahl an Agenten im neuen siteware APP-Store.
+                          Mit siteware bist du immer einen Schritt voraus – sei dabei. Von Anfang an.
                       </div>
                       <div className={styles.buttonsection}>
-                        <Button type="primary" className={styles.builderbutton}>Angebot anfordern</Button>
-                        <Button type="primary" className={styles.builderbutton}>Zum App-Store</Button>
+                        <Button
+                          type="primary"
+                          href={"mailto:info@siteware.io?subject=Anfrage%20individueller%20KI-Agent"}
+                          className={styles.builderbutton}
+                        >
+                          Angebot anfordern
+                        </Button>
                       </div>
                     </div>
                     <div className={styles.builderteaser}>

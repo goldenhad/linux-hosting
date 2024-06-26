@@ -22,7 +22,7 @@ const frontendnav: MenuProps["items"] = [
     key: "legal"
   },
   {
-    label: <Link href={"login"}>Siteware business</Link>,
+    label: <Link href={"login"}>Siteware</Link>,
     key: "login"
   }
 ]
@@ -134,12 +134,12 @@ Legal.getLayout = ( page ) => {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
+        <meta property="og:title" content="Siteware dein intelligenter KI-Agent" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/ogimage.jpg" />
         <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASEURL}`} />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware business | ai assistant</title>
+        <title>Siteware | ai assistant</title>
       </Head>
       <main>
         {page}

@@ -8,17 +8,14 @@ import type { NextComponentType } from "next";
 import Chatra from "@chatra/chatra";
 import { useRouter } from "next/router";
 import { logEvent, setAnalyticsCollectionEnabled } from "firebase/analytics";
-import { analytics, firebase_app } from "../db";
+import { analytics } from "../db";
 import cookieCutter from "cookie-cutter"
-import { getAuth } from "firebase/auth";
 
 
 const roboto = Roboto( {
   weight: ["100", "300", "400", "500", "700", "900"],
   subsets: ["latin"]
 } )
-
-const auth = getAuth(firebase_app);
 
 const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( {
   Component,
@@ -110,13 +107,13 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
       <>
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
+          <meta property="og:title" content="Siteware dein intelligenter KI-Agent" />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/ogimage.jpg" />
           <meta name="viewport" content="initial-scale=1, maximum-scale=1" />
           <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASEURL}`} />
           <link rel="icon" type="image/x-icon" href="/small_logo.ico" />
-          <title>Siteware business | ai assistant</title>
+          <title>Siteware | ai agent</title>
         </Head>
         <div className={roboto.className}>
           <Component {...pageProps}/>
@@ -128,12 +125,12 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ( 
       <>
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
+          <meta property="og:title" content="Siteware dein intelligenter KI-Agent" />
           <meta property="og:type" content="website" />
           <meta property="og:image" content="/ogimage.jpg" />
           <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASEURL}`} />
           <link rel="icon" type="image/x-icon" href="/small_logo.ico" />
-          <title>Siteware business | ai assistant</title>
+          <title>Siteware | ai assistant</title>
         </Head>
         <AuthContextProvider>
           <div className={roboto.className}>

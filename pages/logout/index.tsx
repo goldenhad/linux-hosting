@@ -2,7 +2,6 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { useEffect } from "react";
 import { useAuthContext } from "../../components/context/AuthContext";
 import { useRouter } from "next/navigation";
-import signUserOut from "../../firebase/auth/signout";
 import { Spin } from "antd";
 import axios from "axios";
 
@@ -14,13 +13,6 @@ import axios from "axios";
 export default function Logout(){
   const { login } = useAuthContext();
   const router = useRouter();
-
-  /**
-   * Function executing the logout from firebase
-   */
-  const handleLogOut = async () => {
-    await signUserOut();
-  }
 
   /**
    * Execute logout on page logout

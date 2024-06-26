@@ -9,10 +9,20 @@
         font-size: 18px !important;
         line-height: 1.2;
         font-weight: 100;
-        
+        min-height: 20vh;
+        justify-content: flex-start !important;
+        padding-bottom: 20%;    
     }
     .formContainer {
         padding: 10% 5% !important;
+        order: 2;
+    }
+    .typewriterContainer{
+        order: 3;
+    }
+    .loginbutton button {
+        width: auto;
+    
     }
 
 }
@@ -42,6 +52,7 @@
         margin: 0 auto;
         padding: 0 10%;
     }
+
 }
 @media only screen and (max-width: 1620px) {
 .contentContainer {
@@ -52,12 +63,35 @@
 }
 
 .backgroundStyle {
-    background-image: url("https://images.unsplash.com/photo-1549778399-f94fd24d4697?q=80&w=3348&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+    //background-color: rgba($color: #000000, $alpha: 1.0);
     background-position: center center;
     background-size: cover;
     background-repeat: no-repeat;
     width: 100vw;
-    height: 100vh;
+    height: 100vh; 
+    background: linear-gradient(270deg, #80539d, #f7a941, #55988b);
+    background-image: url("/noise.png") fixed;
+    background-size: 600% 600%;
+
+    -webkit-animation: AnimationName 30s ease infinite;
+    -moz-animation: AnimationName 30s ease infinite;
+    animation: AnimationName 30s ease infinite;
+}
+
+@-webkit-keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@-moz-keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
 }
 
 .overlayStyle {
@@ -149,14 +183,16 @@
         }
 
         .loginbutton{
-            width: 100%;
             display: flex;
             flex-direction: row;
             justify-content: center;
             margin-top: 32px;
-            
-            
+        button {
+            width: unset;
+            min-width: 350px;
         }
+        }
+        
     }
 
     .signupnotice{
@@ -178,6 +214,9 @@
     z-index: 1; 
     border-bottom: 10px solid #1478FD;
     padding: 25px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
     
     .navmenu{
        justify-content: end;

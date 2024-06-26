@@ -8,6 +8,11 @@ type ResponseData = {
     message: string,
 }
 
+export function decryptProfile(ciphertext: string, salt: string ){
+  const dec = CryptoJS.AES.decrypt( ciphertext, salt + process.env.MAILENC );
+  return dec.toString( CryptoJS.enc.Utf8 )
+}
+
 /**
  * Route for decrypting text using AES
  * @param req Request object
@@ -24,10 +29,10 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       if( data.ciphertext && data.salt ){
         try{
           // decrypt the ciphertext by using the salt and the pepper
-          const decrypted_data = CryptoJS.AES.decrypt( data.ciphertext, data.salt + process.env.MAILENC );
+          const decrypted_data = decryptProfile(data.ciphertext, data.salt);
 
           // Return the decrypted string
-          return res.status( 200 ).send( { errorcode: 0, message: decrypted_data.toString( CryptoJS.enc.Utf8 ) } );
+          return res.status( 200 ).send( { errorcode: 0, message: decrypted_data } );
         }catch( e ){
           //console.log(e);
           return res.status( 400 ).send( { errorcode: 4, message: "Error while decrypting" } );

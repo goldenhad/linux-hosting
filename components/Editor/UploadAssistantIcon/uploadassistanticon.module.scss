@@ -1,0 +1,16 @@
+.profilepicturerow{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+
+    .deleteProfilePictureButton{
+        font-size: 20px;
+        display: flex;
+        position: sticky;
+
+        &:hover{
+            color: #cf1322;
+            cursor: pointer;
+        }
+    }
+}

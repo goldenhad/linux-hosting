@@ -1,0 +1,209 @@
+
+
+.blockcontainer {
+  width: 150px;
+  height: 100px;
+  background-color: white;
+  border-radius: 12px;
+
+  padding: 20px 10px 20px 10px;
+
+  position: relative;
+
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/*.add {
+  position: relative;
+  left: 100%;
+
+  background-color: #4b4c4d;
+  color: white;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  opacity: 0.1;
+
+  &:hover {
+    opacity: 1;
+    cursor: pointer;
+  }
+}*/
+
+.optionsinput{
+  width: 100%;
+}
+
+.edit{
+  &:hover {
+    color: black;
+    cursor: pointer;
+  }
+}
+
+.setioninput{
+
+}
+
+.sectionaddrow{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+
+  .sectionadd {
+    font-size: 18px;
+    width: 20px;
+    height: 20px;
+    background: #4b4c4d;
+    color: white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    opacity: 0.1;
+    margin-top: 20px;
+
+    &:hover{
+      opacity: 1;
+      cursor: pointer;
+    }
+  }
+}
+
+.sectioncollapse{
+  width: 100%;
+}
+
+.inputaddrow{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+
+  .inputadd{
+    font-size: 18px;
+    width: 20px;
+    height: 20px;
+    background: #4b4c4d;
+    color: white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    opacity: 0.1;
+    margin-top: 20px;
+
+    &:hover{
+      opacity: 1;
+      cursor: pointer;
+    }
+  }
+}
+
+.optioncontainer{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 15px;
+
+
+  .options{
+    background-color: #fafafa;
+    padding: 10px;
+    border-radius: 12px;
+
+    .optionrow{
+      margin-top: 10px;
+    }
+  }
+
+  .optionaddrow{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+
+    .optionadd{
+      font-size: 18px;
+      width: 20px;
+      height: 20px;
+      background: #4b4c4d;
+      color: white;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      opacity: 0.1;
+      margin-top: 20px;
+
+      &:hover{
+        opacity: 1;
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+.addbutton{
+  margin-top: 20px;
+}
+
+.editorcard{
+  margin-top: 15px;
+}
+
+.optionswitch{
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.selectadditionaloptions{
+  margin-bottom: 32px;
+}
+
+.editcol{
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+.selectoptions > *{
+  display: flex !important;
+  flex-direction: row !important;
+}
+
+.selectsettings{
+  width: 100%;
+}
+
+.keytag {
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.optionrow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.deleteOption{
+  height: 50px;
+}

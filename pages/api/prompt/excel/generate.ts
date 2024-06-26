@@ -21,7 +21,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           const messages: Array<AIMessage>  = [
             {
               role: "system",
-              content: "Du bist ein Assistent und Beantwortest Fragen rund um das Thema Microsoft Excel."+
+              content: "Du bist ein Agent und Beantwortest Fragen rund um das Thema Microsoft Excel."+
                       "Nutzer geben dir Informationen zu sich und eine Frage, du beantwortest diese Frage."+
                       "Die Antwort sollte auf den Nutzer zugeschnitten sein. Daten, Fakten und Zahlen sollten immer unverändert wiedergegeben werden."+
                       "Adressiere den Nutzer nicht direkt mit seinem Namen. Schreibe in der DU-Form"

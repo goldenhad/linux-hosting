@@ -99,9 +99,22 @@
 
         
 
-        .assistantlink{
+        .assistantlink {
             font-weight: 700;
             color: #1478FD;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+
+        .brokenassistantlink {
+            font-weight: 700;
+            color: lightgray;
+
+            &:hover {
+                cursor: pointer;
+            }
         }
     }
 }
@@ -110,4 +123,11 @@
     &:hover {
         cursor: pointer;
     }
+}
+
+.deletemodalbuttons{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 16px;
 }

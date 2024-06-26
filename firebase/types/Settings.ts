@@ -49,7 +49,20 @@ export type Calculations = {
     savedMinutesProMail: number,
     autoDiscountPercent: number,
     coupons: Array<Coupon>,
-    assistantcost: Array<AssistantCost>
+    assistantcost: Array<AssistantCost>,
+    services: ServiceParameters
+}
+
+export type EmbeddingParameters = {
+    chunkSize: number,
+    overlap: number
+}
+
+export type ServiceParameters = {
+    profitPercent: {
+        QaA: number,
+        chat: number
+    }
 }
 
 export type Coupon = {

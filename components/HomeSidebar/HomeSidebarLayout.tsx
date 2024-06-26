@@ -1,5 +1,5 @@
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import { LogoutOutlined } from "@ant-design/icons";
+import { LogoutOutlined, ToolOutlined } from "@ant-design/icons";
 import Icon, { CloseOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Avatar, Badge, ConfigProvider, Divider, Drawer, FloatButton, Layout, List, Menu, Popover } from "antd";
@@ -19,8 +19,7 @@ import All from "../../public/icons/all.svg";
 import Chat from "../../public/icons/chat.svg";
 import Zap from "../../public/icons/zap.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
-import { getImageUrl } from "../../firebase/drive/upload_file";
-//import RecommendBox from "../RecommendBox/RecommendBox";
+import { getProfilePictureUrl } from "../../firebase/drive/upload_file";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -40,6 +39,7 @@ const HomeSidebarLayout = ( props: {
   children: ReactNode,
   context: {user: User, login, role, profile},
   category: { value: string, setter: Dispatch<SetStateAction<string>>},
+  favouriteCount: number,
   messageApi,
 }) => {
   const [collapsed, setCollapsed] = useState( true );
@@ -51,7 +51,6 @@ const HomeSidebarLayout = ( props: {
   const [ imageUrl, setImageUrl ] = useState( undefined );
   const router = useRouter();
   // eslint-disable-next-line
-  const [ version, setVersion ] = useState( "" );
   const [ sidebaropen, setSidebarOpen ] = useState(false);
   const [ screenwidth, setScreenwidth ] = useState(window.innerWidth);
 
@@ -61,7 +60,7 @@ const HomeSidebarLayout = ( props: {
   useEffect( () => {
     const setProfileImage = async () => {
       if(props.context.login?.uid){
-        const url = await getImageUrl( props.context.login.uid );
+        const url = await getProfilePictureUrl( props.context.login.uid );
         setImageUrl( url );
       }
     }
@@ -219,9 +218,9 @@ const HomeSidebarLayout = ( props: {
    * @returns Badge with count of faved assistants
    */
   const FavouriteBadge = () => {
-    if(props.context.user.services?.favourites) {
+    if(props.favouriteCount) {
       return(
-        <Badge className={styles.badge} status="default" color="#f2f4f7" count={props.context.user.services.favourites.length}/>
+        <Badge className={styles.badge} status="default" color="#f2f4f7" count={props.favouriteCount}/>
       );
     }
   }
@@ -312,7 +311,7 @@ const HomeSidebarLayout = ( props: {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={"/logo_w.svg"} alt="Logo" width={100}/>
                 </div>
-                <div className={styles.title}>Assistenten</div>
+                <div className={styles.title}>Agenten</div>
                 <List className={styles.assistantlist} split={false}>
                   <List.Item className={`${styles.assistantlink} ${isselected("all")}`} data-function={"all"} onClick={() => {
                     props.category.setter("all");
@@ -344,6 +343,21 @@ const HomeSidebarLayout = ( props: {
                   }}>
                     <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
                     <div className={styles.assistantcatname}>Produktivität</div>  
+                  </List.Item>
+                  {(props.context.role.canUseEditor)?
+                    <List.Item className={`${styles.assistantlink} ${isselected("unpublished")}`} data-function={"unpublished"} onClick={() => {
+                      props.category.setter("unpublished");
+                      setSidebarOpen(false);
+                    }}>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Unveröffentlicht</div>
+                    </List.Item>: <></>}
+                  <List.Item className={`${styles.assistantlink}`} onClick={() => {
+                    router.push("/store")
+                    setSidebarOpen(false);
+                  }}>
+                    <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Appstore</div>
                   </List.Item>
                 </List>
               </div>
@@ -469,9 +483,9 @@ const HomeSidebarLayout = ( props: {
                 <div className={styles.homesidebar}>
                   <div className={styles.logo}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={"/logo.svg"} alt="Logo" width={100}/>
+                    <img src={"/siteware-logo-black.svg"} alt="Logo" width={100}/>
                   </div>
-                  <div className={styles.title}>Assistenten</div>
+                  <div className={styles.title}>Agenten</div>
                   <List className={styles.assistantlist} split={false}>
                     <List.Item className={`${styles.assistantlink} ${isselected("all")}`} data-function={"all"} onClick={() => {
                       props.category.setter("all"); 
@@ -500,6 +514,23 @@ const HomeSidebarLayout = ( props: {
                     }}>
                       <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
                       <div className={styles.assistantcatname}>Produktivität</div>  
+                    </List.Item>
+                    {(props.context.role.canUseEditor)?
+                      <List.Item className={`${styles.assistantlink} ${isselected("admin")}`} data-function={"admin"} onClick={() => {
+                        props.category.setter("admin");
+                        setSidebarOpen(false);
+                      }}>
+                        <ToolOutlined />
+                        <div className={styles.assistantcatname}>Admin</div>
+                      </List.Item>: <></>}
+                  </List>
+                  <List className={`${styles.assistantlist} ${styles.sublist}`} split={false}>
+                    <List.Item className={`${styles.assistantlink}`} onClick={() => {
+                      router.push("/store")
+                      setSidebarOpen(false);
+                    }}>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Appstore</div>
                     </List.Item>
                   </List>
                 </div>

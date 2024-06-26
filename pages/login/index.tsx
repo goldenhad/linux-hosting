@@ -145,7 +145,7 @@ export default function Login(){
         <Row justify="space-around" align="bottom" style={{ height: "100%" , padding: "5% 0" }}>
           <Col xs={8}  // Fullwidth on very small screens
             sm={8}  // Wider screens, but still smaller than tablets
-            md={8}  // Tablet
+            md={12}  // Tablet
             lg={8}  // Small Desktops
             xl={4}   // Big Desktops
             style={{ textAlign: "right" }}>
@@ -156,8 +156,8 @@ export default function Login(){
               </Link>
             </div>
           </Col>
-          <Col xs={9}  // Fullwidth on very small screens
-            sm={18}  // Wider screens, but still smaller than tablets
+          <Col className={styles.typewriterContainer} xs={24}  // Fullwidth on very small screens
+            sm={24}  // Wider screens, but still smaller than tablets
             md={12}  // Tablet
             lg={10}  // Small Desktops
             xl={8}   // Big Desktops
@@ -165,27 +165,29 @@ export default function Login(){
             <div className={styles.typewriterEffect}>
               <
                 TypewriterEffect texts = {
-                  ["Ich bin Dein neuer KI Assistent aus Deutschland.",
-                    "Ich biete Dir laufend neue KI -Apps, die das Leben leichter machen schreibe und antworte auf E-Mails in Deinem Stil.",
-                    "Ich verfasse Text in dem Stil, den Du Dir wünschst.",
-                    "Meine Ergebnisse sind  unlimitiert im Umfang.",
-                    "Ich arbeite mit mehreren KI Modellen in einem System DMSP:",
-                    "Ich arbeite Deine Aufgaben in mehreren Schritten ab (DMSP).",
-                    "Ich sorge dafür, dass Du wieder mehr Zeit für Deine wesentlichen Aufgaben hast.",
-                    "Ich beantworte dir alle Fragen zu Excel wie ein Berater.",
-                    "Ich biete Dir Zugang zu führenden KI Modellen in einem System.",
-                    "Ich lerne schnell und viel über Dich, Dein Unternehmen, Deine Produkte und Dienstleistungen.",
-                    "Ich übersetze Deine Texte in viele Sprachen.",
-                    "Ich sorge dafür, dass Deine Texte der Rechtschreibung entsprechen.",
-                    "Bald kannst Du eigene Apps mit Siteware entwickeln und damit Geld verdienen."
+                  ["Entdecke deine neue KI aus Deutschland und revolutioniere deine Produktivität.",
+                    "Ich biete dir laufend neue KI-Agenten, für alle möglichen Aufgaben.",
+                    "Lass mich deine E-Mails schreiben und beantworten – spare Zeit und Mühe!",
+                    "Die Einrichtung ist kinderleicht und dauert nur 3 Minuten – starte sofort ohne Kreditkarte.",
+                    "Registriere dich kostenlos und erhalte 20,- EUR Startguthaben zum Ausprobieren.",
+                    "Mit mir brauchst du keine Fachkenntnisse – ich erledige das für dich!",
+                    "Erlebe unübertroffene Ergebnisqualität mit meiner Siteware® Multimodal-Technologie, die gleichzeitig mit mehreren KI-Modellen arbeitet.",
+                    "Ich erstelle Texte genau nach deinem Stil und Umfang – du bestimmst die Details.",
+                    "Ich arbeite deine Aufgaben effizient und dynamisch in mehreren Schritten mit der Siteware®-DMSP-Technologie ab.",
+                    "Ich spare dir viel Zeit und sorge dafür, dass du dich wieder auf deine wesentlichen Aufgaben konzentrieren kannst.",
+                    "Ich beantworte alle deine Excel-Fragen wie ein Experte.",
+                    "Mit einem Konto bei Siteware erhältst du Zugang zu den fortschrittlichsten KI-Modellen am Markt.",
+                    "Ich lerne schnell dazu über dich, dein Unternehmen und deine Angebote, um maßgeschneiderte Lösungen zu bieten (Siteware®-Brain).",
+                    "Ich übersetze deine Texte in zahlreiche Sprachen und sorge für korrekte Rechtschreibung.",
+                    "Profitiere bald von unserer Community: Entwickle eigene Agenten mit Siteware und erhalte einen Anteil am Umsatz."
                   ]
                 }
               />
             </div>
           </Col>
           <Col className={styles.formContainer} xs={24}  // Vollbreite auf sehr kleinen Bildschirmen
-            sm={18}  // Fullwidth on very small screens
-            md={12}  // Tablet
+            sm={24}  // Fullwidth on very small screens
+            md={18}  // Tablet
             lg={10}  // Small Desktops
             xl={8}   // Big Desktops
           >
@@ -233,14 +235,14 @@ export default function Login(){
               />
 
               <Form.Item className={styles.loginbutton}>
-                <FatButton isSubmitButton={true} text="Kostenlos Anmelden" />
+                <FatButton isSubmitButton={true} text="Anmelden" />
               </Form.Item>
             </Form>
 
           
                     
             <div className={styles.signupnotice}>
-              <div>Noch keinen Account?</div><Link className={styles.signuplink} href={"/register"}>Jetzt registrieren</Link>
+              <div>Noch keinen Account?</div><Link className={styles.signuplink} href={"/register"}>Jetzt kostenlos registrieren</Link>
             </div>
           </Col>
         </Row>
@@ -262,12 +264,12 @@ Login.getLayout = ( page ) => {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Siteware | Dein intelligenter KI-Assistent" />
+        <meta property="og:title" content="Siteware | Dein intelligenter KI-Agent" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/ogimage.jpg" />
         <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASEURL}`} />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware | Dein intelligenter KI-Assistent</title>
+        <title>Siteware | Dein intelligenter KI-Agent</title>
       </Head>
       <main >
         {page}

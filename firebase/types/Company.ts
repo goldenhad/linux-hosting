@@ -63,7 +63,9 @@ export type Company = {
     invitedUsers: Array<InvitedUser>;
     plan?: Plan;
     customerId?: string;
-    paymentMethods: Array<PaymentMethod>
+    paymentMethods: Array<PaymentMethod>,
+    apikey?: string;
+    assistants?: Array<string>;
 }
 
 export const basicCompany = {

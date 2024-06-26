@@ -1,16 +1,10 @@
 import { GetServerSideProps } from "next";
-import { useEffect, useState } from "react";
-import { Alert, Button, Form, Input, Result } from "antd";
+import { useState } from "react";
 import styles from "./confirm.module.scss"
 import Head from "next/head";
-import { getAuth } from "firebase/auth";
-import { firebase_app } from "../../db";
 import { useRouter } from "next/router";
-import { AuthContextProvider } from "../../components/context/AuthContext";
 import FatButton from "../../components/FatButton";
 import axios from "axios";
-
-const auth = getAuth(firebase_app);
 
 // Props given by firebase to this page trough redirection
 interface restprops {
@@ -36,7 +30,7 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
  */
 export default function Confirm( props: restprops ){
   const router = useRouter();
-  const [ valid, setValid ] = useState(props.valid);
+  const [ valid ] = useState(props.valid);
 
   const validDescription = () => {
     if(valid){
@@ -95,7 +89,7 @@ Confirm.getLayout = (page) => {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware business | ai assistant</title>
+        <title>Siteware | ai assistant</title>
       </Head>
       <main>
         {page}

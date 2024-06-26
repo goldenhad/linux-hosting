@@ -44,7 +44,7 @@ import {
 } from "chart.js";
 import { User } from "../../firebase/types/User";
 import { InvitedUser } from "../../firebase/types/Company";
-import { getImageUrl } from "../../firebase/drive/upload_file";
+import { getProfilePictureUrl } from "../../firebase/drive/upload_file";
 import FatButton from "../../components/FatButton";
 import { toGermanCurrencyString } from "../../helper/price";
 const { TextArea } = Input;
@@ -196,7 +196,7 @@ export default function Company( props: InitialProps ) {
       },
       {
         title: "Weitere Teammitglieder einladen",
-        description: "Falls weitere Mitglieder deiner Firma die Funktionen von Siteware business benötigen,"+
+        description: "Falls weitere Mitglieder deiner Firma die Funktionen von Siteware benötigen,"+
         " hast du hier die Möglichkeit, sie direkt einzuladen.",
         target: () => inviteRef.current,
         nextButtonProps: {
@@ -254,7 +254,7 @@ export default function Company( props: InitialProps ) {
       {
         title: "Statistik zur Nutzung",
         description: "Hier findest du eine kurze und klare Übersicht darüber, wie viele Mails deine Firma über das "+
-        "aktuelle Jahr mit Siteware business bereits verbraucht hat und wie viele Mails"+
+        "aktuelle Jahr mit Siteware bereits verbraucht hat und wie viele Mails"+
         " noch auf eurem Konto verfügbar sind.",
         target: () => budgetRef.current,
         nextButtonProps: {
@@ -287,7 +287,7 @@ export default function Company( props: InitialProps ) {
       {
         title: "Eure bisherigen Einkäufe",
         description: "In der untenstehenden Tabelle findet ihr eine Übersicht eurer bisherigen Einkäufe bei "+
-        "Siteware business. Hier habt ihr die Möglichkeit, Rechnungen herunterzuladen und unterbrochene"+
+        "Siteware. Hier habt ihr die Möglichkeit, Rechnungen herunterzuladen und unterbrochene"+
         " Einkäufe abzuschließen.",
         target: () => orderRef.current,
         nextButtonProps: {
@@ -383,7 +383,7 @@ export default function Company( props: InitialProps ) {
       const usersWithPictures = [];
 
       for( let i=0; i < userTableData.length; i++ ){
-        const imageurl = await getImageUrl( userTableData[i].id );
+        const imageurl = await getProfilePictureUrl( userTableData[i].id );
         if( imageurl ){
           userTableData[i].profilepicture = imageurl;
         }
@@ -918,7 +918,7 @@ export default function Company( props: InitialProps ) {
       setInviteUserModalOpen( false );
     }catch( e ){
       setIsInviteErrVisible( true );
-      setInviteErrMsg( "Ein Nutzer mit dieser E-Mail Adresse nutzt Siteware business bereits!" );
+      setInviteErrMsg( "Ein Nutzer mit dieser E-Mail Adresse nutzt Siteware bereits!" );
     }
   }
 

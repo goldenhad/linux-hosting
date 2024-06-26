@@ -1,12 +1,7 @@
 import { GetServerSideProps } from "next";
-import { useState } from "react";
-import { Alert, Button, Form, Input, Result } from "antd";
-import styles from "./action.module.scss"
 import Head from "next/head";
-import resetpassword from "../../firebase/auth/reset";
 import { ResetPassword } from "../../components/Actions/ResetPassword/ResetPassword";
 import { VerifyMail } from "../../components/Actions/VeryfyMail/VerifyMail";
-import { AuthContextProvider } from "../../components/context/AuthContext";
 
 // Props given by firebase to this page trough redirection
 export interface restprops {
@@ -63,7 +58,7 @@ Action.getLayout = ( page ) => {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <link rel="icon" type="image/x-icon" href="small_logo.ico"/>
-        <title>Siteware business | ai assistant</title>
+        <title>Siteware | ai assistant</title>
       </Head>
       <main>
         {page}

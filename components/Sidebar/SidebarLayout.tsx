@@ -15,7 +15,7 @@ import Help from "../../public/icons/help.svg";
 import CookieBanner from "../CookieBanner/CookieBanner";
 import Stats from "../../public/icons/stat.svg";
 import Settings from "../../public/icons/settings.svg";
-import { getImageUrl } from "../../firebase/drive/upload_file";
+import { getProfilePictureUrl } from "../../firebase/drive/upload_file";
 
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -57,7 +57,7 @@ const SidebarLayout = ( props: {
   useEffect( () => {
     const setProfileImage = async () => {
       if(props.context.login?.uid){
-        const url = await getImageUrl( props.context.login.uid );
+        const url = await getProfilePictureUrl( props.context.login.uid );
         setImageUrl( url );
       }
     }
@@ -208,7 +208,7 @@ const SidebarLayout = ( props: {
         <Header className={styles.header}>
           <Link href={"/"} className={styles.headerlink}>
             {/*eslint-disable-next-line */}
-            <img src="/small_logo.png" width={32} height={32} alt="Logo"/>
+            <img src="/siteware-logo-BM-white.svg" width={32} height={32} alt="Logo"/>
           </Link>
           <div className={styles.headerinteraction}>
             {(props.hist)? 
@@ -266,7 +266,7 @@ const SidebarLayout = ( props: {
             <div className={styles.mobilesidebarcontainer}>
               <div className={styles.logobox}>
                 {/*eslint-disable-next-line */}
-                <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
+                <img src="/siteware-logo-BM-white.svg" width={41.15} height={40} alt="Logo"/>
               </div>
               <div className={styles.drawermenu}>
                 <Menu className={styles.primarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
@@ -304,7 +304,7 @@ const SidebarLayout = ( props: {
             <Link href={"/"}>
               <div className={styles.logobox}>
                 {/*eslint-disable-next-line */}
-                <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
+                <img src="/siteware-logo-BM-white.svg" width={41.15} height={40} alt="Logo"/>
               </div>
             </Link>
   

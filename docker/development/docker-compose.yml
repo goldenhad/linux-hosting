@@ -1,15 +1,15 @@
 version: '3'
 
 services:
-    mailbuddy:
-        image: ghcr.io/printerboi/siteware_business_dev:latest
-        ports:
-            - '3002:3000'
-        volumes:
-            - ./stats:/app/stats
-        networks:
-            - mailbuddynetwork
-            - proxynetwork
+  mailbuddy:
+    image: ghcr.io/printerboi/siteware_business_dev:latest
+    ports:
+      - '3002:3000'
+    volumes:
+      - ./stats:/app/stats
+    networks:
+      - mailbuddynetwork
+      - proxynetwork
 
 
 networks:

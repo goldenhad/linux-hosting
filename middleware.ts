@@ -41,6 +41,8 @@ export async function middleware(request: NextRequest) {
         return redirectToHome(request);
       }
 
+      console.log(request.nextUrl.pathname);
+
       if(!request.nextUrl.pathname.startsWith("/confirm") && !request.nextUrl.pathname.startsWith("/action")){
         if(!decodedToken.email_verified){
           return redirectToRoute("/confirm", request);
@@ -48,13 +50,13 @@ export async function middleware(request: NextRequest) {
       }
     },
     handleInvalidToken: async (reason) => {
-      console.info("Missing or malformed credentials", { reason });
+      //console.info("Missing or malformed credentials", { reason });
       //console.log(PUBLIC_PATHS);
-      console.log(request.nextUrl.pathname);
-      console.log(PUBLIC_PATHS.includes(request.nextUrl.pathname))
+      //console.log(request.nextUrl.pathname);
+      //console.log(PUBLIC_PATHS.includes(request.nextUrl.pathname))
 
       if (!PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
-        console.log("redirecting....");
+        //console.log("redirecting....");
         return redirectToLogin(request, {
           path: "/login",
           publicPaths: PUBLIC_PATHS

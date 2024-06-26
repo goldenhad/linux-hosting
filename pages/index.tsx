@@ -45,10 +45,11 @@ export default function Home(props: { assistants: Array<Assistant> }) {
   const [ selectedCat, setSelectedCat ] = useState("all");
   const [ videoPopupVisible, setVideoPopupVisible ] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [ videoLink, setVideoLink ] = useState("");
+  const [ videoLink ] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [play, setPlay] = useState(false);
   const [ searchValue, setSearchValue ] = useState<string>("");
+  const [ favs, setFavs ] = useState<Array<Assistant>>([])
 
 
   const videoplayer = useRef(null);
@@ -60,6 +61,19 @@ export default function Home(props: { assistants: Array<Assistant> }) {
       router.push( "/setup" );
     }
   }, [router, user.setupDone] );
+
+  useEffect(() => {
+    const visibleAssistants = props.assistants.filter((singleService: Assistant) => {
+      return singleService.published == true &&
+          (
+            (singleService.visibility === Visibility.ALL) ||
+              (singleService.visibility === Visibility.SELECTED && singleService.selectedCompanies && singleService.selectedCompanies.includes(user.Company)) ||
+              (singleService.visibility === Visibility.PRIVATE && singleService.owner === user.Company)
+          );
+    });
+    
+    setFavs(visibleAssistants);
+  }, []);
 
 
   const steps: TourProps["steps"] = [
@@ -163,14 +177,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
 
 
       if(selectedCat != "admin"){
-        servicearr = props.assistants.filter((singleService: Assistant) => {
-          return singleService.published == true &&
-              (
-                (singleService.visibility === Visibility.ALL) ||
-                  (singleService.visibility === Visibility.SELECTED && singleService.selectedCompanies && singleService.selectedCompanies.includes(user.Company)) ||
-                  (singleService.visibility === Visibility.PRIVATE && singleService.owner === user.Company)
-              );
-        });
+        servicearr = favs
 
         if(selectedCat != "all"){
           if(selectedCat != "favourites"){
@@ -186,20 +193,11 @@ export default function Home(props: { assistants: Array<Assistant> }) {
           }
         }
       }else{
-        servicearr = servicearr.filter((singleService: Assistant) => {
+        servicearr = servicearr.filter(() => {
           return true;
         });
       }
-
-      /*servicearr = servicearr.sort((a: Assistant, b: Assistant) => {
-        if( a.rank < b.rank){
-          return -1;
-        }else if( a.rank > b.rank){
-          return 1;
-        }else{
-          return 0;
-        }
-      })*/
+      
 
       const getRibbonText = (published: boolean) => {
         if(!published){
@@ -269,7 +267,13 @@ export default function Home(props: { assistants: Array<Assistant> }) {
 
   return (
     <HomeSidebarLayout messageApi={messageApi} context={context}
-      category={{ value: selectedCat, setter: setSelectedCat }}>
+      category={{ value: selectedCat, setter: setSelectedCat }} favouriteCount={
+        favs.filter((singleService: Assistant) => {
+          if(user.services){
+            return user.services.favourites.includes(singleService.uid);
+          }
+        }).length
+      } >
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>

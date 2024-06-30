@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { message } from "antd";
-import { getAuth } from "firebase/auth";
+import { applyActionCode, getAuth } from "firebase/auth";
 import { firebase_app } from "../../../db";
 import { useRouter } from "next/router";
 import styles from "./verify.action.module.scss";
@@ -24,11 +24,17 @@ export function VerifyMail(props: { oobCode: string }){
 
   useEffect( () => {
     const takeAction = async () => {
-      if(login.uid){
+      console.log(auth.currentUser);
+      if(!auth.currentUser?.emailVerified){
         if(props.oobCode != "") {
-          if (!login.emailVerified || true) {
-            const verreq = await axios.post("/api/account/verify", { uid: login.uid });
-            if (verreq.status == 200) {
+          try{
+            console.log("ICH BIN HIER");
+            await applyActionCode(auth, props.oobCode);
+            console.log("VERIFIED");
+            setVerifyFailed(false);
+            setWorked(true);
+            //const verreq = await axios.post("/api/account/verify", { oobCode: props.oobCode });
+            /*if (verreq.status == 200) {
               console.log("VERIFIED");
               setVerifyFailed(false);
               //router.push("/confirm?valid=1");
@@ -36,11 +42,16 @@ export function VerifyMail(props: { oobCode: string }){
             } else {
               console.log("VERIFICATION FAILED!!!");
               setVerifyFailed(true);
-            }
-          }else{
-            router.push("/");
+            }*/
+          }catch (e){
+            console.log(e);
+            setVerifyFailed(true);
           }
         }
+      }else{
+        console.log("Already verified!");
+        setVerifyFailed(false);
+        setWorked(true);
       }
     }
 
@@ -82,7 +93,6 @@ export function VerifyMail(props: { oobCode: string }){
             Die Bestätigung Ihrer E-Mail war erfolgreich. Sie können das Fenster nun schließen!
         </div>
         <FatButton onClick={async () => {
-          console.log(login.emailVerified);
           await axios.get("/api/logout");
           router.push("/login");
         }} text={"Zu Siteware"}/>

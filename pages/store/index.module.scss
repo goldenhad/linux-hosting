@@ -67,7 +67,7 @@
                 height: 100px;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: space-between;
             }
 
             .builderbutton{
@@ -121,6 +121,9 @@
 
     .comingsoon{
         width: 100%;
+        opacity: 0.5;
+
+        
     }
 
     .comingsooncard{
@@ -150,21 +153,23 @@
                 margin-top: 50px;
                 display: flex;
                 flex-direction: row;
-                justify-content: center;
+                justify-content: space-between;
             }
         }
-    }
+    
+        
+    
+        .builderteaser{
+            background-image: url("/builder.png");
+            background-position: center;
+            background-size: cover;
+            height: 360px;
+            width: 50%;
+            padding-left: 50px;
+            padding-right: 10px;
+            border-radius: 20px;
 
-    .builderteaser{
-        background-image: url("/builder.png");
-        background-position: center;
-        background-size: cover;
-        height: 360px;
-        width: 50%;
-        padding-left: 50px;
-        padding-right: 10px;
-        border-radius: 20px;
-
+        }
     }
 
     .bannersection{
@@ -205,6 +210,7 @@
                 flex-wrap: wrap;
                 justify-content: center;
                 gap: 32px;
+                margin-bottom: 100px;
             }
         }
 
@@ -214,6 +220,7 @@
                 flex-direction: row;
                 flex-wrap: wrap;
                 gap: 32px;
+                margin-bottom: 100px;
             }
         }
 

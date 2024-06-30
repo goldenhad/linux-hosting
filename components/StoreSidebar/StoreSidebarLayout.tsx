@@ -1,41 +1,47 @@
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from "react";
-import { LogoutOutlined } from "@ant-design/icons";
-import Icon, { HistoryOutlined } from "@ant-design/icons";
+import { LeftCircleOutlined, LogoutOutlined } from "@ant-design/icons";
+import Icon, { CloseOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Avatar, ConfigProvider, Divider, Drawer, FloatButton, Layout, Menu, Popover } from "antd";
+import { Avatar, Badge, ConfigProvider, Divider, Drawer, FloatButton, Layout, List, Menu, Popover } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content, Sider } = Layout;
 import { User } from "../../firebase/types/User";
-import styles from "./sidebar.module.scss";
+import styles from "./storesidebar.module.scss";
 import Home from "../../public/icons/home.svg";
-import Nav from "../../public/icons/nav.svg";
 import Profiles from "../../public/icons/profiles.svg";
 import Help from "../../public/icons/help.svg";
-import CookieBanner from "../CookieBanner/CookieBanner";
+import Heart from "../../public/icons/heart.svg";
+import Nav from "../../public/icons/nav.svg";
 import Stats from "../../public/icons/stat.svg";
 import Settings from "../../public/icons/settings.svg";
+import All from "../../public/icons/all.svg";
+import Chat from "../../public/icons/chat.svg";
+import Zap from "../../public/icons/zap.svg";
+import CookieBanner from "../CookieBanner/CookieBanner";
 import { getProfilePictureUrl } from "../../firebase/drive/upload_file";
-
+//import RecommendBox from "../RecommendBox/RecommendBox";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
 
 /**
- * Provides a layout with a sidebar. The sidebar implements a simple navigation
+ * Provides a special sidebar layout for our homepage
  * @param props.children Page content
  * @param props.context.user User object of the application
  * @param props.context.login Firebase login object
  * @param props.context.role Role object of the current user
  * @param props.context.profile Profilepicture information
- * @param props.hist Dispatcher used to display the history if we render the mobile header
- * @returns SidebarLayout component
+ * @param props.category.value Category selected by the user for the assistants
+ * @param props.category.setter Dispatcher responsible for updating the assistant category 
+ * @returns Sidebar with assistant category selector
  */
-const SidebarLayout = ( props: {
+const StoreSidebarLayout = (props: {
   children: ReactNode,
-  context: { user: User, login, role, profile },
-  hist?: Dispatch<SetStateAction<boolean>>
-} ) => {
+  context: {user: User, login, role, profile},
+  category: { value: string, setter: Dispatch<SetStateAction<string>>},
+  messageApi,
+}) => {
   const [collapsed, setCollapsed] = useState( true );
   // eslint-disable-next-line
   const [ collapseWidth, setCollapseWidth ] = useState( 80 );
@@ -46,9 +52,7 @@ const SidebarLayout = ( props: {
   const router = useRouter();
   // eslint-disable-next-line
   const [ version, setVersion ] = useState( "" );
-
   const [ sidebaropen, setSidebarOpen ] = useState(false);
-
   const [ screenwidth, setScreenwidth ] = useState(window.innerWidth);
 
   /**
@@ -65,12 +69,12 @@ const SidebarLayout = ( props: {
     setProfileImage();
   }, [props.context.login] );
 
-
+  
   /**
    * Effect used for responsive sizing of the sidebar
    */
   useEffect(() => {
-    if(screenwidth <= 1500 ){
+    if(screenwidth <= 1500){
       setBreakpoint("lg");
       setCollapseWidth(0);
       setCollapsed(true);
@@ -80,7 +84,6 @@ const SidebarLayout = ( props: {
       setCollapseWidth(80);
     }
   }, [screenwidth]);
-
 
   /**
    * Effect used bind a eventlistener to window resizes,
@@ -109,7 +112,7 @@ const SidebarLayout = ( props: {
    * @param children Children of the MenuItem
    * @returns Either the MenuItem or null
    */
-  function getItem( label: React.ReactNode, key: React.Key, check: () => boolean, icon?: React.ReactNode, children?: MenuItem[] ): MenuItem {
+  const getItem = ( label: React.ReactNode, key: React.Key, check: () => boolean, icon?: React.ReactNode, children?: MenuItem[] ): MenuItem => {
     if( check() ){
       return {
         key,
@@ -176,27 +179,52 @@ const SidebarLayout = ( props: {
    */
   const profilemenu = (
     <div className={styles.avatarmenu}>
-      <Link href={"/account"} className={styles.accountlink} data-linkname={"account"}>
+      <Link href={"/account"} data-linkname={"account"} className={styles.accountlink}>
         <div className={styles.profile}>
           <Avatar
             size={40}
             style={{ color: "#474747", backgroundColor: "#F2F4F7" }}
             src={props.context.profile.picture}
           >
-            {(props.context.user?.email)? props.context.user.email.charAt(0):""}
+            {(props.context.user.email)? props.context.user.email.charAt(0):""}
           </Avatar>
           <div className={styles.profileinfo}>Mein Account</div>
         </div>
       </Link>
       <Divider className={styles.menudivider} />
       <div className={styles.iconlink}>
-        <Link href="/logout" className={styles.linkwrapper} data-linkname={"logout"}>
+        <Link href="/logout" data-linkname={"logout"} className={styles.linkwrapper}>
           <LogoutOutlined />
           <div className={styles.iconlinktext}>Ausloggen</div>
         </Link>
       </div>
     </div>
   );
+  
+  /**
+   * Check if the given name is the currently selected category provided to the sidebar
+   * @param name Category to test agains
+   * @returns Either a styling object to represent the selected cat or an empty string
+   */
+  const isselected = (name: string) => {
+    if(name == props.category.value){
+      return styles.selectedcat;
+    }else{
+      return "";
+    }
+  }
+
+  /**
+   * Subcomponent to return a badge containing the amount of faved assistants
+   * @returns Badge with count of faved assistants
+   */
+  const FavouriteBadge = () => {
+    if(props.context.user.services?.favourites) {
+      return(
+        <Badge className={styles.badge} status="default" color="#f2f4f7" count={props.context.user.services.favourites.length}/>
+      );
+    }
+  }
 
   /**
    * Subcomponent to render a header if the screenwidth is below a fixed amount
@@ -208,31 +236,21 @@ const SidebarLayout = ( props: {
         <Header className={styles.header}>
           <Link href={"/"} className={styles.headerlink}>
             {/*eslint-disable-next-line */}
-            <img src="/siteware-logo-BM-white.svg" width={32} height={32} alt="Logo"/>
+            <img src="/small_logo.png" width={32} height={32} alt="Logo"/>
           </Link>
-          <div className={styles.headerinteraction}>
-            {(props.hist)? 
-              <HistoryOutlined
-                className={styles.histicon}
-                onClick={() => {
-                  props.hist(true); 
-                }}
-              />
-              : <></>}
-            <Icon
-              component={Nav}
-              className={styles.headericon}
-              viewBox='0 0 40 40'
-              onClick={() => {
-                setSidebarOpen(!sidebaropen); 
-              }}
-            />
-          </div>
+          <Icon
+            component={Nav}
+            className={styles.headericon}
+            viewBox='0 0 40 40'
+            onClick={() => {
+              setSidebarOpen(!sidebaropen); 
+            }}
+          />
         </Header>
       );
     }
   }
-  
+
   // Check the current screenwidth
   if(screenwidth <= 1500){
     // if the screenwidth is below 1500px render the mobile layout of the sidebar
@@ -247,16 +265,18 @@ const SidebarLayout = ( props: {
           Slider: {
             trackBg: "#1478FD",
             handleColor: "#1478FD"
+          },
+          Layout: {
+            headerBg: "#101828"
           }
         }
       }}>
-        <Layout className={styles.layout} hasSider={(screenwidth > 1500)}>
+        <Layout className={styles.layout} hasSider={!(screenwidth <= 1500)}>
           <MobileHeader />
           <Drawer
-            style={{ backgroundColor: "#101828" }}
-            bodyStyle={{ backgroundColor: "#101828", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", width: 80, borderColor: "#101828" }}
+            bodyStyle={{ backgroundColor: "#101828", padding: 0, display: "flex", flexDirection: "row", alignItems: "center" }}
             placement="left"
-            width={80}
+            width={"100%"}
             onClose={() => {
               setSidebarOpen(false)
             }}
@@ -266,7 +286,7 @@ const SidebarLayout = ( props: {
             <div className={styles.mobilesidebarcontainer}>
               <div className={styles.logobox}>
                 {/*eslint-disable-next-line */}
-                <img src="/siteware-logo-BM-white.svg" width={41.15} height={40} alt="Logo"/>
+                <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
               </div>
               <div className={styles.drawermenu}>
                 <Menu className={styles.primarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
@@ -277,99 +297,74 @@ const SidebarLayout = ( props: {
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
                     <Avatar
                       size={40}
-                      style={(props.context.profile.picture) ? { color: "#474747" } : {
-                        color: "#474747",
-                        backgroundColor: "#F2F4F7"
-                      }}
+                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
-                      data-name={"profilemenu"}
                     >
-                      <>{(props.context.user?.email) ? props.context.user.email.charAt(0).toUpperCase() : ""}</>
+                      {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
                   </Popover>
                 </div>
               </div>
+            </div>
+            <div className={styles.homesidebarcontainer_mobile}>
+              <div className={styles.homesidebar}>
+                <div className={styles.logo}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={"/logo_w.svg"} alt="Logo" width={100}/>
+                </div>
+                <div className={styles.title}>Agenten</div>
+                <List className={styles.assistantlist} split={false}>
+                  <List.Item className={`${styles.assistantlink} ${isselected("all")}`} data-function={"all"} onClick={() => {
+                    props.category.setter("all");
+                    setSidebarOpen(false);
+                  }}>
+                    <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Alle</div>
+                  </List.Item>
+                  <List.Item className={`${styles.assistantlink} ${isselected("favourites")}`} data-function={"fav"} onClick={() => {
+                    props.category.setter("favourites");
+                    setSidebarOpen(false);
+                  }}>
+                    <Icon component={Heart} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Favoriten</div>
+                    <div className={styles.assistantcount}>
+                      <FavouriteBadge />
+                    </div>
+                  </List.Item>
+                  <List.Item className={`${styles.assistantlink} ${isselected("content")}`} data-function={"content"} onClick={() => {
+                    props.category.setter("content");
+                    setSidebarOpen(false);
+                  }}>
+                    <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Content-Erstellung</div>  
+                  </List.Item>
+                  <List.Item className={`${styles.assistantlink} ${isselected("productivity")}`} data-function={"productivity"} onClick={() => {
+                    props.category.setter("productivity");
+                    setSidebarOpen(false);
+                  }}>
+                    <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                    <div className={styles.assistantcatname}>Produktivität</div>  
+                  </List.Item>
+                  {(props.context.role.canUseEditor)?
+                    <List.Item className={`${styles.assistantlink} ${isselected("unpublished")}`} data-function={"unpublished"} onClick={() => {
+                      props.category.setter("unpublished");
+                      setSidebarOpen(false);
+                    }}>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Unveröffentlicht</div>
+                    </List.Item>: <></>}
+                </List>
+              </div>
+              {/* <RecommendBox user={props.context.user} messageApi={props.messageApi} /> */}
+            </div>
+            <div className={styles.canclebar}>
+              <div className={styles.closesidebar} onClick={() => {
+                setSidebarOpen(false)
+              }}><CloseOutlined /></div>
             </div>
           </Drawer>
           <Sider
-            width={80}
-            className={`${styles.sidebar}`}
-            breakpoint={breakpoint}
-            collapsedWidth={collapseWidth}
-            collapsed={collapsed}
-            onCollapse={( value ) => {
-              setCollapsed( value )
-            }}
-          >
-            <Link href={"/"}>
-              <div className={styles.logobox}>
-                {/*eslint-disable-next-line */}
-                <img src="/siteware-logo-BM-white.svg" width={41.15} height={40} alt="Logo"/>
-              </div>
-            </Link>
-  
-            <div className={styles.navigation}>
-              
-              <Menu className={styles.primarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
-  
-              <div className={styles.sidebarbottomcontainer}>
-                <Menu className={styles.secondarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={footeritems} />
-                <div className={styles.avatarcontainer}>
-                  <Popover placement="rightBottom" content={profilemenu} trigger="click">
-                    <Avatar
-                      size={40}
-                      style={(props.context.profile.picture) ? { color: "#474747" } : {
-                        color: "#474747",
-                        backgroundColor: "#F2F4F7"
-                      }}
-                      src={props.context.profile.picture}
-                      data-name={"profilemenu"}
-                    >
-                      {(props.context.user?.email) ? props.context.user.email.charAt(0).toUpperCase() : ""}
-                    </Avatar>
-                  </Popover>
-                </div>
-              </div>
-            </div>
-          </Sider>
-          
-          <Layout>
-            <Content className={styles.layoutcontent}>
-              <div className={styles.childrencontainer}>
-                {props.children}
-              </div>
-            </Content>
-            <FloatButton
-              className='sosbutton'
-              icon={<Icon component={Help} className={styles.floaticon} viewBox='0 0 22 22' size={24} />}
-              shape='square'
-              description={"Hilfe"}
-            />
-            <Footer style={{ textAlign: "center", color: "lightgrey" }}>{version}</Footer>
-          </Layout>
-          <CookieBanner />
-        </Layout>
-      </ConfigProvider>
-    );
-  }else{
-    // If the width of the screen is above 1500px we render the desktop variant of the component
-    return (
-      <ConfigProvider theme={{
-        components: {
-          Menu: {
-            darkItemSelectedBg: "#344054",
-            darkDangerItemSelectedColor: "#ffffff"
-          },
-          Slider: {
-            trackBg: "#1478FD",
-            handleColor: "#1478FD"
-          }
-        }
-      }}>
-        <Layout className={styles.layout} hasSider={true}>
-          <Sider
-            width={80}
-            className={`${styles.sidebar}`}
+            className={styles.sidebar}
             breakpoint={breakpoint}
             collapsedWidth={collapseWidth}
             collapsed={collapsed}
@@ -388,7 +383,7 @@ const SidebarLayout = ( props: {
               
               <Menu className={styles.primarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
   
-              <div className={styles.sidebarbottomcontainer}>
+              <div>
                 <Menu className={styles.secondarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={footeritems} />
                 <div className={styles.avatarcontainer}>
                   <Popover placement="rightBottom" content={profilemenu} trigger="click">
@@ -396,9 +391,8 @@ const SidebarLayout = ( props: {
                       size={40}
                       style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
                       src={props.context.profile.picture}
-                      data-name={"profilemenu"}
                     >
-                      {(props.context.user?.email)? props.context.user.email.charAt(0).toUpperCase():""}
+                      {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
                     </Avatar>
                   </Popover>
                 </div>
@@ -408,9 +402,7 @@ const SidebarLayout = ( props: {
           
           <Layout>
             <Content className={styles.layoutcontent}>
-              <div className={styles.childrencontainer}>
-                {props.children}
-              </div>
+              <div className={styles.childrencontainer}>{props.children}</div>
             </Content>
             <FloatButton
               className='sosbutton'
@@ -418,7 +410,142 @@ const SidebarLayout = ( props: {
               shape='square'
               description={"Hilfe"}
             />
-            <Footer style={{ textAlign: "center", color: "lightgrey" }}>{version}</Footer>
+          </Layout>
+          <CookieBanner />
+        </Layout>
+      </ConfigProvider>
+    );
+  }else{
+    // If the width of the screen is above 1500px we render the desktop variant of the component
+    return (
+      <ConfigProvider theme={{
+        components: {
+          Menu: {
+            darkItemSelectedBg: "#344054",
+            darkDangerItemSelectedColor: "#ffffff",
+            darkItemBg: ""
+          },
+          Slider: {
+            trackBg: "#1478FD",
+            handleColor: "#1478FD"
+          }
+        }
+      }}>
+        <Layout className={styles.layout} hasSider={!(screenwidth <= 1500)}>
+          <MobileHeader />
+          <Sider
+            className={styles.sidebar}
+            breakpoint={breakpoint}
+            collapsedWidth={collapseWidth}
+            collapsed={collapsed}
+            onCollapse={( value ) => {
+              setCollapsed( value )
+            }}
+          >
+            <Link href={"/"}>
+              <div className={styles.logobox}>
+                {/*eslint-disable-next-line */}
+                <img src="/small_logo.png" width={41.15} height={40} alt="Logo"/>
+              </div>
+            </Link>
+  
+            <div className={styles.navigation}>
+              
+              <Menu className={styles.primarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={items} />
+  
+              <div>
+                <Menu className={styles.secondarymenu} theme="dark" defaultSelectedKeys={[getDefaultSelected()]} mode="inline" items={footeritems} />
+                <div className={styles.avatarcontainer}>
+                  <Popover placement="rightBottom" content={profilemenu} trigger="click">
+                    <Avatar
+                      size={40}
+                      style={(props.context.profile.picture)? { color: "#474747" }: { color: "#474747", backgroundColor: "#F2F4F7" }}
+                      src={props.context.profile.picture}
+                      data-name={"profilemenu"}
+                    >
+                      {(props.context.user.email)? props.context.user.email.charAt(0).toUpperCase():""}
+                    </Avatar>
+                  </Popover>
+                </div>
+              </div>
+            </div>
+          </Sider>
+          
+          <Layout>
+            <Content className={styles.layoutcontent}>
+              <aside className={styles.homesidebarcontainer}>
+                <div className={styles.homesidebar}>
+                  <div className={styles.logo}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={"/siteware-logo-black.svg"} alt="Logo" width={100}/>
+                  </div>
+                  <div className={styles.title}>Agenten</div>
+                  <List className={styles.assistantlist} split={false}>
+                    <List.Item className={`${styles.assistantlink} ${isselected("all")}`} data-function={"all"}
+                      onClick={() => {
+                        props.category.setter("all");
+                      }}>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Alle</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("content")}`} data-function={"content"}
+                      onClick={() => {
+                        props.category.setter("content");
+                      }}>
+                      <Icon component={Chat} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Content-Erstellung</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("productivity")}`}
+                      data-function={"productivity"} onClick={() => {
+                        props.category.setter("productivity");
+                        setSidebarOpen(false);
+                      }}>
+                      <Icon component={Zap} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Produktivität</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("siteware")}`}
+                      data-function={"siteware"} onClick={() => {
+                        props.category.setter("siteware");
+                        setSidebarOpen(false);
+                      }}>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Siteware</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("chatbots")}`}
+                      data-function={"chatbots"} onClick={() => {
+                        props.category.setter("chatbots");
+                        setSidebarOpen(false);
+                      }}>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>ChatBots</div>
+                    </List.Item>
+                    <List.Item className={`${styles.assistantlink} ${isselected("analysis")}`}
+                      data-function={"analysis"} onClick={() => {
+                        props.category.setter("analysis");
+                        setSidebarOpen(false);
+                      }}>
+                      <Icon component={All} className={styles.assistanticon} viewBox='0 0 22 22'/>
+                      <div className={styles.assistantcatname}>Analyse</div>
+                    </List.Item>
+                  </List>
+                  <List className={styles.backlist} split={false}>
+                    <List.Item className={`${styles.assistantlink}`} onClick={() => {
+                      router.push("/");
+                    }}>
+                      <LeftCircleOutlined/>
+                      <div className={styles.assistantcatname}>Zurück</div>
+                    </List.Item>
+                  </List>
+                </div>
+              </aside>
+              <div className={styles.childrencontainer}>{}{props.children}</div>
+            </Content>
+            <FloatButton
+              className='sosbutton'
+              icon={<Icon component={Help} className={styles.floaticon} viewBox='0 0 22 22' size={24} />}
+              shape='square'
+              description={"Hilfe"}
+            />
           </Layout>
           <CookieBanner />
         </Layout>
@@ -426,4 +553,4 @@ const SidebarLayout = ( props: {
     );
   }
 };
-export default SidebarLayout;
+export default StoreSidebarLayout;

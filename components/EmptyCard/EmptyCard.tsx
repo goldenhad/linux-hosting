@@ -20,7 +20,7 @@ const EmptyCard = () => {
           </div>
           <div className={styles.servicedescription}>
             <PlusCircleOutlined className={styles.addicon}/>
-            <div>Neuer Assistent</div>
+            <div>Neuer Agent</div>
           </div>
         </Card>
       </div>

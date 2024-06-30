@@ -89,7 +89,7 @@ Confirm.getLayout = (page) => {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware business | ai assistant</title>
+        <title>Siteware | ai assistant</title>
       </Head>
       <main>
         {page}

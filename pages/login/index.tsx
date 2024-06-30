@@ -264,12 +264,12 @@ Login.getLayout = ( page ) => {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Siteware | Dein intelligenter KI-Assistent" />
+        <meta property="og:title" content="Siteware | Dein intelligenter KI-Agent" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/ogimage.jpg" />
         <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASEURL}`} />
         <link rel="icon" type="image/x-icon" href="small_logo.ico" />
-        <title>Siteware | Dein intelligenter KI-Assistent</title>
+        <title>Siteware | Dein intelligenter KI-Agent</title>
       </Head>
       <main >
         {page}

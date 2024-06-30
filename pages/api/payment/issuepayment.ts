@@ -42,7 +42,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                   },
                   payment_method: data.method,
                   off_session: true,
-                  description: "Automatische Nachbuchung Siteware business Credits"
+                  description: "Automatische Nachbuchung Siteware Credits"
                 });
 
                 // Return the id of the created paymentintent

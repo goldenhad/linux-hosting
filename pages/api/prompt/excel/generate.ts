@@ -21,7 +21,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           const messages: Array<AIMessage>  = [
             {
               role: "system",
-              content: "Du bist ein Assistent und Beantwortest Fragen rund um das Thema Microsoft Excel."+
+              content: "Du bist ein Agent und Beantwortest Fragen rund um das Thema Microsoft Excel."+
                       "Nutzer geben dir Informationen zu sich und eine Frage, du beantwortest diese Frage."+
                       "Die Antwort sollte auf den Nutzer zugeschnitten sein. Daten, Fakten und Zahlen sollten immer unverändert wiedergegeben werden."+
                       "Adressiere den Nutzer nicht direkt mit seinem Namen. Schreibe in der DU-Form"
@@ -33,7 +33,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           ];
 
           // Call the model and get the used tokens back.
-          const { count } = await generateAIResponse(Model.GPT4, messages, res, data )
+          const { count } = await generateAIResponse(Model.GPT4, messages, res, data)
 
           // Send a response with token counts
           return res.status(200).send(`<~${count.response + count.request}~>`);

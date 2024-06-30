@@ -3,7 +3,7 @@ import React, { Dispatch, ReactComponentElement, SetStateAction, useEffect, useR
 import { MessageInstance } from "antd/es/message/interface";
 import { NotificationInstance } from "antd/es/notification/interface";
 import { Button, Divider, Form, Input, Result, Skeleton } from "antd";
-import { ArrowLeftOutlined, ArrowRightOutlined, HistoryOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, ArrowRightOutlined, HistoryOutlined, RightOutlined } from "@ant-design/icons";
 import { handleEmptyString } from "../../../helper/architecture";
 import { isMobile } from "react-device-detect";
 import { useRouter } from "next/router";
@@ -18,6 +18,8 @@ import Markdown from "react-markdown";
 import moment from "moment/moment";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../db";
+import { getAssistantImageUrl } from "../../../firebase/drive/upload_file";
+import { useExtractColor } from "react-extract-colors";
 
 const { TextArea } = Input;
 
@@ -65,6 +67,7 @@ export default function ChatAssistant(props: {
   const [msgContext, setMsgContext ] = useState<Array<MsgContext>>([]);
   const [ promptError, setPromptError ] = useState(false);
   const [form] = Form.useForm();
+  const [image, setImage] = useState("");
 
   const { user } = props.context;
 
@@ -79,6 +82,25 @@ export default function ChatAssistant(props: {
     }
   }, [chatMsgs]);
 
+  /**
+   * Effect to load the provided assistant image.
+   * If no image was provided use the base svg image
+   */
+  useEffect(() => {
+    const loadImage = async () => {
+      const url = await getAssistantImageUrl(props.assistant.uid);
+      //const url = `/api/assistant/image?aid=${props.assistant.uid}`;
+      if(url){
+        setImage(url);
+      }else{
+        setImage("/base.svg")
+      }
+    }
+
+    loadImage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if(props.predefinedState.state && props.predefinedState.state.length > 0){
       setChatMsgs(props.predefinedState.state);
@@ -90,9 +112,44 @@ export default function ChatAssistant(props: {
     }
   }, [props.predefinedState]);
 
+  const getPrimaryColor = () => {
+    if(props.assistant.primaryColor){
+      return props.assistant.primaryColor;
+    }else{
+      return "#0f4faa";
+    }
+  }
+
+  const { dominantColor, darkerColor, lighterColor } = useExtractColor(image);
+  useEffect(() => {
+    console.log(dominantColor)
+  }, [image]);
+
+  const getTextColor = () => {
+    if(props.assistant.primaryColor){
+      const c = props.assistant.primaryColor.substring(1);      // strip #
+      const rgb = parseInt(c, 16);   // convert rrggbb to decimal
+      const r = (rgb >> 16) & 0xff;  // extract red
+      const g = (rgb >>  8) & 0xff;  // extract green
+      const b = (rgb >>  0) & 0xff;  // extract blue
+
+      const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+
+      if (luma <= 220) {
+        return "white";
+      }else{
+        return "black";
+      }
+
+
+    }else{
+      return "white";
+    }
+  }
 
   const handleUserMsg = async (values: { chatmsg: string }) => {
     const localmsgs = [...chatMsgs];
+    form.setFieldValue("chatmsg", "");
     const localHist = [...props.history.state];
 
     if(localmsgs.length == 1){
@@ -224,8 +281,8 @@ export default function ChatAssistant(props: {
         >
           <div className={styles.msgcontainer}>
             <span
-              className={styles.msgsender}>{(msg.type == MsgType.MODEL) ? "KI" : `${user.firstname} ${user.lastname}`}</span>
-            <div className={`${styles.chatmsg}`}>
+              className={styles.msgsender}>{(msg.type == MsgType.MODEL) ? `${props.assistant.name}` : `${user.firstname} ${user.lastname}`}</span>
+            <div className={`${styles.chatmsg}`} style={{ backgroundColor: getPrimaryColor(), color: getTextColor() }}>
               { (typeof msg.content == "string")? <Markdown
                 skipHtml={true}
                 remarkPlugins={[ remarkBreaks, remarkGfm ]}
@@ -270,10 +327,20 @@ export default function ChatAssistant(props: {
   return (
     <div className={styles.welcomemessage}>
       <div className={styles.messagcnt}>
-        <Button onClick={() => {
-          router.push("/")
-        }} icon={<ArrowLeftOutlined/>}></Button>
-        <div className={styles.msg}>Willkommen zurück, {handleEmptyString(user.firstname)}</div>
+        <div className={styles.backbutton}>
+          <Button onClick={() => {
+            router.push("/")
+          }} icon={<ArrowLeftOutlined/>}></Button>
+          <div className={styles.msg}>Zur Übersicht</div>
+        </div>
+
+        <div className={styles.headerimagecontainer}>
+          <img width={50} height={50} className={styles.headerimage} src={image} />
+          <div>
+            Willkommen beim {props.assistant.name}
+          </div>
+        </div>
+
         {(!isMobile && window.innerWidth >= 992) ?
           <Button className={styles.histbutton} onClick={() => {
             props.setHistoryOpen(true)
@@ -290,12 +357,13 @@ export default function ChatAssistant(props: {
       <div className={styles.inputwindow}>
         <Form form={form} disabled={formDisabled} layout={"horizontal"} onFinish={handleUserMsg} className={styles.inputform}>
           <Form.Item className={styles.inputformitem} name={"chatmsg"} label={""}>
-            <TextArea placeholder={"Worum geht es?"}></TextArea>
+            <TextArea className={styles.area} autoSize={true} placeholder={"Worum geht es?"}></TextArea>
           </Form.Item>
-            
+
           <Button
             className={styles.inputformbutton}
             type={"primary"}
+            style={{ backgroundColor: getPrimaryColor(), color: getTextColor() }}
             onClick={() => {
               if(quotaOverused) {
                 props.messageApi.error("Dein Budget ist ausgeschöpft. In der Kontoübersicht kannst du neues Guthaben dazubuchen!")
@@ -304,7 +372,7 @@ export default function ChatAssistant(props: {
               }
             }}
           >
-            <ArrowRightOutlined />
+            <RightOutlined />
           </Button>
         </Form>
       </div>

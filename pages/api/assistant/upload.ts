@@ -47,9 +47,14 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
         // Upload the image to firebase
         const imageurl = await uploadAssistantImage( imageBytes, assistant );
 
+        for (let i= 0; i < imageBytes.length; i++){
+          console.log(imageBytes[i]);
+        }
+
         return res.status( 200 ).send( { errorcode: 0, message: imageurl } );
 
       }catch( e ){
+        console.error(e);
         return res.status( 400 ).send( { errorcode: 1, message: "The provided Data causend an error" } );
       }
     }else{

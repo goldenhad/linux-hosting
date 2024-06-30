@@ -90,7 +90,13 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
       validateApiKey(apikey).then(async ({ user }) => {
         // If the key is valid...
         // Parse the given messages as json object
-        const parsedMessages = JSON.parse(messages);
+        console.log(messages);
+        let parsedMessages = [];
+        try {
+          parsedMessages = JSON.parse(messages);
+        }catch (e){
+          parsedMessages = [];
+        }
 
         const assistantData = await firestore.doc(`/Assistants/${aid}`).get();
         const liveAssistantData = assistantData.data() as Assistant;
@@ -226,7 +232,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                           },
                           payment_method: method,
                           off_session: true,
-                          description: "Automatische Nachbuchung Siteware business Credits"
+                          description: "Automatische Nachbuchung Siteware Credits"
                         });
 
                         // Get the invoice id from the create request

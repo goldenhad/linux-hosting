@@ -62,31 +62,6 @@ export class TokenCalculator{
     this.parameter = calc;
   }
 
-  indexToCredits(index: number, additionalDiscount?: boolean): number{
-    const priceObj = this.parameter.products.find((obj: Product) => {
-      return obj.id === index;
-    });
-
-    if(priceObj){
-      const price = priceObj.price;
-      let discount = priceObj.discount;
-      if(additionalDiscount){
-        discount += this.parameter.autoDiscountPercent;
-      }
-
-      const nomalizer = 1/(this.parameter.tokenProMail.in + this.parameter.tokenProMail.out);
-      const cost = (this.parameter.costPerToken.in)/1000 * this.parameter.tokenProMail.in + (this.parameter.costPerToken.out)/1000 * this.parameter.tokenProMail.out;
-      const profit = this.parameter.profitPercent/100;
-
-      console.log(price, nomalizer, cost, profit);
-      console.log(nomalizer * price/(cost * profit))
-
-      return parseFloat((price/(cost * profit) * (1 + discount/100)).toFixed(0));
-    }else{
-      throw Error("Price undefined");
-    }
-  }
-
   indexToTokens(index: number, additionalDiscount?: boolean): number{
     const priceObj = this.parameter.products.find((obj: Product) => {
       return obj.id === index;
@@ -137,6 +112,8 @@ export class TokenCalculator{
 
   cost(tokens: { in: number, out: number }, assistantType: AssistantType): number {
     let profit = 0;
+
+    console.log(this.parameter);
 
     if(assistantType == AssistantType.QAA){
       profit = this.parameter.services.profitPercent.QaA;

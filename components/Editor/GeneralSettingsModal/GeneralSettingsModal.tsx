@@ -8,6 +8,7 @@ import updateData from "../../../firebase/data/updateData";
 import { UploadProps } from "antd/es/upload";
 import { AssistantState } from "../EditorSidebar/EditorSidebar";
 import { getAssistantImageUrl } from "../../../firebase/drive/upload_file";
+import { Visibility } from "../../../firebase/types/Assistant";
 
 const { TextArea } = Input;
 
@@ -26,6 +27,7 @@ export default function GeneralSettingsModal(props: {
 }) {
   const [ predefinedImage, setPredefinedImage ] = useState("");
   const [ uplaodedFiles, setUploadedFiles ] = useState(0);
+  const [ visibility, setVisibility ] = useState(props.assistantState.visibility? props.assistantState.visibility: Visibility.PRIVATE);
 
   useEffect(() => {
     const loadAssistantImage = async () => {
@@ -197,12 +199,36 @@ export default function GeneralSettingsModal(props: {
             options={[
               { value: "productivity", label: "Produktivität" },
               { value: "content", label: "Content-Erstellung" },
+              { value: "siteware", label: "Siteware" },
+              { value: "chatbots", label: "ChatBots" },
+              { value: "analysis", label: "Analyse" },
               { value: "other", label: "Sonstige" }
             ]} ></Select>
         </Form.Item>
 
+        <Form.Item initialValue={props.assistantState.visibility} name={"visibility"} label={<b>Sichtbarkeit</b>}>
+          <Select
+            placeholder={"Bitte wähle eine Sichtbarkeit aus"}
+            options={[
+              { value: Visibility.PRIVATE, label: "Privat" },
+              { value: Visibility.SELECTED, label: "Ausgewählte Nutzer" },
+              { value: Visibility.ALL, label: "Öffentlich" }
+            ]} onChange={(value) => {
+              setVisibility(value) 
+            }} ></Select>
+        </Form.Item>
+
+        <Form.Item
+          hidden={(visibility !== Visibility.SELECTED)}
+          initialValue={(props.assistantState.selectedCompanies !== undefined)? props.assistantState.selectedCompanies.join("\n"): ""}
+          name={"selectedCompanies"}
+          label={<b>Ausgewählte Firmen (eine ID pro Zeile)</b>}
+        >
+          <TextArea rows={7} placeholder={"Beschreibe deinen Agenten kurz"} />
+        </Form.Item>
+
         <Form.Item initialValue={props.assistantState.description} name={"description"} label={<b>Beschreibung</b>}>
-          <TextArea rows={7} placeholder={"Beschreibe deinen Assistenten kurz"} />
+          <TextArea rows={7} placeholder={"Beschreibe deinen Agenten kurz"} />
         </Form.Item>
 
 
@@ -213,7 +239,7 @@ export default function GeneralSettingsModal(props: {
             <div className={styles.infoicon} >
               <Popover overlayClassName={styles.infopopup} showArrow={true} title={"Informationen zur Wissensbasis"} content={
                 <div>
-                  Siteware kann Dokumente einlesen, verarbeiten und als Kontext für deinen Assistenten bereitstellen.
+                  Siteware kann Dokumente einlesen, verarbeiten und als Kontext für deinen Agenten bereitstellen.
                   Achte darauf die Daten ggf. so zu strukturieren, dass sie für die KI verständlich sind.
                   Darüber hinaus solltest du darauf achten, in der Wissensbasis keine sensiblen Daten zu speichern.
                   Diese könnten sonst durch die KI preisgegeben werden.

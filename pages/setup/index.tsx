@@ -412,7 +412,7 @@ export default function Setup(){
         </div>
 
         <div className={styles.formContainer}>
-          <div className={styles.formtitle}>Willkommen bei Siteware business</div>
+          <div className={styles.formtitle}>Willkommen bei Siteware</div>
           <div className={styles.formexplanation}>Wir müssen zuerst dein Konto einrichten<br/>Keine Sorge, es dauert nicht lang!</div>
                     
           <div className={styles.stepcontainer}>
@@ -433,7 +433,7 @@ export default function Setup(){
               )}
               {current === getFormSteps().length - 1 && (
                 <Button type="primary" onClick={() => setupUser()} loading={promptProcesing}>
-                  Zu Siteware business
+                  Zu Siteware
                 </Button>
               )}
               {current < getFormSteps().length - 1 && (

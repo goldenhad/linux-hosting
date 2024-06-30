@@ -36,10 +36,12 @@ export async function middleware(request: NextRequest) {
       privateKey: serviceAccount.private_key
     },
     handleValidToken: async ({ token, decodedToken }, headers) => {
-      if (PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
+      if (PUBLIC_PATHS.includes(request.nextUrl.pathname) && !request.nextUrl.pathname.startsWith("/action")) {
         console.log(`ROUTE ${request.nextUrl.pathname} is not public, redirecting to home...`)
         return redirectToHome(request);
       }
+
+      console.log(request.nextUrl.pathname);
 
       if(!request.nextUrl.pathname.startsWith("/confirm") && !request.nextUrl.pathname.startsWith("/action")){
         if(!decodedToken.email_verified){
@@ -48,13 +50,13 @@ export async function middleware(request: NextRequest) {
       }
     },
     handleInvalidToken: async (reason) => {
-      console.info("Missing or malformed credentials", { reason });
+      //console.info("Missing or malformed credentials", { reason });
       //console.log(PUBLIC_PATHS);
-      console.log(request.nextUrl.pathname);
-      console.log(PUBLIC_PATHS.includes(request.nextUrl.pathname))
+      //console.log(request.nextUrl.pathname);
+      //console.log(PUBLIC_PATHS.includes(request.nextUrl.pathname))
 
       if (!PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
-        console.log("redirecting....");
+        //console.log("redirecting....");
         return redirectToLogin(request, {
           path: "/login",
           publicPaths: PUBLIC_PATHS

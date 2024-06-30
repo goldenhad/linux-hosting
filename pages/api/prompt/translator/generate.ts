@@ -22,7 +22,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
           const messages: Array<AIMessage>  = [
             {
               role: "system",
-              content: "Du bist ein Assistent und übersetzt Texte in eine Zielsprache die durch den Nutzer spezifiziert wird."+
+              content: "Du bist ein Agent und übersetzt Texte in eine Zielsprache die durch den Nutzer spezifiziert wird."+
                   "Die Antwort sollte den Inhalt des Originaltextes erhalten und so genau wie möglich übersetzen."+
                   "Daten, Fakten und Zahlen sollten immer unverändert wiedergegeben werden. Gib nur den übersetzen Text aus"
             },
@@ -32,7 +32,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             }];
 
           // Call the model and get the used tokens back.
-          const { count } = await generateAIResponse(Model.GPT4, messages, res, data )
+          const { count } = await generateAIResponse(Model.GPT4, messages, res, data)
 
           // Send a response with token counts
           return res.status(200).send(`<~${count.response + count.request}~>`);

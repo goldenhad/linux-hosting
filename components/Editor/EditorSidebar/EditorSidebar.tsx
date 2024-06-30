@@ -4,11 +4,7 @@ import { Button, Drawer, Form, Input, Layout, message, Switch } from "antd";
 import Link from "next/link";
 import styles from "./editorsidebar.module.scss";
 import CookieBanner from "../../CookieBanner/CookieBanner";
-import Assistant, {
-  Block,
-  FileReference,
-  InputBlock
-} from "../../../firebase/types/Assistant";
+import Assistant, { Block, FileReference, InputBlock, Visibility } from "../../../firebase/types/Assistant";
 import updateData from "../../../firebase/data/updateData";
 import { checkValidityOfAssistantConfig } from "../../../helper/assistant";
 import GeneralSettingsModal from "../GeneralSettingsModal/GeneralSettingsModal";
@@ -30,6 +26,9 @@ export interface AssistantState {
   published: boolean,
   uid: string,
   blocks: Array<Block | InputBlock>,
+  owner: string,
+  visibility: Visibility,
+  selectedCompanies?: Array<string>,
   knowledgeFiles: Array<FileReference>
 }
 
@@ -133,6 +132,9 @@ const EditorSidebar = ( props: {
 
     AssistantToUpdate.description = (desc)? desc: "";
     AssistantToUpdate.category = settForm.getFieldValue("category");
+    AssistantToUpdate.visibility = (settForm.getFieldValue("visibility"))? settForm.getFieldValue("visibility"): Visibility.PRIVATE;
+    const selectedCompsString: string = settForm.getFieldValue("selectedCompanies");
+    AssistantToUpdate.selectedCompanies = (selectedCompsString)? selectedCompsString?.split("\n"): [];
     AssistantToUpdate.name = name;
     
     if(AssistantToUpdate.blocks && AssistantToUpdate.blocks.length > 0){
@@ -166,7 +168,7 @@ const EditorSidebar = ( props: {
           messageApi.error("Bitte lege eine Kategorie fest!");
         }
       }else{
-        messageApi.error("Bitte gib einen Namen für deinen Assistenten ein!");
+        messageApi.error("Bitte gib einen Namen für deinen Agenten ein!");
       }
     }else{
       messageApi.error("Bitte definiere mindestens einen Block!");
@@ -200,7 +202,7 @@ const EditorSidebar = ( props: {
           </Link>
 
           <div className={styles.nameinput}>
-            <Input value={name} placeholder={"Neuer Assistent"}
+            <Input value={name} placeholder={"Neuer Agent"}
               onChange={(val) => {
                 setName( val.target.value )
               }}></Input>
@@ -224,7 +226,7 @@ const EditorSidebar = ( props: {
 
           <div className={styles.headerActions}>
             <div className={styles.additionalSettings}>
-              <span className={styles.settingsname}>Öffentlich?</span>
+              <span className={styles.settingsname}>Veröffentlicht?</span>
               <Switch value={(assistantState) ? assistantState.published : false} size="small"
                 onChange={(val) => setAssistantState({ ...assistantState, published: val })}/>
             </div>
@@ -233,7 +235,7 @@ const EditorSidebar = ( props: {
               <Button onClick={() => {
                 saveAssistant();
               }} className={styles.savebutton}
-              type={"primary"}>{(props.aid) ? "Speichern" : "Assistenten anlegen"}</Button>
+              type={"primary"}>{(props.aid) ? "Speichern" : "Agenten anlegen"}</Button>
             </div>
           </div>
         </Header>
@@ -328,7 +330,7 @@ const EditorSidebar = ( props: {
             </Link>
 
             <div className={styles.nameinput}>
-              <Input value={name} placeholder={"Neuer Assistent"} onChange={(val) => {
+              <Input value={name} placeholder={"Neuer Agent"} onChange={(val) => {
                 setName(val.target.value )
               }}></Input>
             </div>
@@ -351,7 +353,7 @@ const EditorSidebar = ( props: {
 
             <div className={styles.headerActions}>
               <div className={styles.additionalSettings}>
-                <span className={styles.settingsname}>Öffentlich?</span>
+                <span className={styles.settingsname}>Veröffentlicht?</span>
                 <Switch
                   value={(assistantState)? assistantState.published: false}
                   size="small"
@@ -362,7 +364,7 @@ const EditorSidebar = ( props: {
                 <PreviewButton />
                 <Button onClick={() => {
                   saveAssistant();
-                }} className={styles.savebutton} type={"primary"}>{(props.aid)? "Speichern" : "Assistenten anlegen"}</Button>
+                }} className={styles.savebutton} type={"primary"}>{(props.aid)? "Speichern" : "Agenten anlegen"}</Button>
               </div>
             </div>
           </Header>

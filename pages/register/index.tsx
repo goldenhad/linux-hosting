@@ -33,7 +33,7 @@ const frontendnav: MenuProps["items"] = [
     key: "legal"
   },
   {
-    label: <Link href={"login"}>Siteware business</Link>,
+    label: <Link href={"login"}>Siteware</Link>,
     key: "login"
   }
 ]
@@ -756,7 +756,7 @@ export default function Register( props ){
             }]}>
             <Select onChange={( value ) => {
               ( value == "Für mein Unternehmen" )? setRegisteringCompany( true ): setRegisteringCompany( false ) 
-            }} placeholder={"Wie planst du Siteware business zu nutzen?"}
+            }} placeholder={"Wie planst du Siteware zu nutzen?"}
             options={[{ key: 0, value: "Nur für mich persönlich" }, { key: 1, value: "Für mein Unternehmen" }]}/>
           </Form.Item>
     
@@ -814,8 +814,8 @@ export default function Register( props ){
         <div className={styles.formContainer}>
           <div className={styles.formtitle}>Registrieren</div>
           <div className={styles.formexplanation}>
-            Spare Zeit und steigere deine Produktivität mit Siteware Business – 
-            melde dich jetzt an und entdecke die Kraft unserer KI-Assistenten!
+            Spare Zeit und steigere deine Produktivität mit Siteware –
+            melde dich jetzt an und entdecke die Kraft unserer KI-Agenten!
           </div>
           {getForm()}
           <div className={styles.backtologin}>
@@ -833,7 +833,7 @@ Register.getLayout = ( page ) => {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Siteware business dein intelligenter KI-Assistent" />
+        <meta property="og:title" content="Siteware dein intelligenter KI-Agent" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/ogimage.jpg" />
         <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASEURL}`} />

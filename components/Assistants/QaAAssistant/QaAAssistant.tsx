@@ -387,7 +387,7 @@ export default function QaAAssistant(props: {
 
               const encHist = encHistObj.data.message;
 
-              const userhist = context.user.history;
+              const userhist = context.user.history? context.user.history: {};
               // Set the history to the encoded string and update the user
               userhist[props.assistant.uid] = encHist;
               await updateDoc( doc( db, "User", context.login.uid ), { history: userhist } );

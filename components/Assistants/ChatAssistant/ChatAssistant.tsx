@@ -241,7 +241,7 @@ export default function ChatAssistant(props: {
             const encHist = encHistObj.data.message;
 
             props.history.set(localHist);
-            const userhist = user.history;
+            const userhist = user.history? user.history: {};
             // Set the history to the encoded string and update the user
             userhist[props.assistant.uid] = encHist;
             await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );

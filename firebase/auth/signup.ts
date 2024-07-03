@@ -55,7 +55,7 @@ export default async function signUp( firstname, lastname, email, username, pass
             unlimited: false,
             orders: [],
             invitedUsers: [],
-            assistants: [],
+            assistants: []
           } );
 
           //console.log("created the company");
@@ -129,8 +129,8 @@ export default async function signUp( firstname, lastname, email, username, pass
 
             console.log(process.env.NEXT_PUBLIC_BASEURL);
 
-            await sendEmailVerification(auth.currentUser);
-            console.log("EMAIL VERSENDET");
+            //await sendEmailVerification(auth.currentUser);
+            //console.log("EMAIL VERSENDET");
 
           } catch( e ) {
             console.log(e);

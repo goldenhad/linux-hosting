@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { message } from "antd";
-import { applyActionCode, getAuth } from "firebase/auth";
+import { applyActionCode, checkActionCode, getAuth } from "firebase/auth";
 import { firebase_app } from "../../../db";
 import { useRouter } from "next/router";
 import styles from "./verify.action.module.scss";
@@ -14,8 +14,6 @@ const auth = getAuth( firebase_app );
 
 export function VerifyMail(props: { oobCode: string }){
   const router = useRouter();
-  const context = useAuthContext();
-  const { login } = context;
   const [ verifyFailed, setVerifyFailed ] = useState(false);
   const [ worked, setWorked ] = useState(false);
   const [ emailSend, setEmailSend ] = useState(false);
@@ -23,40 +21,36 @@ export function VerifyMail(props: { oobCode: string }){
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect( () => {
-    const takeAction = async () => {
+    /*const takeAction = async () => {
       console.log(auth.currentUser);
-      if(!auth.currentUser?.emailVerified){
+      if(auth.currentUser){
+
+      }
+    }*/
+
+    auth.onAuthStateChanged(async (user) => {
+      if(!user.emailVerified){
         if(props.oobCode != "") {
           try{
-            console.log("ICH BIN HIER");
             await applyActionCode(auth, props.oobCode);
-            console.log("VERIFIED");
             setVerifyFailed(false);
             setWorked(true);
-            //const verreq = await axios.post("/api/account/verify", { oobCode: props.oobCode });
-            /*if (verreq.status == 200) {
-              console.log("VERIFIED");
-              setVerifyFailed(false);
-              //router.push("/confirm?valid=1");
-              setWorked(true);
-            } else {
-              console.log("VERIFICATION FAILED!!!");
-              setVerifyFailed(true);
-            }*/
           }catch (e){
             console.log(e);
+            console.log(props.oobCode);
             setVerifyFailed(true);
           }
         }
       }else{
-        console.log("Already verified!");
         setVerifyFailed(false);
         setWorked(true);
       }
-    }
+    }, (err) => {
+      console.log(err);
+    })
 
-    takeAction();
-  }, []);
+    //takeAction();
+  }, [props.oobCode]);
 
   const sendMail = async () => {
     await sendEmailVerification(auth.currentUser);
@@ -95,7 +89,7 @@ export function VerifyMail(props: { oobCode: string }){
         <FatButton onClick={async () => {
           await axios.get("/api/logout");
           router.push("/login");
-        }} text={"Zu Siteware"}/>
+        }} text={"Zum Login"}/>
       </div>
     );
   }

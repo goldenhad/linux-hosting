@@ -32,7 +32,6 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
  * @constructor
  */
 export default function Action( props: restprops ){
-  console.log("loading action component...")
   const ActionComponent = () => {
     if(props.mode == "resetPassword"){
       return <ResetPassword oobCode={props.oobCode} />

@@ -50,7 +50,7 @@ export function VerifyMail(props: { oobCode: string }){
     })
 
     //takeAction();
-  }, []);
+  }, [props.oobCode]);
 
   const sendMail = async () => {
     await sendEmailVerification(auth.currentUser);
@@ -89,7 +89,7 @@ export function VerifyMail(props: { oobCode: string }){
         <FatButton onClick={async () => {
           await axios.get("/api/logout");
           router.push("/login");
-        }} text={"Zu Siteware"}/>
+        }} text={"Zum Login"}/>
       </div>
     );
   }

@@ -38,14 +38,15 @@ export default function Account() {
 
   useEffect( () => {
     // Init the edit account form with the values of the user
-    personalForm.setFieldValue( "username", user.username );
-    personalForm.setFieldValue( "email", login.email );
-    personalForm.setFieldValue( "firstname", user.firstname );
-    personalForm.setFieldValue( "lastname", user.lastname );
-    personalForm.setFieldValue( "street", company.street );
-    personalForm.setFieldValue( "postalcode", company.postalcode );
-    personalForm.setFieldValue( "city", company.city );
-
+    if(user){
+      personalForm.setFieldValue( "username", user.username );
+      personalForm.setFieldValue( "email", login.email );
+      personalForm.setFieldValue( "firstname", user.firstname );
+      personalForm.setFieldValue( "lastname", user.lastname );
+      personalForm.setFieldValue( "street", company.street );
+      personalForm.setFieldValue( "postalcode", company.postalcode );
+      personalForm.setFieldValue( "city", company.city );
+    }
     // eslint-disable-next-line
   }, [] );
 
@@ -80,10 +81,10 @@ export default function Account() {
     return (
       <div className={styles.password}>
         <Card className={styles.passwordcard} title="API" bordered={true}>
-          {(user.apikey)?
+          {(user?.apikey)?
             <div className={styles.apikeyrow}>
               <Paragraph>
-                <pre>{user.apikey}</pre>
+                <pre>{user?.apikey}</pre>
               </Paragraph>
               <Button type={"default"} danger onClick={() => {
                 deleteApiKey();
@@ -131,9 +132,9 @@ export default function Account() {
   const deleteUser = async () => {
     // Check role of user...
 
-    switch ( user.Role ) {
+    switch ( user?.Role ) {
     case "Company-Admin":
-      const { result } = await getDocWhere( "User", "Company", "==", user.Company );
+      const { result } = await getDocWhere( "User", "Company", "==", user?.Company );
       console.log(result);
       if( result ){
         // Test if there are any other users of the company
@@ -153,7 +154,7 @@ export default function Account() {
       try{
         await deleteProfilePicture( login.uid );
         await deleteData( "User", login.uid );
-        await deleteData( "Company", user.Company );
+        await deleteData( "Company", user?.Company );
         await deleteSitewareUser();
       }catch(e){
         console.log( e );
@@ -178,7 +179,7 @@ export default function Account() {
       break;
 
     case "Singleuser":
-      const cmpnysnglSerDeleteData = await deleteData( "Company", user.Company );
+      const cmpnysnglSerDeleteData = await deleteData( "Company", user?.Company );
       console.log( cmpnysnglSerDeleteData );
       if( !cmpnysnglSerDeleteData.error ){
         const snglSerDeleteData = await deleteData( "User", login.uid );
@@ -187,6 +188,8 @@ export default function Account() {
           await deleteProfilePicture( login.uid );
           const deleteUserCall = await deleteSitewareUser();
           console.log( deleteUserCall );
+          await axios.get("/api/logout");
+          router.replace("/login");
         }
       }
       break;
@@ -194,8 +197,6 @@ export default function Account() {
     default:
       break;
     }
-
-    router.push( "/logout" );
   }
 
 

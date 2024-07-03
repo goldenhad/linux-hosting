@@ -41,7 +41,6 @@ export async function middleware(request: NextRequest) {
         return redirectToHome(request);
       }
 
-      console.log(request.nextUrl.pathname);
 
       if(!request.nextUrl.pathname.startsWith("/confirm") && !request.nextUrl.pathname.startsWith("/action")){
         if(!decodedToken.email_verified){

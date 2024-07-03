@@ -21,8 +21,15 @@ export function VerifyMail(props: { oobCode: string }){
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect( () => {
-    const takeAction = async () => {
-      if(!auth.currentUser?.emailVerified){
+    /*const takeAction = async () => {
+      console.log(auth.currentUser);
+      if(auth.currentUser){
+
+      }
+    }*/
+
+    auth.onAuthStateChanged(async (user) => {
+      if(!user.emailVerified){
         if(props.oobCode != "") {
           try{
             await applyActionCode(auth, props.oobCode);
@@ -38,10 +45,12 @@ export function VerifyMail(props: { oobCode: string }){
         setVerifyFailed(false);
         setWorked(true);
       }
-    }
+    }, (err) => {
+      console.log(err);
+    })
 
-    takeAction();
-  }, [props.oobCode]);
+    //takeAction();
+  }, []);
 
   const sendMail = async () => {
     await sendEmailVerification(auth.currentUser);

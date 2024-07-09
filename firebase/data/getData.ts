@@ -1,8 +1,17 @@
 import { firebase_app } from "../../db";
-import { getFirestore, doc, getDoc, query, where, getDocs, collection } from "firebase/firestore";
+import { getFirestore, doc, getDoc, query, where, getDocs, collection, DocumentData, CollectionReference } from "firebase/firestore";
+import Assistant from "../types/Assistant";
 
 const db = getFirestore( firebase_app );
 
+type DocReturn<T> = {
+  result: T[], 
+  error: string | null | object
+}
+
+type Collections = {
+  Assistants: Assistant
+}
 
 export default async function getDocument( collection, id ) {
   const docRef = doc( db, collection, id );
@@ -42,17 +51,17 @@ export async function getDocWhere( col, state, comperator, invariant ) {
 }
 
 
-export async function getAllDocs( col ) {
-  const docRef = collection( db, col );
+export async function getAllDocs<T extends  Collections[C] & { uid: string }, C extends keyof Collections>( col: C ): Promise<DocReturn<T>>{
+  const docRef = collection( db, col ) as CollectionReference<T>
 
-  let result = null;
+  let result: Array<T> | null = null;
   let error = null;
 
   try {
     const rawdata = await getDocs( docRef );
     result = [];
     rawdata.forEach( ( doc ) => {
-      const obj = doc.data();
+      const obj: T = doc.data();
       obj.uid = doc.id;
       result.push( obj );
     } )

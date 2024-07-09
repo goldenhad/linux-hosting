@@ -1,6 +1,9 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
+const dotenv = require('dotenv');
+const { DefinePlugin } = require("webpack");
 
+dotenv.config({ path: '../.env' });
 module.exports = {
   entry: './src/index.tsx',
   output: {
@@ -40,10 +43,19 @@ module.exports = {
       template: path.resolve(__dirname, 'src', 'index.html'),
       filename: 'index.html',
     }),
+    new DefinePlugin({
+      'process.env': JSON.stringify(process.env)
+    })
   ],
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.scss', '.sass'],
     modules: ['node_modules'],
+    alias: {
+      "Shared/Components": path.resolve(__dirname, "..", "components"),
+      "Shared/Types": path.resolve(__dirname, "..","/firebase/types"),
+      "Shared/Helper": path.resolve(__dirname, "..","helper"),
+      "Shared/Firebase": path.resolve(__dirname, "..","firebase"),
+    }
   },
   devServer: {
     static: {
@@ -53,5 +65,10 @@ module.exports = {
     compress: true,
     port: 9000,
     hot: true,
+    proxy: [{ 
+      context: ['/api'],
+      target: 'http://localhost:3000',
+      secure: false, 
+    }]
   },
 };

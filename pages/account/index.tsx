@@ -1,20 +1,20 @@
 import { Card, Button, Form, Input, Result, message, Modal, Typography } from "antd";
 import styles from "./account.module.scss"
 import { useEffect, useState } from "react";
-import SidebarLayout from "../../components/Sidebar/SidebarLayout";
-import { useAuthContext } from "../../components/context/AuthContext";
-import forgotpassword from "../../firebase/auth/forgot";
+import SidebarLayout from "../../lib/components/Sidebar/SidebarLayout";
+import { useAuthContext } from "../../lib/components/context/AuthContext";
+import forgotpassword from "../../lib/firebase/auth/forgot";
 import axios from "axios";
-import { User } from "../../firebase/types/User";
-import deleteData from "../../firebase/data/deleteData";
-import deleteSitewareUser from "../../firebase/auth/delete";
-import { getDocWhere } from "../../firebase/data/getData";
-import reauthUser from "../../firebase/auth/reauth";
+import { User } from "../../lib/firebase/types/User";
+import deleteData from "../../lib/firebase/data/deleteData";
+import deleteSitewareUser from "../../lib/firebase/auth/delete";
+import { getDocWhere } from "../../lib/firebase/data/getData";
+import reauthUser from "../../lib/firebase/auth/reauth";
 import { useRouter } from "next/router";
-import { deleteProfilePicture } from "../../firebase/drive/delete";
-import FatButton from "../../components/FatButton";
-import EditUserForm from "../../components/Forms/EditUserForm/EditUserForm";
-import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
+import { deleteProfilePicture } from "../../lib/firebase/drive/delete";
+import FatButton from "../../lib/components/FatButton";
+import EditUserForm from "../../lib/components/Forms/EditUserForm/EditUserForm";
+import UploadProfileImage from "../../lib/components/UploadProfileImage/UploadProfileImage";
 
 const { Paragraph } = Typography;
 
@@ -156,6 +156,8 @@ export default function Account() {
         await deleteData( "User", login.uid );
         await deleteData( "Company", user?.Company );
         await deleteSitewareUser();
+        await axios.get("/api/logout");
+        router.replace("/login");
       }catch(e){
         console.log( e );
       }

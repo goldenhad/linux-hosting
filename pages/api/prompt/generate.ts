@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../../firebase/admin"
-import { AIMessage, AssistantResponse, generateAIResponse, Model } from "../../../helper/prompt/generation";
+import { auth } from "../../../lib/firebase/admin"
+import { AIMessage, AssistantResponse, generateAIResponse, Model } from "../../../lib/helper/prompt/generation";
 
 
 /**

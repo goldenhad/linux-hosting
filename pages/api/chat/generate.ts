@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../../firebase/admin"
+import { auth } from "../../../lib/firebase/admin"
 import {
   AIMessage,
   AssistantResponse,
   generateChatResponse,
   Model
-} from "../../../helper/prompt/generation";
+} from "../../../lib/helper/prompt/generation";
 
 
 /**

@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
-import { auth } from "../../../firebase/admin"
-import { parseProfilePrompt } from "../../../helper/prompt/templating";
-import getDocument from "../../../firebase/data/getData";
+import { auth } from "../../../lib/firebase/admin"
+import { parseProfilePrompt } from "../../../lib/helper/prompt/templating";
+import getDocument from "../../../lib/firebase/data/getData";
 
 const openai = new OpenAI( {
   apiKey: process.env.OPENAI_API_KEY

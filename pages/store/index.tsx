@@ -1,18 +1,17 @@
-import { Badge, Button, Card, Divider, Input, message, Modal } from "antd";
+import { Divider, Input, message, Modal } from "antd";
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
-import { useAuthContext } from "../../components/context/AuthContext";
+import { useAuthContext } from "../../lib/components/context/AuthContext";
 import { useRouter } from "next/navigation";
-import updateData from "../../firebase/data/updateData";
-import { handleUndefinedTour } from "../../helper/architecture";
+import updateData from "../../lib/firebase/data/updateData";
+import { handleUndefinedTour } from "../../lib/helper/architecture";
 import ReactPlayer from "react-player/lazy"
-import { getAllDocs } from "../../firebase/data/getData";
-import Assistant, { Visibility } from "../../firebase/types/Assistant";
-import EmptyCard from "../../components/EmptyCard/EmptyCard";
-import StoreSidebarLayout from "../../components/StoreSidebar/StoreSidebarLayout";
-import StoreCard from "../../components/StoreCard/StoreCard";
-import { Company } from "../../firebase/types/Company";
+import { getAllDocs } from "../../lib/firebase/data/getData";
+import Assistant, { Visibility } from "../../lib/firebase/types/Assistant";
+import StoreSidebarLayout from "../../lib/components/StoreSidebar/StoreSidebarLayout";
+import StoreCard from "../../lib/components/StoreCard/StoreCard";
+import { Company } from "../../lib/firebase/types/Company";
 
 const { Search } = Input;
 
@@ -58,6 +57,9 @@ export default function Home(props: { assistants: Array<Assistant> }) {
   useEffect( () => {
     if( !user.setupDone && user.setupDone != undefined ){
       router.push( "/setup" );
+    }
+    if( !role.canEditCompanyDetails ){
+      router.push( "/" );
     }
   }, [router, user.setupDone] );
 

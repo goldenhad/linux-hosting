@@ -3,7 +3,7 @@ import { useState } from "react";
 import styles from "./confirm.module.scss"
 import Head from "next/head";
 import { useRouter } from "next/router";
-import FatButton from "../../components/FatButton";
+import FatButton from "../../lib/components/FatButton";
 import axios from "axios";
 
 // Props given by firebase to this page trough redirection

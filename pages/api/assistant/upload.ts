@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../../firebase/admin"
+import { auth } from "../../../lib/firebase/admin"
 import { Formidable } from "formidable";
-import { uploadAssistantImage } from "../../../firebase/drive/upload_file";
+import { uploadAssistantImage } from "../../../lib/firebase/drive/upload_file";
 import fs from "fs";
 
 type ResponseData = {

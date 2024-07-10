@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../../firebase/admin"
+import { auth } from "../../../lib/firebase/admin"
 import CryptoJS from "crypto-js";
 
 

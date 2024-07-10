@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../../firebase/admin"
-import getDocument from "../../../firebase/data/getData";
+import { auth } from "../../../lib/firebase/admin"
+import getDocument from "../../../lib/firebase/data/getData";
 import { UserMetadata } from "@firebase/auth";
 
 type ResponseData = {

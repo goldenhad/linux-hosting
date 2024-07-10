@@ -2,9 +2,9 @@
 import { ConfigProvider } from "antd";
 import styles from "./upgrade.module.scss"
 import { GetServerSideProps } from "next";
-import { useAuthContext } from "../../components/context/AuthContext";
-import Creditform from "../../components/CreditForm/Creditform";
-import getStripe from "../../helper/stripe";
+import { useAuthContext } from "../../lib/components/context/AuthContext";
+import Creditform from "../../lib/components/CreditForm/Creditform";
+import getStripe from "../../lib/helper/stripe";
 import { Elements } from "@stripe/react-stripe-js";
 
 

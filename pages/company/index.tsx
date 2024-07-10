@@ -20,12 +20,12 @@ import styles from "./edit.company.module.scss"
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
-import SidebarLayout from "../../components/Sidebar/SidebarLayout";
+import SidebarLayout from "../../lib/components/Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
-import { handleEmptyString, handleUndefinedTour } from "../../helper/architecture";
-import { useAuthContext } from "../../components/context/AuthContext";
-import { getDocWhere } from "../../firebase/data/getData";
-import updateData from "../../firebase/data/updateData";
+import { handleEmptyString, handleUndefinedTour } from "../../lib/helper/architecture";
+import { useAuthContext } from "../../lib/components/context/AuthContext";
+import { getDocWhere } from "../../lib/firebase/data/getData";
+import updateData from "../../lib/firebase/data/updateData";
 import {
   ClockCircleOutlined,
   ArrowDownOutlined,
@@ -42,11 +42,11 @@ import {
   Tooltip as ChartTooltip,
   Legend
 } from "chart.js";
-import { User } from "../../firebase/types/User";
-import { InvitedUser } from "../../firebase/types/Company";
-import { getProfilePictureUrl } from "../../firebase/drive/upload_file";
-import FatButton from "../../components/FatButton";
-import { toGermanCurrencyString } from "../../helper/price";
+import { User } from "../../lib/firebase/types/User";
+import { InvitedUser } from "../../lib/firebase/types/Company";
+import { getProfilePictureUrl } from "../../lib/firebase/drive/upload_file";
+import FatButton from "../../lib/components/FatButton";
+import { toGermanCurrencyString } from "../../lib/helper/price";
 const { TextArea } = Input;
 
 ChartJS.register(

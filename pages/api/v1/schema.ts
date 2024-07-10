@@ -2,9 +2,9 @@ import type { NextApiRequest, NextApiResponse } from "next";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import ResponseData = Dispatcher.ResponseData;
-import { validateApiKey } from "../../../helper/api/apiKey";
-import { firestore } from "../../../firebase/admin";
-import Assistant, { AssistantType, InputBlock } from "../../../firebase/types/Assistant";
+import { validateApiKey } from "../../../lib/helper/api/apiKey";
+import { firestore } from "../../../lib/firebase/admin";
+import Assistant, { AssistantType, InputBlock } from "../../../lib/firebase/types/Assistant";
 
 
 

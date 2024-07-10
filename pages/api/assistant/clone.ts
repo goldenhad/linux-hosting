@@ -1,14 +1,9 @@
 // Import necessary modules and types
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth, firestore } from "../../../firebase/admin"
-import {
-  encode
-} from "gpt-tokenizer"
-import Assistant from "../../../firebase/types/Assistant";
-import { User } from "../../../firebase/types/User";
-import { Role } from "../../../firebase/types/Role";
-import axios from "axios";
-
+import { auth, firestore } from "../../../lib/firebase/admin"
+import Assistant from "../../../lib/firebase/types/Assistant";
+import { User } from "../../../lib/firebase/types/User";
+import { Role } from "../../../lib/firebase/types/Role";
 
 // Define the response data type
 type ResponseData = {

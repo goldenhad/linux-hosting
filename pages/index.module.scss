@@ -225,3 +225,13 @@
     padding-top: 25px;
     padding-bottom: 25px;
 }
+
+.servicenotice{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    font-size: 24px;
+    font-weight: bold;
+}

@@ -19,12 +19,12 @@ import { extractText } from "llamaindex/llm/utils";
 // @ts-ignore
 import ResponseData = Dispatcher.ResponseData;
 import axios from "axios";
-import { MsgType } from "../../../components/Assistants/ChatAssistant/ChatAssistant";
-import { firestore } from "../../../firebase/admin";
-import { TokenCalculator } from "../../../helper/price";
-import { Calculations, InvoiceSettings } from "../../../firebase/types/Settings";
-import { Company, Order } from "../../../firebase/types/Company";
-import { stripe } from "../../../stripe/api";
+import { MsgType } from "../../../lib/components/Assistants/ChatAssistant/ChatAssistant";
+import { firestore } from "../../../lib/firebase/admin";
+import { TokenCalculator } from "../../../lib/helper/price";
+import { Calculations, InvoiceSettings } from "../../../lib/firebase/types/Settings";
+import { Company, Order } from "../../../lib/firebase/types/Company";
+import { stripe } from "../../../lib/stripe/api";
 
 
 const tokenCount = { in:0 , out: 0 };

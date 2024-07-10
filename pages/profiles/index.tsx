@@ -2,19 +2,19 @@ import { Alert, Button, Card, Form, Input, Modal, Select, Steps, Tag, Tour, Tour
 import { SettingOutlined, DeleteOutlined } from "@ant-design/icons";
 import styles from "./list.profiles.module.scss"
 import { useEffect, useRef, useState } from "react";
-import SidebarLayout from "../../components/Sidebar/SidebarLayout";
+import SidebarLayout from "../../lib/components/Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
 const { Paragraph } = Typography;
 const { TextArea } = Input;
-import { useAuthContext } from "../../components/context/AuthContext";
-import { Profile, ProfileSettings } from "../../firebase/types/Profile";
-import updateData from "../../firebase/data/updateData";
+import { useAuthContext } from "../../lib/components/context/AuthContext";
+import { Profile, ProfileSettings } from "../../lib/firebase/types/Profile";
+import updateData from "../../lib/firebase/data/updateData";
 import { arrayUnion } from "firebase/firestore";
-import { handleEmptyArray, handleUndefinedTour } from "../../helper/architecture";
+import { handleEmptyArray, handleUndefinedTour } from "../../lib/helper/architecture";
 import axios from "axios";
 import environment from "dotenv";
 import { isMobile } from "react-device-detect";
-import FatButton from "../../components/FatButton";
+import FatButton from "../../lib/components/FatButton";
 environment.config();
 
 // Define a maximum amount of profiles as constant

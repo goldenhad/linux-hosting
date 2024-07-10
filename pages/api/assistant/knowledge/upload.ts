@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../../../firebase/admin"
+import { auth } from "../../../../lib/firebase/admin"
 import { Formidable } from "formidable";
 import {
   Metadata, OpenAIEmbedding,
@@ -8,8 +8,8 @@ import {
   VectorStoreIndex,
   Document, IngestionPipeline, SimpleNodeParser, TitleExtractor, TextFileReader, MarkdownReader
 } from "llamaindex";
-import getDocument from "../../../../firebase/data/getData";
-import { EmbeddingParameters } from "../../../../firebase/types/Settings";
+import getDocument from "../../../../lib/firebase/data/getData";
+import { EmbeddingParameters } from "../../../../lib/firebase/types/Settings";
 
 type ResponseData = {
     errorcode: number,

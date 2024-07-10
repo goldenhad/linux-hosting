@@ -1,13 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../../firebase/admin"
-import getDocument, { getDocWhere } from "../../../firebase/data/getData";
+import { auth } from "../../../lib/firebase/admin"
+import { getDocWhere } from "../../../lib/firebase/data/getData";
 import { UserMetadata } from "@firebase/auth";
-import deleteData from "../../../firebase/data/deleteData";
-import { deleteProfilePicture } from "../../../firebase/drive/delete";
-import deleteSitewareUser from "../../../firebase/auth/delete";
-import { User } from "../../../firebase/types/User";
-import axios from "axios";
-import { deleteAllUserData } from "../../../helper/userManagement";
+import deleteData from "../../../lib/firebase/data/deleteData";
+import { deleteProfilePicture } from "../../../lib/firebase/drive/delete";
+import deleteSitewareUser from "../../../lib/firebase/auth/delete";
+import { User } from "../../../lib/firebase/types/User";
+import { deleteAllUserData } from "../../../lib/helper/userManagement";
 
 type ResponseData = {
     errorcode: number,

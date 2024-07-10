@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Alert, Button, Form, Input, Result } from "antd";
 import styles from "./password.forgot.module.scss"
 import Head from "next/head";
-import forgotpassword from "../../../firebase/auth/forgot";
+import forgotpassword from "../../../lib/firebase/auth/forgot";
 
 
 /**

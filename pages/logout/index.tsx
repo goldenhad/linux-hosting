@@ -1,6 +1,6 @@
 import { LoadingOutlined } from "@ant-design/icons";
 import { useEffect } from "react";
-import { useAuthContext } from "../../components/context/AuthContext";
+import { useAuthContext } from "../../lib/components/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Spin } from "antd";
 import axios from "axios";

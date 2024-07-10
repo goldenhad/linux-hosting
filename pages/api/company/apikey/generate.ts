@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth, firestore } from "../../../../firebase/admin"
-import { User } from "../../../../firebase/types/User";
-import { Role } from "../../../../firebase/types/Role";
+import { auth, firestore } from "../../../../lib/firebase/admin"
+import { User } from "../../../../lib/firebase/types/User";
+import { Role } from "../../../../lib/firebase/types/Role";
 
 type ResponseData = {
     errorcode: number,

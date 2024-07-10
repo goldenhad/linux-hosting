@@ -3,16 +3,16 @@ import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 import { Alert, Checkbox, Form, Input, MenuProps, Select, Space, Menu } from "antd";
 import styles from "./register.module.scss"
-import signUp, { signUpUser } from "../../firebase/auth/signup";
+import signUp, { signUpUser } from "../../lib/firebase/auth/signup";
 import Head from "next/head";
-import userExists, { couponExists, usernameExists } from "../../firebase/auth/userExists";
-import CookieBanner from "../../components/CookieBanner/CookieBanner";
-import { getDocWhere } from "../../firebase/data/getData";
+import userExists, { couponExists, usernameExists } from "../../lib/firebase/auth/userExists";
+import CookieBanner from "../../lib/components/CookieBanner/CookieBanner";
+import { getDocWhere } from "../../lib/firebase/data/getData";
 import Link from "next/link";
 import CryptoJS from "crypto-js";
 import Nav from "../../public/icons/nav.svg";
 import Icon, { CheckOutlined, CloseOutlined } from "@ant-design/icons";
-import FatButton from "../../components/FatButton";
+import FatButton from "../../lib/components/FatButton";
 
 enum CouponState {
   "VALID",

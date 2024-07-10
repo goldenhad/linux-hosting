@@ -2,11 +2,11 @@ import { Button, Result } from "antd";
 import styles from "./thankyou.module.scss"
 import { useEffect, useState } from "react";
 import { GetServerSideProps } from "next";
-import SidebarLayout from "../../components/Sidebar/SidebarLayout";
-import { useAuthContext } from "../../components/context/AuthContext";
+import SidebarLayout from "../../lib/components/Sidebar/SidebarLayout";
+import { useAuthContext } from "../../lib/components/context/AuthContext";
 import Link from "next/link";
-import { Order } from "../../firebase/types/Company";
-import updateData from "../../firebase/data/updateData";
+import { Order } from "../../lib/firebase/types/Company";
+import updateData from "../../lib/firebase/data/updateData";
 import axios from "axios";
 import { useRouter } from "next/router";
 

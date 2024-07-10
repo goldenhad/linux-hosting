@@ -1,6 +1,6 @@
 // Import necessary modules and types
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../../firebase/admin"
+import { auth } from "../../../lib/firebase/admin"
 import {
   encode
 } from "gpt-tokenizer"

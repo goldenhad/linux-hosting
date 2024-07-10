@@ -240,8 +240,11 @@ export default function ChatAssistant(props: {
             const encHist = encHistObj.data.message;
 
             props.history.set(localHist);
-            const userhist = user.history;
+            let userhist = user.history;
             // Set the history to the encoded string and update the user
+            if(userhist === undefined){
+              userhist = [];
+            }
             userhist[props.assistant.uid] = encHist;
             await updateDoc( doc( db, "User", props.context.login.uid ), { history: userhist } );
 
@@ -281,7 +284,9 @@ export default function ChatAssistant(props: {
           <div className={styles.msgcontainer}>
             <span
               className={styles.msgsender}>{(msg.type == MsgType.MODEL) ? `${props.assistant.name}` : `${user.firstname} ${user.lastname}`}</span>
-            <div className={`${styles.chatmsg}`} style={{ backgroundColor: getPrimaryColor(), color: getTextColor() }}>
+            <div
+              className={`${styles.chatmsg}`}
+              style={{ backgroundColor: (msg.type == MsgType.MODEL)? getPrimaryColor(): "#F2F4F7", color: (msg.type == MsgType.MODEL)? getTextColor(): "black" }}>
               { (typeof msg.content == "string")? <Markdown
                 skipHtml={true}
                 remarkPlugins={[ remarkBreaks, remarkGfm ]}

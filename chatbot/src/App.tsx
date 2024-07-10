@@ -10,18 +10,16 @@ interface IProps {
 
 const App: React.FC<PropsWithChildren<IProps>> = () => {
 
-  const [assistant, setAssistant] = useState();
+  const [assistants, setAssistants] = useState([]);
 
   useEffect(()=>{
     const getAllAssistants = async ()=>{
       const data = await axios.get("/api/assistant/getAll")
 
-      let { message: assistants, errorcode } = data.data;
+      let { message: assistantsList, errorcode } = data.data;
 
-      let assistant = assistants.find((assistant)=> (assistant.blocks[0] as InputBlock).type);
-
-      if(assistant){
-        setAssistant(assistant);
+      if(assistantsList && assistantsList.length > 0){
+        setAssistants(assistantsList);
       }
     }
 
@@ -100,7 +98,7 @@ const App: React.FC<PropsWithChildren<IProps>> = () => {
           Service Dashboard
         </div> */}
         {
-          assistant && <Assistant assistant={assistant} />
+          assistants.length && <Assistant assistantsList={assistants} />
         }
       </div>
 }

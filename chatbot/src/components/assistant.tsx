@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Typography } from "antd";
+import React, { useEffect, useState } from "react";
+import { Typography, MenuProps, Select, SelectProps } from "antd";
 import Assistant, { AssistantType, InputBlock } from "Shared/Firebase/types/Assistant";
 import ChatAssistant from "./ChatAssistant";
 
@@ -12,19 +12,29 @@ export const MSGDURATION = 3;
 const { Paragraph } = Typography;
 
 
-export default function(props: { assistant: Assistant }) {
-
+export default function(props: { assistantsList: Assistant[] }) {
   const [ formDisabled] = useState( false );
   const [ historyState, setHistoryState ] = useState([]);
+  const [assistants, setAssistants] = useState<SelectProps['options']>([]);
+  const [selectedAssistant, setSelectedAssistant] = useState<Assistant | null>(null);
 
-  
+  useEffect(()=>{
+    let { assistantsList } = props;
+    if(assistantsList && assistantsList.length > 0){
+      let list = props.assistantsList.map((assistant)=> ({ value: assistant.uid, label: assistant.name }));
+      setAssistants(list);
+    }
+  }, [ props.assistantsList ])
+
   const getAssistantForm = () => {
-    console.log((props.assistant.blocks[0] as InputBlock).type);
 
-    switch ((props.assistant.blocks[0] as InputBlock).type){
+    if(selectedAssistant == null) 
+      return null;
+
+    switch ((selectedAssistant.blocks[0] as InputBlock).type){
         case AssistantType.CHAT:
         return <ChatAssistant
-            assistant={props.assistant}
+            assistant={selectedAssistant}
             formDisabled={formDisabled}
             history={{ state: historyState, set: setHistoryState }}
         />;
@@ -32,9 +42,23 @@ export default function(props: { assistant: Assistant }) {
     }
   }
 
+  const onAssistantSelect: SelectProps['onChange'] = (value: any) => {
+    let { assistantsList } = props;
+    
+    let assistant = assistantsList.find(assistant=> assistant.uid === value);
+    setSelectedAssistant(assistant as Assistant);
+  };
+
 
   return(
       <div>
+        { !selectedAssistant && <Select
+          showSearch
+          placeholder="Select a Chatbot"
+          optionFilterProp="label"
+          onChange={onAssistantSelect}
+          options={assistants}
+        />}
         {getAssistantForm()}
       </div>
   );

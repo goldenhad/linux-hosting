@@ -5,7 +5,6 @@ import { NotificationInstance } from "antd/es/notification/interface";
 import { Button, Divider, Form, Input, Result, Skeleton } from "antd";
 import { ArrowLeftOutlined, HistoryOutlined, RightOutlined } from "@ant-design/icons";
 import { isMobile } from "react-device-detect";
-import styles from "./chatassistant.module.scss"
 import axios from "axios";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
@@ -60,31 +59,31 @@ export default function ChatAssistant(props: {
   const [image, setImage] = useState("");
 
 
-  useEffect(() => {
-    const element = lastMsgRef.current;
-    if(element){
-      element.scrollTop = element.scrollHeight;
-    }
-  }, [chatMsgs]);
+  // useEffect(() => {
+  //   const element = lastMsgRef.current;
+  //   if(element){
+  //     element.scrollTop = element.scrollHeight;
+  //   }
+  // }, [chatMsgs]);
 
-  /**
-   * Effect to load the provided assistant image.
-   * If no image was provided use the base svg image
-   */
-  useEffect(() => {
-    const loadImage = async () => {
-      const url = await getAssistantImageUrl(props.assistant.uid);
-      //const url = `/api/assistant/image?aid=${props.assistant.uid}`;
-      if(url){
-        setImage(url);
-      }else{
-        setImage("/base.svg")
-      }
-    }
+  // /**
+  //  * Effect to load the provided assistant image.
+  //  * If no image was provided use the base svg image
+  //  */
+  // useEffect(() => {
+  //   const loadImage = async () => {
+  //     const url = await getAssistantImageUrl(props.assistant.uid);
+  //     //const url = `/api/assistant/image?aid=${props.assistant.uid}`;
+  //     if(url){
+  //       setImage(url);
+  //     }else{
+  //       setImage("/base.svg")
+  //     }
+  //   }
 
-    loadImage();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  //   loadImage();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
 
   const getPrimaryColor = () => {
@@ -95,10 +94,10 @@ export default function ChatAssistant(props: {
     }
   }
 
-  const { dominantColor } = useExtractColor(image);
-  useEffect(() => {
-    console.log(dominantColor)
-  }, [image]);
+  // const { dominantColor } = useExtractColor(image);
+  // useEffect(() => {
+  //   console.log(dominantColor)
+  // }, [image]);
 
   const getTextColor = () => {
     if(props.assistant.primaryColor){
@@ -158,6 +157,9 @@ export default function ChatAssistant(props: {
         query: values.chatmsg,
         messages: relevantcontext,
       }, {
+        headers: {
+          "x-api-key": process.env.QUERY_CHAT_API_KEY
+        },
         onDownloadProgress: async (progressEvent) => {
           const lmsgs = [...localmsgs];
           let dataChunk: string = progressEvent.event?.currentTarget.response;
@@ -197,14 +199,21 @@ export default function ChatAssistant(props: {
   const ChatMessages = () => {
     return chatMsgs.map((msg: ChatMsg, idx) => {
       return (
+
+        // <div key={idx} className="content">
+        //     <div className="message">
+        //       <p>Technische Mängel in der Mobilversion, unzureichende Kommunikation und Reaktionszeiten, sowie mangelhafte Qualitätskontrolle. Technische Mängel in der Mobilversion.</p>
+        //       <div className="time time-right">19:51</div>
+        //     </div>
+        // </div>
         <div
           key={idx}
-          className={`${styles.msgrow} ${(msg.type == MsgType.USER) ? styles.usermsg : styles.systemmsg}`}
+          className={`msgrow ${(msg.type == MsgType.USER) ? "usermsg" : "systemmsg"}`}
         >
-          <div className={styles.msgcontainer}>
+          <div className="msgcontainer">
             <span
-              className={styles.msgsender}>{(msg.type == MsgType.MODEL) ? `${props.assistant.name}` : `Anonymous`}</span>
-            <div className={`${styles.chatmsg}`} style={{ backgroundColor: getPrimaryColor(), color: getTextColor() }}>
+              className="msgsender">{(msg.type == MsgType.MODEL) ? `${props.assistant.name}` : `Anonymous`}</span>
+            <div className="chatmsg" style={{ backgroundColor: getPrimaryColor(), color: getTextColor() }}>
               { (typeof msg.content == "string")? <Markdown
                 skipHtml={true}
                 remarkPlugins={[ remarkBreaks, remarkGfm ]}
@@ -236,53 +245,53 @@ export default function ChatAssistant(props: {
     })
   }
 
-  const Err = () => {
-    return(
-      <Result
-        status="error"
-        title="Fehler"
-        subTitle="Ein Fehler ist aufgetreten. Bitte versuche es später erneut!"
-      ></Result>
-    );
-  }
+  // const Err = () => {
+  //   return(
+  //     <Result
+  //       status="error"
+  //       title="Fehler"
+  //       subTitle="Ein Fehler ist aufgetreten. Bitte versuche es später erneut!"
+  //     ></Result>
+  //   );
+  // }
 
   return (
-    <div className={styles.welcomemessage}>
-      <div className={styles.messagcnt}>
-        <div className={styles.backbutton}>
+    <div className="welcomemessage">
+      <div className="messagcnt">
+        <div className="backbutton">
           <Button onClick={() => {
           }} icon={<ArrowLeftOutlined/>}></Button>
-          <div className={styles.msg}>Zur Übersicht</div>
+          <div className="msg">Zur Übersicht</div>
         </div>
 
-        <div className={styles.headerimagecontainer}>
-          <img width={50} height={50} className={styles.headerimage} src={image} />
+        <div className="headerimagecontainer">
+          <img width={50} height={50} className="headerimage" src={image} />
           <div>
             Willkommen beim {props.assistant.name}
           </div>
         </div>
 
         {(!isMobile && window.innerWidth >= 992) ?
-          <Button className={styles.histbutton} onClick={() => {
+          <Button className="histbutton" onClick={() => {
             props.setHistoryOpen(true)
           }} icon={
             <HistoryOutlined/>}>{`Bisherige Anfragen ${props.history.state.length}/${MAXHISTITEMS}`}</Button> : <></>
         }
       </div>
-      <Divider className={styles.welcomeseperator}/>
+      <Divider className="welcomeseperator"/>
 
-      <div className={styles.chatwindow} ref={lastMsgRef}>
+      <div className="chatwindow" ref={lastMsgRef}>
         {(promptError)? <Err />
           : <ChatMessages />}
       </div>
-      <div className={styles.inputwindow}>
-        <Form form={form} disabled={formDisabled} layout={"horizontal"} onFinish={handleUserMsg} className={styles.inputform}>
-          <Form.Item className={styles.inputformitem} name={"chatmsg"} label={""}>
-            <TextArea className={styles.area} autoSize={true} placeholder={"Worum geht es?"}></TextArea>
+      <div className="inputwindow">
+        <Form form={form} disabled={formDisabled} layout={"horizontal"} onFinish={handleUserMsg} className="inputform">
+          <Form.Item className="inputformitem" name={"chatmsg"} label={""}>
+            <TextArea className="area" autoSize={true} placeholder={"Worum geht es?"}></TextArea>
           </Form.Item>
 
           <Button
-            className={styles.inputformbutton}
+            className="inputformbutton"
             type={"primary"}
             style={{ backgroundColor: getPrimaryColor(), color: getTextColor() }}
             onClick={() => {
@@ -297,4 +306,5 @@ export default function ChatAssistant(props: {
     </div>
 
   );
+  return null;
 }

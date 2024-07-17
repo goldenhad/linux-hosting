@@ -1,14 +1,18 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const dotenv = require('dotenv');
-const { DefinePlugin } = require("webpack");
 
-dotenv.config({ path: '../.env' });
+// dotenv.config({ path: '../.env' });
 module.exports = {
-  entry: './src/index.tsx',
+  entry: { chatbot: './src/index.tsx'},
+  mode: "development",
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'chat-bot.js',
+    filename: '[name].js',
+    pathinfo: false,
+    clean: true,
+    assetModuleFilename: '[name][ext][query]',
+    publicPath: 'http://localhost:3000/'
   },
   module: {
     rules: [
@@ -19,6 +23,7 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
+            plugins: ["react-hot-loader/babel"]
           },
         },
       },
@@ -27,7 +32,6 @@ module.exports = {
         use: [
           'style-loader',
           'css-loader',
-          'resolve-url-loader', 
           {
             loader: "sass-loader",
             options: {
@@ -36,6 +40,13 @@ module.exports = {
           }
         ],
       },
+      {
+        test: /\.(jpg|png|svg|gif)$/,
+        type: 'asset/resource',
+        generator: {
+            emit: false,
+        },
+      },
     ],
   },
   plugins: [
@@ -43,9 +54,6 @@ module.exports = {
       template: path.resolve(__dirname, 'src', 'index.html'),
       filename: 'index.html',
     }),
-    new DefinePlugin({
-      'process.env': JSON.stringify(process.env)
-    })
   ],
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.scss', '.sass'],
@@ -56,19 +64,5 @@ module.exports = {
       "Shared/Helper": path.resolve(__dirname, "..","helper"),
       "Shared/Firebase": path.resolve(__dirname, "..","firebase"),
     }
-  },
-  devServer: {
-    static: {
-        directory: path.join(__dirname, 'public'),
-        publicPath: '/',
-    },
-    compress: true,
-    port: 9000,
-    hot: true,
-    proxy: [{ 
-      context: ['/api'],
-      target: 'http://localhost:3000',
-      secure: false, 
-    }]
   },
 };

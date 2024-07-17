@@ -14,7 +14,7 @@ import Markdown from "react-markdown";
 import { getAssistantImageUrl } from "Shared/Firebase/drive/upload_file";
 import { useExtractColor } from "react-extract-colors";
 
-const { TextArea } = Input;
+const { TextArea, Search } = Input;
 
 const MAXHISTITEMS = 10;
 const MSGDURATION = 3;
@@ -26,6 +26,8 @@ export enum MsgType {
     USER = "user",
     ASSISTANT = "assistant"
 }
+
+const QUERY_CHAT_API_KEY=`d41193ba5c6cc53063c97ea64432c7ca1437708d6facb5df613b292b9e619c99e276b143ae6c9194fd6a0da9b6ebf0ac8e801e74b5438a4d02e3165db58ba264`;
 
 interface ChatMsg {
     content: string | ReactComponentElement<any>,
@@ -59,12 +61,12 @@ export default function ChatAssistant(props: {
   const [image, setImage] = useState("");
 
 
-  // useEffect(() => {
-  //   const element = lastMsgRef.current;
-  //   if(element){
-  //     element.scrollTop = element.scrollHeight;
-  //   }
-  // }, [chatMsgs]);
+  useEffect(() => {
+    const element = lastMsgRef.current;
+    if(element){
+      element.scrollTop = element.scrollHeight;
+    }
+  }, [chatMsgs]);
 
   // /**
   //  * Effect to load the provided assistant image.
@@ -158,7 +160,7 @@ export default function ChatAssistant(props: {
         messages: relevantcontext,
       }, {
         headers: {
-          "x-api-key": process.env.QUERY_CHAT_API_KEY
+          "x-api-key": QUERY_CHAT_API_KEY
         },
         onDownloadProgress: async (progressEvent) => {
           const lmsgs = [...localmsgs];
@@ -195,116 +197,88 @@ export default function ChatAssistant(props: {
       setPromptError(true);
     }
   }
+
+  const onEnterPress = (event: React.KeyboardEvent<HTMLTextAreaElement>)=> {
+    event.preventDefault();
+    let key = event.key;
+    // If the user has pressed enter
+    if (key === "Enter" && !event.shiftKey) {
+        form.submit();
+    }
+  }
   
   const ChatMessages = () => {
     return chatMsgs.map((msg: ChatMsg, idx) => {
       return (
-
-        // <div key={idx} className="content">
-        //     <div className="message">
-        //       <p>Technische Mängel in der Mobilversion, unzureichende Kommunikation und Reaktionszeiten, sowie mangelhafte Qualitätskontrolle. Technische Mängel in der Mobilversion.</p>
-        //       <div className="time time-right">19:51</div>
-        //     </div>
-        // </div>
-        <div
-          key={idx}
-          className={`msgrow ${(msg.type == MsgType.USER) ? "usermsg" : "systemmsg"}`}
-        >
-          <div className="msgcontainer">
-            <span
-              className="msgsender">{(msg.type == MsgType.MODEL) ? `${props.assistant.name}` : `Anonymous`}</span>
-            <div className="chatmsg" style={{ backgroundColor: getPrimaryColor(), color: getTextColor() }}>
-              { (typeof msg.content == "string")? <Markdown
-                skipHtml={true}
-                remarkPlugins={[ remarkBreaks, remarkGfm ]}
-                components={{
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                  code: function ({ node, className, children, ...props }) {
-                    const match = /language-(\w+)/.exec(className || "")
-                    return match ? (
-                      <SyntaxHighlighter
-                        language={match[1]}
-                        style={oneLight}
-                        {...props}
-                      >{String(children).replace(/\n$/, "")}</SyntaxHighlighter>
-                    ) : (
-                      <code className={className} {...props}>
-                        {children}
-                      </code>
-                    )
-                  }
-                }}
-              >
-                {msg.content as string}
-              </Markdown>: msg.content}
-
-            </div>
-          </div>
-        </div>
-      );
+            <div 
+              className={`msgrow ${(msg.type == MsgType.USER) ? "message message-small" : "message"}`}
+            >
+                  {(typeof msg.content == "string")? <Markdown
+                    skipHtml={true}
+                    remarkPlugins={[ remarkBreaks, remarkGfm ]}
+                    components={{
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                      code: function ({ node, className, children, ...props }) {
+                        const match = /language-(\w+)/.exec(className || "")
+                        return match ? (
+                          <SyntaxHighlighter
+                            language={match[1]}
+                            style={oneLight}
+                            {...props}
+                          >{String(children).replace(/\n$/, "")}</SyntaxHighlighter>
+                        ) : (
+                          <code className={className} {...props}>
+                            {children}
+                          </code>
+                        )
+                      }
+                    }}
+                  >
+                    {msg.content as string}
+                  </Markdown>: msg.content}
+              <div className="time time-right">19:51</div>
+          </div>);
     })
   }
 
-  // const Err = () => {
-  //   return(
-  //     <Result
-  //       status="error"
-  //       title="Fehler"
-  //       subTitle="Ein Fehler ist aufgetreten. Bitte versuche es später erneut!"
-  //     ></Result>
-  //   );
-  // }
+  const Err = () => {
+    return(
+      <Result
+        status="error"
+        title="Fehler"
+        subTitle="Ein Fehler ist aufgetreten. Bitte versuche es später erneut!"
+      ></Result>
+    );
+  }
 
   return (
-    <div className="welcomemessage">
-      <div className="messagcnt">
-        <div className="backbutton">
-          <Button onClick={() => {
-          }} icon={<ArrowLeftOutlined/>}></Button>
-          <div className="msg">Zur Übersicht</div>
-        </div>
-
-        <div className="headerimagecontainer">
-          <img width={50} height={50} className="headerimage" src={image} />
-          <div>
-            Willkommen beim {props.assistant.name}
-          </div>
-        </div>
-
-        {(!isMobile && window.innerWidth >= 992) ?
-          <Button className="histbutton" onClick={() => {
-            props.setHistoryOpen(true)
-          }} icon={
-            <HistoryOutlined/>}>{`Bisherige Anfragen ${props.history.state.length}/${MAXHISTITEMS}`}</Button> : <></>
-        }
-      </div>
-      <Divider className="welcomeseperator"/>
-
-      <div className="chatwindow" ref={lastMsgRef}>
+    <>
+      <div className="content" ref={lastMsgRef}>
         {(promptError)? <Err />
           : <ChatMessages />}
       </div>
-      <div className="inputwindow">
+      <div className="chat-input">
         <Form form={form} disabled={formDisabled} layout={"horizontal"} onFinish={handleUserMsg} className="inputform">
           <Form.Item className="inputformitem" name={"chatmsg"} label={""}>
-            <TextArea className="area" autoSize={true} placeholder={"Worum geht es?"}></TextArea>
+            <TextArea onKeyUp={onEnterPress} className="area" autoSize={true} placeholder={"Worum geht es?"} />
           </Form.Item>
 
-          <Button
-            className="inputformbutton"
-            type={"primary"}
-            style={{ backgroundColor: getPrimaryColor(), color: getTextColor() }}
-            onClick={() => {
-              
-                form.submit();
-            }}
-          >
-            <RightOutlined />
-          </Button>
+          <div className="send-btn">
+            <Button
+              className="inputformbutton"
+              type={"primary"}
+              style={{ backgroundColor: getPrimaryColor(), color: getTextColor() }}
+              onClick={() => {
+                
+                  form.submit();
+              }}
+            >
+              Send
+            </Button>
+          </div>
         </Form>
       </div>
-    </div>
-
+    </>
   );
   return null;
 }

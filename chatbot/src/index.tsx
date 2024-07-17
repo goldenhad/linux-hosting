@@ -3,7 +3,8 @@ import { Root, createRoot } from 'react-dom/client';
 import App from './App';
 
 let reactRoot: Root;
-window.initChatBot = function (){
+
+window.initChatBot = ()=>{
     if(reactRoot && reactRoot?.unmount){
         reactRoot.unmount();
     }
@@ -13,6 +14,7 @@ window.initChatBot = function (){
         rootEle.id = '___MAIL_BUDDY___';
         document.body.append(rootEle);
     }
+    console.log("rootEle===>", rootEle);
     reactRoot = createRoot(rootEle as HTMLElement);
     reactRoot.render(<App />)
 }
@@ -20,3 +22,13 @@ window.initChatBot = function (){
 let rootEle: HTMLElement | null = document.getElementById('root');
 reactRoot = createRoot(rootEle as HTMLElement);
 reactRoot.render(<App />)
+
+if(module.hot) {
+    module.hot.accept('./App', ()=>{
+
+        const NextApp = require('./App').default;
+        console.log("Chnages updated")
+        // Render the updated component
+        reactRoot.render(<NextApp />);
+    })
+}

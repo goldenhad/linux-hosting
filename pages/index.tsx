@@ -12,6 +12,7 @@ import ReactPlayer from "react-player/lazy"
 import { getAllDocs } from "../firebase/data/getData";
 import Assistant, { Visibility } from "../firebase/types/Assistant";
 import EmptyCard from "../components/EmptyCard/EmptyCard";
+import Script from "next/script";
 
 const { Search } = Input;
 
@@ -274,6 +275,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
           }
         }).length
       } >
+      <Script onReady={()=>window.initChatBot()} strategy="afterInteractive" src="/api/chatbot" />
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>

@@ -9,7 +9,7 @@ import Chatra from "@chatra/chatra";
 import { useRouter } from "next/router";
 import { logEvent, setAnalyticsCollectionEnabled } from "firebase/analytics";
 import { analytics } from "../db";
-import cookieCutter from "cookie-cutter"
+import cookieCutter from "cookie-cutter";
 
 
 const roboto = Roboto( {

@@ -19,7 +19,6 @@
       "isolatedModules": true,
       "noEmit": true,
       "jsx": "react-jsx",
-      "typeRoots": ["./node_modules"],
       "paths": {
         "Shared/Components/*": ["../components/*"],
         "Shared/Firebase/*": ["../firebase/*"],
@@ -28,7 +27,7 @@
     },
     "include": [
       "src",
-      "window.d.ts"
+      "window.d.ts",
     ],
     "exclude": [
         "node_modules"

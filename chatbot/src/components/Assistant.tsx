@@ -52,6 +52,7 @@ export default function(props: { assistantsList: Assistant[] }) {
 
   return(
       <div>
+        <div style={{color: 'green'}}>Please Select a chatbot to get Answers from first</div>
         { !selectedAssistant && <Select
           showSearch
           placeholder="Select a Chatbot"

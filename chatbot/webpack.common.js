@@ -12,7 +12,7 @@ module.exports = {
     pathinfo: false,
     clean: true,
     assetModuleFilename: '[name][ext][query]',
-    publicPath: 'http://localhost:3000/'
+    publicPath: '/'
   },
   module: {
     rules: [
@@ -23,7 +23,7 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
-            plugins: ["react-hot-loader/babel"]
+            // plugins: ["react-hot-loader/babel"]
           },
         },
       },

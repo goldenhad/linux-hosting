@@ -13,6 +13,8 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import Markdown from "react-markdown";
 import { getAssistantImageUrl } from "Shared/Firebase/drive/upload_file";
 import { useExtractColor } from "react-extract-colors";
+import { default as chatbotImage } from "../../../public/chat-bot.png";
+
 
 const { TextArea, Search } = Input;
 
@@ -209,7 +211,8 @@ export default function ChatAssistant(props: {
   
   const ChatMessages = () => {
     return chatMsgs.map((msg: ChatMsg, idx) => {
-      return (
+      return (<>
+      <div>
             <div 
               className={`msgrow ${(msg.type == MsgType.USER) ? "message message-small" : "message"}`}
             >
@@ -236,8 +239,11 @@ export default function ChatAssistant(props: {
                   >
                     {msg.content as string}
                   </Markdown>: msg.content}
-              <div className="time time-right">19:51</div>
-          </div>);
+                  </div>
+                  <div className={`time ${(msg.type == MsgType.USER) ? " time-left" : "time-right"}`}>19:51</div>
+          </div>
+          
+          </>);
     })
   }
 
@@ -258,6 +264,7 @@ export default function ChatAssistant(props: {
           : <ChatMessages />}
       </div>
       <div className="chat-input">
+        <img src={chatbotImage} className="chatbot-icon"/>
         <Form form={form} disabled={formDisabled} layout={"horizontal"} onFinish={handleUserMsg} className="inputform">
           <Form.Item className="inputformitem" name={"chatmsg"} label={""}>
             <TextArea onKeyUp={onEnterPress} className="area" autoSize={true} placeholder={"Worum geht es?"} />
@@ -278,6 +285,7 @@ export default function ChatAssistant(props: {
           </div>
         </Form>
       </div>
+      
     </>
   );
   return null;

@@ -64,14 +64,15 @@ export default function AssistantContainer(props: { assistantsList: Assistant[] 
 
   return (
     <div>
-      <div style={{ color: "green" }}>Please Select a chatbot to get Answers from first</div>
-      {!selectedAssistant && <Select
+      {!selectedAssistant && <> 
+      <div style={{ color: "white",padding: '40px 0px 5px 0px'}}>Please Select a chatbot to get Answers from first</div>
+      <Select
         showSearch
         placeholder="Select a Chatbot"
         optionFilterProp="label"
         onChange={onAssistantSelect}
         options={assistants}
-      />}
+      /> </> }
       {getAssistantForm()}
     </div>
   );

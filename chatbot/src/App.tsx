@@ -4,6 +4,9 @@ import React, { PropsWithChildren, useEffect, useState } from "react";
 import { InputBlock } from "Shared/Firebase/types/Assistant";
 import Assistant from "./components/Assistant";
 import { default as upwardImage } from "../../public/upward-arrow.svg";
+import { default as chatbotImage } from "../../public/chat-bot.png";
+import { default as expandImage } from "../../public/fullscreen.png";
+import { default as crossImage } from "../../public/close.png";
 
 interface IProps {
   // props you want to pass to the component other than the children
@@ -12,6 +15,8 @@ interface IProps {
 const App: React.FC<PropsWithChildren<IProps>> = () => {
 
   const [assistants, setAssistants] = useState([]);
+  const [expanded, setExpanded] = useState(false);
+  const [isMinimisedToIcon, setIsMinimisedToIcon] = useState(true);
 
   useEffect(() => {
     const getAllAssistants = async () => {
@@ -27,17 +32,41 @@ const App: React.FC<PropsWithChildren<IProps>> = () => {
     getAllAssistants()
   }, [])
 
+  const handleExpand = () => {
+    setExpanded(!expanded);
+
+  }
+
+  const minimsedHandle = () => {
+    setIsMinimisedToIcon(!isMinimisedToIcon);
+    setExpanded(false)
+  }
+
   console.log("assistants.length", assistants.length);
-  return <div className="fixed-chat">
-    <div className="container">
-      <div className="arrowup">
-        <img src={upwardImage} />
+  return (
+    <>
+      <div className={`${isMinimisedToIcon ? 'expand-icon' : 'd-none'}`} onClick={minimsedHandle}><img src={chatbotImage} /></div>
+      <div className={`${isMinimisedToIcon ? 'd-none' : 'minimise-icon-show'}`}>
+        <div className={`${expanded ? 'fixed-chat-expanded' : 'fixed-chat'} `}>
+        <div className="d-flex icon-position" style={{justifyContent: "flex-end"}}>
+            <div onClick={handleExpand}>
+            <img src={expandImage} className="expand-icon-img" style={{padding: '0px 10px 0px 0px'}}/>
+            </div>
+            <div onClick={minimsedHandle}>
+              
+            <img src={crossImage} className="cross-icon-img" /></div>
+
+          </div>
+        <div className="container">
+          
+          {
+            !!assistants.length && <Assistant assistantsList={assistants} />
+          }
+        </div>
+        </div>
       </div>
-      {
-        !!assistants.length && <Assistant assistantsList={assistants} />
-      }
-    </div>
-  </div>
+    </>
+  )
 }
 
 export default App;

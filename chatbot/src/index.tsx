@@ -20,8 +20,10 @@ window.initChatBot = ()=>{
 }
 
 let rootEle: HTMLElement | null = document.getElementById('root');
-reactRoot = createRoot(rootEle as HTMLElement);
-reactRoot.render(<App />)
+if(rootEle){
+  reactRoot = createRoot(rootEle as HTMLElement);
+  reactRoot.render(<App />)
+}
 
 if(module.hot) {
     module.hot.accept('./App', ()=>{

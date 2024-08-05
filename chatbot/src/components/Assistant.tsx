@@ -31,7 +31,9 @@ export default function AssistantContainer(props: { assistantsList: Assistant[] 
 
   useEffect(() => {
     const assistantsList = props.assistantsList;
-    if (assistantsList && assistantsList.length > 0) {
+    if(assistantsList && assistantsList.length === 1){
+      setSelectedAssistant(assistantsList[0]);
+    }else if (assistantsList && assistantsList.length > 0) {
       const list = props.assistantsList.map((assistant) => ({ value: assistant.uid, label: assistant.name }));
       setAssistants(list);
     }

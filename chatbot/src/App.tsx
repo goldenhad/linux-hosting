@@ -2,7 +2,8 @@ import axios from "axios";
 import "./style.scss"
 import React, { PropsWithChildren, useEffect, useState } from "react";
 import { InputBlock } from "Shared/Firebase/types/Assistant";
-import Assistant from "./components/Assistant";
+import AssistantForm from "./components/Assistant";
+import Assistant  from "Shared/Firebase/types/Assistant";
 import { default as upwardImage } from "../../public/upward-arrow.svg";
 import { default as chatbotImage } from "../../public/chat-bot.png";
 import { default as expandImage } from "../../public/fullscreen.png";
@@ -14,7 +15,7 @@ interface IProps {
 
 const App: React.FC<PropsWithChildren<IProps>> = () => {
 
-  const [assistants, setAssistants] = useState([]);
+  const [assistants, setAssistants] = useState<Assistant[]>([]);
   const [expanded, setExpanded] = useState(false);
   const [isMinimisedToIcon, setIsMinimisedToIcon] = useState(true);
 
@@ -23,8 +24,12 @@ const App: React.FC<PropsWithChildren<IProps>> = () => {
       const data = await axios.get("/api/assistant/getAll")
 
       const { message: assistantsList, errorcode } = data.data;
-
-      if (assistantsList && assistantsList.length > 0) {
+      const { AGENTID } = window.SITEWARE_CONFIG || {};
+      const assistant: Assistant | null = assistantsList.find((item: Assistant )=> item.uid === AGENTID)
+      console.log("assistant, AGENTID===>", assistant, AGENTID);
+      if(assistant){
+        setAssistants([assistant]);
+      }else if (assistantsList && assistantsList.length > 0) {
         setAssistants(assistantsList);
       }
     }
@@ -60,7 +65,7 @@ const App: React.FC<PropsWithChildren<IProps>> = () => {
         <div className="container">
           
           {
-            !!assistants.length && <Assistant assistantsList={assistants} />
+            !!assistants.length && <AssistantForm assistantsList={assistants} />
           }
         </div>
         </div>

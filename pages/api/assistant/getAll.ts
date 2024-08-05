@@ -10,17 +10,21 @@ type ResponseData = {
   message: Assistant[] | string
 }
 
+export const getAssistants = async (assistantId?: string): Promise<Assistant[] | Assistant | undefined> => {
+  const assistantReq = await getAllDocs("Assistants");
+  if(assistantId){
+    return assistantReq.result.find((assistant) => assistant.visibility === Visibility.ALL && assistant.uid === assistantId);
+  }else if (assistantReq.result) {
+    return assistantReq.result.filter((assistant) => assistant.visibility === Visibility.ALL);
+  }
+} 
 // Define the request handler function
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData | string>) {
 
   // Check if the request method is GET
   if (req.method == "GET") {
 
-    let assistants: Array<Assistant> = [];
-    const assistantReq = await getAllDocs("Assistants");
-    if (assistantReq.result) {
-      assistants = assistantReq.result.filter((assistant) => assistant.visibility === Visibility.ALL);
-    }
+    const assistants = await getAssistants() as Assistant[];
 
     return res.status(200).json({ errorcode: null, message: assistants });
   } else {

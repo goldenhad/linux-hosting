@@ -275,7 +275,7 @@ export default function Home(props: { assistants: Array<Assistant> }) {
           }
         }).length
       } >
-      <Script onReady={()=>window.initChatBot()} strategy="afterInteractive" src="/api/chatbot" />
+      <Script onReady={()=>window.initChatBot()} strategy="afterInteractive" src="/api/chatbot?agentid=7D5ZcHyEcySUEiZu8X9i&apiKey=ddfg3434" />
       {contextHolder}
       <div className={styles.main}>
         <div className={styles.greetingrow}>

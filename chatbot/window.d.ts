@@ -1,3 +1,4 @@
 interface Window {
-    initChatBot: ()=>void
+    initChatBot: ()=>void,
+    SITEWARE_CONFIG: { [key: string]: string }
 }

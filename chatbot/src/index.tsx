@@ -14,7 +14,6 @@ window.initChatBot = ()=>{
         rootEle.id = '___MAIL_BUDDY___';
         document.body.append(rootEle);
     }
-    console.log("rootEle===>", rootEle);
     reactRoot = createRoot(rootEle as HTMLElement);
     reactRoot.render(<App />)
 }

@@ -31,9 +31,9 @@ export default function AssistantContainer(props: { assistantsList: Assistant[] 
 
   useEffect(() => {
     const assistantsList = props.assistantsList;
-    if(assistantsList && assistantsList.length === 1){
+    if (assistantsList && assistantsList.length === 1) {
       setSelectedAssistant(assistantsList[0]);
-    }else if (assistantsList && assistantsList.length > 0) {
+    } else if (assistantsList && assistantsList.length > 0) {
       const list = props.assistantsList.map((assistant) => ({ value: assistant.uid, label: assistant.name }));
       setAssistants(list);
     }
@@ -45,16 +45,16 @@ export default function AssistantContainer(props: { assistantsList: Assistant[] 
       return null;
 
     switch ((selectedAssistant.blocks[0] as InputBlock).type) {
-    case AssistantType.CHAT: {
-      return <ChatAssistant
-        assistant={selectedAssistant}
-        formDisabled={formDisabled}
-        history={{ state: historyState, set: setHistoryState }}
-      />;
+      case AssistantType.CHAT: {
+        return <ChatAssistant
+          assistant={selectedAssistant}
+          formDisabled={formDisabled}
+          history={{ state: historyState, set: setHistoryState }}
+        />;
+      }
+      default: return null;
     }
-    default: return null;
-    }
-}
+  }
 
   const onAssistantSelect: SelectProps["onChange"] = (value: any) => {
     const { assistantsList } = props;
@@ -65,17 +65,17 @@ export default function AssistantContainer(props: { assistantsList: Assistant[] 
 
 
   return (
-    <div>
-      {!selectedAssistant && <> 
-      <div style={{ color: "white",padding: '40px 0px 5px 0px'}}>Please Select a chatbot to get Answers from first</div>
-      <Select
-        showSearch
-        placeholder="Select a Chatbot"
-        optionFilterProp="label"
-        onChange={onAssistantSelect}
-        options={assistants}
-      /> </> }
+    <>
+      {!selectedAssistant && <>
+        <div style={{ color: "white", padding: '40px 0px 5px 0px' }}>Please Select a chatbot to get Answers from first</div>
+        <Select
+          showSearch
+          placeholder="Select a Chatbot"
+          optionFilterProp="label"
+          onChange={onAssistantSelect}
+          options={assistants}
+        /> </>}
       {getAssistantForm()}
-    </div>
+    </>
   );
 }

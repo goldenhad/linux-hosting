@@ -25,6 +25,7 @@
     "**/*.tsx"
 , "cypress.config.js", "currents.config.js"  ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "chatbot"
   ]
 }

@@ -3,7 +3,6 @@ import Assistant, { InputBlock } from "Shared/Firebase/types/Assistant";
 import { MessageInstance } from "antd/es/message/interface";
 import { NotificationInstance } from "antd/es/notification/interface";
 import { Button, Form, Input, Result, Skeleton } from "antd";
-import axios from "axios";
 import moment from "moment/moment";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
@@ -11,6 +10,7 @@ import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import Markdown from "react-markdown";
 import { default as chatbotImage } from "../../../public/chat-bot.png";
+import { API } from "../services";
 
 
 const { TextArea } = Input;
@@ -156,7 +156,7 @@ export default function ChatAssistant(props: {
 
 
     try {
-      await axios.post("/api/v1/query/chat", {
+      await API.post("api/v1/query/chat", {
         aid: props.assistant.uid,
         query: values.chatmsg,
         messages: relevantcontext

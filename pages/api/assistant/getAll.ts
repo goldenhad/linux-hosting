@@ -1,7 +1,9 @@
 // Import necessary modules and types
 import type { NextApiRequest, NextApiResponse } from "next";
+import cors from "cors";
 import Assistant, { Visibility } from "../../../firebase/types/Assistant";
 import { getAllDocs } from "../../../firebase/data/getData";
+import { corsMiddleware } from "../chatbot";
 
 
 // Define the response data type
@@ -21,6 +23,10 @@ export const getAssistants = async (assistantId?: string): Promise<Assistant[] |
 // Define the request handler function
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData | string>) {
 
+  const options: Partial< typeof cors>  = {
+    origin: req.headers["origin"]
+  };
+  await corsMiddleware(req, res, options)
   // Check if the request method is GET
   if (req.method == "GET") {
 

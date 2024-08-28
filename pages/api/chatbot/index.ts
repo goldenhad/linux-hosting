@@ -1,8 +1,25 @@
 import { NextApiResponse, NextApiRequest } from "next";
 import fs from "fs";
 import path from "path";
+import cors from "cors";
 import { getAssistants } from "../assistant/getAll";
 
+export const corsMiddleware = <T = any>(
+  req: NextApiRequest,
+  res: NextApiResponse<T>,
+  options : typeof cors
+) => {
+
+  return new Promise((resolve, reject)=>{
+    cors(options)(req, res, (result: Error)=>{
+      if(result instanceof Error){
+        return reject(result);
+      }
+
+      return resolve(result);
+    })
+  })
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,7 +28,11 @@ export default async function handler(
   const searchParams = req.query;
   const agentid = searchParams["agentid"] as string;
   const assistant =  await getAssistants(agentid);
+  const options: Partial< typeof cors>  = {
+    origin: req.headers["origin"]
+  };
 
+  await corsMiddleware(req, res, options);
   if(!assistant){
     res.writeHead(400, {
       "Content-Type": "text/html"

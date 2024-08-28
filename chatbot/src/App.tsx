@@ -1,4 +1,3 @@
-import axios from "axios";
 import "./style.scss"
 import React, { PropsWithChildren, useEffect, useState } from "react";
 import AssistantForm from "./components/Assistant";
@@ -6,6 +5,7 @@ import Assistant from "Shared/Firebase/types/Assistant";
 import { default as chatbotImage } from "../../public/chat-bot.png";
 import { default as expandImage } from "../../public/fullscreen.png";
 import { default as crossImage } from "../../public/close.png";
+import { API } from "./services";
 
 interface IProps {
   // props you want to pass to the component other than the children
@@ -19,7 +19,7 @@ const App: React.FC<PropsWithChildren<IProps>> = () => {
 
   useEffect(() => {
     const getAllAssistants = async () => {
-      const data = await axios.get("/api/assistant/getAll")
+      const data = await API.get("api/assistant/getAll")
 
       const { message: assistantsList } = data.data;
       const { AGENTID } = window.SITEWARE_CONFIG || {};

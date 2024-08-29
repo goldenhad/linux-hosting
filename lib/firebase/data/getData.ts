@@ -1,5 +1,5 @@
 import { firebase_app } from "../../../db";
-import { getFirestore, doc, getDoc, query, where, getDocs, collection, DocumentData, CollectionReference } from "firebase/firestore";
+import { getFirestore, doc, getDoc, query, where, getDocs, collection, CollectionReference } from "firebase/firestore";
 import Assistant from "../types/Assistant";
 import { Service } from "../types/Service";
 import { Company } from "../types/Company";

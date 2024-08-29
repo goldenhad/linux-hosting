@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import cors from "cors";
 import { getAssistants } from "../assistant/getAll";
+import { validateApiKey } from "../../../lib/helper/api/apiKey";
 
 export const corsMiddleware = <T = any>(
   req: NextApiRequest,
@@ -27,6 +28,8 @@ export default async function handler(
 ) {
   const searchParams = req.query;
   const agentid = searchParams["agentid"] as string;
+  const apiKey = searchParams["apiKey"] as string;
+  await validateApiKey(apiKey);
   const assistant =  await getAssistants(agentid);
   const options: Partial< typeof cors>  = {
     origin: req.headers["origin"]
@@ -43,7 +46,8 @@ export default async function handler(
   const distPath = path.resolve(process.cwd(), "chatbot", "dist", "chatbot.js");
   const content = fs.readFileSync(distPath);
   const configContents = `window.SITEWARE_CONFIG = ${JSON.stringify({
-    AGENTID: agentid
+    AGENTID: agentid,
+    APIKEY: apiKey
   })};`;
   const contentWithConfig = [configContents, content].join("");
   res.writeHead(200, {

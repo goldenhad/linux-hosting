@@ -90,7 +90,8 @@ export default async function signUp( firstname, lastname, email, username, pass
                 usage: false,
                 profiles: false,
                 company: false
-              }
+              },
+              history: {}
             } );
 
             //console.log("Created the user");
@@ -221,7 +222,8 @@ export async function signUpUser( firstname, lastname, email, username, password
                     usage: false,
                     profiles: false,
                     company: false
-                  }
+                  },
+                  history: {}
                 } );
 
 

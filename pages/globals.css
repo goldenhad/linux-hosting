@@ -373,4 +373,19 @@
   color: inherit !important;
 }
 
+.align-center {
+  text-align: center;
+  margin: 5px auto;
+}
+
+.p-5{
+  padding: 5px;
+} 
+
+.chatbot-script-content{
+  background-color: #d7d2d2;
+  border-radius: 10px;
+  padding: 10px 15px;
+}
+
 .ant-menu-inline-collapsed-tooltip { display: none; }

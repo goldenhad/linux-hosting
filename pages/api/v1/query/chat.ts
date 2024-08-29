@@ -23,10 +23,12 @@ import { Calculations, InvoiceSettings } from "../../../../lib/firebase/types/Se
 import { Company, Order } from "../../../../lib/firebase/types/Company";
 import { stripe } from "../../../../lib/stripe/api";
 import { encodingForModel } from "js-tiktoken";
+import cors from "cors";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { Settings } from "llamaindex/Settings";
 import Assistant, { AssistantType, InputBlock } from "../../../../lib/firebase/types/Assistant";
+import { corsMiddleware } from "../../chatbot";
 
 
 // Define the url where we reach qdrant
@@ -71,6 +73,10 @@ Settings.callbackManager.on("llm-stream", (event) => {
 
 
 export default async function handler( req: NextApiRequest, res: NextApiResponse<ResponseData> ) {
+  const options: Partial< typeof cors>  = {
+    origin: req.headers["origin"]
+  };
+  await corsMiddleware(req, res, options)
   if(req.method == "POST"){
 
     console.log(req.body);

@@ -1,4 +1,4 @@
-import { Button, Drawer, List, message, notification, Typography } from "antd";
+import { Button, Drawer, List, message, Modal, notification, Typography } from "antd";
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "../../lib/components/context/AuthContext";
 import { GetServerSideProps } from "next";
@@ -81,6 +81,7 @@ export default function Assistant(props: { assistant: Assistant }) {
   const [notificationAPI, notificationContextHolder] = notification.useNotification();
   const [ prefState, setPrefState ] = useState([]);
   const [ prefStateIdx, setPrefStateIdx ] = useState(-1);
+  const [isChatbotScriptModalOpen, setChatbotScriptModalOpen] = useState(false);
 
 
   useEffect( () => {
@@ -291,6 +292,44 @@ export default function Assistant(props: { assistant: Assistant }) {
     }
   }
 
+  const getPrimaryColor = () => {
+    if(props.assistant.primaryColor){
+      return props.assistant.primaryColor;
+    }else{
+      return "#0f4faa";
+    }
+  }
+
+  const getTextColor = () => {
+    if(props.assistant.primaryColor){
+      const c = props.assistant.primaryColor.substring(1);      // strip #
+      const rgb = parseInt(c, 16);   // convert rrggbb to decimal
+      const r = (rgb >> 16) & 0xff;  // extract red
+      const g = (rgb >>  8) & 0xff;  // extract green
+      const b = (rgb >>  0) & 0xff;  // extract blue
+
+      const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+
+      if (luma <= 220) {
+        return "white";
+      }else{
+        return "black";
+      }
+
+
+    }else{
+      return "white";
+    }
+  }
+
+  const getScriptTag =  () => {
+    return `<script src="${location.origin}/api/chatbot?agentid=${props.assistant.uid}" data-nscript="afterInteractive"></script>`
+  }
+
+  const copyScript = () => {
+    navigator.clipboard.writeText( getScriptTag() );
+    messageApi.success( "Script in die Zwischenablage kopiert." );
+  }
 
   return(
     <SidebarLayout context={context} hist={setHistOpen}>
@@ -298,7 +337,37 @@ export default function Assistant(props: { assistant: Assistant }) {
       {notificationContextHolder}
       <div className={styles.main}>
         {getAssistantForm()}
+        <div className="align-center">
+          <Button
+            className={styles.inputformbutton}
+            type={"primary"}
+            onClick={()=>setChatbotScriptModalOpen(true)}
+            style={{ backgroundColor: getPrimaryColor(), color: getTextColor() }}
+          >
+            Chatbot einbetten
+          </Button>
+        </div>
       </div>
+      <Modal 
+        centered width={"25%"} title={null} 
+        closeIcon={null}
+        open={isChatbotScriptModalOpen} footer={null} onCancel={() => setChatbotScriptModalOpen(false)}>
+        <div className="chatbot-script-content">
+          { getScriptTag() }
+        </div>
+        <div className="align-center">
+          <div className="p-5">
+            <Button
+              onClick={()=> copyScript()}
+              className={styles.inputformbutton}
+              type={"primary"}
+              style={{ backgroundColor: getPrimaryColor(), color: getTextColor() }}
+            >
+              Einbettungscode kopieren
+            </Button>
+          </div>
+        </div>
+      </Modal>
       <Drawer
         title={`Bisherige Anfragen ${historyState.length}/${MAXHISTITEMS}`}
         placement={"right"}

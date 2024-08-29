@@ -66,6 +66,7 @@ export type Company = {
     paymentMethods: Array<PaymentMethod>,
     apikey?: string;
     assistants?: Array<string>;
+    [key: string]: any;
 }
 
 export const basicCompany = {

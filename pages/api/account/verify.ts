@@ -1,6 +1,6 @@
-import verifyEmail from "../../../firebase/auth/verify";
+import verifyEmail from "../../../lib/firebase/auth/verify";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../../firebase/admin"
+import { auth } from "../../../lib/firebase/admin"
 
 type ResponseData = {
     errorcode: number,

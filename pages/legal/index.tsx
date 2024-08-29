@@ -2,7 +2,7 @@ import { Typography, Menu, MenuProps, FloatButton } from "antd";
 import Icon from "@ant-design/icons";
 import styles from "./legal.module.scss"
 import Head from "next/head";
-import CookieBanner from "../../components/CookieBanner/CookieBanner";
+import CookieBanner from "../../lib/components/CookieBanner/CookieBanner";
 import Help from "../../public/icons/help.svg";
 import Link from "next/link";
 import Nav from "../../public/icons/nav.svg";

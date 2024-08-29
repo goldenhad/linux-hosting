@@ -1,20 +1,20 @@
 import { Card, Button, Form, Input, Result, message, Modal, Typography } from "antd";
 import styles from "./account.module.scss"
 import { useEffect, useState } from "react";
-import SidebarLayout from "../../components/Sidebar/SidebarLayout";
-import { useAuthContext } from "../../components/context/AuthContext";
-import forgotpassword from "../../firebase/auth/forgot";
+import SidebarLayout from "../../lib/components/Sidebar/SidebarLayout";
+import { useAuthContext } from "../../lib/components/context/AuthContext";
+import forgotpassword from "../../lib/firebase/auth/forgot";
 import axios from "axios";
-import { User } from "../../firebase/types/User";
-import deleteData from "../../firebase/data/deleteData";
-import deleteSitewareUser from "../../firebase/auth/delete";
-import { getDocWhere } from "../../firebase/data/getData";
-import reauthUser from "../../firebase/auth/reauth";
+import { User } from "../../lib/firebase/types/User";
+import deleteData from "../../lib/firebase/data/deleteData";
+import deleteSitewareUser from "../../lib/firebase/auth/delete";
+import { getDocWhere } from "../../lib/firebase/data/getData";
+import reauthUser from "../../lib/firebase/auth/reauth";
 import { useRouter } from "next/router";
-import { deleteProfilePicture } from "../../firebase/drive/delete";
-import FatButton from "../../components/FatButton";
-import EditUserForm from "../../components/Forms/EditUserForm/EditUserForm";
-import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
+import { deleteProfilePicture } from "../../lib/firebase/drive/delete";
+import FatButton from "../../lib/components/FatButton";
+import EditUserForm from "../../lib/components/Forms/EditUserForm/EditUserForm";
+import UploadProfileImage from "../../lib/components/UploadProfileImage/UploadProfileImage";
 
 const { Paragraph } = Typography;
 
@@ -38,14 +38,15 @@ export default function Account() {
 
   useEffect( () => {
     // Init the edit account form with the values of the user
-    personalForm.setFieldValue( "username", user.username );
-    personalForm.setFieldValue( "email", login.email );
-    personalForm.setFieldValue( "firstname", user.firstname );
-    personalForm.setFieldValue( "lastname", user.lastname );
-    personalForm.setFieldValue( "street", company.street );
-    personalForm.setFieldValue( "postalcode", company.postalcode );
-    personalForm.setFieldValue( "city", company.city );
-
+    if(user){
+      personalForm.setFieldValue( "username", user.username );
+      personalForm.setFieldValue( "email", login.email );
+      personalForm.setFieldValue( "firstname", user.firstname );
+      personalForm.setFieldValue( "lastname", user.lastname );
+      personalForm.setFieldValue( "street", company.street );
+      personalForm.setFieldValue( "postalcode", company.postalcode );
+      personalForm.setFieldValue( "city", company.city );
+    }
     // eslint-disable-next-line
   }, [] );
 
@@ -80,10 +81,10 @@ export default function Account() {
     return (
       <div className={styles.password}>
         <Card className={styles.passwordcard} title="API" bordered={true}>
-          {(user.apikey)?
+          {(user?.apikey)?
             <div className={styles.apikeyrow}>
               <Paragraph>
-                <pre>{user.apikey}</pre>
+                <pre>{user?.apikey}</pre>
               </Paragraph>
               <Button type={"default"} danger onClick={() => {
                 deleteApiKey();
@@ -131,9 +132,9 @@ export default function Account() {
   const deleteUser = async () => {
     // Check role of user...
 
-    switch ( user.Role ) {
+    switch ( user?.Role ) {
     case "Company-Admin":
-      const { result } = await getDocWhere( "User", "Company", "==", user.Company );
+      const { result } = await getDocWhere( "User", "Company", "==", user?.Company );
       console.log(result);
       if( result ){
         // Test if there are any other users of the company
@@ -153,8 +154,10 @@ export default function Account() {
       try{
         await deleteProfilePicture( login.uid );
         await deleteData( "User", login.uid );
-        await deleteData( "Company", user.Company );
+        await deleteData( "Company", user?.Company );
         await deleteSitewareUser();
+        await axios.get("/api/logout");
+        router.replace("/login");
       }catch(e){
         console.log( e );
       }
@@ -178,7 +181,7 @@ export default function Account() {
       break;
 
     case "Singleuser":
-      const cmpnysnglSerDeleteData = await deleteData( "Company", user.Company );
+      const cmpnysnglSerDeleteData = await deleteData( "Company", user?.Company );
       console.log( cmpnysnglSerDeleteData );
       if( !cmpnysnglSerDeleteData.error ){
         const snglSerDeleteData = await deleteData( "User", login.uid );
@@ -187,6 +190,8 @@ export default function Account() {
           await deleteProfilePicture( login.uid );
           const deleteUserCall = await deleteSitewareUser();
           console.log( deleteUserCall );
+          await axios.get("/api/logout");
+          router.replace("/login");
         }
       }
       break;
@@ -194,8 +199,6 @@ export default function Account() {
     default:
       break;
     }
-
-    router.push( "/logout" );
   }
 
 

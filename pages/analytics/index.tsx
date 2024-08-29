@@ -2,10 +2,10 @@ import { Card, Input, Modal, Popover, Table, Tag } from "antd";
 import styles from "./analytics.module.scss"
 import { useEffect, useState } from "react";
 import { GetServerSideProps } from "next";
-import SidebarLayout from "../../components/Sidebar/SidebarLayout";
+import SidebarLayout from "../../lib/components/Sidebar/SidebarLayout";
 import { useRouter } from "next/router";
-import { useAuthContext } from "../../components/context/AuthContext";
-import { getAllDocs, getDocWhere } from "../../firebase/data/getData";
+import { useAuthContext } from "../../lib/components/context/AuthContext";
+import { getAllDocs, getDocWhere } from "../../lib/firebase/data/getData";
 
 
 import {
@@ -21,12 +21,12 @@ import {
   Title,
   Tooltip as ChartTooltip
 } from "chart.js";
-import { User } from "../../firebase/types/User";
-import { toGermanCurrencyString } from "../../helper/price";
+import { User } from "../../lib/firebase/types/User";
+import { toGermanCurrencyString } from "../../lib/helper/price";
 import { CodeOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { Line, Pie } from "react-chartjs-2";
 import moment from "moment";
-import { auth } from "../../firebase/admin";
+import { auth } from "../../lib/firebase/admin";
 
 ChartJS.register(
   CategoryScale,

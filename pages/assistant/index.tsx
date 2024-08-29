@@ -1,18 +1,18 @@
 import { Button, Drawer, List, message, Modal, notification, Typography } from "antd";
 import React, { useEffect, useState } from "react";
-import { useAuthContext } from "../../components/context/AuthContext";
+import { useAuthContext } from "../../lib/components/context/AuthContext";
 import { GetServerSideProps } from "next";
-import { getAllDocs } from "../../firebase/data/getData";
-import Assistant, { AssistantType, InputBlock } from "../../firebase/types/Assistant";
-import SidebarLayout from "../../components/Sidebar/SidebarLayout";
+import { getAllDocs } from "../../lib/firebase/data/getData";
+import Assistant, { AssistantType, InputBlock } from "../../lib/firebase/types/Assistant";
+import SidebarLayout from "../../lib/components/Sidebar/SidebarLayout";
 import styles from "./assistant.module.scss";
 import axios from "axios";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../db";
-import QaAAssistant from "../../components/Assistants/QaAAssistant/QaAAssistant";
-import ChatAssistant, { MsgType } from "../../components/Assistants/ChatAssistant/ChatAssistant";
+import QaAAssistant from "../../lib/components/Assistants/QaAAssistant/QaAAssistant";
+import ChatAssistant, { MsgType } from "../../lib/components/Assistants/ChatAssistant/ChatAssistant";
 import { CloseOutlined, EyeOutlined } from "@ant-design/icons";
-import { checkValidityOfAssistantConfig } from "../../helper/assistant";
+import { checkValidityOfAssistantConfig } from "../../lib/helper/assistant";
 
 // Defines the max amount of history states saved per user
 export const MAXHISTITEMS = 10;

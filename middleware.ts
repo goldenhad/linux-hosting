@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authMiddleware, redirectToHome, redirectToLogin } from "next-firebase-auth-edge";
 import serviceAccount from "./mailbuddy_priv_key.json";
 
-const PUBLIC_PATHS = ["/register", "/api/chatbot", "/login", "/forgot/password", "/privacy", "/legal", "/monitoring", "/sentry-example-page", "/action"];
+const PUBLIC_PATHS = ["/register", "/api/chatbot", "/login", "/forgot/password", "/privacy", "/legal", "/action"];
 
 const redirectToRoute = (pathname: string, request: NextRequest) => {
   const url = request.nextUrl.clone();
@@ -41,7 +41,6 @@ export async function middleware(request: NextRequest) {
         return redirectToHome(request);
       }
 
-      console.log(request.nextUrl.pathname);
 
       if(!request.nextUrl.pathname.startsWith("/confirm") && !request.nextUrl.pathname.startsWith("/action")){
         if(!decodedToken.email_verified){

@@ -2,16 +2,17 @@ import { TourProps, Tour, Divider, message, Modal, Card, Badge, Button, Input } 
 import styles from "./index.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
-import { useAuthContext } from "../components/context/AuthContext";
+import { useAuthContext } from "../lib/components/context/AuthContext";
 import { useRouter } from "next/navigation";
-import updateData from "../firebase/data/updateData";
-import { handleUndefinedTour } from "../helper/architecture";
-import AssistantCard from "../components/AssistantCard/AssistantCard";
-import HomeSidebarLayout from "../components/HomeSidebar/HomeSidebarLayout";
+import updateData from "../lib/firebase/data/updateData";
+import { handleUndefinedTour } from "../lib/helper/architecture";
+import AssistantCard from "../lib/components/AssistantCard/AssistantCard";
+import HomeSidebarLayout from "../lib/components/HomeSidebar/HomeSidebarLayout";
 import ReactPlayer from "react-player/lazy"
-import { getAllDocs } from "../firebase/data/getData";
-import Assistant, { Visibility } from "../firebase/types/Assistant";
-import EmptyCard from "../components/EmptyCard/EmptyCard";
+import { getAllDocs } from "../lib/firebase/data/getData";
+import Assistant, { Visibility } from "../lib/firebase/types/Assistant";
+import EmptyCard from "../lib/components/EmptyCard/EmptyCard";
+import FatButton from "../lib/components/FatButton";
 import Script from "next/script";
 
 const { Search } = Input;
@@ -172,94 +173,109 @@ export default function Home(props: { assistants: Array<Assistant> }) {
 
 
     if(context.company.assistants !== undefined){
-      let servicearr = props.assistants.filter((assistant) => {
-        return context.company.assistants.includes(assistant.uid) || (selectedCat == "admin");
-      });
+      if(context.company.assistants.length !== 0){
+        let servicearr = props.assistants.filter((assistant) => {
+          return context.company.assistants.includes(assistant.uid) || (selectedCat == "admin");
+        });
 
 
-      if(selectedCat != "admin"){
-        servicearr = favs
+        if(selectedCat != "admin"){
+          servicearr = favs
 
-        if(selectedCat != "all"){
-          if(selectedCat != "favourites"){
-            servicearr = servicearr.filter((singleService: Assistant) => {
-              return singleService.category == selectedCat;
-            });
+          if(selectedCat != "all"){
+            if(selectedCat != "favourites"){
+              servicearr = servicearr.filter((singleService: Assistant) => {
+                return singleService.category == selectedCat;
+              });
+            }else{
+              servicearr = servicearr.filter((singleService: Assistant) => {
+                if(user.services){
+                  return user.services.favourites.includes(singleService.uid);
+                }
+              });
+            }
+          }
+        }else{
+          servicearr = servicearr.filter(() => {
+            return true;
+          });
+        }
+
+
+        const getRibbonText = (published: boolean) => {
+          if(!published){
+            return "Entwurf"
           }else{
-            servicearr = servicearr.filter((singleService: Assistant) => {
-              if(user.services){
-                return user.services.favourites.includes(singleService.uid);
-              }
-            });
+            return undefined;
           }
         }
+
+        return (
+          <div className={styles.servicelist}>
+            {servicearr.filter((assistant) => {
+              return context.company.assistants.includes(assistant.uid) || (selectedCat == "admin");
+            }).filter((singleService: Assistant) => {
+              if(searchValue !== ""){
+                return singleService.name.includes(searchValue);
+              }else{
+                return true;
+              }
+            }).map((singleService: Assistant, idx: number) => {
+              return <AssistantCard
+                aid={singleService.uid}
+                name={singleService.uid}
+                blocks={singleService.blocks}
+                key={idx}
+                image={singleService.image}
+                title={singleService.name}
+                description={singleService.description}
+                link={`/assistant?aid=${singleService.uid}`}
+                fav={user.services?.favourites.includes(singleService.uid)}
+                knowledeFiles={singleService.knowledgeFiles}
+                ribbonText={getRibbonText(singleService.published)}
+                router={router}
+                onVideoClick={() => {
+                  // setVideoLink(singleService.video);
+                  // setVideoPopupVisible(true);
+                  // setPlay(true);
+                  window.open(singleService.video, "_blank", "noreferrer");
+                }}
+                onFav={async () => {
+                  const currentfavs = (user.services?.favourites)? user.services.favourites: [];
+                  currentfavs.push(singleService.uid);
+                  await updateData("User", login.uid, { services: { favourites: currentfavs } });
+                }}
+                onDeFav={async () => {
+                  const currentfavs =  user.services.favourites.filter((fservice: string) => {
+                    return fservice != singleService.uid
+                  })
+                  await updateData("User", login.uid, { services: { favourites: currentfavs } });
+                }}
+                canEdit={role.canUseEditor}
+                published={singleService.published}
+              />
+            })}
+            {role.canUseEditor && <EmptyCard />}
+          </div>
+        );
       }else{
-        servicearr = servicearr.filter(() => {
-          return true;
-        });
+        return (
+          <div className={styles.servicenotice}>
+            {(role.canEditCompanyDetails)? "Du kannst neue Agenten im Appstore hinzufügen": "Bitte einen Firmenadministrator darum neue Agenten hinzuzufügen"}
+            {role.canEditCompanyDetails &&
+                <FatButton text={"Zum Appstore"} onClick={() => {
+                  router.push("/store")
+                }}></FatButton>}
+          </div>
+        );
       }
-      
-
-      const getRibbonText = (published: boolean) => {
-        if(!published){
-          return "Entwurf"
-        }else{
-          return undefined;
-        }
-      }
-
-      return (
-        <div className={styles.servicelist}>
-          {servicearr.filter((assistant) => {
-            return context.company.assistants.includes(assistant.uid) || (selectedCat == "admin");
-          }).filter((singleService: Assistant) => {
-            if(searchValue !== ""){
-              return singleService.name.includes(searchValue);
-            }else{
-              return true;
-            }
-          }).map((singleService: Assistant, idx: number) => {
-            return <AssistantCard
-              aid={singleService.uid}
-              name={singleService.uid}
-              blocks={singleService.blocks}
-              key={idx}
-              image={singleService.image}
-              title={singleService.name}
-              description={singleService.description}
-              link={`/assistant?aid=${singleService.uid}`}
-              fav={user.services?.favourites.includes(singleService.uid)}
-              knowledeFiles={singleService.knowledgeFiles}
-              ribbonText={getRibbonText(singleService.published)}
-              router={router}
-              onVideoClick={() => {
-                // setVideoLink(singleService.video);
-                // setVideoPopupVisible(true);
-                // setPlay(true);
-                window.open(singleService.video, "_blank", "noreferrer");
-              }}
-              onFav={async () => {
-                const currentfavs = (user.services?.favourites)? user.services.favourites: [];
-                currentfavs.push(singleService.uid);
-                await updateData("User", login.uid, { services: { favourites: currentfavs } });
-              }}
-              onDeFav={async () => {
-                const currentfavs =  user.services.favourites.filter((fservice: string) => {
-                  return fservice != singleService.uid
-                })
-                await updateData("User", login.uid, { services: { favourites: currentfavs } });
-              }}
-              canEdit={role.canUseEditor}
-              published={singleService.published}
-            />
-          })}
-          {role.canUseEditor && <EmptyCard />}
-        </div>
-      );
     }else{
       return (
-        <div className={styles.servicelist}>
-            Bitte füge neue Agenten im Appstore hinzu!
+        <div className={styles.servicenotice}>
+            Du kannst neue Agenten im Appstore hinzufügen
+          <FatButton text={"Zum Appstore"} onClick={() => {
+            router.push("/store")
+          }}></FatButton>
         </div>
       );
     }

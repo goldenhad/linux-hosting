@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../../firebase/admin"
-import { sendMail } from "../../../helper/emailer";
-import userExists from "../../../firebase/auth/userExists";
+import { auth } from "../../../lib/firebase/admin"
+import { sendMail } from "../../../lib/helper/emailer";
+import userExists from "../../../lib/firebase/auth/userExists";
 import CryptoJS from "crypto-js";
 import crypto from "crypto";
 
@@ -84,6 +84,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
           }catch( e ){
             // If we encounter any error during the email generation and sending
+            console.log(e);
             return res.status( 400 ).send( { errorcode: 1, message: "The email could not be send" } );
           }
         }else{

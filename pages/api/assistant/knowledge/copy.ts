@@ -1,9 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../../../firebase/admin"
-import {
-  QdrantVectorStore,
-  VectorStoreIndex
-} from "llamaindex";
+import { auth } from "../../../../lib/firebase/admin"
 import { QdrantClient } from "@qdrant/js-client-rest";
 
 type ResponseData = {

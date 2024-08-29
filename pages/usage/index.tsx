@@ -2,10 +2,10 @@ import { Button, Card, Tag, TourProps, Tour, List, Collapse, Pagination, Modal, 
 import styles from "./usage.module.scss"
 import { useEffect, useRef, useState } from "react";
 import { GetServerSideProps } from "next";
-import SidebarLayout from "../../components/Sidebar/SidebarLayout";
-import { convertToCurrency, handleUndefinedTour } from "../../helper/architecture";
-import { useAuthContext } from "../../components/context/AuthContext";
-import { getDocWhere } from "../../firebase/data/getData";
+import SidebarLayout from "../../lib/components/Sidebar/SidebarLayout";
+import { convertToCurrency, handleUndefinedTour } from "../../lib/helper/architecture";
+import { useAuthContext } from "../../lib/components/context/AuthContext";
+import { getDocWhere } from "../../lib/firebase/data/getData";
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -17,7 +17,7 @@ import {
   CreditCardOutlined
 } from "@ant-design/icons";
 import Link from "next/link";
-import { Order, PaymentMethod, Usage } from "../../firebase/types/Company";
+import { Order, PaymentMethod, Usage } from "../../lib/firebase/types/Company";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -27,18 +27,18 @@ import {
   Tooltip as ChartTooltip,
   Legend
 } from "chart.js";
-import updateData from "../../firebase/data/updateData";
+import updateData from "../../lib/firebase/data/updateData";
 import moment from "moment";
 import { isMobile } from "react-device-detect";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "../../db";
 import axios from "axios";
-import RechargeForm from "../../components/RechargeForm/RechargeForm";
+import RechargeForm from "../../lib/components/RechargeForm/RechargeForm";
 import { Elements } from "@stripe/react-stripe-js";
-import getStripe from "../../helper/stripe";
-import AddCreditCardForm from "../../components/AddCreditCardForm/AddCreditCardForm";
-import UsageStatistic from "../../components/UsageStatistic/UsageStatistic";
-import { TokenCalculator, toGermanCurrencyString } from "../../helper/price";
+import getStripe from "../../lib/helper/stripe";
+import AddCreditCardForm from "../../lib/components/AddCreditCardForm/AddCreditCardForm";
+import UsageStatistic from "../../lib/components/UsageStatistic/UsageStatistic";
+import { TokenCalculator, toGermanCurrencyString } from "../../lib/helper/price";
 import { useRouter } from "next/router";
 
 ChartJS.register(

@@ -2,7 +2,7 @@ import "./globals.css"
 import Head from "next/head";
 import { Roboto } from "next/font/google";
 import { AppContext, AppInitialProps, AppLayoutProps } from "next/app";
-import { AuthContextProvider } from "../components/context/AuthContext";
+import { AuthContextProvider } from "../lib/components/context/AuthContext";
 import { useEffect, useState } from "react";
 import type { NextComponentType } from "next";
 import Chatra from "@chatra/chatra";

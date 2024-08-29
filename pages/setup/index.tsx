@@ -2,10 +2,10 @@ import router from "next/router";
 import { useEffect, useState } from "react";
 import { Button, Form, Input, Select, Steps, Typography, message } from "antd";
 import styles from "./setup.module.scss"
-import { useAuthContext } from "../../components/context/AuthContext";
-import updateData from "../../firebase/data/updateData";
+import { useAuthContext } from "../../lib/components/context/AuthContext";
+import updateData from "../../lib/firebase/data/updateData";
 import axios from "axios";
-import UploadProfileImage from "../../components/UploadProfileImage/UploadProfileImage";
+import UploadProfileImage from "../../lib/components/UploadProfileImage/UploadProfileImage";
 const { Paragraph } = Typography;
 const { TextArea } = Input;
 

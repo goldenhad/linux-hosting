@@ -1,7 +1,7 @@
 import { GetServerSideProps } from "next";
 import Head from "next/head";
-import { ResetPassword } from "../../components/Actions/ResetPassword/ResetPassword";
-import { VerifyMail } from "../../components/Actions/VeryfyMail/VerifyMail";
+import { ResetPassword } from "../../lib/components/Actions/ResetPassword/ResetPassword";
+import { VerifyMail } from "../../lib/components/Actions/VeryfyMail/VerifyMail";
 
 // Props given by firebase to this page trough redirection
 export interface restprops {
@@ -32,7 +32,6 @@ export const getServerSideProps: GetServerSideProps = async ( ctx ) => {
  * @constructor
  */
 export default function Action( props: restprops ){
-  console.log("loading action component...")
   const ActionComponent = () => {
     if(props.mode == "resetPassword"){
       return <ResetPassword oobCode={props.oobCode} />

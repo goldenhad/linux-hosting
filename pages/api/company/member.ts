@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "../../../firebase/admin"
-import getDocument from "../../../firebase/data/getData";
-import { deleteAllUserData } from "../../../helper/userManagement";
+import { auth } from "../../../lib/firebase/admin"
+import getDocument from "../../../lib/firebase/data/getData";
+import { deleteAllUserData } from "../../../lib/helper/userManagement";
 
 type ResponseData = {
     errorcode: number,

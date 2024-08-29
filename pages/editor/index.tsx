@@ -1,11 +1,11 @@
 import { GetServerSideProps } from "next";
-import EditorSidebar from "../../components/Editor/EditorSidebar/EditorSidebar";
+import EditorSidebar from "../../lib/components/Editor/EditorSidebar/EditorSidebar";
 import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
-import getDocument from "../../firebase/data/getData";
-import Assistant, { Block, InputBlock, Visibility } from "../../firebase/types/Assistant";
-import { addDataWithoutId } from "../../firebase/data/setData";
-import { auth } from "../../firebase/admin";
+import getDocument from "../../lib/firebase/data/getData";
+import Assistant, { Block, InputBlock, Visibility } from "../../lib/firebase/types/Assistant";
+import { addDataWithoutId } from "../../lib/firebase/data/setData";
+import { auth } from "../../lib/firebase/admin";
 
 
 export interface EditorContextState {
@@ -86,7 +86,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 export default function Editor({ assistant, aid }){
   const EditorCanvas = dynamic(
     () => {
-      return import("../../components/Editor/EditorCanvas/EditorCanvas").then((res) => res);
+      return import("../../lib/components/Editor/EditorCanvas/EditorCanvas").then((res) => res);
     }
   );
   

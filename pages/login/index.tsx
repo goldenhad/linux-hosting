@@ -2,16 +2,15 @@ import router from "next/router";
 import { useState, useEffect } from "react";
 import { Alert, Checkbox, Form, Input, Menu, MenuProps, Row, Col, Layout } from "antd";
 import styles from "./login.module.scss"
-import signIn from "../../firebase/auth/signin";
+import signIn from "../../lib/firebase/auth/signin";
 import Head from "next/head";
 import Link from "next/link";
-import CookieBanner from "../../components/CookieBanner/CookieBanner";
-import FatButton from "../../components/FatButton";
+import CookieBanner from "../../lib/components/CookieBanner/CookieBanner";
+import FatButton from "../../lib/components/FatButton";
 import { logEvent } from "firebase/analytics";
 import { analytics } from "../../db";
-import getDocument from "../../firebase/data/getData";
-import { User } from "../../firebase/types/User";
-import * as Sentry from "@sentry/nextjs"
+import getDocument from "../../lib/firebase/data/getData";
+import { User } from "../../lib/firebase/types/User";
 
 const { Content, Footer } = Layout;
 
@@ -90,7 +89,6 @@ export default function Login(){
 
     // Check if we ecounter a sign in error
     if ( error ) {
-      Sentry.captureException(error);
       setLoginFailed( true );
     }else{
       setLoginFailed( false );
@@ -121,7 +119,6 @@ export default function Login(){
         }
       }else{
         // If we encounter an error set the failed flga
-        Sentry.captureException(usereq.error);
         setLoginFailed( true );
       }
     }

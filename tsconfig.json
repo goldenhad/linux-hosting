@@ -22,8 +22,7 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
-, "cypress.config.js", "currents.config.js"  ],
+    "**/*.tsx"],
   "exclude": [
     "node_modules",
     "chatbot"

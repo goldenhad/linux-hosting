@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import ResponseData = Dispatcher.ResponseData;
-import { validateApiKey } from "../../../../helper/api/apiKey";
+import { validateApiKey } from "../../../../lib/helper/api/apiKey";
 import axios from "axios";
 import {
   ChatMessage,
@@ -16,11 +16,11 @@ import {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { extractText } from "llamaindex/llm/utils";
-import { firestore } from "../../../../firebase/admin";
-import { TokenCalculator } from "../../../../helper/price";
-import { Calculations, InvoiceSettings } from "../../../../firebase/types/Settings";
-import { Company, Order } from "../../../../firebase/types/Company";
-import { stripe } from "../../../../stripe/api";
+import { firestore } from "../../../../lib/firebase/admin";
+import { TokenCalculator } from "../../../../lib/helper/price";
+import { Calculations, InvoiceSettings } from "../../../../lib/firebase/types/Settings";
+import { Company, Order } from "../../../../lib/firebase/types/Company";
+import { stripe } from "../../../../lib/stripe/api";
 import { encodingForModel } from "js-tiktoken";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -30,9 +30,9 @@ import Assistant, {
   AssistantInputType,
   AssistantType,
   InputBlock
-} from "../../../../firebase/types/Assistant";
-import { Profile } from "../../../../firebase/types/Profile";
-import { Role } from "../../../../firebase/types/Role";
+} from "../../../../lib/firebase/types/Assistant";
+import { Profile } from "../../../../lib/firebase/types/Profile";
+import { Role } from "../../../../lib/firebase/types/Role";
 import { decryptProfile } from "../../prompt/decrypt";
 
 

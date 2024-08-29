@@ -323,7 +323,7 @@ export default function Assistant(props: { assistant: Assistant }) {
   }
 
   const getScriptTag =  () => {
-    return `<script src="${location.origin}/api/chatbot?agentid=${props.assistant.uid}" data-nscript="afterInteractive"></script>`
+    return `<script src="${location.origin}/api/chatbot?agentid=${props.assistant.uid}&apiKey=${user.apikey}" data-nscript="afterInteractive"></script>`
   }
 
   const copyScript = () => {
@@ -337,7 +337,7 @@ export default function Assistant(props: { assistant: Assistant }) {
       {notificationContextHolder}
       <div className={styles.main}>
         {getAssistantForm()}
-        <div className="align-center">
+        { !!user?.apikey && <div className="align-center">
           <Button
             className={styles.inputformbutton}
             type={"primary"}
@@ -346,7 +346,7 @@ export default function Assistant(props: { assistant: Assistant }) {
           >
             Chatbot einbetten
           </Button>
-        </div>
+        </div>}
       </div>
       <Modal 
         centered width={"25%"} title={null} 

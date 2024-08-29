@@ -23,8 +23,6 @@ export enum MsgType {
   ASSISTANT = "assistant"
 }
 
-const QUERY_CHAT_API_KEY = "d41193ba5c6cc53063c97ea64432c7ca1437708d6facb5df613b292b9e619c99e276b143ae6c9194fd6a0da9b6ebf0ac8e801e74b5438a4d02e3165db58ba264";
-
 interface ChatMsg {
   content: string | undefined | ReactComponentElement<any>,
   type: MsgType,
@@ -130,9 +128,6 @@ export default function ChatAssistant(props: {
         query: values.chatmsg,
         messages: relevantcontext
       }, {
-        headers: {
-          "x-api-key": QUERY_CHAT_API_KEY
-        },
         onDownloadProgress: async (progressEvent) => {
           const lmsgs = [...localmsgs];
           let dataChunk: string = progressEvent.event?.currentTarget.response;

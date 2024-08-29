@@ -5,7 +5,7 @@ const Dotenv = require("dotenv-webpack");
 
 dotenv.config({ path: path.resolve("../.env") });
 
-const appUrl = process.env.APP_URL;
+const appUrl = process.env.NEXT_PUBLIC_BASEURL;
 module.exports = {
   entry: { chatbot: "./src/index.tsx" },
   mode: "development",

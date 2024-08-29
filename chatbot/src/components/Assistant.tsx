@@ -15,20 +15,6 @@ export default function AssistantContainer(props: { assistantsList: Assistant[] 
   const [assistants, setAssistants] = useState<SelectProps["options"]>([]);
   const [selectedAssistant, setSelectedAssistant] = useState<Assistant | null>(null);
 
-  const [isModalOpen, setIsModalOpen] = useState(true);
-
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
   useEffect(() => {
     const assistantsList = props.assistantsList;
     if (assistantsList && assistantsList.length === 1) {

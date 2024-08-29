@@ -14,9 +14,6 @@ import { API } from "../services";
 
 
 const { TextArea } = Input;
-
-const MAXHISTITEMS = 10;
-const MSGDURATION = 3;
 const MAXCONTEXTSIZE = 3;
 
 
@@ -61,7 +58,6 @@ export default function ChatAssistant(props: {
   const [msgContext, setMsgContext] = useState<Array<MsgContext>>([]);
   const [promptError, setPromptError] = useState(false);
   const [form] = Form.useForm();
-  const [image, setImage] = useState("");
 
 
   useEffect(() => {
@@ -71,26 +67,6 @@ export default function ChatAssistant(props: {
     }
   }, [chatMsgs]);
 
-  // /**
-  //  * Effect to load the provided assistant image.
-  //  * If no image was provided use the base svg image
-  //  */
-  // useEffect(() => {
-  //   const loadImage = async () => {
-  //     const url = await getAssistantImageUrl(props.assistant.uid);
-  //     //const url = `/api/assistant/image?aid=${props.assistant.uid}`;
-  //     if(url){
-  //       setImage(url);
-  //     }else{
-  //       setImage("/base.svg")
-  //     }
-  //   }
-
-  //   loadImage();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
-
   const getPrimaryColor = () => {
     if (props.assistant.primaryColor) {
       return props.assistant.primaryColor;
@@ -98,11 +74,6 @@ export default function ChatAssistant(props: {
       return "#0f4faa";
     }
   }
-
-  // const { dominantColor } = useExtractColor(image);
-  // useEffect(() => {
-  //   console.log(dominantColor)
-  // }, [image]);
 
   const getTextColor = () => {
     if (props.assistant.primaryColor) {
@@ -139,11 +110,9 @@ export default function ChatAssistant(props: {
     });
 
 
-    //lastMsgRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
     localmsgs.push({ content: values.chatmsg, type: MsgType.USER, date: new Date() });
     localmsgs.push({ content: <Skeleton active />, type: MsgType.MODEL, date: new Date() });
 
-    console.log(msgContext.length);
     // We add one here to ignore the assistants personality
     if (msgContext.length >= MAXCONTEXTSIZE) {
       msgContext.shift();
@@ -210,7 +179,7 @@ export default function ChatAssistant(props: {
   }
 
   const ChatMessages = () => {
-    return chatMsgs.map((msg: ChatMsg, idx) => {
+    return chatMsgs.map((msg: ChatMsg) => {
       return (<>
         <div className="chat">
           <div
@@ -240,7 +209,7 @@ export default function ChatAssistant(props: {
               {msg.content as string}
             </Markdown> : msg.content}
           </div>
-          <div className={`time ${(msg.type == MsgType.USER) ? " time-left" : "time-right"}`}>{moment(msg.date).format("HH:mm a")}</div>
+          <div className={`time ${(msg.type == MsgType.USER) ? " time-left" : "time-right"}`}>{moment(msg.date).format("HH:mm")}</div>
         </div>
 
       </>);

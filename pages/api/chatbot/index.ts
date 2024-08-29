@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import cors from "cors";
 import { getAssistants } from "../assistant/getAll";
-import { validateApiKey } from "../../../helper/api/apiKey";
+import { validateApiKey } from "../../../lib/helper/api/apiKey";
 
 export const corsMiddleware = <T = any>(
   req: NextApiRequest,

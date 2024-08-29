@@ -1,10 +1,10 @@
 // Import necessary modules and types
 import type { NextApiRequest, NextApiResponse } from "next";
 import cors from "cors";
-import Assistant, { Visibility } from "../../../firebase/types/Assistant";
-import { getAllDocs } from "../../../firebase/data/getData";
+import Assistant, { Visibility } from "../../../lib/firebase/types/Assistant";
+import { getAllDocs } from "../../../lib/firebase/data/getData";
 import { corsMiddleware } from "../chatbot";
-import { validateApiKey } from "../../../helper/api/apiKey";
+import { validateApiKey } from "../../../lib/helper/api/apiKey";
 
 
 // Define the response data type

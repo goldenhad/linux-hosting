@@ -64,10 +64,10 @@ module.exports = {
     extensions: [".ts", ".tsx", ".js", ".jsx", ".scss", ".sass"],
     modules: ["node_modules"],
     alias: {
-      "Shared/Components": path.resolve(__dirname, "..", "components"),
-      "Shared/Types": path.resolve(__dirname, "..", "/firebase/types"),
-      "Shared/Helper": path.resolve(__dirname, "..", "helper"),
-      "Shared/Firebase": path.resolve(__dirname, "..", "firebase")
+      "Shared/Components": path.resolve(__dirname, "..", "lib/components"),
+      "Shared/Types": path.resolve(__dirname, "..", "lib/firebase/types"),
+      "Shared/Helper": path.resolve(__dirname, "..", "lib/helper"),
+      "Shared/Firebase": path.resolve(__dirname, "..", "lib/firebase")
     }
   }
 };

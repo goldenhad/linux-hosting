@@ -1,0 +1,430 @@
+@import "../assets/fonts/styles.css";
+@import "../assets/icons/style.css";
+
+* {
+  font-family: Gilroy;
+}
+
+/*
+  1. Use a more-intuitive box-sizing model.
+*/
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+/*
+	2. Remove default margin
+  */
+* {
+  margin: 0;
+}
+
+/*
+	3. Allow percentage-based heights in the application
+  */
+html,
+body {
+  height: 100%;
+}
+
+/*
+	Typographic tweaks!
+	4. Add accessible line-height
+	5. Improve text rendering
+  */
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+body *::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+  background-color: #cdd4ea;
+  border-radius: 8px;
+}
+
+body *::-webkit-scrollbar-thumb {
+  background-color: #8f99bd;
+  border-radius: 8px;
+  background-clip: border-box;
+}
+
+/*
+	6. Improve media defaults
+  */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/*
+	7. Remove built-in form typography styles
+  */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/*
+	8. Avoid text overflows
+  */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/*
+	9. Create a root stacking context
+  */
+#root,
+#__next {
+  isolation: isolate;
+}
+
+/* this css must be organised properly  */
+/* TODO: discuss this with team */
+
+#app {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+#chat-window-wrapper {
+  flex: 1 1 0;
+  /* giving basis as 0 stops the container height from increasing */
+  background-color: #f4f5f6;
+}
+
+#chat-input-wrapper {
+  background-color: #fff;
+}
+
+.chat-input-box {
+  padding: 0px 16px;
+}
+
+#chat-input-wrapper form {
+  width: 100%;
+  display: flex;
+}
+
+.input-box {
+  display: flex;
+  gap: 12px;
+  min-height: 64px;
+}
+
+.input-box textarea {
+  padding: 0px;
+  width: 100%;
+  resize: none;
+  margin: 21px 0px;
+  max-height: 216px;
+  border-radius: 0;
+  border: none;
+  outline: none;
+  color: var(--grey-300, #5c6074);
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 22px;
+  align-self: center;
+}
+
+.textareaLabel {
+  flex: 1;
+  line-height: 0;
+}
+
+.input-box textarea::placeholder {
+  color: var(--grey-500, #9fa2ad);
+}
+
+.input-button {
+  cursor: pointer;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+  text-decoration: none;
+  color: #7b7f8f;
+  transition: color 0.2s linear;
+  margin-top: 16px;
+}
+
+.input-button:hover:enabled {
+  color: var(--widget-color);
+}
+
+.input-button:disabled {
+  cursor: not-allowed;
+}
+
+#attachmentPicker {
+  display: none;
+}
+
+.input-picker {
+  cursor: pointer;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7b7f8f;
+  transition: color 0.2s linear;
+  margin-top: 16px;
+}
+
+.input-picker:hover {
+  color: var(--widget-color);
+}
+
+#attachmentPicker:disabled + .input-picker {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+/* CHAT WINDOW CSS */
+.outgoing {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.message-window {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px 16px 16px;
+}
+
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* CHAT WINDOW CSS */
+
+.remove-padding-all {
+  padding: 0 !important;
+}
+
+/* TEMPORARY */
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+/* TEMPORARY */
+
+/* QUICK REPLY */
+.quick-reply-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quick-reply-buttons-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+/* QUICK REPLY */
+
+/* LIST BLOCK */
+.list-block-bubble-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.list-block-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.list-block-content-wrapper > div > * {
+  padding: 0px 16px;
+}
+
+.list-block-bottom-sheet {
+  top: 90px;
+  background: hsla(0, 0%, 100%, 0.96);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.09);
+  backdrop-filter: blur(16px);
+}
+/* LIST BLOCK */
+
+/* CSAT */
+.csat-bottom-sheet {
+  background: hsla(0, 0%, 100%, 0.96);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.09);
+  backdrop-filter: blur(16px);
+}
+/* CSAT */
+/* livechat */
+.livechat-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  width: 100%;
+  overflow-y: auto;
+  background-color: #f4f5f6;
+  background-size: cover;
+}
+.livechat-room {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Message Sending */
+.sending-message {
+  opacity: 0.2;
+}
+.arabic-text {
+  text-align: right;
+  direction: rtl;
+}
+
+/* flickity */
+.flickity-viewport {
+  padding-top: 2%;
+}
+
+.flickity-slider {
+  margin-top: -2%;
+}
+.carousel-cell-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.carousel-cell {
+  margin-right: 10px; /* Add spacing between cells */
+  /* background-color: #ddd; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.flickity-button {
+  /* Existing styles */
+  background-color: var(--brand-color);
+  padding: 16px 12px;
+  border: none;
+  cursor: pointer;
+  /* font-size: 16px; */
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+
+  /* New positioning */
+  position: absolute;
+  top: 50%; /* Vertically center the buttons */
+  transform: translateY(-50%);
+
+  /* Move buttons slightly more outward */
+  margin-left: -10px; /* Adjust as needed */
+  margin-right: -10px; /* Adjust as needed */
+}
+
+.flickity-button.previous {
+  border-radius: 0 4px 4px 0;
+}
+.flickity-button.next {
+  border-radius: 4px 0 0 4px;
+}
+
+/* Hover styles */
+.flickity-button:hover {
+  background-color: var(--brand-color);
+}
+/* big previous & next buttons */
+.flickity-prev-next-button {
+  width: 10px;
+}
+/* icon color */
+.flickity-button-icon {
+  fill: white;
+}
+/* hide disabled button */
+.flickity-button:disabled {
+  display: none;
+}
+
+.pdf-viewer-modal-wrapper {
+  flex-direction: column;
+  position: fixed;
+  padding: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: var(--Radius-radius-minimal, 8px);
+  background: var(--white, #fff);
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08),
+    0px 1px 3px 0px rgba(0, 0, 0, 0.2);
+  height: 75%;
+  width: 80%;
+  z-index: 2;
+}
+
+.pdf-viewer-modal-wrapper .modal-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+}
+.pdf-viewer-modal-wrapper .modal-content::-webkit-scrollbar {
+  width: 0px;
+  height: 1px;
+}
+
+.pdf-viewer-modal-wrapper .modal-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.pdf-viewer-modal-wrapper .modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.pdf-viewer-modal-wrapper .modal-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.pdf-viewer-modal-wrapper button {
+  font-size: 12px;
+  padding: 12px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  outline: none;
+  background: none;
+  border: none;
+}

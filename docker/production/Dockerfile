@@ -25,7 +25,7 @@ COPY . .
 # This will do the trick, use the corresponding env file for each environment.
 COPY .env .env.production
 RUN yarn build
-
+RUN cd /app/chatbot && npm run build
 # 3. Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
@@ -40,6 +40,7 @@ COPY --from=builder /app/public ./public
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/chatbot ./.next/
 
 
 EXPOSE 3000

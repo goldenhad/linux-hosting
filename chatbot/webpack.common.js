@@ -3,7 +3,9 @@ const path = require("path");
 const dotenv = require("dotenv");
 const Dotenv = require("dotenv-webpack");
 
-dotenv.config({ path: path.resolve("../.env") });
+const isDevelopment = !(["test", "production"].includes(process.env.NODE_ENV))
+
+dotenv.config({ path: isDevelopment ? "../.env" : path.resolve(process.cwd(),".env.production") });
 
 const appUrl = process.env.NEXT_PUBLIC_BASEURL;
 module.exports = {
@@ -57,7 +59,7 @@ module.exports = {
       filename: "index.html"
     }),
     new Dotenv({
-      path: path.resolve("../.env")
+      path: path.resolve( isDevelopment ? "../.env" : path.resolve(process.cwd(),".env.production"))
     })
   ],
   resolve: {

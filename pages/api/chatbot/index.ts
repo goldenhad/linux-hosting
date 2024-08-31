@@ -29,13 +29,14 @@ export default async function handler(
   const searchParams = req.query;
   const agentid = searchParams["agentid"] as string;
   const apiKey = searchParams["apiKey"] as string;
-  await validateApiKey(apiKey);
-  const assistant =  await getAssistants(agentid);
   const options: Partial< typeof cors>  = {
     origin: req.headers["origin"]
   };
-
   await corsMiddleware(req, res, options);
+  await validateApiKey(apiKey);
+  
+  const assistant =  await getAssistants(agentid);
+
   if(!assistant){
     res.writeHead(400, {
       "Content-Type": "text/html"

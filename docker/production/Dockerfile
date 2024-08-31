@@ -40,7 +40,7 @@ COPY --from=builder /app/public ./public
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/chatbot ./.next/
+COPY --from=builder /app/chatbot/dist ./chatbot/dist
 
 
 EXPOSE 3000

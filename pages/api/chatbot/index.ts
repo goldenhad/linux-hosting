@@ -48,7 +48,8 @@ export default async function handler(
   const content = fs.readFileSync(distPath);
   const configContents = `window.SITEWARE_CONFIG = ${JSON.stringify({
     AGENTID: agentid,
-    APIKEY: apiKey
+    APIKEY: apiKey,
+    BASEURL: process.env.NEXT_PUBLIC_BASEURL
   })};`;
   const contentWithConfig = [configContents, content].join("");
   res.writeHead(200, {

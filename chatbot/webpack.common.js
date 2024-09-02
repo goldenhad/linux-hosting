@@ -1,7 +1,6 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 const dotenv = require("dotenv");
-const Dotenv = require("dotenv-webpack");
 
 const isDevelopment = !(["test", "production"].includes(process.env.NODE_ENV))
 
@@ -17,7 +16,7 @@ module.exports = {
     pathinfo: false,
     clean: true,
     assetModuleFilename: "[name][ext][query]",
-    publicPath: appUrl ? appUrl : "./"
+    publicPath: appUrl ? `${appUrl}/` : "./"
   },
   module: {
     rules: [
@@ -57,9 +56,6 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, "src", "index.html"),
       filename: "index.html"
-    }),
-    new Dotenv({
-      path: path.resolve( isDevelopment ? "../.env" : path.resolve(process.cwd(),".env.production"))
     })
   ],
   resolve: {

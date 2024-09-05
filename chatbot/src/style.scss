@@ -5,6 +5,9 @@ body{
     margin: 0;
 }
 
+#___MAIL_BUDDY___{
+  font-size: 16px;
+}
 
 * {
   box-sizing: border-box;
@@ -65,7 +68,7 @@ body{
     position: fixed;
     bottom: 17px;
     left: 1.5rem;
-    z-index: 999;
+    z-index: 999999;
     overflow: auto;
     box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08),
     0 3px 6px -4px rgba(0, 0, 0, 0.12),
@@ -90,7 +93,7 @@ body{
   position: fixed;
   bottom: 80px;
   height: 24em;
-  z-index: 999;
+  z-index: 999999;
   right: 24px;
   overflow-y: auto;
   overflow-x: hidden;

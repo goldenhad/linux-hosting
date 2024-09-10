@@ -18,10 +18,12 @@ window.initChatBot = () => {
   reactRoot.render(<App />)
 }
 
-let rootEle: HTMLElement | null = document.getElementById("root");
+const rootEle: HTMLElement | null = document.getElementById("siteware-root");
 if (rootEle) {
   reactRoot = createRoot(rootEle as HTMLElement);
   reactRoot.render(<App />)
+}else{
+  window.initChatBot()
 }
 
 if (module.hot) {

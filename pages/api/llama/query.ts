@@ -48,7 +48,7 @@ Settings.callbackManager.on("llm-stream", (event) => {
 
 const llm = new OpenAI({
   // currently is "gpt-4-turbo-2024-04-09"
-  model: "gpt-4-turbo"
+  model: "gpt-4o-mini"
 });
 
 export default async function handler( req: NextApiRequest, res: NextApiResponse<ResponseData> ) {
@@ -100,7 +100,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
       const retriever = index.asRetriever();
       // Limit the context window to the three most relevant nodes
-      retriever.similarityTopK = 10;
+      retriever.similarityTopK = 3;
 
       const chatEngine = new ContextChatEngine({ retriever, chatModel: llm , chatHistory: messages });
 
